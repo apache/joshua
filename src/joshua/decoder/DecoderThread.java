@@ -94,15 +94,14 @@ public class DecoderThread extends Thread {
    */
   public Translation translate(Sentence sentence) {
 
-    Decoder.LOG(1, String.format("Input %d: %s", sentence.id(), sentence.fullSource()));
+    Decoder.LOG(1, "Input " + sentence.id() + ", " + sentence.fullSource());
 
     if (sentence.target() != null)
-      Decoder.LOG(1, String.format("Input %d: Constraining to target sentence '%s'", 
-          sentence.id(), sentence.target()));
+      Decoder.LOG(1, "Input "+ sentence.id() +": Constraining to target sentence " + sentence.target());
 
     // skip blank sentences
     if (sentence.isEmpty()) {
-      Decoder.LOG(1, String.format("Translation %d: Translation took 0 seconds", sentence.id()));
+      Decoder.LOG(1, "Translation " + sentence.id() + ": Translation took 0 seconds");
       return new Translation(sentence, null, featureFunctions, joshuaConfiguration);
     }
     
