@@ -18,7 +18,6 @@
  */
 package joshua.decoder.chart_parser;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,8 +40,7 @@ public class CubePruneState implements Comparable<CubePruneState> {
     this.computeNodeResult = score;
     this.ranks = ranks;
     this.rules = rules;
-    // create a new vector is critical, because currentAntecedents will change later
-    this.antNodes = new ArrayList<HGNode>(antecedents);
+    this.antNodes = antecedents;
     this.dotNode = dotNode;
   }
 
