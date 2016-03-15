@@ -20,7 +20,9 @@
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 
@@ -29,7 +31,7 @@ import joshua.decoder.Decoder;
 import joshua.decoder.JoshuaConfiguration;
 import joshua.decoder.Translation;
 import joshua.decoder.Translations;
-import joshua.decoder.io.TranslationRequest;
+import joshua.decoder.io.TranslationRequestStream;
 
 import org.junit.After;
 import org.junit.Before;
@@ -108,7 +110,7 @@ public class MultithreadedTranslationTests {
     // GIVEN
 
     int inputLines = 10000;
-    joshuaConfig.construct_structured_output = true; // Enabled alignments.
+    joshuaConfig.use_structured_output = true; // Enabled alignments.
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < inputLines; i++) {
       sb.append(INPUT + "\n");
@@ -116,8 +118,8 @@ public class MultithreadedTranslationTests {
 
     // Append a large string together to simulate N requests to the decoding
     // engine.
-    TranslationRequest req = new TranslationRequest(new ByteArrayInputStream(sb.toString()
-        .getBytes(Charset.forName("UTF-8"))), joshuaConfig);
+    TranslationRequestStream req = new TranslationRequestStream(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(sb.toString()
+        .getBytes(Charset.forName("UTF-8"))))), joshuaConfig);
 
     // WHEN
     // Translate all spans in parallel.
