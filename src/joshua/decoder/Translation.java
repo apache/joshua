@@ -88,6 +88,7 @@ public class Translation {
         final KBestExtractor kBestExtractor = new KBestExtractor(source, featureFunctions, Decoder.weights, false, joshuaConfiguration);
         structuredTranslations = kBestExtractor.KbestExtractOnHG(hypergraph, joshuaConfiguration.topN);
         if (structuredTranslations.isEmpty()) {
+            structuredTranslations = asList(StructuredTranslationFactory.fromEmptyOutput(source));
             this.output = "";
         } else {
             this.output = structuredTranslations.get(0).getTranslationString();

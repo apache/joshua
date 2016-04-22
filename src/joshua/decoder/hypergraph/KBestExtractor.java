@@ -184,7 +184,7 @@ public class KBestExtractor {
    */
   public List<StructuredTranslation> KbestExtractOnHG(HyperGraph hg, int topN) {
     resetState();
-    if (hg.goalNode == null) {
+    if (hg == null || hg.goalNode == null) {
       return emptyList();
     }
     final List<StructuredTranslation> kbest = new ArrayList<>(topN);

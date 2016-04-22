@@ -20,6 +20,7 @@ package joshua.decoder;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static joshua.decoder.hypergraph.ViterbiExtractor.getViterbiFeatures;
 import static joshua.decoder.hypergraph.ViterbiExtractor.getViterbiString;
 import static joshua.decoder.hypergraph.ViterbiExtractor.getViterbiWordAlignmentList;
@@ -59,6 +60,16 @@ public class StructuredTranslationFactory {
         getViterbiFeatures(hypergraph, featureFunctions, sourceSentence).getMap(),
         (System.currentTimeMillis() - startTime) / 1000.0f);
   }
+  
+  /**
+   * Returns a StructuredTranslation from an empty decoder output
+   * @param sourceSentence
+   * @return
+   */
+  public static StructuredTranslation fromEmptyOutput(final Sentence sourceSentence) {
+        return new StructuredTranslation(
+                sourceSentence, "", emptyList(), 0, emptyList(), emptyMap(), 0f);
+      }
   
   /**
    * Returns a StructuredTranslation instance from a KBest DerivationState. 
