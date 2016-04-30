@@ -205,10 +205,17 @@ public class Vocabulary {
   }
 
   public static String getWords(int[] ids) {
-    if (ids.length == 0) return "";
+    return getWords(ids, " ");
+  }
+  
+  public static String getWords(int[] ids, final String separator) {
+    if (ids.length == 0) {
+      return "";
+    }
     StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < ids.length - 1; i++)
-      sb.append(word(ids[i])).append(" ");
+    for (int i = 0; i < ids.length - 1; i++) {
+      sb.append(word(ids[i])).append(separator);
+    }
     return sb.append(word(ids[ids.length - 1])).toString();
   }
 
