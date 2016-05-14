@@ -107,14 +107,15 @@ public class StructuredOutputTest {
     joshuaConfig.use_structured_output = true; // set structured output creation to true
     translation = decode(input);
     Assert
-        .assertEquals(expectedTranslation, translation.getTranslationString());
+        .assertEquals(expectedTranslation, translation.getStructuredTranslation().getTranslationString());
     Assert.assertEquals(Arrays.asList(expectedTranslation.split("\\s+")),
-        translation.getTranslationTokens());
-    Assert.assertEquals(expectedScore, translation.getTranslationScore(),
+        translation.getStructuredTranslation().getTranslationTokens());
+    Assert.assertEquals(expectedScore, translation.getStructuredTranslation().getTranslationScore(),
         0.00001);
-    Assert.assertEquals(expectedWordAlignment, translation.getWordAlignment());
-    Assert.assertEquals(translation.getWordAlignment().size(), translation
-        .getTranslationTokens().size());
+    Assert.assertEquals(expectedWordAlignment, translation.getStructuredTranslation()
+        .getTranslationWordAlignments().get(0));
+    Assert.assertEquals(translation.getStructuredTranslation().getTranslationWordAlignments().size(), translation.
+        getStructuredTranslation().getTranslationTokens().size());
 
   }
 

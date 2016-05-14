@@ -19,6 +19,7 @@
 package org.apache.joshua.decoder.ff.lm;
 
 import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
 
 import org.junit.After;
 import org.junit.Before;
@@ -81,7 +82,7 @@ public class LanguageModelFFTest {
   @Test
   public void givenStartAndOneMoreSymbol_whenEstimateFutureCost_thenMultipleWeightAndLogProbabilty() {
     int startSymbolId = Vocabulary.id(Vocabulary.START_SYM);
-    assertNotEquals(startSymbolId, 3);
+    assertThat(startSymbolId, not(equalTo(3)));
     int[] left = {startSymbolId, 3};
     NgramDPState currentState = new NgramDPState(left, new int[left.length]);
     

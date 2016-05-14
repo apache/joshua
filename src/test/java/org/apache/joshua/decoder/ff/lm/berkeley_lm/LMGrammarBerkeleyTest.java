@@ -27,7 +27,6 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import org.apache.joshua.decoder.Decoder;
@@ -38,7 +37,7 @@ import org.apache.joshua.decoder.segment_file.Sentence;
 /**
  * Replacement for test/lm/berkeley/test.sh regression test
  */
-@RunWith(Parameterized.class)
+@RunWith(value = Parameterized.class)
 public class LMGrammarBerkeleyTest {
 
   private static final String INPUT = "the chat-rooms";
@@ -60,7 +59,7 @@ public class LMGrammarBerkeleyTest {
     decoder.cleanUp();
   }
   
-  @Parameter
+  //TODO @Parameters
   public String lmFile;
   
   @Test
