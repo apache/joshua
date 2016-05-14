@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.phrase;
+package org.apache.joshua.decoder.phrase;
 
 import java.util.List;	
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.ff.state_maintenance.DPState;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.ff.tm.format.HieroFormatReader;
-import joshua.decoder.hypergraph.HGNode;
-import joshua.decoder.hypergraph.HyperEdge;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
+import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.hypergraph.HyperEdge;
 
 /**
  * Represents a hypothesis, a translation of some coverage of the input. Extends {@link HGNode}, 

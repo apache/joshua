@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm.hash_based;
+package org.apache.joshua.decoder.ff.tm.hash_based;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import joshua.decoder.ff.tm.RuleCollection;
-import joshua.decoder.ff.tm.Trie;
+import org.apache.joshua.decoder.ff.tm.RuleCollection;
+import org.apache.joshua.decoder.ff.tm.Trie;
 
 /**
  * @author Zhifei Li, <zhifei.work@gmail.com>

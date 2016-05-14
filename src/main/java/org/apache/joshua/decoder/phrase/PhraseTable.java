@@ -16,21 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.phrase;
+package org.apache.joshua.decoder.phrase;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.ff.tm.Grammar;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.ff.tm.RuleCollection;
-import joshua.decoder.ff.tm.Trie;
-import joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
-import joshua.decoder.ff.tm.packed.PackedGrammar;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.tm.Grammar;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.RuleCollection;
+import org.apache.joshua.decoder.ff.tm.Trie;
+import org.apache.joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
+import org.apache.joshua.decoder.ff.tm.packed.PackedGrammar;
 
 /**
  * Represents a phrase table, and is implemented as a wrapper around either a {@link PackedGrammar}

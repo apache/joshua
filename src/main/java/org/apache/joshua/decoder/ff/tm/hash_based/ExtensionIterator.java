@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm.hash_based;
+package org.apache.joshua.decoder.ff.tm.hash_based;
 
 import java.util.HashMap;
 import java.util.Iterator;

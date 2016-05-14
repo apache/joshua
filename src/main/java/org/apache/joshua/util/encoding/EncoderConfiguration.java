@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.util.encoding;
+package org.apache.joshua.util.encoding;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -27,7 +27,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-import joshua.corpus.Vocabulary;
+import org.apache.joshua.corpus.Vocabulary;
 
 public class EncoderConfiguration {
 

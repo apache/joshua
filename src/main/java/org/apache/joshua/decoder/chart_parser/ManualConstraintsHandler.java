@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.chart_parser;
+package org.apache.joshua.decoder.chart_parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,11 +24,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.ff.tm.Grammar;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.segment_file.ConstraintRule;
-import joshua.decoder.segment_file.ConstraintSpan;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.tm.Grammar;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.segment_file.ConstraintRule;
+import org.apache.joshua.decoder.segment_file.ConstraintSpan;
 
 /**
  * @author Zhifei Li, <zhifei.work@gmail.com>

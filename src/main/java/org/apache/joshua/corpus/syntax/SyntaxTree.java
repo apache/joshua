@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.corpus.syntax;
+package org.apache.joshua.corpus.syntax;
 
 import java.util.Collection;
 

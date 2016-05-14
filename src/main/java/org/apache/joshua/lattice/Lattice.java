@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.lattice;
+package org.apache.joshua.lattice;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,10 +29,10 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.segment_file.Token;
-import joshua.util.ChartSpan;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.segment_file.Token;
+import org.apache.joshua.util.ChartSpan;
 
 /**
  * A lattice representation of a directed graph.

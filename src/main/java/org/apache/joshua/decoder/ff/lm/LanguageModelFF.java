@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.lm;
+package org.apache.joshua.decoder.ff.lm;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,19 +27,19 @@ import java.util.List;
 
 import com.google.common.primitives.Ints;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.Support;
-import joshua.decoder.chart_parser.SourcePath;
-import joshua.decoder.ff.FeatureVector;
-import joshua.decoder.ff.StatefulFF;
-import joshua.decoder.ff.lm.berkeley_lm.LMGrammarBerkeley;
-import joshua.decoder.ff.lm.KenLM;
-import joshua.decoder.ff.state_maintenance.DPState;
-import joshua.decoder.ff.state_maintenance.NgramDPState;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.hypergraph.HGNode;
-import joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.Support;
+import org.apache.joshua.decoder.chart_parser.SourcePath;
+import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.ff.StatefulFF;
+import org.apache.joshua.decoder.ff.lm.berkeley_lm.LMGrammarBerkeley;
+import org.apache.joshua.decoder.ff.lm.KenLM;
+import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.state_maintenance.NgramDPState;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
  * This class performs the following:
@@ -114,7 +114,7 @@ public class LanguageModelFF extends StatefulFF {
     private void read(String file_name) throws IOException {
 
       int lineno = 0;
-      for (String line: new joshua.util.io.LineReader(file_name, false)) {
+      for (String line: new org.apache.joshua.util.io.LineReader(file_name, false)) {
         lineno++;
         String[] lineComp = line.trim().split("\\s+");
         try {

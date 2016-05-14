@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.similarity;
+package org.apache.joshua.decoder.ff.similarity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,18 +30,18 @@ import java.util.List;
 
 import com.google.common.base.Throwables;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.chart_parser.SourcePath;
-import joshua.decoder.ff.FeatureVector;
-import joshua.decoder.ff.StatefulFF;
-import joshua.decoder.ff.SourceDependentFF;
-import joshua.decoder.ff.state_maintenance.DPState;
-import joshua.decoder.ff.state_maintenance.NgramDPState;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.hypergraph.HGNode;
-import joshua.decoder.segment_file.Sentence;
-import joshua.util.Cache;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.chart_parser.SourcePath;
+import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.ff.StatefulFF;
+import org.apache.joshua.decoder.ff.SourceDependentFF;
+import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.state_maintenance.NgramDPState;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.util.Cache;
 
 public class EdgePhraseSimilarityFF extends StatefulFF implements SourceDependentFF {
 

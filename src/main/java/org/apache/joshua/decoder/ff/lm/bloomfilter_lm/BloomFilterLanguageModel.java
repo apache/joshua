@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.lm.bloomfilter_lm;
+package org.apache.joshua.decoder.ff.lm.bloomfilter_lm;
 
 import java.io.Externalizable;
 import java.io.FileInputStream;
@@ -33,10 +33,10 @@ import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.ff.lm.DefaultNGramLanguageModel;
-import joshua.util.Regex;
-import joshua.util.io.LineReader;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.lm.DefaultNGramLanguageModel;
+import org.apache.joshua.util.Regex;
+import org.apache.joshua.util.io.LineReader;
 
 /**
  * An n-gram language model with linearly-interpolated Witten-Bell smoothing, using a Bloom filter

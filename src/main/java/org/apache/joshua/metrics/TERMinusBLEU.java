@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.metrics;
+package org.apache.joshua.metrics;
 
 import java.io.BufferedReader;
 import java.io.File;

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.ui.tree_visualizer;
+package org.apache.joshua.ui.tree_visualizer;
 
 import java.awt.Dimension;
 import java.awt.geom.Point2D;

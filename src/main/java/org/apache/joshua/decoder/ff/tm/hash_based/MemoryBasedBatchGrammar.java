@@ -16,26 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm.hash_based;
+package org.apache.joshua.decoder.ff.tm.hash_based;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.Decoder;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.JoshuaConfiguration.OOVItem;
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.ff.tm.AbstractGrammar;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.ff.tm.GrammarReader;
-import joshua.decoder.ff.tm.Trie;
-import joshua.decoder.ff.tm.format.HieroFormatReader;
-import joshua.decoder.ff.tm.format.PhraseFormatReader;
-import joshua.decoder.ff.tm.format.SamtFormatReader;
-import joshua.util.FormatUtils;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.JoshuaConfiguration.OOVItem;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.tm.AbstractGrammar;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.GrammarReader;
+import org.apache.joshua.decoder.ff.tm.Trie;
+import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
+import org.apache.joshua.decoder.ff.tm.format.PhraseFormatReader;
+import org.apache.joshua.decoder.ff.tm.format.SamtFormatReader;
+import org.apache.joshua.util.FormatUtils;
 
 /**
  * This class implements a memory-based bilingual BatchGrammar.

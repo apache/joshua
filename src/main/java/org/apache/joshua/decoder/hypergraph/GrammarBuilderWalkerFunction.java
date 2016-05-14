@@ -16,17 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.hypergraph;
+package org.apache.joshua.decoder.hypergraph;
 
 import java.io.PrintStream;
 import java.util.HashSet;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.ff.tm.Grammar;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.ff.tm.format.HieroFormatReader;
-import joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.ff.tm.Grammar;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
+import org.apache.joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
 
 /**
  * This walker function builds up a new context-free grammar by visiting each node in a hypergraph.

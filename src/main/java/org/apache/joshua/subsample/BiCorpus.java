@@ -5,7 +5,7 @@
  * Machine Translation System to release modifications under the LGPL version 2.1. LGPL version 3
  * requires no special permission since it is compatible with Apache License 2.0
  */
-package joshua.subsample;
+package org.apache.joshua.subsample;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -14,8 +14,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import joshua.corpus.Phrase;
-
+import org.apache.joshua.corpus.Phrase;
 
 /**
  * Class for representing a sentence-aligned bi-corpus (with optional word-alignments).

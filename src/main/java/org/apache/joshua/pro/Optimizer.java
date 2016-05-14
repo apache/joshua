@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.pro;
+package org.apache.joshua.pro;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -28,8 +28,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import joshua.corpus.Vocabulary;
-import joshua.metrics.EvaluationMetric;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.metrics.EvaluationMetric;
 
 // this class implements the PRO tuning method
 public class Optimizer {

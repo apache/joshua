@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.segment_file;
+package org.apache.joshua.decoder.segment_file;
 
-import joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.JoshuaConfiguration;
 
 public class ParseTreeInput extends Sentence {
 

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm.packed;
+package org.apache.joshua.decoder.ff.tm.packed;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
@@ -30,11 +30,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.ff.tm.RuleCollection;
-import joshua.decoder.ff.tm.Trie;
-import joshua.decoder.ff.tm.hash_based.ExtensionIterator;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.RuleCollection;
+import org.apache.joshua.decoder.ff.tm.Trie;
+import org.apache.joshua.decoder.ff.tm.hash_based.ExtensionIterator;
 
 /**
  * SliceAggregatingTrie collapses multiple tries

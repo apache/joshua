@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.ui.tree_visualizer.browser;
+package org.apache.joshua.ui.tree_visualizer.browser;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import joshua.ui.tree_visualizer.tree.Tree;
+import org.apache.joshua.ui.tree_visualizer.tree.Tree;
 
 class TranslationInfo {
   private String sourceSentence;

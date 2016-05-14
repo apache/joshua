@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm;
+package org.apache.joshua.decoder.ff.tm;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;

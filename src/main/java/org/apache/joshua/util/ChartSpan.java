@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.util;
+package org.apache.joshua.util;
 
 /**
  * CKY-based decoding makes extensive use of charts, which maintain information about spans (i, j)

@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.tools;
+package org.apache.joshua.tools;
 
-import static joshua.decoder.ff.tm.packed.PackedGrammar.VOCABULARY_FILENAME;
+import static org.apache.joshua.decoder.ff.tm.packed.PackedGrammar.VOCABULARY_FILENAME;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -36,12 +36,12 @@ import java.util.Queue;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
-import joshua.corpus.Vocabulary;
-import joshua.util.FormatUtils;
-import joshua.util.encoding.EncoderConfiguration;
-import joshua.util.encoding.FeatureTypeAnalyzer;
-import joshua.util.encoding.IntEncoder;
-import joshua.util.io.LineReader;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.util.FormatUtils;
+import org.apache.joshua.util.encoding.EncoderConfiguration;
+import org.apache.joshua.util.encoding.FeatureTypeAnalyzer;
+import org.apache.joshua.util.encoding.IntEncoder;
+import org.apache.joshua.util.io.LineReader;
 
 public class GrammarPacker {
 

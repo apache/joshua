@@ -5,7 +5,7 @@
  * Machine Translation System to release modifications under the LGPL version 2.1. LGPL version 3
  * requires no special permission since it is compatible with Apache License 2.0
  */
-package joshua.subsample;
+package org.apache.joshua.subsample;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -18,9 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import joshua.corpus.BasicPhrase;
-import joshua.corpus.Phrase;
-
+import org.apache.joshua.corpus.BasicPhrase;
+import org.apache.joshua.corpus.Phrase;
 
 /**
  * A class for subsampling a large (F,E)-parallel sentence-aligned corpus to generate a smaller

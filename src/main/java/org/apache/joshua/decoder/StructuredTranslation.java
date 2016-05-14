@@ -16,21 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder;
+package org.apache.joshua.decoder;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static joshua.decoder.hypergraph.ViterbiExtractor.getViterbiFeatures;
-import static joshua.decoder.hypergraph.ViterbiExtractor.getViterbiString;
-import static joshua.decoder.hypergraph.ViterbiExtractor.getViterbiWordAlignmentList;
-import static joshua.util.FormatUtils.removeSentenceMarkers;
+import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiFeatures;
+import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiString;
+import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiWordAlignmentList;
+import static org.apache.joshua.util.FormatUtils.removeSentenceMarkers;
 
 import java.util.List;
 import java.util.Map;
 
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.hypergraph.HyperGraph;
-import joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.hypergraph.HyperGraph;
+import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
  * structuredTranslation provides a more structured access to translation

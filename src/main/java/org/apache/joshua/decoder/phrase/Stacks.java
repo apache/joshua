@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.phrase;
+package org.apache.joshua.decoder.phrase;
 
 /***
  * Entry point for phrase-based decoding, analogous to {@link Chart} for the CKY algorithm. This
@@ -38,17 +38,17 @@ package joshua.decoder.phrase;
 import java.util.ArrayList;
 import java.util.List;
 
-import joshua.corpus.Span;
-import joshua.decoder.Decoder;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.chart_parser.ComputeNodeResult;
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.ff.tm.AbstractGrammar;
-import joshua.decoder.ff.tm.Grammar;
-import joshua.decoder.hypergraph.HGNode;
-import joshua.decoder.hypergraph.HyperEdge;
-import joshua.decoder.hypergraph.HyperGraph;
-import joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.corpus.Span;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.tm.AbstractGrammar;
+import org.apache.joshua.decoder.ff.tm.Grammar;
+import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.hypergraph.HyperEdge;
+import org.apache.joshua.decoder.hypergraph.HyperGraph;
+import org.apache.joshua.decoder.segment_file.Sentence;
 
 public class Stacks {
 

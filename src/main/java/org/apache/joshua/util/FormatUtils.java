@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.util;
+package org.apache.joshua.util;
 
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.regex.Pattern;
 
-import joshua.corpus.Vocabulary;
+import org.apache.joshua.corpus.Vocabulary;
 
 /**
  * Utility class for format issues.

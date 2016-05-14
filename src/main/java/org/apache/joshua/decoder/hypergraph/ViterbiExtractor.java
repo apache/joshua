@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.hypergraph;
+package org.apache.joshua.decoder.hypergraph;
 
 import static java.util.Collections.emptyList;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.ff.FeatureVector;
-import joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
  * @author Zhifei Li, <zhifei.work@gmail.com>

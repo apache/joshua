@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder;
+package org.apache.joshua.decoder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,12 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.ff.state_maintenance.NgramDPState;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.hypergraph.HyperEdge;
-import joshua.util.Ngram;
-import joshua.util.Regex;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.state_maintenance.NgramDPState;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.hypergraph.HyperEdge;
+import org.apache.joshua.util.Ngram;
+import org.apache.joshua.util.Regex;
 
 /**
  * this class implements: (1) sentence-level bleu, with smoothing

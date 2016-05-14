@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.segment_file;
+package org.apache.joshua.decoder.segment_file;
 
-import joshua.corpus.Vocabulary;
-import joshua.corpus.syntax.ArraySyntaxTree;
-import joshua.corpus.syntax.SyntaxTree;
-import joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.corpus.syntax.ArraySyntaxTree;
+import org.apache.joshua.corpus.syntax.SyntaxTree;
+import org.apache.joshua.decoder.JoshuaConfiguration;
 
 public class ParsedSentence extends Sentence {
 

@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.zmert;
+package org.apache.joshua.zmert;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import joshua.decoder.JoshuaConfiguration;
-import joshua.util.FileUtility;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.util.FileUtility;
 
 public class ZMERT {
   public static void main(String[] args) throws Exception {

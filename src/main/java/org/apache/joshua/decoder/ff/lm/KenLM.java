@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.lm;
+package org.apache.joshua.decoder.ff.lm;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.ff.lm.NGramLanguageModel;
-import joshua.decoder.ff.state_maintenance.KenLMState;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.lm.NGramLanguageModel;
+import org.apache.joshua.decoder.ff.state_maintenance.KenLMState;
 
 /**
  * JNI wrapper for KenLM. This version of KenLM supports two use cases, implemented by the separate

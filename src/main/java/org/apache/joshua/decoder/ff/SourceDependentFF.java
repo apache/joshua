@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff;
+package org.apache.joshua.decoder.ff;
 
-import joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.decoder.segment_file.Sentence;
 
 public interface SourceDependentFF extends Cloneable {
 

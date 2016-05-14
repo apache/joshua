@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm;
+package org.apache.joshua.decoder.ff.tm;
 
 import java.util.ArrayList;
 import java.util.Arrays;  
@@ -29,11 +29,11 @@ import java.util.regex.Pattern;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.Decoder;
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.ff.FeatureVector;
-import joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
  * This class define the interface for Rule. 

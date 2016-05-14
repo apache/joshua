@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.lm.berkeley_lm;
+package org.apache.joshua.decoder.ff.lm.berkeley_lm;
 
 import java.io.File;
 import java.util.Arrays;
@@ -24,11 +24,12 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.ff.lm.DefaultNGramLanguageModel;
+
 import com.google.common.annotations.VisibleForTesting;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.ff.lm.DefaultNGramLanguageModel;
-import joshua.decoder.Decoder;
 import edu.berkeley.nlp.lm.ArrayEncodedNgramLanguageModel;
 import edu.berkeley.nlp.lm.ConfigOptions;
 import edu.berkeley.nlp.lm.StringWordIndexer;

@@ -16,11 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.subsample;
+package org.apache.joshua.subsample;
 
 import java.io.File;
 import java.io.IOException;
-
 
 /**
  * A callback closure for <code>Subsampler.subsample</code>. This class is used by

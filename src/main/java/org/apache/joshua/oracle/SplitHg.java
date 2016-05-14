@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.oracle;
+package org.apache.joshua.oracle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import joshua.decoder.hypergraph.HGNode;
-import joshua.decoder.hypergraph.HyperEdge;
-import joshua.decoder.hypergraph.HyperGraph;
+import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.hypergraph.HyperEdge;
+import org.apache.joshua.decoder.hypergraph.HyperGraph;
 
 /**
  * This class implements general ways of splitting the hypergraph based on coarse-to-fine idea input

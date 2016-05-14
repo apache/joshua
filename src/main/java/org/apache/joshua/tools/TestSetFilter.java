@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.tools;
+package org.apache.joshua.tools;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import joshua.util.io.LineReader;
+import org.apache.joshua.util.io.LineReader;
 
 public class TestSetFilter {
   private Filter filter = null;

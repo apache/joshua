@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm;
+package org.apache.joshua.decoder.ff.tm;
 
 import java.util.List;
 
-import joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.FeatureFunction;
 
 /**
  * Grammar is a class for wrapping a trie of TrieGrammar in order to store holistic metadata.

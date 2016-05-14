@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.util.io;
+package org.apache.joshua.util.io;
 
 import java.io.BufferedReader;
 import java.io.FileDescriptor;
@@ -31,7 +31,7 @@ import java.util.NoSuchElementException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipException;
 
-import joshua.decoder.Decoder;
+import org.apache.joshua.decoder.Decoder;
 
 /**
  * This class provides an Iterator interface to a BufferedReader. This covers the most common

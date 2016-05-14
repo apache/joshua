@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.ui.tree_visualizer;
+package org.apache.joshua.ui.tree_visualizer;
 
 import java.awt.Color;
 
 import javax.swing.JApplet;
 
-import joshua.ui.tree_visualizer.tree.Tree;
+import org.apache.joshua.ui.tree_visualizer.tree.Tree;
 
 /**
  * An applet for viewing DerivationTrees. It consists of a DerivationViewer inside of the applet's
@@ -40,12 +40,12 @@ public class DerivationViewerApplet extends JApplet {
   public void init() {
     String source = getParameter("sourceSentence");
     String derivation = getParameter("derivationTree");
-		Tree tree = new Tree(derivation);
+    Tree tree = new Tree(derivation);
 
     add(new DerivationViewer(new DerivationTree(tree, source),
-					                   getSize(),
-														 Color.red,
-														 DerivationViewer.AnchorType.ANCHOR_ROOT));
+        getSize(),
+        Color.red,
+        DerivationViewer.AnchorType.ANCHOR_ROOT));
     return;
   }
 }

@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.util;
+package org.apache.joshua.util;
 
 public class Platform {
-
 
   public static boolean isMac() {
     return System.getProperties().getProperty("os.name").toLowerCase().indexOf("mac") != -1;

@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.segment_file;
+package org.apache.joshua.decoder.segment_file;
 
 import javax.swing.text.Segment;
-
 
 /**
  * This interface is for an individual (partial) item to seed the chart with. All rules should be

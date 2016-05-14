@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder;
+package org.apache.joshua.decoder;
 
 /*
  * This class is used to capture metadata command to Joshua on input and pass them to the

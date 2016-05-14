@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.metrics;
+package org.apache.joshua.metrics;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Semaphore;
 
-import joshua.util.StreamGobbler;
+import org.apache.joshua.util.StreamGobbler;
 
 
 public class TercomRunner implements Runnable {

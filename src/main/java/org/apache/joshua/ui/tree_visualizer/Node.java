@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.ui.tree_visualizer;
+package org.apache.joshua.ui.tree_visualizer;
 
 /**
  * A representation of a node in a derivation tree. The derivation tree class itself is

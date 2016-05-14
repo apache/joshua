@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.phrase;
+package org.apache.joshua.decoder.phrase;
 
 import java.util.BitSet;
 
-import joshua.corpus.Span;
+import org.apache.joshua.corpus.Span;
 
 /**
  * Represents a coverage vector. The vector is relative to a hypothesis. {firstZero} denotes the

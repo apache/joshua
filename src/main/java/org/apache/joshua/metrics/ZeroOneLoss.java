@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.metrics;
+package org.apache.joshua.metrics;
 
 public class ZeroOneLoss extends EvaluationMetric {
   public ZeroOneLoss() {

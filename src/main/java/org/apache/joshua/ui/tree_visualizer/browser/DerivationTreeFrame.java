@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.ui.tree_visualizer.browser;
+package org.apache.joshua.ui.tree_visualizer.browser;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -27,12 +27,12 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 
-import joshua.ui.tree_visualizer.DerivationTree;
-import joshua.ui.tree_visualizer.DerivationViewer;
-import joshua.ui.tree_visualizer.tree.Tree;
+import org.apache.joshua.ui.tree_visualizer.DerivationTree;
+import org.apache.joshua.ui.tree_visualizer.DerivationViewer;
+import org.apache.joshua.ui.tree_visualizer.tree.Tree;
 
 /**
  * A frame that displays a derivation tree.

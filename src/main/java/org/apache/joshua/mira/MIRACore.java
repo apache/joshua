@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.mira;
+package org.apache.joshua.mira;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -44,11 +44,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import joshua.decoder.Decoder;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.metrics.EvaluationMetric;
-import joshua.util.StreamGobbler;
-import joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.metrics.EvaluationMetric;
+import org.apache.joshua.util.StreamGobbler;
+import org.apache.joshua.corpus.Vocabulary;
 
 /**
  * This code was originally written by Yuan Cao, who copied the MERT code to produce this file.

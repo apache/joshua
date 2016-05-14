@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.ui.tree_visualizer;
+package org.apache.joshua.ui.tree_visualizer;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Collections;
 
-import joshua.ui.tree_visualizer.tree.Tree;
+import org.apache.joshua.ui.tree_visualizer.tree.Tree;
 
 import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
 import edu.uci.ics.jung.graph.util.EdgeType;

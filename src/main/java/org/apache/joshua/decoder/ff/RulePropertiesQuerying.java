@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff;
+package org.apache.joshua.decoder.ff;
 
 import java.util.ArrayList;
 import java.util.List;
-import joshua.corpus.Vocabulary;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.hypergraph.HGNode;
 
 public class RulePropertiesQuerying {
 

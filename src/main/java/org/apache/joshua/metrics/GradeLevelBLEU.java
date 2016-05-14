@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.metrics;
+package org.apache.joshua.metrics;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -25,7 +25,6 @@ import java.text.DecimalFormat;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 public class GradeLevelBLEU extends BLEU {
   private static final Logger logger = Logger.getLogger(GradeLevelBLEU.class.getName());

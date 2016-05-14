@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.io;
+package org.apache.joshua.decoder.io;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

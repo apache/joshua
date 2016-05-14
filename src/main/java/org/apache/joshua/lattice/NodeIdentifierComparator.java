@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.lattice;
+package org.apache.joshua.lattice;
 
 import java.io.Serializable;
 import java.util.Comparator;

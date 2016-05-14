@@ -16,17 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.hypergraph;
+package org.apache.joshua.decoder.hypergraph;
 
 import static java.lang.Math.min;
-import static joshua.corpus.Vocabulary.getWords;
-import static joshua.corpus.Vocabulary.nt;
+import static org.apache.joshua.corpus.Vocabulary.getWords;
+import static org.apache.joshua.corpus.Vocabulary.nt;
 
 import java.util.Stack;
 
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.hypergraph.KBestExtractor.DerivationState;
-import joshua.decoder.hypergraph.KBestExtractor.DerivationVisitor;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationState;
+import org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationVisitor;
 
 public class OutputStringExtractor implements WalkerFunction, DerivationVisitor {
   

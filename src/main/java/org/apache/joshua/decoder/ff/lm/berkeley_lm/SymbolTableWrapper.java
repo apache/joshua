@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.lm.berkeley_lm;
+package org.apache.joshua.decoder.ff.lm.berkeley_lm;
 
-import joshua.corpus.Vocabulary;
+import org.apache.joshua.corpus.Vocabulary;
 import edu.berkeley.nlp.lm.WordIndexer;
 
 class SymbolTableWrapper implements WordIndexer<String> {

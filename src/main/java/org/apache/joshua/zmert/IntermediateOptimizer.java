@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.zmert;
+package org.apache.joshua.zmert;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -31,7 +31,7 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
-import joshua.metrics.EvaluationMetric;
+import org.apache.joshua.metrics.EvaluationMetric;
 
 public class IntermediateOptimizer implements Runnable {
   /* non-static data members */

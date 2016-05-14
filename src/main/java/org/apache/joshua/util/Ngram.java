@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.util;
+package org.apache.joshua.util;
 
 import java.util.List;
 import java.util.Map;
 
-import joshua.corpus.Vocabulary;
+import org.apache.joshua.corpus.Vocabulary;
 
 /**
  * Provides convenience functions for extracting all ngrams from a sentence, represented as an array

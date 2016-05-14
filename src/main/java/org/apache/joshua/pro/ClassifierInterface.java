@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.pro;
+package org.apache.joshua.pro;
 
 import java.util.Vector;
 

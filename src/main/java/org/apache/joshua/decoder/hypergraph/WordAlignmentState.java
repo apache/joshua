@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.hypergraph;
+package org.apache.joshua.decoder.hypergraph;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.Rule;
 
 /**
  * This class encodes a derivation state in terms of a list of alignment points.

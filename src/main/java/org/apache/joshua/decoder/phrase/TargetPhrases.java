@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.phrase;
+package org.apache.joshua.decoder.phrase;
 
 import java.util.ArrayList;	
 import java.util.Collections;
 import java.util.List;
 
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.ff.FeatureVector;
-import joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.ff.tm.Rule;
 
 /**
  * Represents a sorted collection of target-side phrases. Typically, these are phrases

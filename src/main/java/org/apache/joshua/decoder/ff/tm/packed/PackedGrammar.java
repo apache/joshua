@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm.packed;
+package org.apache.joshua.decoder.ff.tm.packed;
 
 /***
  * This package implements Joshua's packed grammar structure, which enables the efficient loading	
@@ -80,20 +80,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.Decoder;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.ff.FeatureVector;
-import joshua.decoder.ff.tm.AbstractGrammar;
-import joshua.decoder.ff.tm.BasicRuleCollection;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.ff.tm.RuleCollection;
-import joshua.decoder.ff.tm.Trie;
-import joshua.decoder.ff.tm.hash_based.ExtensionIterator;
-import joshua.util.encoding.EncoderConfiguration;
-import joshua.util.encoding.FloatEncoder;
-import joshua.util.io.LineReader;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.ff.tm.AbstractGrammar;
+import org.apache.joshua.decoder.ff.tm.BasicRuleCollection;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.RuleCollection;
+import org.apache.joshua.decoder.ff.tm.Trie;
+import org.apache.joshua.decoder.ff.tm.hash_based.ExtensionIterator;
+import org.apache.joshua.util.encoding.EncoderConfiguration;
+import org.apache.joshua.util.encoding.FloatEncoder;
+import org.apache.joshua.util.io.LineReader;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;

@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.chart_parser;
+package org.apache.joshua.decoder.chart_parser;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.hypergraph.HGNode;
 
 /**
  * Represents a list of items in the hypergraph that have the same left-hand side but may have

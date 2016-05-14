@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.state_maintenance;
+package org.apache.joshua.decoder.ff.state_maintenance;
 
 /**
  * Abstract class enforcing explicit implementation of the standard methods.

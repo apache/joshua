@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm.format;
+package org.apache.joshua.decoder.ff.tm.format;
 
 import java.util.logging.Logger;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.ff.tm.GrammarReader;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.GrammarReader;
 
 public class SamtFormatReader extends GrammarReader<Rule> {
 

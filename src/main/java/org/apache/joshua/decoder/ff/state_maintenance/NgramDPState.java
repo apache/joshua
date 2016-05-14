@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.state_maintenance;
+package org.apache.joshua.decoder.ff.state_maintenance;
 
 import java.util.Arrays;
 
-import joshua.corpus.Vocabulary;
+import org.apache.joshua.corpus.Vocabulary;
 
 /**
  * @author Zhifei Li, <zhifei.work@gmail.com>

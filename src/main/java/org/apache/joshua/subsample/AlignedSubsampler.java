@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.subsample;
+package org.apache.joshua.subsample;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;

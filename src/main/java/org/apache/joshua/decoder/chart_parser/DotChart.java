@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.chart_parser;
+package org.apache.joshua.decoder.chart_parser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,16 +26,16 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.ff.tm.Grammar;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.ff.tm.RuleCollection;
-import joshua.decoder.ff.tm.Trie;
-import joshua.decoder.segment_file.Token;
-import joshua.lattice.Arc;
-import joshua.lattice.Lattice;
-import joshua.lattice.Node;
-import joshua.util.ChartSpan;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.tm.Grammar;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.RuleCollection;
+import org.apache.joshua.decoder.ff.tm.Trie;
+import org.apache.joshua.decoder.segment_file.Token;
+import org.apache.joshua.lattice.Arc;
+import org.apache.joshua.lattice.Lattice;
+import org.apache.joshua.lattice.Node;
+import org.apache.joshua.util.ChartSpan;
 
 /**
  * The DotChart handles Earley-style implicit binarization of translation rules.

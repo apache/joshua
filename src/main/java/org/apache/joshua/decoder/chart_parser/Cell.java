@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.chart_parser;
+package org.apache.joshua.decoder.chart_parser;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -30,11 +30,11 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.ff.state_maintenance.DPState;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.hypergraph.HGNode;
-import joshua.decoder.hypergraph.HyperEdge;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.hypergraph.HyperEdge;
 
 /**
  * this class implement functions: (1) combine small itesm into larger ones using rules, and create

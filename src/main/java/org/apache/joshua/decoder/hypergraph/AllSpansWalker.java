@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.hypergraph;
+package org.apache.joshua.decoder.hypergraph;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import joshua.corpus.Span;
+import org.apache.joshua.corpus.Span;
 
 /***
  * Uses {@link ForestWalker} to visit one {@link HGNode} per span of the chart. No guarantees are
@@ -46,7 +46,7 @@ public class AllSpansWalker {
    * @param walker
    */
   public void walk(HGNode node, final WalkerFunction walker) {
-    new ForestWalker().walk(node, new joshua.decoder.hypergraph.WalkerFunction() {
+    new ForestWalker().walk(node, new org.apache.joshua.decoder.hypergraph.WalkerFunction() {
       @Override
       public void apply(HGNode node, int index) {
         if (node != null) {

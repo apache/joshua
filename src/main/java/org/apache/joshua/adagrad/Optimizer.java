@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.adagrad;
+package org.apache.joshua.adagrad;
 
 import java.util.Collections;
 import java.util.ArrayList;
@@ -27,8 +27,8 @@ import java.util.Set;
 import java.util.Vector;
 import java.lang.Math;
 
-import joshua.corpus.Vocabulary;
-import joshua.metrics.EvaluationMetric;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.metrics.EvaluationMetric;
 
 // this class implements the AdaGrad algorithm
 public class Optimizer {

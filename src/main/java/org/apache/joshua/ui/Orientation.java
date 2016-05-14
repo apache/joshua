@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.ui;
+package org.apache.joshua.ui;
 
 public enum Orientation {
   HORIZONTAL, VERTICAL

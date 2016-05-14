@@ -16,26 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.oracle;
+package org.apache.joshua.oracle;
 
-import static joshua.decoder.hypergraph.ViterbiExtractor.getViterbiString;
-import static joshua.util.FormatUtils.removeSentenceMarkers;
+import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiString;
+import static org.apache.joshua.util.FormatUtils.removeSentenceMarkers;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.Support;
-import joshua.decoder.Decoder;
-import joshua.decoder.hypergraph.HGNode;
-import joshua.decoder.hypergraph.HyperEdge;
-import joshua.decoder.hypergraph.HyperGraph;
-import joshua.decoder.hypergraph.KBestExtractor;
-import joshua.util.FileUtility;
-import joshua.util.io.LineReader;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.Support;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.hypergraph.HyperEdge;
+import org.apache.joshua.decoder.hypergraph.HyperGraph;
+import org.apache.joshua.decoder.hypergraph.KBestExtractor;
+import org.apache.joshua.util.FileUtility;
+import org.apache.joshua.util.io.LineReader;
 
 /**
  * approximated BLEU (1) do not consider clipping effect (2) in the dynamic programming, do not

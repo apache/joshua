@@ -16,17 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff;
+package org.apache.joshua.decoder.ff;
 
 import java.util.List;
 
-import joshua.decoder.Decoder;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.chart_parser.SourcePath;
-import joshua.decoder.ff.state_maintenance.DPState;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.hypergraph.HGNode;
-import joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.chart_parser.SourcePath;
+import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
  * Stateful features contribute dynamic programming state. Unlike earlier versions of Joshua, the

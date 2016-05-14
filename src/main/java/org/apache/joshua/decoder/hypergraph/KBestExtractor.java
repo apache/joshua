@@ -16,34 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.hypergraph;
+package org.apache.joshua.decoder.hypergraph;
 
-import static joshua.util.FormatUtils.unescapeSpecialSymbols;
-import static joshua.util.FormatUtils.removeSentenceMarkers;
+import static org.apache.joshua.util.FormatUtils.unescapeSpecialSymbols;
+import static org.apache.joshua.util.FormatUtils.removeSentenceMarkers;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.BLEU;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.ff.FeatureVector;
-import joshua.decoder.ff.fragmentlm.Tree;
-import joshua.decoder.ff.state_maintenance.DPState;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.io.DeNormalize;
-import joshua.decoder.segment_file.Sentence;
-import joshua.decoder.segment_file.Token;
-import joshua.util.FormatUtils;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.BLEU;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.ff.fragmentlm.Tree;
+import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.io.DeNormalize;
+import org.apache.joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.decoder.segment_file.Token;
+import org.apache.joshua.util.FormatUtils;
+
+import cern.colt.Arrays;
 
 /**
  * This class implements lazy k-best extraction on a hyper-graph.

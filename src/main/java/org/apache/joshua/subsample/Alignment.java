@@ -5,8 +5,7 @@
  * under the LGPL version 2.1. LGPL version 3 requires no special permission since it is compatible
  * with Apache License 2.0
  */
-package joshua.subsample;
-
+package org.apache.joshua.subsample;
 
 /**
  * A set of word alignments between an F phrase and an E phrase. The implementation uses a

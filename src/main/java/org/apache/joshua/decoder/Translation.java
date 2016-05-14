@@ -16,25 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder;
+package org.apache.joshua.decoder;
 
-import static joshua.decoder.hypergraph.ViterbiExtractor.getViterbiFeatures;
-import static joshua.decoder.hypergraph.ViterbiExtractor.getViterbiString;
-import static joshua.decoder.hypergraph.ViterbiExtractor.getViterbiWordAlignments;
-import static joshua.util.FormatUtils.removeSentenceMarkers;
+import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiFeatures;
+import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiString;
+import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiWordAlignments;
+import static org.apache.joshua.util.FormatUtils.removeSentenceMarkers;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
 
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.ff.FeatureVector;
-import joshua.decoder.ff.lm.StateMinimizingLanguageModel;
-import joshua.decoder.hypergraph.HyperGraph;
-import joshua.decoder.hypergraph.KBestExtractor;
-import joshua.decoder.io.DeNormalize;
-import joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.ff.lm.StateMinimizingLanguageModel;
+import org.apache.joshua.decoder.hypergraph.HyperGraph;
+import org.apache.joshua.decoder.hypergraph.KBestExtractor;
+import org.apache.joshua.decoder.io.DeNormalize;
+import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
  * This class represents translated input objects (sentences or lattices). It is aware of the source

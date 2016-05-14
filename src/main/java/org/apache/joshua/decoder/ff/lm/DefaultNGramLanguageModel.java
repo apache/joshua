@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.lm;
+package org.apache.joshua.decoder.ff.lm;
 
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import joshua.corpus.Vocabulary;
+import org.apache.joshua.corpus.Vocabulary;
 
 /**
  * This class provides a default implementation for the Equivalent LM State optimization (namely,

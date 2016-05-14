@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.util;
+package org.apache.joshua.util;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
-import joshua.util.io.IndexedReader;
-import joshua.util.io.LineReader;
+import org.apache.joshua.util.io.IndexedReader;
+import org.apache.joshua.util.io.LineReader;
 
 
 /**

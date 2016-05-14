@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.fragmentlm;
+package org.apache.joshua.decoder.ff.fragmentlm;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,16 +26,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.chart_parser.SourcePath;
-import joshua.decoder.ff.FeatureVector;
-import joshua.decoder.ff.StatefulFF;
-import joshua.decoder.ff.state_maintenance.DPState;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.ff.tm.format.HieroFormatReader;
-import joshua.decoder.hypergraph.HGNode;
-import joshua.decoder.hypergraph.HyperEdge;
-import joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.chart_parser.SourcePath;
+import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.ff.StatefulFF;
+import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
+import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.hypergraph.HyperEdge;
+import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
  * Feature function that reads in a list of language model fragments and matches them against the

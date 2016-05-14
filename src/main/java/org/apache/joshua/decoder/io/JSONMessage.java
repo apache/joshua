@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.io;
+package org.apache.joshua.decoder.io;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ import java.util.List;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import joshua.decoder.Translation;
+import org.apache.joshua.decoder.Translation;
 
 public class JSONMessage {
   public Data data = null;

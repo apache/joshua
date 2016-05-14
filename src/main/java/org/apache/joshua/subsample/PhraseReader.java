@@ -5,14 +5,13 @@
  * under the LGPL version 2.1. LGPL version 3 requires no special permission since it is compatible
  * with Apache License 2.0
  */
-package joshua.subsample;
+package org.apache.joshua.subsample;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 
-import joshua.corpus.BasicPhrase;
-
+import org.apache.joshua.corpus.BasicPhrase;
 
 /**
  * Wrapper class to read in each line as a BasicPhrase.

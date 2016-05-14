@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.metrics;
+package org.apache.joshua.metrics;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -32,8 +32,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 
-import joshua.util.StreamGobbler;
-
+import org.apache.joshua.util.StreamGobbler;
 
 public class TER extends EvaluationMetric {
   private boolean caseSensitive;

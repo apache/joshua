@@ -5,12 +5,9 @@
  * under the LGPL version 2.1. LGPL version 3 requires no special permission since it is compatible
  * with Apache License 2.0
  */
-package joshua.subsample;
+package org.apache.joshua.subsample;
 
-// TODO: if we generalize the Alignment class, we could move this
-// to joshua.util.sentence.
-
-import joshua.corpus.Phrase;
+import org.apache.joshua.corpus.Phrase;
 
 
 /**

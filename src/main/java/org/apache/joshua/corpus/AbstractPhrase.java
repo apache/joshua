@@ -16,9 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.corpus;
-
-
+package org.apache.joshua.corpus;
 
 /**
  * This class provides a skeletal implementation of the base methods likely to be common to most or

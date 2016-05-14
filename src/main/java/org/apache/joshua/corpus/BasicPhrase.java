@@ -5,7 +5,7 @@
  * under the LGPL version 2.1. LGPL version 3 requires no special permission since it is compatible
  * with Apache License 2.0
  */
-package joshua.corpus;
+package org.apache.joshua.corpus;
 
 import java.util.ArrayList;
 

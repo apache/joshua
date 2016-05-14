@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm.format;
+package org.apache.joshua.decoder.ff.tm.format;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.ff.tm.PhraseRule;
-import joshua.util.io.LineReader;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.tm.PhraseRule;
+import org.apache.joshua.util.io.LineReader;
 
 /***
  * This class reads in the Moses phrase table format, with support for the source and target side,

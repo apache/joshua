@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.phrase;
+package org.apache.joshua.decoder.phrase;
 
 /*** 
  * A candidate is basically a cube prune state. It contains a list of hypotheses and target
@@ -28,11 +28,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import joshua.corpus.Span;
-import joshua.decoder.chart_parser.ComputeNodeResult;
-import joshua.decoder.ff.state_maintenance.DPState;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.corpus.Span;
+import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
+import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.hypergraph.HGNode;
 
 public class Candidate {
 

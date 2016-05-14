@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.tools;
+package org.apache.joshua.tools;
 
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import joshua.corpus.Vocabulary;
-import joshua.corpus.syntax.ArraySyntaxTree;
-import joshua.util.io.LineReader;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.corpus.syntax.ArraySyntaxTree;
+import org.apache.joshua.util.io.LineReader;
 
 /**
  * Finds labeling for a set of phrases.

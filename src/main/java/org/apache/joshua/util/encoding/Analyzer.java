@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.util.encoding;
+package org.apache.joshua.util.encoding;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import joshua.util.io.LineReader;
+import org.apache.joshua.util.io.LineReader;
 
 public class Analyzer {
 

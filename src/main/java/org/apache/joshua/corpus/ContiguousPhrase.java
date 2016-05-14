@@ -16,12 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.corpus;
-
+package org.apache.joshua.corpus;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * ContiguousPhrase implements the Phrase interface by linking into indices within a corpus. This is

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.zmert;
+package org.apache.joshua.zmert;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -49,10 +49,10 @@ import java.util.concurrent.Semaphore;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import joshua.decoder.Decoder;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.metrics.EvaluationMetric;
-import joshua.util.StreamGobbler;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.metrics.EvaluationMetric;
+import org.apache.joshua.util.StreamGobbler;
 
 /**
  * This code was originally written by Omar Zaidan.  In September of 2012, it was augmented to support

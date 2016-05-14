@@ -16,24 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder;
+package org.apache.joshua.decoder;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import joshua.decoder.chart_parser.Chart;
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.ff.FeatureVector;
-import joshua.decoder.ff.SourceDependentFF;
-import joshua.decoder.ff.tm.Grammar;
-import joshua.decoder.hypergraph.ForestWalker;
-import joshua.decoder.hypergraph.GrammarBuilderWalkerFunction;
-import joshua.decoder.hypergraph.HyperGraph;
-import joshua.decoder.phrase.Stacks;
-import joshua.decoder.segment_file.Sentence;
-import joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.chart_parser.Chart;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.ff.SourceDependentFF;
+import org.apache.joshua.decoder.ff.tm.Grammar;
+import org.apache.joshua.decoder.hypergraph.ForestWalker;
+import org.apache.joshua.decoder.hypergraph.GrammarBuilderWalkerFunction;
+import org.apache.joshua.decoder.hypergraph.HyperGraph;
+import org.apache.joshua.decoder.phrase.Stacks;
+import org.apache.joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.corpus.Vocabulary;
 
 /**
  * This class handles decoding of individual Sentence objects (which can represent plain sentences

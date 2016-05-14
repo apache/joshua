@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.adagrad;
+package org.apache.joshua.adagrad;
 
-import joshua.decoder.JoshuaConfiguration;
-import joshua.util.FileUtility;
-import joshua.util.StreamGobbler;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.util.FileUtility;
+import org.apache.joshua.util.StreamGobbler;
 
 public class AdaGrad {
   public static void main(String[] args) throws Exception {

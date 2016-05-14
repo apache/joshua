@@ -16,16 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.fragmentlm;
+package org.apache.joshua.decoder.ff.fragmentlm;
 
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
-import joshua.corpus.Vocabulary;
-
+import org.apache.joshua.corpus.Vocabulary;
 /**
  * Tools for displaying, reading, and modifying trees. Borrowed from the Berkeley Parser.
  * 
@@ -166,7 +168,7 @@ public class Trees {
     }
 
     public PennTreeReader(Reader in) {
-      this.in = new PushbackReader(in);
+      this.in = new PushbackReader((java.io.Reader) in);
       nextTree = readRootTree();
       // System.out.println(nextTree);
     }

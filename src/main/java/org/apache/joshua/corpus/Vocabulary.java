@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.corpus;
+package org.apache.joshua.corpus;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -32,9 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.StampedLock;
 
-import joshua.decoder.Decoder;
-import joshua.decoder.ff.lm.NGramLanguageModel;
-import joshua.util.FormatUtils;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.ff.lm.NGramLanguageModel;
+import org.apache.joshua.util.FormatUtils;
 
 /**
  * Static singular vocabulary class.

@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm.hash_based;
+package org.apache.joshua.decoder.ff.tm.hash_based;
 
-import joshua.decoder.ff.tm.BasicRuleCollection;
-import joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.BasicRuleCollection;
+import org.apache.joshua.decoder.ff.tm.Rule;
 
 /**
  * Stores a collection of all rules with the same french side (and thus same arity).

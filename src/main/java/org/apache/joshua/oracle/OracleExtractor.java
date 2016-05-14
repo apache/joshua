@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.oracle;
+package org.apache.joshua.oracle;
 
-import joshua.decoder.hypergraph.HyperGraph;
+import org.apache.joshua.decoder.hypergraph.HyperGraph;
 
 /**
  * Convenience wrapper class for oracle extraction code.

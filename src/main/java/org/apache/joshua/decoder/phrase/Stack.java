@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.phrase;
+package org.apache.joshua.decoder.phrase;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,11 +26,11 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import joshua.decoder.Decoder;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.chart_parser.ComputeNodeResult;
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
  * Organizes all hypotheses containing the same number of source words. 

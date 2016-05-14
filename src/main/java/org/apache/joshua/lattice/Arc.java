@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.lattice;
-
+package org.apache.joshua.lattice;
 
 /**
  * An arc in a directed graph.

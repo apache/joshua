@@ -16,17 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.phrase;
+package org.apache.joshua.decoder.phrase;
 
 import java.util.ArrayList;	
 import java.util.Arrays;
 import java.util.List;
 
-import joshua.decoder.Decoder;
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.ff.tm.RuleCollection;
-import joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.RuleCollection;
+import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
  * This class represents a bundle of phrase tables that have been read in,

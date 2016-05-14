@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm;
+package org.apache.joshua.decoder.ff.tm;
 
 import java.util.List;
 
-import joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.FeatureFunction;
 
 /**
  * A RuleCollection represents a set of rules that share the same source side (and hence the same

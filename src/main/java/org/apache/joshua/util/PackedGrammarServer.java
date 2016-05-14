@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.util;
+package org.apache.joshua.util;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -24,12 +24,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.ff.tm.Trie;
-import joshua.decoder.ff.tm.packed.PackedGrammar;
-import joshua.util.io.LineReader;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.Trie;
+import org.apache.joshua.decoder.ff.tm.packed.PackedGrammar;
+import org.apache.joshua.util.io.LineReader;
 
 public class PackedGrammarServer {
 

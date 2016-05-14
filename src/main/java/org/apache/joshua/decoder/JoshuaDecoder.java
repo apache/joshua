@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder;
+package org.apache.joshua.decoder;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -30,10 +30,10 @@ import java.util.logging.Logger;
 
 import com.sun.net.httpserver.HttpServer;
 
-import joshua.decoder.JoshuaConfiguration.SERVER_TYPE;
-import joshua.decoder.io.TranslationRequestStream;
-import joshua.server.TcpServer;
-import joshua.server.ServerThread;
+import org.apache.joshua.decoder.JoshuaConfiguration.SERVER_TYPE;
+import org.apache.joshua.decoder.io.TranslationRequestStream;
+import org.apache.joshua.server.TcpServer;
+import org.apache.joshua.server.ServerThread;
 
 /**
  * Implements decoder initialization, including interaction with <code>JoshuaConfiguration</code>

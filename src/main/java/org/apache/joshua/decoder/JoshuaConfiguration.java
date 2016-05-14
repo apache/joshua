@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder;
+package org.apache.joshua.decoder;
 
-import static joshua.util.FormatUtils.cleanNonTerminal;
-import static joshua.util.FormatUtils.markup;
+import static org.apache.joshua.util.FormatUtils.cleanNonTerminal;
+import static org.apache.joshua.util.FormatUtils.markup;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -31,11 +31,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.logging.Logger;
 
-import joshua.decoder.ff.StatefulFF;
-import joshua.decoder.ff.fragmentlm.Tree;
-import joshua.util.FormatUtils;
-import joshua.util.Regex;
-import joshua.util.io.LineReader;
+import org.apache.joshua.decoder.ff.StatefulFF;
+import org.apache.joshua.decoder.ff.fragmentlm.Tree;
+import org.apache.joshua.util.FormatUtils;
+import org.apache.joshua.util.Regex;
+import org.apache.joshua.util.io.LineReader;
 
 /**
  * Configuration file for Joshua decoder.

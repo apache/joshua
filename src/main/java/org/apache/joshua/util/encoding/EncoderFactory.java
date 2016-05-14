@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.util.encoding;
+package org.apache.joshua.util.encoding;
 
 public class EncoderFactory {
 

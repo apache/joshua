@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.fragmentlm;
+package org.apache.joshua.decoder.ff.fragmentlm;
 
 import java.util.*;
 import java.io.*;

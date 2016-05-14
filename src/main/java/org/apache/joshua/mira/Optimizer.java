@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.mira;
+package org.apache.joshua.mira;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import joshua.corpus.Vocabulary;
-import joshua.metrics.EvaluationMetric;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.metrics.EvaluationMetric;
 
 // this class implements the MIRA algorithm
 public class Optimizer {

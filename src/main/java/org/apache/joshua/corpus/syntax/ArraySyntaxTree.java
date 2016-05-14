@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.corpus.syntax;
+package org.apache.joshua.corpus.syntax;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -30,8 +30,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import joshua.corpus.Vocabulary;
-import joshua.util.io.LineReader;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.util.io.LineReader;
 
 public class ArraySyntaxTree implements SyntaxTree, Externalizable {
 

@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.hypergraph;
+package org.apache.joshua.decoder.hypergraph;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 
 /**
  * this class implement Hypergraph node (i.e., HGNode); also known as Item in parsing.

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.io;
+package org.apache.joshua.decoder.io;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,10 +24,10 @@ import java.io.Reader;
 
 import com.google.gson.stream.JsonReader;
 
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.JoshuaConfiguration.INPUT_TYPE;
-import joshua.decoder.MetaDataException;
-import joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.JoshuaConfiguration.INPUT_TYPE;
+import org.apache.joshua.decoder.MetaDataException;
+import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
  * This class iterates over an input stream, looking for inputs to translate. By default, it

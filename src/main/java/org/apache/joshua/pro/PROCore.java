@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.pro;
+package org.apache.joshua.pro;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -40,15 +40,16 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.TreeSet;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import joshua.decoder.Decoder;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.metrics.EvaluationMetric;
-import joshua.util.StreamGobbler;
-import joshua.corpus.Vocabulary;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.metrics.EvaluationMetric;
+import org.apache.joshua.util.StreamGobbler;
+
+import EDU.oswego.cs.dl.util.concurrent.ConcurrentHashMap;
 
 /**
  * This code was originally written by Yuan Cao, who copied the MERT code to produce this file.
@@ -710,12 +711,12 @@ public class PROCore {
       int[] candCount = new int[numSentences];
       int[] lastUsedIndex = new int[numSentences];
 
-      ConcurrentHashMap<Integer, int[]>[] suffStats_array = new ConcurrentHashMap[numSentences];
+      ConcurrentHashMap[] suffStats_array = new ConcurrentHashMap[numSentences];
       for (int i = 0; i < numSentences; ++i) {
         candCount[i] = 0;
         lastUsedIndex[i] = -1;
         // suffStats_array[i].clear();
-        suffStats_array[i] = new ConcurrentHashMap<Integer, int[]>();
+        suffStats_array[i] = new ConcurrentHashMap();
       }
 
       // initLambda[0] is not used!

@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm;
+package org.apache.joshua.decoder.ff.tm;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.Decoder;
-import joshua.util.io.LineReader;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.util.io.LineReader;
 
 /**
  * This is a base class for simple, ASCII line-based grammars that are stored on disk.

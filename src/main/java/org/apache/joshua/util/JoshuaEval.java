@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.util;
+package org.apache.joshua.util;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -29,7 +29,7 @@ import java.io.InputStreamReader;
 import java.text.DecimalFormat;
 import java.util.TreeSet;
 
-import joshua.metrics.EvaluationMetric;
+import org.apache.joshua.metrics.EvaluationMetric;
 
 public class JoshuaEval {
   final static DecimalFormat f4 = new DecimalFormat("###0.0000");

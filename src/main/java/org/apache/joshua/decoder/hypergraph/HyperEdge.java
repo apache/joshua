@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.hypergraph;
+package org.apache.joshua.decoder.hypergraph;
 
 import java.util.List;
 
-import joshua.decoder.chart_parser.SourcePath;
-import joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.chart_parser.SourcePath;
+import org.apache.joshua.decoder.ff.tm.Rule;
 
 /**
  * this class implement Hyperedge

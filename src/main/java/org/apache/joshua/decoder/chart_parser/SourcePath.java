@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.chart_parser;
+package org.apache.joshua.decoder.chart_parser;
 
-import joshua.decoder.segment_file.Token;
-import joshua.lattice.Arc;
+import org.apache.joshua.decoder.segment_file.Token;
+import org.apache.joshua.lattice.Arc;
 
 /**
  * This class represents information about a path taken through the source lattice.

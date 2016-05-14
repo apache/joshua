@@ -16,22 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff;
+package org.apache.joshua.decoder.ff;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;	
 import java.util.List;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.chart_parser.SourcePath;
-import joshua.decoder.ff.state_maintenance.DPState;
-import joshua.decoder.ff.state_maintenance.NgramDPState;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.hypergraph.HGNode;
-import joshua.decoder.segment_file.Sentence;
-import joshua.util.io.LineReader;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.chart_parser.SourcePath;
+import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.state_maintenance.NgramDPState;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.util.io.LineReader;
 
 /***
  * The RuleBigram feature is an indicator feature that counts target word bigrams that are created when

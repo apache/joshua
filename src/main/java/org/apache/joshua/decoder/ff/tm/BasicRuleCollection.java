@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm;
+package org.apache.joshua.decoder.ff.tm;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.FeatureFunction;
 
 /**
  * Basic collection of translation rules.

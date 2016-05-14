@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder;
+package org.apache.joshua.decoder;
 
 import java.util.LinkedList;
-import joshua.decoder.io.TranslationRequestStream;
+import org.apache.joshua.decoder.io.TranslationRequestStream;
 
 /**
  * This class represents a streaming sequence of translations. It is returned by the main entry

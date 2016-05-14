@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.state_maintenance;
+package org.apache.joshua.decoder.ff.state_maintenance;
 
 /**
  * Maintains a state pointer used by KenLM to implement left-state minimization. 

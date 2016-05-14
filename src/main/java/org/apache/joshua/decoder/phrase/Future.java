@@ -16,18 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.phrase;
+package org.apache.joshua.decoder.phrase;
 
-/***
- * This class represents the future cost of a hypothesis. The future cost of a hypothesis is the
- * cost of covering all uncovered words. The way this is computed is with a simple dynamic program
- * that computes, for each span of the input, the best possible way to cover that span with
- * phrases from the phrase table. No non-local features (e.g., the language model cost) are used
- * in computing this estimate.	
- */
-
-import joshua.decoder.Decoder;
-import joshua.util.ChartSpan;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.util.ChartSpan;
 
 public class Future {
   

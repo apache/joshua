@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.pro;
+package org.apache.joshua.pro;
 
-import joshua.decoder.JoshuaConfiguration;
-import joshua.util.FileUtility;
-import joshua.util.StreamGobbler;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.util.FileUtility;
+import org.apache.joshua.util.StreamGobbler;
 
 public class PRO {
   public static void main(String[] args) throws Exception {

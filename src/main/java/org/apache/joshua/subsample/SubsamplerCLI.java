@@ -5,7 +5,7 @@
  * Machine Translation System to release modifications under the LGPL version 2.1. LGPL version 3
  * requires no special permission since it is compatible with Apache License 2.0
  */
-package joshua.subsample;
+package org.apache.joshua.subsample;
 
 import java.io.IOException;
 

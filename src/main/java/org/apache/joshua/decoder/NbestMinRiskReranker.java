@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder;
+package org.apache.joshua.decoder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,8 +29,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import joshua.util.Ngram;
-import joshua.util.Regex;
+import org.apache.joshua.util.Ngram;
+import org.apache.joshua.util.Regex;
 
 
 /**

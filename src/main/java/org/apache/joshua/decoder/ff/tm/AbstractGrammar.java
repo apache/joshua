@@ -16,22 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm;
+package org.apache.joshua.decoder.ff.tm;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.segment_file.Token;
-import joshua.lattice.Arc;
-import joshua.lattice.Lattice;
-import joshua.lattice.Node;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.phrase.PhraseTable;
+import org.apache.joshua.decoder.segment_file.Token;
+import org.apache.joshua.lattice.Arc;
+import org.apache.joshua.lattice.Lattice;
+import org.apache.joshua.lattice.Node;
+
+import cern.colt.Arrays;
 
 /**
  * Partial implementation of the <code>Grammar</code> interface that provides logic for sorting a

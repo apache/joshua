@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.metrics;
+package org.apache.joshua.metrics;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import joshua.util.Algorithms;
+import org.apache.joshua.util.Algorithms;
 
 // The metric re-uses most of the BLEU code
 public class Precis extends BLEU {

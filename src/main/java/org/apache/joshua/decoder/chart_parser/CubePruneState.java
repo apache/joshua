@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.chart_parser;
+package org.apache.joshua.decoder.chart_parser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import joshua.decoder.hypergraph.HGNode;
-import joshua.decoder.chart_parser.DotChart.DotNode;
-import joshua.decoder.ff.state_maintenance.DPState;
-import joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.chart_parser.DotChart.DotNode;
+import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.tm.Rule;
 
 // ===============================================================
 // CubePruneState class

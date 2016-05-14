@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.hypergraph;
+package org.apache.joshua.decoder.hypergraph;
 
 import static java.util.Collections.emptyList;
 
 import java.util.List;
 import java.util.Stack;
 
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.hypergraph.KBestExtractor.DerivationState;
-import joshua.decoder.hypergraph.KBestExtractor.DerivationVisitor;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationState;
+import org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationVisitor;
 
 /**
  * This class enables extraction of word-level alignments from hypotheses.

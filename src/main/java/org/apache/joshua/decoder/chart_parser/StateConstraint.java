@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.chart_parser;
+package org.apache.joshua.decoder.chart_parser;
 
 import java.util.Collection;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.ff.state_maintenance.DPState;
-import joshua.decoder.ff.state_maintenance.NgramDPState;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.state_maintenance.NgramDPState;
 
 /**
  * This class provides constraints on the sorts of states that are permitted in the chart. Its

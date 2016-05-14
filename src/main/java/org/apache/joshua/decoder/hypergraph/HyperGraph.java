@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.hypergraph;
+package org.apache.joshua.decoder.hypergraph;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -26,12 +26,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.chart_parser.ComputeNodeResult;
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.ff.FeatureVector;
-import joshua.decoder.hypergraph.ForestWalker.TRAVERSAL;
-import joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.hypergraph.ForestWalker.TRAVERSAL;
+import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
  * this class implement (1) HyperGraph-related data structures (Item and Hyper-edges)

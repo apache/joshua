@@ -16,9 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.corpus;
-
-
+package org.apache.joshua.corpus;
 
 /**
  * Corpus is an interface that contains methods for accessing the information within a monolingual

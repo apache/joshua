@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm;
+package org.apache.joshua.decoder.ff.tm;
 
-import static joshua.decoder.ff.tm.packed.PackedGrammar.VOCABULARY_FILENAME;
-import static joshua.util.FormatUtils.cleanNonTerminal;
-import static joshua.util.FormatUtils.isNonterminal;
+import static org.apache.joshua.decoder.ff.tm.packed.PackedGrammar.VOCABULARY_FILENAME;
+import static org.apache.joshua.util.FormatUtils.cleanNonTerminal;
+import static org.apache.joshua.util.FormatUtils.isNonterminal;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,9 +28,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.util.io.LineReader;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.util.io.LineReader;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;

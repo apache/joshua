@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.lm.bloomfilter_lm;
+package org.apache.joshua.decoder.ff.lm.bloomfilter_lm;
 
 import java.io.Externalizable;
 import java.io.IOException;

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.ui;
+package org.apache.joshua.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

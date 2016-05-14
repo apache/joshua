@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.util.io;
+package org.apache.joshua.util.io;
 
 import java.io.Closeable;
 import java.io.DataOutput;

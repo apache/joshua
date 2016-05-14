@@ -16,18 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.segment_file;
+package org.apache.joshua.decoder.segment_file;
 
-import static joshua.util.FormatUtils.escapeSpecialSymbols;
+import static org.apache.joshua.util.FormatUtils.escapeSpecialSymbols;
 
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.Decoder;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.util.FormatUtils;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.util.FormatUtils;
 
 /**
  * Stores the identity of a word and its annotations in a sentence.

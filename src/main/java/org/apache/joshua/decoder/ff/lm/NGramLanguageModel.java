@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.lm;
+package org.apache.joshua.decoder.ff.lm;
 
 /**
  * An interface for new language models to implement. An object of this type is passed to

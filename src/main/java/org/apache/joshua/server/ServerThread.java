@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.server;
+package org.apache.joshua.server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,9 +32,9 @@ import java.util.HashMap;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import joshua.decoder.Decoder;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.io.TranslationRequestStream;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.io.TranslationRequestStream;
 
 /**
  * This class handles a concurrent request for translations from a newly opened socket.

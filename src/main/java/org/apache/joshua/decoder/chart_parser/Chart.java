@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.chart_parser;
+package org.apache.joshua.decoder.chart_parser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,27 +26,27 @@ import java.util.PriorityQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.Decoder;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.chart_parser.CubePruneState;
-import joshua.decoder.chart_parser.DotChart.DotNode;
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.ff.SourceDependentFF;
-import joshua.decoder.ff.tm.AbstractGrammar;
-import joshua.decoder.ff.tm.Grammar;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.ff.tm.RuleCollection;
-import joshua.decoder.ff.tm.Trie;
-import joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
-import joshua.decoder.hypergraph.HGNode;
-import joshua.decoder.hypergraph.HyperGraph;
-import joshua.decoder.segment_file.Sentence;
-import joshua.decoder.segment_file.Token;
-import joshua.lattice.Arc;
-import joshua.lattice.Lattice;
-import joshua.lattice.Node;
-import joshua.util.ChartSpan;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.chart_parser.CubePruneState;
+import org.apache.joshua.decoder.chart_parser.DotChart.DotNode;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.SourceDependentFF;
+import org.apache.joshua.decoder.ff.tm.AbstractGrammar;
+import org.apache.joshua.decoder.ff.tm.Grammar;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.RuleCollection;
+import org.apache.joshua.decoder.ff.tm.Trie;
+import org.apache.joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
+import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.hypergraph.HyperGraph;
+import org.apache.joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.decoder.segment_file.Token;
+import org.apache.joshua.lattice.Arc;
+import org.apache.joshua.lattice.Lattice;
+import org.apache.joshua.lattice.Node;
+import org.apache.joshua.util.ChartSpan;
 
 /**
  * Chart class this class implements chart-parsing: (1) seeding the chart (2)

@@ -16,10 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.ui.tree_visualizer.browser;
-
-import joshua.ui.tree_visualizer.tree.Tree;
-import joshua.util.io.LineReader;
+package org.apache.joshua.ui.tree_visualizer.browser;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -27,9 +24,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 import javax.swing.DefaultListModel;
@@ -38,10 +35,13 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.DocumentEvent;
+
+import org.apache.joshua.ui.tree_visualizer.tree.Tree;
+import org.apache.joshua.util.io.LineReader;
 
 public class Browser {
 

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.util.encoding;
+package org.apache.joshua.util.encoding;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import joshua.corpus.Vocabulary;
-import joshua.util.io.LineReader;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.util.io.LineReader;
 
 public class FeatureTypeAnalyzer {
 

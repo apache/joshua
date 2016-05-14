@@ -16,21 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.fragmentlm;
+package org.apache.joshua.decoder.ff.fragmentlm;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.*;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.ff.fragmentlm.Trees.PennTreeReader;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.hypergraph.HGNode;
-import joshua.decoder.hypergraph.HyperEdge;
-import joshua.decoder.hypergraph.KBestExtractor.DerivationState;
-import joshua.util.io.LineReader;
-
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.fragmentlm.Trees.PennTreeReader;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.hypergraph.HyperEdge;
+import org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationState;
+import org.apache.joshua.util.io.LineReader;
 /**
  * Represent phrase-structure trees, with each node consisting of a label and a list of children.
  * Borrowed from the Berkeley Parser, and extended to allow the representation of tree fragments in

@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.server;
+package org.apache.joshua.server;
 
-import java.net.*;
-import java.io.*;
+import java.io.IOException;
+import java.net.ServerSocket;
 
-import joshua.decoder.Decoder;
-import joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.JoshuaConfiguration;
 
 /**
  * TCP/IP server. Accepts newline-separated input sentences written to the socket, translates them

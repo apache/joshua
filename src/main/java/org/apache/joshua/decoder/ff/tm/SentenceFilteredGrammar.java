@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder.ff.tm;
+package org.apache.joshua.decoder.ff.tm;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import joshua.decoder.ff.tm.hash_based.ExtensionIterator;
-import joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
-import joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.decoder.ff.tm.hash_based.ExtensionIterator;
+import org.apache.joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
+import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
  * This class implements dynamic sentence-level filtering. This is accomplished with a parallel

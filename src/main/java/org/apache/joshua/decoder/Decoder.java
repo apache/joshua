@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package joshua.decoder;
+package org.apache.joshua.decoder;
 
-import static joshua.decoder.ff.FeatureVector.DENSE_FEATURE_NAMES;
+import static org.apache.joshua.decoder.ff.FeatureVector.DENSE_FEATURE_NAMES;
 
 import java.io.BufferedWriter;	
 import java.io.File;
@@ -37,28 +37,28 @@ import java.util.concurrent.BlockingQueue;
 
 import com.google.common.base.Strings;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.ff.FeatureVector;
-import joshua.decoder.JoshuaConfiguration.INPUT_TYPE;
-import joshua.decoder.JoshuaConfiguration.SERVER_TYPE;
-import joshua.decoder.ff.FeatureFunction;
-import joshua.decoder.ff.PhraseModel;
-import joshua.decoder.ff.StatefulFF;
-import joshua.decoder.ff.lm.LanguageModelFF;
-import joshua.decoder.ff.tm.Grammar;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.ff.tm.Trie;
-import joshua.decoder.ff.tm.format.HieroFormatReader;
-import joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
-import joshua.decoder.ff.tm.packed.PackedGrammar;
-import joshua.decoder.io.JSONMessage;
-import joshua.decoder.io.TranslationRequestStream;
-import joshua.decoder.phrase.PhraseTable;
-import joshua.decoder.segment_file.Sentence;
-import joshua.util.FileUtility;
-import joshua.util.FormatUtils;
-import joshua.util.Regex;
-import joshua.util.io.LineReader;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.JoshuaConfiguration.INPUT_TYPE;
+import org.apache.joshua.decoder.JoshuaConfiguration.SERVER_TYPE;
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.PhraseModel;
+import org.apache.joshua.decoder.ff.StatefulFF;
+import org.apache.joshua.decoder.ff.lm.LanguageModelFF;
+import org.apache.joshua.decoder.ff.tm.Grammar;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.Trie;
+import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
+import org.apache.joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
+import org.apache.joshua.decoder.ff.tm.packed.PackedGrammar;
+import org.apache.joshua.decoder.io.JSONMessage;
+import org.apache.joshua.decoder.io.TranslationRequestStream;
+import org.apache.joshua.decoder.phrase.PhraseTable;
+import org.apache.joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.util.FileUtility;
+import org.apache.joshua.util.FormatUtils;
+import org.apache.joshua.util.Regex;
+import org.apache.joshua.util.io.LineReader;
 
 /**
  * This class handles decoder initialization and the complication introduced by multithreading.
