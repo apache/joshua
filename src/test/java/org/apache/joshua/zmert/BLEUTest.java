@@ -61,10 +61,10 @@ public class BLEUTest {
     BLEU bleu = new BLEU();
 
     // Default constructor should use a maximum n-gram length of 4
-    Assert.assertEquals(bleu.maxGramLength, 4);
+    Assert.assertEquals(bleu.getMaxGramLength(), 4);
 
     // Default constructor should use the closest reference
-    Assert.assertEquals(bleu.effLengthMethod, BLEU.EffectiveLengthMethod.CLOSEST);
+    Assert.assertEquals(bleu.getEffLengthMethod(), BLEU.EffectiveLengthMethod.CLOSEST);
 
   }
 
@@ -120,15 +120,13 @@ public class BLEUTest {
 
     //TODO You can now read in the files, and do something useful with them.
 
+    @SuppressWarnings("resource")
     Scanner refScanner = new Scanner(new File(referenceFile));
 
     while (refScanner.hasNextLine()) {
 
+      @SuppressWarnings("unused")
       String refLine = refScanner.nextLine();
-
     }
-
-
   }
-
 }

@@ -45,16 +45,17 @@ public class BinaryTest {
       }	
     }
 
-    Vocabulary vocab = new Vocabulary(words);
+    Vocabulary vocab = new Vocabulary();
+    vocab.addAll(words.toArray(new String[words.size()]));
 
     try {
 
       File tempFile = File.createTempFile(BinaryTest.class.getName(), "vocab");
       FileOutputStream outputStream = new FileOutputStream(tempFile);
       ObjectOutput out = new BinaryOut(outputStream, true);
-      vocab.writeExternal(out);
+      vocab.write(tempFile.toString());
 
-      ObjectInput in = new BinaryIn<Vocabulary>(tempFile.getAbsolutePath(), Vocabulary.class);
+      ObjectInput in = new BinaryIn(tempFile.getAbsolutePath(), Vocabulary.class);
       Object o = in.readObject();
       Assert.assertTrue(o instanceof Vocabulary);
 

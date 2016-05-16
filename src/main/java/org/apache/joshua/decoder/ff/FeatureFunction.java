@@ -72,7 +72,7 @@ public abstract class FeatureFunction {
    * names, for templates that define multiple features.
    */
   protected String name = null;
-  
+
   /*
    * The list of features each function can contribute, along with the dense feature IDs.
    */
@@ -93,14 +93,14 @@ public abstract class FeatureFunction {
    * instantiated
    */
   protected FeatureVector weights;
-  
+
   /* The config */
   protected JoshuaConfiguration config;
 
   public String getName() {
     return name;
   }
-  
+
   // Whether the feature has state.
   public abstract boolean isStateful();
 
@@ -112,7 +112,7 @@ public abstract class FeatureFunction {
 
     this.parsedArgs = FeatureFunction.parseArgs(args);
   }
-  
+
   /**
    * Any feature function can use this to report dense features names to the master code. The 
    * parameter tells the feature function the index of the first available dense feature ID; the feature
@@ -304,6 +304,15 @@ public abstract class FeatureFunction {
   }
 
   /**
+   * It is used when initializing translation grammars (for 
+   * pruning purpose, and to get stateless logP for each rule). 
+   * This is also required to sort the rules (required by Cube-pruning). 
+   */ 
+  public abstract double estimateLogP(Rule rule, int sentID);
+  
+  public abstract double  getWeight(); 
+
+  /**
    * Accumulator objects allow us to generalize feature computation.
    * ScoreAccumulator takes (feature,value) pairs and simple stores the weighted
    * sum (for decoding). FeatureAccumulator records the named feature values
@@ -326,7 +335,7 @@ public abstract class FeatureFunction {
     public void add(String name, float value) {
       score += value * weights.getSparse(name);
     }
-    
+
     @Override
     public void add(int id, float value) {
       score += value * weights.getDense(id);
@@ -348,7 +357,7 @@ public abstract class FeatureFunction {
     public void add(String name, float value) {
       features.increment(name, value);
     }
-    
+
     @Override
     public void add(int id, float value) {
       features.increment(id,  value);

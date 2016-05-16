@@ -31,7 +31,7 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * This feature computes three feature templates: a feature indicating the length of the rule's
  * source side, its target side, and a feature that pairs them.
  */
-public class RuleLength extends StatelessFF {
+public abstract class RuleLength extends StatelessFF {
 
   public RuleLength(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, "RuleLength", args, config);

@@ -52,7 +52,7 @@ public class SourceBLEU extends BLEU {
   protected void initialize() {
     metricName = "SRC_BLEU";
     toBeMinimized = true;
-    suffStatsCount = 2 * maxGramLength + 2;
+    suffStatsCount = 2 * getMaxGramLength() + 2;
 
     set_weightsArray();
     set_maxNgramCounts();

@@ -16,37 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.joshua.packed;
-
-import java.io.File;
-import java.io.IOException;
-
-import org.apache.joshua.corpus.Vocabulary;
-
-public class VocabTest {
-  public static void main(String args[]) {
-
-    int numWords = 0;
-    try {
-      String dir = args[0];
-
-      boolean read = Vocabulary.read(new File(dir + "/vocabulary"));
-      if (! read) {
-        System.err.println("VocabTest: Failed to read the vocabulary.");
-        System.exit(1);
-      }
-
-      int id = 0;
-      while (Vocabulary.hasId(id)) {
-        String word = Vocabulary.word(id);
-        System.out.println(String.format("VOCAB: %d\t%s", id, word));
-        numWords++;
-        id++;
-      }
-    } catch (IOException e) {
-      ;
-    }
-
-    System.out.println("read " + numWords + " words");
-  }
+package org.apache.joshua.util.quantization;
+ 
+ 
+public class QuantizerFactory { 
+ 
+  public static Quantizer get(String key) { 
+    if ("boolean".equals(key)) { 
+      return new BooleanQuantizer(); 
+ 
+//    } else if ("byte".equals(key)) { 
+//      return new ByteQuantizer(); 
+// 
+//    } else if ("char".equals(key)) { 
+//      return new CharQuantizer(); 
+// 
+//    } else if ("short".equals(key)) { 
+//      return new ShortQuantizer(); 
+// 
+//    } else if ("float".equals(key)) { 
+//      return new FloatQuantizer(); 
+// 
+//    } else if ("int".equals(key)) { 
+//      return new IntQuantizer(); 
+// 
+//    } else if ("8bit".equals(key)) { 
+//      return new EightBitQuantizer(); 
+ 
+    } else { 
+      throw new RuntimeException("Unknown quantizer type: " + key); 
+    } 
+  } 
 }

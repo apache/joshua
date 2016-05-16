@@ -16,37 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.joshua.packed;
+package org.apache.joshua.util.quantization;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.DataInputStream; 
+import java.io.DataOutputStream; 
+import java.io.IOException; 
 
-import org.apache.joshua.corpus.Vocabulary;
+abstract class StatelessQuantizer implements Quantizer { 
 
-public class VocabTest {
-  public static void main(String args[]) {
+  public void initialize() {} 
 
-    int numWords = 0;
-    try {
-      String dir = args[0];
+  public void add(float key) {} 
 
-      boolean read = Vocabulary.read(new File(dir + "/vocabulary"));
-      if (! read) {
-        System.err.println("VocabTest: Failed to read the vocabulary.");
-        System.exit(1);
-      }
+  public void finalize() {} 
 
-      int id = 0;
-      while (Vocabulary.hasId(id)) {
-        String word = Vocabulary.word(id);
-        System.out.println(String.format("VOCAB: %d\t%s", id, word));
-        numWords++;
-        id++;
-      }
-    } catch (IOException e) {
-      ;
-    }
+  public void writeState(DataOutputStream out) throws IOException { 
+    out.writeUTF(getKey()); 
+  } 
 
-    System.out.println("read " + numWords + " words");
-  }
+  public void readState(DataInputStream in) throws IOException {} 
 }

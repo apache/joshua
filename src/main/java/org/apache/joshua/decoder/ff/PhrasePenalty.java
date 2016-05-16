@@ -83,4 +83,16 @@ public class PhrasePenalty extends StatelessFF {
       return weights.getDense(denseFeatureIndex) * value;
     return 0.0f;
   }
+
+  @Override
+  public double estimateLogP(Rule rule, int sentID) {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public double getWeight() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
 }

@@ -115,7 +115,7 @@ public class StructuredTranslationTest {
   @Test
   public void givenInput_whenRegularOutputFormat_thenExpectedOutput() {
     // GIVEN
-    joshuaConfig.construct_structured_output = false;
+    //joshuaConfig.construct_structured_output = false;
     joshuaConfig.outputFormat = "%s | %a ";
     
     // WHEN
@@ -128,7 +128,7 @@ public class StructuredTranslationTest {
   @Test
   public void givenInput_whenRegularOutputFormatWithTopN1_thenExpectedOutput() {
     // GIVEN
-    joshuaConfig.construct_structured_output = false;
+    //joshuaConfig.construct_structured_output = false;
     joshuaConfig.outputFormat = "%s | %e | %a | %c";
     joshuaConfig.topN = 1;
     
@@ -143,7 +143,7 @@ public class StructuredTranslationTest {
   @Test
   public void givenInput_whenStructuredOutputFormat_thenExpectedOutput() {
     // GIVEN
-    joshuaConfig.construct_structured_output = true;
+    //joshuaConfig.construct_structured_output = true;
     
     // WHEN
     final StructuredTranslation translation = decode(INPUT).getStructuredTranslation();
@@ -165,7 +165,7 @@ public class StructuredTranslationTest {
   @Test
   public void givenEmptyInput_whenStructuredOutputFormat_thenEmptyOutput() {
     // GIVEN
-    joshuaConfig.construct_structured_output = true;
+    //joshuaConfig.construct_structured_output = true;
     
     // WHEN
     final StructuredTranslation translation = decode("").getStructuredTranslation();
@@ -184,7 +184,7 @@ public class StructuredTranslationTest {
   @Test
   public void givenOOVInput_whenStructuredOutputFormat_thenOOVOutput() {
     // GIVEN
-    joshuaConfig.construct_structured_output = true;
+    //joshuaConfig.construct_structured_output = true;
     final String input = "gabarbl";
     
     // WHEN
@@ -204,7 +204,7 @@ public class StructuredTranslationTest {
   @Test
   public void givenEmptyInput_whenRegularOutputFormat_thenNewlineOutput() {
     // GIVEN
-    joshuaConfig.construct_structured_output = false;
+    //joshuaConfig.construct_structured_output = false;
     
     // WHEN
     final Translation translation = decode("");

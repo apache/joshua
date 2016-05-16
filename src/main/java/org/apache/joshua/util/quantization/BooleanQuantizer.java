@@ -16,37 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.joshua.packed;
+package org.apache.joshua.util.quantization;
 
-import java.io.File;
-import java.io.IOException;
+import java.nio.ByteBuffer; 
 
-import org.apache.joshua.corpus.Vocabulary;
+/**
+ * Standard quantizer for boolean types. 
+ *  
+ * @author jg 
+ *  
+ */ 
+public class BooleanQuantizer extends StatelessQuantizer { 
 
-public class VocabTest {
-  public static void main(String args[]) {
+  public final float read(ByteBuffer stream, int position) { 
+    return 1.0f; 
+  } 
 
-    int numWords = 0;
-    try {
-      String dir = args[0];
+  public final void write(ByteBuffer stream, float value) {} 
 
-      boolean read = Vocabulary.read(new File(dir + "/vocabulary"));
-      if (! read) {
-        System.err.println("VocabTest: Failed to read the vocabulary.");
-        System.exit(1);
-      }
+  @Override 
+  public String getKey() { 
+    return "boolean"; 
+  } 
 
-      int id = 0;
-      while (Vocabulary.hasId(id)) {
-        String word = Vocabulary.word(id);
-        System.out.println(String.format("VOCAB: %d\t%s", id, word));
-        numWords++;
-        id++;
-      }
-    } catch (IOException e) {
-      ;
-    }
-
-    System.out.println("read " + numWords + " words");
-  }
+  public final int size() { 
+    return 0; 
+  } 
 }

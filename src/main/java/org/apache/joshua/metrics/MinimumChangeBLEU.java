@@ -54,7 +54,7 @@ public class MinimumChangeBLEU extends BLEU {
     metricName = "MC_BLEU";
     toBeMinimized = false;
     // adding 1 to the sufficient stats for regular BLEU
-    suffStatsCount = 2 * maxGramLength + 3;
+    suffStatsCount = 2 * getMaxGramLength() + 3;
 
     set_weightsArray();
     set_maxNgramCounts();
@@ -133,7 +133,7 @@ public class MinimumChangeBLEU extends BLEU {
 
 
   public int effLength(int candLength, int i) {
-    if (effLengthMethod == EffectiveLengthMethod.CLOSEST) {
+    if (getEffLengthMethod() == EffectiveLengthMethod.CLOSEST) {
       int closestRefLength = Integer.MIN_VALUE;
       int minDiff = Math.abs(candLength - closestRefLength);
 
@@ -151,7 +151,7 @@ public class MinimumChangeBLEU extends BLEU {
         }
       }
       return closestRefLength;
-    } else if (effLengthMethod == EffectiveLengthMethod.SHORTEST) {
+    } else if (getEffLengthMethod() == EffectiveLengthMethod.SHORTEST) {
       int shortestRefLength = Integer.MAX_VALUE;
 
       for (int r = 0; r < refsPerSen; ++r) {
@@ -186,7 +186,7 @@ public class MinimumChangeBLEU extends BLEU {
 
     double correctGramCount, totalGramCount;
 
-    for (int n = 1; n <= maxGramLength; ++n) {
+    for (int n = 1; n <= getMaxGramLength(); ++n) {
       correctGramCount = stats[2 * (n - 1)];
       totalGramCount = stats[2 * (n - 1) + 1];
 

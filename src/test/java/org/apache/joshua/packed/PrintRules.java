@@ -60,13 +60,14 @@ public class PrintRules {
     have_alignments = alignment_file.exists();
 
     // Read the vocabulary.
-    Vocabulary.read(dir + "/vocabulary");
+    Vocabulary.read(new File(dir + "/vocabulary"));
 
     // Read the quantizer setup.
     quantization = new QuantizerConfiguration();
     quantization.read(dir + "/quantization");
 
     // Get the channels etc.
+    @SuppressWarnings("resource")
     FileChannel source_channel = new FileInputStream(source_file).getChannel();
     int source_size = (int) source_channel.size();
     IntBuffer source_buffer = source_channel.map(MapMode.READ_ONLY, 0,
@@ -74,6 +75,7 @@ public class PrintRules {
     source = new int[source_size / 4];
     source_buffer.get(source);
 
+    @SuppressWarnings("resource")
     FileChannel target_channel = new FileInputStream(target_file).getChannel();
     int target_size = (int) target_channel.size();
     IntBuffer target_buffer = target_channel.map(MapMode.READ_ONLY, 0, 
@@ -81,11 +83,13 @@ public class PrintRules {
     target = new int[target_size / 4];
     target_buffer.get(target);
 
+    @SuppressWarnings("resource")
     FileChannel feature_channel = new FileInputStream(feature_file).getChannel();
     int feature_size = (int) feature_channel.size();
     features = feature_channel.map(MapMode.READ_ONLY, 0, feature_size);
 
     if (have_alignments) {
+      @SuppressWarnings("resource")
       FileChannel alignment_channel = new FileInputStream(alignment_file).getChannel();
       int alignment_size = (int) alignment_channel.size();
       alignments = alignment_channel.map(MapMode.READ_ONLY, 0, alignment_size);

@@ -517,4 +517,16 @@ public class LanguageModelFF extends StatefulFF {
   public static void resetLmIndex() {
     LM_INDEX = 0;
   }
+
+  @Override
+  public double estimateLogP(Rule rule, int sentID) {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public double getWeight() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
 }

@@ -53,8 +53,8 @@ public class BLEU_SBP extends BLEU {
 
     /* ~~~ */
     int effectiveLength = effLength(words.length, i);
-    stats[maxGramLength + 1] = Math.min(words.length, effectiveLength);
-    stats[maxGramLength + 2] = effectiveLength;
+    stats[getMaxGramLength() + 1] = Math.min(words.length, effectiveLength);
+    stats[getMaxGramLength() + 2] = effectiveLength;
     /* ~~~ */
 
     return stats;

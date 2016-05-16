@@ -98,7 +98,7 @@ public class Precis extends BLEU {
     // compression requires extra stats. We additionally store the Levenshtein
     // distance to the source, the source length in tokens and the source
     // length relevant
-    suffStatsCount = 2 * maxGramLength + 4 + (this.characterBased ? 3 : 0);
+    suffStatsCount = 2 * getMaxGramLength() + 4 + (this.characterBased ? 3 : 0);
 
     set_weightsArray();
     set_maxNgramCounts();
@@ -164,11 +164,11 @@ public class Precis extends BLEU {
     set_prec_suffStats(stats, candidate_words, i);
 
     // Same as BLEU.
-    stats[2 * maxGramLength] = candidate_words.length;
-    stats[2 * maxGramLength + 1] = effLength(candidate_words.length, i);
+    stats[2 * getMaxGramLength()] = candidate_words.length;
+    stats[2 * getMaxGramLength() + 1] = effLength(candidate_words.length, i);
 
     // Source length in tokens.
-    stats[2 * maxGramLength + 2] = refWordCount[i][sourceReferenceIndex];
+    stats[2 * getMaxGramLength() + 2] = refWordCount[i][sourceReferenceIndex];
 
     // Character-based compression requires stats in character counts.
     if (this.characterBased) {
@@ -197,7 +197,7 @@ public class Precis extends BLEU {
 
   // hacked to be able to return character length upon request
   public int effLength(int candLength, int i, boolean character_length) {
-    if (effLengthMethod == EffectiveLengthMethod.CLOSEST) {
+    if (getEffLengthMethod() == EffectiveLengthMethod.CLOSEST) {
       int closestRefLength = Integer.MIN_VALUE;
       int minDiff = Math.abs(candLength - closestRefLength);
 
@@ -218,7 +218,7 @@ public class Precis extends BLEU {
         }
       }
       return closestRefLength;
-    } else if (effLengthMethod == EffectiveLengthMethod.SHORTEST) {
+    } else if (getEffLengthMethod() == EffectiveLengthMethod.SHORTEST) {
       int shortestRefLength = Integer.MAX_VALUE;
 
       for (int r = 0; r < refsPerSen; ++r) {
@@ -249,9 +249,9 @@ public class Precis extends BLEU {
     double accuracy = 0.0;
     double smooth_addition = 1.0; // following bleu-1.04.pl
 
-    double cnd_len = stats[2 * maxGramLength];
-    double ref_len = stats[2 * maxGramLength + 1];
-    double src_len = stats[2 * maxGramLength + 2];
+    double cnd_len = stats[2 * getMaxGramLength()];
+    double ref_len = stats[2 * getMaxGramLength() + 1];
+    double src_len = stats[2 * getMaxGramLength() + 2];
     double compression_cnd_len = stats[suffStatsCount - 4];
     double compression_ref_len = stats[suffStatsCount - 3];
     double compression_src_len = stats[suffStatsCount - 2];
@@ -266,7 +266,7 @@ public class Precis extends BLEU {
 
     // this part matches BLEU
     double correctGramCount, totalGramCount;
-    for (int n = 1; n <= maxGramLength; ++n) {
+    for (int n = 1; n <= getMaxGramLength(); ++n) {
       correctGramCount = stats[2 * (n - 1)];
       totalGramCount = stats[2 * (n - 1) + 1];
       double prec_n;
@@ -292,9 +292,9 @@ public class Precis extends BLEU {
 
   // Somewhat not-so-detailed, this is used in the JoshuaEval tool.
   public void printDetailedScore_fromStats(int[] stats, boolean oneLiner) {
-    double cnd_len = stats[2 * maxGramLength];
-    double ref_len = stats[2 * maxGramLength + 1];
-    double src_len = stats[2 * maxGramLength + 2];
+    double cnd_len = stats[2 * getMaxGramLength()];
+    double ref_len = stats[2 * getMaxGramLength() + 1];
+    double src_len = stats[2 * getMaxGramLength() + 2];
     double compression_cnd_len = stats[suffStatsCount - 4];
     double compression_ref_len = stats[suffStatsCount - 3];
     double compression_src_len = stats[suffStatsCount - 2];

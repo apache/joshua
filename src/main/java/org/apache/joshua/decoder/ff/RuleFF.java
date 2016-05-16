@@ -85,4 +85,16 @@ public class RuleFF extends StatelessFF {
     }
     return ruleString.replaceAll("[ =]", "~");
   }
+
+  @Override
+  public double estimateLogP(Rule rule, int sentID) {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public double getWeight() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
 }

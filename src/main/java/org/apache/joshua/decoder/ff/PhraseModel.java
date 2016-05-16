@@ -132,4 +132,16 @@ public class PhraseModel extends StatelessFF {
   public String toString() {
     return name + " " + Vocabulary.word(ownerID);
   }
+
+  @Override
+  public double estimateLogP(Rule rule, int sentID) {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public double getWeight() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
 }

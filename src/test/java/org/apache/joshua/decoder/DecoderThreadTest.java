@@ -74,12 +74,12 @@ public class DecoderThreadTest {
       sourcePrintStream.close();
       String sourceCorpusFileName = sourceFile.getAbsolutePath();
 
-      Vocabulary vocabulary = new Vocabulary();
-      int[] sourceLengths = Vocabulary.initializeVocabulary(sourceCorpusFileName, vocabulary, true);
-      Assert.assertEquals(sourceLengths.length, 2);
-      int numberOfSentences = sourceLengths[1];
-
-      Corpus sourceCorpus = SuffixArrayFactory.createCorpusArray(sourceCorpusFileName, vocabulary, sourceLengths[0], sourceLengths[1]);
+//      Vocabulary vocabulary = new Vocabulary();
+//      int[] sourceLengths = Vocabulary.initializeVocabulary(sourceCorpusFileName, vocabulary, true);
+//      Assert.assertEquals(sourceLengths.length, 2);
+//      int numberOfSentences = sourceLengths[1];
+//
+//      Corpus sourceCorpus = SuffixArrayFactory.createCorpusArray(sourceCorpusFileName, vocabulary, sourceLengths[0], sourceLengths[1]);
 
 
       // Set up target corpus
@@ -91,13 +91,13 @@ public class DecoderThreadTest {
       targetPrintStream.close();
       String targetCorpusFileName = targetFile.getAbsolutePath();
 
-      int[] targetLengths = Vocabulary.initializeVocabulary(targetCorpusFileName, vocabulary, true);
-      Assert.assertEquals(targetLengths.length, sourceLengths.length);
-      for (int i=0, n=targetLengths.length; i<n; i++) {
-        Assert.assertEquals(targetLengths[i], sourceLengths[i]);
-      }
-
-      Corpus targetCorpus = SuffixArrayFactory.createCorpusArray(targetCorpusFileName, vocabulary, targetLengths[0], targetLengths[1]);
+//      int[] targetLengths = Vocabulary.initializeVocabulary(targetCorpusFileName, vocabulary, true);
+//      Assert.assertEquals(targetLengths.length, sourceLengths.length);
+//      for (int i=0, n=targetLengths.length; i<n; i++) {
+//        Assert.assertEquals(targetLengths[i], sourceLengths[i]);
+//      }
+//
+//      Corpus targetCorpus = SuffixArrayFactory.createCorpusArray(targetCorpusFileName, vocabulary, targetLengths[0], targetLengths[1]);
 
 
       // Construct alignments data structure
@@ -109,11 +109,11 @@ public class DecoderThreadTest {
       alignmentsPrintStream.close();
       String alignmentFileName = alignmentsFile.getAbsolutePath();
 
-      AlignmentGrids grids = new AlignmentGrids(
-          new Scanner(alignmentsFile), 
-          sourceCorpus, 
-          targetCorpus, 
-          numberOfSentences);
+//      AlignmentGrids grids = new AlignmentGrids(
+//          new Scanner(alignmentsFile), 
+//          sourceCorpus, 
+//          targetCorpus, 
+//          numberOfSentences);
 
 
       // Set up test corpus
@@ -138,24 +138,25 @@ public class DecoderThreadTest {
       }
 
 
-      Compile compileJoshDir = new Compile();
-      compileJoshDir.setSourceCorpus(sourceCorpusFileName);
-      compileJoshDir.setTargetCorpus(targetCorpusFileName);
-      compileJoshDir.setAlignments(alignmentFileName);
-      compileJoshDir.setOutputDir(joshDirName);
-      compileJoshDir.execute();
-
-      ExtractRules extractRules = new ExtractRules();
-      extractRules.setJoshDir(joshDirName);
-      extractRules.setTestFile(testFileName);
-      extractRules.setOutputFile(rulesFileName);
-      extractRules.execute();
+//      Compile compileJoshDir = new Compile();
+//      compileJoshDir.setSourceCorpus(sourceCorpusFileName);
+//      compileJoshDir.setTargetCorpus(targetCorpusFileName);
+//      compileJoshDir.setAlignments(alignmentFileName);
+//      compileJoshDir.setOutputDir(joshDirName);
+//      compileJoshDir.execute();
+//
+//      ExtractRules extractRules = new ExtractRules();
+//      extractRules.setJoshDir(joshDirName);
+//      extractRules.setTestFile(testFileName);
+//      extractRules.setOutputFile(rulesFileName);
+//      extractRules.execute();
 
     } catch (IOException e) {
       Assert.fail("Unable to write temporary file. " + e.toString());
-    } catch (ClassNotFoundException e) {
-      Assert.fail("Unable to extract rules. " + e.toString());
     }
+//    } catch (ClassNotFoundException e) {
+//      Assert.fail("Unable to extract rules. " + e.toString());
+//    }
   }
 
   @Test

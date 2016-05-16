@@ -274,4 +274,16 @@ public class EdgePhraseSimilarityFF extends StatefulFF implements SourceDependen
     return (count == 0 ? 0 : similarity / count);
   }
 
+  @Override
+  public double estimateLogP(Rule rule, int sentID) {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public double getWeight() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
 }

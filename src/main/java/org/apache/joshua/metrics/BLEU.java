@@ -27,8 +27,8 @@ public class BLEU extends EvaluationMetric {
   private static final Logger logger = Logger.getLogger(BLEU.class.getName());
 
   // The maximum n-gram we care about
-  protected int maxGramLength;
-  protected EffectiveLengthMethod effLengthMethod;
+  private int maxGramLength;
+  private EffectiveLengthMethod effLengthMethod;
   // 1: closest, 2: shortest, 3: average
   // protected HashMap[][] maxNgramCounts;
 
@@ -46,16 +46,16 @@ public class BLEU extends EvaluationMetric {
 
   public BLEU(int mxGrmLn, String methodStr) {
     if (mxGrmLn >= 1) {
-      maxGramLength = mxGrmLn;
+      setMaxGramLength(mxGrmLn);
     } else {
       logger.severe("Maximum gram length must be positive");
       System.exit(1);
     }
 
     if (methodStr.equals("closest")) {
-      effLengthMethod = EffectiveLengthMethod.CLOSEST;
+      setEffLengthMethod(EffectiveLengthMethod.CLOSEST);
     } else if (methodStr.equals("shortest")) {
-      effLengthMethod = EffectiveLengthMethod.SHORTEST;
+      setEffLengthMethod(EffectiveLengthMethod.SHORTEST);
       // } else if (methodStr.equals("average")) {
       // effLengthMethod = EffectiveLengthMethod.AVERAGE;
     } else {
@@ -71,7 +71,7 @@ public class BLEU extends EvaluationMetric {
   protected void initialize() {
     metricName = "BLEU";
     toBeMinimized = false;
-    suffStatsCount = 2 * maxGramLength + 2;
+    suffStatsCount = 2 * getMaxGramLength() + 2;
     // 2 per gram length for its precision, and 2 for length info
     set_weightsArray();
     set_maxNgramCounts();
@@ -91,9 +91,9 @@ public class BLEU extends EvaluationMetric {
    * Sets the BLEU weights for each n-gram level to uniform.
    */
   protected void set_weightsArray() {
-    weights = new double[1 + maxGramLength];
-    for (int n = 1; n <= maxGramLength; ++n) {
-      weights[n] = 1.0 / maxGramLength;
+    weights = new double[1 + getMaxGramLength()];
+    for (int n = 1; n <= getMaxGramLength(); ++n) {
+      weights[n] = 1.0 / getMaxGramLength();
     }
   }
 
@@ -179,7 +179,7 @@ public class BLEU extends EvaluationMetric {
   public void set_prec_suffStats(int[] stats, String[] words, int i) {
     HashMap<String, Integer>[] candCountsArray = getNgramCountsArray(words);
 
-    for (int n = 1; n <= maxGramLength; ++n) {
+    for (int n = 1; n <= getMaxGramLength(); ++n) {
 
       int correctGramCount = 0;
       String gram = "";
@@ -210,7 +210,7 @@ public class BLEU extends EvaluationMetric {
   }
 
   public int effLength(int candLength, int i) {
-    if (effLengthMethod == EffectiveLengthMethod.CLOSEST) { // closest
+    if (getEffLengthMethod() == EffectiveLengthMethod.CLOSEST) { // closest
 
       int closestRefLength = refWordCount[i][0];
       int minDiff = Math.abs(candLength - closestRefLength);
@@ -230,7 +230,7 @@ public class BLEU extends EvaluationMetric {
 
       return closestRefLength;
 
-    } else if (effLengthMethod == EffectiveLengthMethod.SHORTEST) { // shortest
+    } else if (getEffLengthMethod() == EffectiveLengthMethod.SHORTEST) { // shortest
 
       int shortestRefLength = refWordCount[i][0];
 
@@ -273,7 +273,7 @@ public class BLEU extends EvaluationMetric {
 
     double correctGramCount, totalGramCount;
 
-    for (int n = 1; n <= maxGramLength; ++n) {
+    for (int n = 1; n <= getMaxGramLength(); ++n) {
       correctGramCount = stats[2 * (n - 1)];
       totalGramCount = stats[2 * (n - 1) + 1];
 
@@ -315,7 +315,7 @@ public class BLEU extends EvaluationMetric {
       System.out.print("Precisions: ");
     }
 
-    for (int n = 1; n <= maxGramLength; ++n) {
+    for (int n = 1; n <= getMaxGramLength(); ++n) {
       correctGramCount = stats[2 * (n - 1)];
       totalGramCount = stats[2 * (n - 1) + 1];
 
@@ -401,9 +401,9 @@ public class BLEU extends EvaluationMetric {
 
   public HashMap<String, Integer>[] getNgramCountsArray(String[] words) {
     @SuppressWarnings("unchecked")
-    HashMap<String, Integer>[] ngramCountsArray = new HashMap[1 + maxGramLength];
+    HashMap<String, Integer>[] ngramCountsArray = new HashMap[1 + getMaxGramLength()];
     ngramCountsArray[0] = null;
-    for (int n = 1; n <= maxGramLength; ++n) {
+    for (int n = 1; n <= getMaxGramLength(); ++n) {
       ngramCountsArray[n] = new HashMap<String, Integer>();
     }
 
@@ -411,7 +411,7 @@ public class BLEU extends EvaluationMetric {
     String gram;
     int st = 0;
 
-    for (; st <= len - maxGramLength; ++st) {
+    for (; st <= len - getMaxGramLength(); ++st) {
 
       gram = words[st];
       if (ngramCountsArray[1].containsKey(gram)) {
@@ -421,7 +421,7 @@ public class BLEU extends EvaluationMetric {
         ngramCountsArray[1].put(gram, 1);
       }
 
-      for (int n = 2; n <= maxGramLength; ++n) {
+      for (int n = 2; n <= getMaxGramLength(); ++n) {
         gram = gram + " " + words[st + n - 1];
         if (ngramCountsArray[n].containsKey(gram)) {
           int oldCount = ngramCountsArray[n].get(gram);
@@ -480,7 +480,7 @@ public class BLEU extends EvaluationMetric {
     String gram;
     int st = 0;
 
-    for (; st <= len - maxGramLength; ++st) {
+    for (; st <= len - getMaxGramLength(); ++st) {
 
       gram = words[st];
       if (ngramCountsAll.containsKey(gram)) {
@@ -490,7 +490,7 @@ public class BLEU extends EvaluationMetric {
         ngramCountsAll.put(gram, 1);
       }
 
-      for (int n = 2; n <= maxGramLength; ++n) {
+      for (int n = 2; n <= getMaxGramLength(); ++n) {
         gram = gram + " " + words[st + n - 1];
         if (ngramCountsAll.containsKey(gram)) {
           int oldCount = ngramCountsAll.get(gram);
@@ -534,7 +534,35 @@ public class BLEU extends EvaluationMetric {
 
   }
 
-  enum EffectiveLengthMethod {
+  /**
+   * @return the maxGramLength
+   */
+  public int getMaxGramLength() {
+    return maxGramLength;
+  }
+
+  /**
+   * @param maxGramLength the maxGramLength to set
+   */
+  public void setMaxGramLength(int maxGramLength) {
+    this.maxGramLength = maxGramLength;
+  }
+
+  /**
+   * @return the effLengthMethod
+   */
+  public EffectiveLengthMethod getEffLengthMethod() {
+    return effLengthMethod;
+  }
+
+  /**
+   * @param effLengthMethod the effLengthMethod to set
+   */
+  public void setEffLengthMethod(EffectiveLengthMethod effLengthMethod) {
+    this.effLengthMethod = effLengthMethod;
+  }
+
+  public enum EffectiveLengthMethod {
     CLOSEST, SHORTEST, AVERAGE
   }
 }

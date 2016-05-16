@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,7 +63,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
 
   /** Logger for this class. */
   private static final Logger logger = Logger.getLogger(Lattice.class.getName());
-  
+
   JoshuaConfiguration config = null;
 
   /**
@@ -75,7 +76,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    */
   public Lattice(List<Node<Value>> nodes, JoshuaConfiguration config) {
     this.nodes = nodes;
-//    this.distances = calculateAllPairsShortestPath();
+    //    this.distances = calculateAllPairsShortestPath();
     this.latticeHasAmbiguity = true;
   }
 
@@ -83,7 +84,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
     // Node<Value> sink = new Node<Value>(nodes.size());
     // nodes.add(sink);
     this.nodes = nodes;
-//    this.distances = calculateAllPairsShortestPath();
+    //    this.distances = calculateAllPairsShortestPath();
     this.latticeHasAmbiguity = isAmbiguous;
   }
 
@@ -114,7 +115,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
       i++;
     }
 
-//    this.distances = calculateAllPairsShortestPath();
+    //    this.distances = calculateAllPairsShortestPath();
   }
 
   public final boolean hasMoreThanOnePath() {
@@ -155,7 +156,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
 
   public static Lattice<Token> createTokenLatticeFromPLF(String data, JoshuaConfiguration config) {
     ArrayList<Node<Token>> nodes = new ArrayList<Node<Token>>();
-    
+
     // This matches a sequence of tuples, which describe arcs leaving this node
     Pattern nodePattern = Pattern.compile("(.+?)\\(\\s*(\\(.+?\\),\\s*)\\s*\\)(.*)");
 
@@ -320,7 +321,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
     // System.err.println(String.format("DISTANCE(%d,%d) = %f", from, to, costs[from][to]));
     if (distances == null)
       this.distances = calculateAllPairsShortestPath();
-    
+
     return distances.get(from, to);
   }
 
@@ -448,22 +449,22 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    * @param lattice
    */
   public void insert(int i, int j, List<Node<Value>> newNodes) {
-    
+
     nodes.get(i).setOutgoingArcs(newNodes.get(0).getOutgoingArcs());
-    
+
     newNodes.remove(0);
     nodes.remove(j);
     Collections.reverse(newNodes);
-    
+
     for (Node<Value> node: newNodes)
       nodes.add(j, node);
-  
+
     this.latticeHasAmbiguity = false;
     for (int x = 0; x < nodes.size(); x++) {
       nodes.get(x).setID(x);
       this.latticeHasAmbiguity |= (nodes.get(x).getOutgoingArcs().size() > 1);
     }
-    
+
     this.distances = null;
   }
 
@@ -481,35 +482,104 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
       ArrayList<Arc<Value>> arcs = new ArrayList<Arc<Value>>();
       for (Arc<Value> arc: node.getOutgoingArcs()) {
         arcs.add(arc);
-        
+
         if (! ingraph.containsKey(arc.getHead()))
           ingraph.put(arc.getHead(), new ArrayList<Arc<Value>>());
         ingraph.get(arc.getHead()).add(arc);
-        
+
         outgraph.put(node, arcs);
       }
     }
-    
+
     ArrayList<Node<Value>> sortedNodes = new ArrayList<Node<Value>>();
     Stack<Node<Value>> stack = new Stack<Node<Value>>();
     stack.push(nodes.get(0));
-    
+
     while (! stack.empty()) {
       Node<Value> node = stack.pop();
       sortedNodes.add(node);
       for (Arc<Value> arc: outgraph.get(node)) {
         outgraph.get(node).remove(arc);
         ingraph.get(arc.getHead()).remove(arc);
-        
+
         if (ingraph.get(arc.getHead()).size() == 0)
           sortedNodes.add(arc.getHead());
       }
     }
-    
+
     int id = 0;
     for (Node<Value> node : sortedNodes)
       node.setID(id++);
-    
+
     this.nodes = sortedNodes;
   }
+
+  /**
+   * Constructs a lattice from a given string representation. 
+   * 
+   * @param data String representation of a lattice. 
+   * @return A lattice that corresponds to the given string. 
+   */ 
+  public static Lattice<String> createFromString(String data) { 
+
+    Map<Integer,Node<String>> nodes = new HashMap<Integer,Node<String>>(); 
+
+    Pattern nodePattern = Pattern.compile("(.+?)\\((\\(.+?\\),)\\)(.*)"); 
+    Pattern arcPattern = Pattern.compile("\\('(.+?)',(\\d+.\\d+),(\\d+)\\),(.*)"); 
+
+    Matcher nodeMatcher = nodePattern.matcher(data); 
+
+    int nodeID = -1; 
+
+    while (nodeMatcher.matches()) { 
+
+      String nodeData = nodeMatcher.group(2); 
+      String remainingData = nodeMatcher.group(3); 
+
+      nodeID++; 
+
+      Node<String> currentNode; 
+      if (nodes.containsKey(nodeID)) { 
+        currentNode = nodes.get(nodeID); 
+      } else { 
+        currentNode = new Node<String>(nodeID); 
+        nodes.put(nodeID, currentNode); 
+      } 
+
+      if (logger.isLoggable(Level.FINE)) logger.fine("Node " + nodeID + ":"); 
+
+      Matcher arcMatcher = arcPattern.matcher(nodeData); 
+
+      while (arcMatcher.matches()) { 
+        String arcLabel = arcMatcher.group(1); 
+        double arcWeight = Double.valueOf(arcMatcher.group(2)); 
+        int destinationNodeID = nodeID + Integer.valueOf(arcMatcher.group(3)); 
+
+        Node<String> destinationNode; 
+        if (nodes.containsKey(destinationNodeID)) { 
+          destinationNode = nodes.get(destinationNodeID); 
+        } else { 
+          destinationNode = new Node<String>(destinationNodeID); 
+          nodes.put(destinationNodeID, destinationNode); 
+        } 
+
+        String remainingArcs = arcMatcher.group(4); 
+
+        if (logger.isLoggable(Level.FINE)) logger.fine("\t" + arcLabel + " " + arcWeight + " " + destinationNodeID); 
+
+        currentNode.addArc(destinationNode, (float) arcWeight, arcLabel); 
+
+        arcMatcher = arcPattern.matcher(remainingArcs); 
+      } 
+
+      nodeMatcher = nodePattern.matcher(remainingData); 
+    } 
+
+    List<Node<String>> nodeList = new ArrayList<Node<String>>(nodes.values()); 
+    Collections.sort(nodeList, new NodeIdentifierComparator()); 
+
+    if (logger.isLoggable(Level.FINE)) logger.fine(nodeList.toString()); 
+
+    return new Lattice<String>(nodeList, new JoshuaConfiguration()); 
+  } 
 }

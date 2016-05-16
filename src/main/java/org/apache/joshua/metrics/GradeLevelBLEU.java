@@ -85,10 +85,10 @@ public class GradeLevelBLEU extends BLEU {
 
   public void initialize() {
     metricName = "GL_BLEU";
-    effLengthMethod = EffectiveLengthMethod.SHORTEST;
+    setEffLengthMethod(EffectiveLengthMethod.SHORTEST);
     toBeMinimized = false;
-    suffStatsCount = 4 * maxGramLength + 7;
-    sentCountIndex = 4 * maxGramLength;
+    suffStatsCount = 4 * getMaxGramLength() + 7;
+    sentCountIndex = 4 * getMaxGramLength();
     set_weightsArray();
     set_maxNgramCounts();
   }
@@ -112,7 +112,7 @@ public class GradeLevelBLEU extends BLEU {
     if (useBLEUplus) {
       int[] src_prec_suffStats = srcBLEU.suffStats(cand_str, i);
       for (int j = 0; j < src_prec_suffStats.length; j++) {
-        stats[2 * maxGramLength + j] = src_prec_suffStats[j];
+        stats[2 * getMaxGramLength() + j] = src_prec_suffStats[j];
       }
     }
 
@@ -203,12 +203,12 @@ public class GradeLevelBLEU extends BLEU {
     }
 
     if (useBLEUplus) {
-      int[] srcStats = new int[2 * maxGramLength];
-      for (int i = 0; i < 2 * maxGramLength; i++) {
-        srcStats[i] = stats[2 * maxGramLength + i];
+      int[] srcStats = new int[2 * getMaxGramLength()];
+      for (int i = 0; i < 2 * getMaxGramLength(); i++) {
+        srcStats[i] = stats[2 * getMaxGramLength() + i];
       }
-      srcStats[2 * maxGramLength] = stats[tokenLength(CANDIDATE)];
-      srcStats[2 * maxGramLength] = stats[tokenLength(SOURCE)];
+      srcStats[2 * getMaxGramLength()] = stats[tokenLength(CANDIDATE)];
+      srcStats[2 * getMaxGramLength()] = stats[tokenLength(SOURCE)];
       double srcBLEUscore = srcBLEU.score(stats);
       BLEUscore = BLEU_plus(BLEUscore, srcBLEUscore);
     }

@@ -46,7 +46,7 @@ public class CountRules {
     FileChannel channel = null;
     try {
       // read the vocabulary
-      Vocabulary.read(dir + "/vocabulary");
+      Vocabulary.read(new File(dir + "/vocabulary"));
 
       // get the channel etc
       stream = new FileInputStream(file);

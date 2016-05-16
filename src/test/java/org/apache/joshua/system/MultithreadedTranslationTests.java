@@ -20,16 +20,19 @@
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 
-import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
-import org.apache.joshua.decoder.Translation;
-import org.apache.joshua.decoder.Translations;
-
+import org.apache.joshua.decoder.MetaDataException;
+import org.apache.joshua.decoder.io.TranslationRequestStream;
+import org.apache.joshua.decoder.segment_file.Sentence;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -107,7 +110,7 @@ public class MultithreadedTranslationTests {
     // GIVEN
 
     int inputLines = 10000;
-    joshuaConfig.construct_structured_output = true; // Enabled alignments.
+    //joshuaConfig.construct_structured_output = true; // Enabled alignments.
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < inputLines; i++) {
       sb.append(INPUT + "\n");
@@ -115,19 +118,40 @@ public class MultithreadedTranslationTests {
 
     // Append a large string together to simulate N requests to the decoding
     // engine.
-    TranslationRequest req = new TranslationRequest(new ByteArrayInputStream(sb.toString()
-        .getBytes(Charset.forName("UTF-8"))), joshuaConfig);
+    TranslationRequestStream req = new TranslationRequestStream(
+        new BufferedReader(new InputStreamReader(new ByteArrayInputStream(sb.toString()
+        .getBytes(Charset.forName("UTF-8"))))), joshuaConfig);
+    
+    ByteArrayOutputStream output = new ByteArrayOutputStream();
+
 
     // WHEN
     // Translate all spans in parallel.
-    Translations translations = this.decoder.decodeAll(req);
-    ArrayList<Translation> translationResults = new ArrayList<Translation>();
+    try {
+      this.decoder.decodeAll(req, output);
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    ArrayList<Sentence> translationResults = new ArrayList<Sentence>();
 
 
     final long translationStartTime = System.nanoTime();
-    Translation t;
-    while ((t = translations.next()) != null) {
-      translationResults.add(t);
+    Sentence t;
+    try {
+      while ((t = req.next()) != null) {
+        translationResults.add(t);
+      }
+    } catch (MetaDataException e) {
+      e.printStackTrace();
+    } finally {
+      if (output != null) {
+        try {
+          output.close();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
     }
 
     final long translationEndTime = System.nanoTime();
