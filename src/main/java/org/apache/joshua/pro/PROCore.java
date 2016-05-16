@@ -320,12 +320,8 @@ public class PROCore {
       }
 
       inFile_names.close();
-    } catch (FileNotFoundException e) {
-      System.err.println("FileNotFoundException in PROCore.initialize(int): " + e.getMessage());
-      System.exit(99901);
     } catch (IOException e) {
-      System.err.println("IOException in PROCore.initialize(int): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
 
     // the parameter file contains one line per parameter
@@ -383,12 +379,8 @@ public class PROCore {
           inFile_comm.close();
         }
       }
-    } catch (FileNotFoundException e) {
-      System.err.println("FileNotFoundException in PROCore.initialize(int): " + e.getMessage());
-      System.exit(99901);
     } catch (IOException e) {
-      System.err.println("IOException in PROCore.initialize(int): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
 
     // set static data members for the EvaluationMetric class
@@ -1465,16 +1457,11 @@ public class PROCore {
 
         int decStatus = p.waitFor();
         if (decStatus != validDecoderExitValue) {
-          println("Call to decoder returned " + decStatus + "; was expecting "
+          throw new RuntimeException("Call to decoder returned " + decStatus + "; was expecting "
               + validDecoderExitValue + ".");
-          System.exit(30);
         }
-      } catch (IOException e) {
-        System.err.println("IOException in PROCore.run_decoder(int): " + e.getMessage());
-        System.exit(99902);
-      } catch (InterruptedException e) {
-        System.err.println("InterruptedException in PROCore.run_decoder(int): " + e.getMessage());
-        System.exit(99903);
+      } catch (IOException | InterruptedException e) {
+        throw new RuntimeException(e);
       }
 
       retSA[0] = decoderOutFileName;
@@ -1572,13 +1559,8 @@ public class PROCore {
         gzipFile(featsFileName);
       }
 
-    } catch (FileNotFoundException e) {
-      System.err.println("FileNotFoundException in PROCore.produceTempFiles(int): "
-          + e.getMessage());
-      System.exit(99901);
     } catch (IOException e) {
-      System.err.println("IOException in PROCore.produceTempFiles(int): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
 
   }
@@ -1626,9 +1608,7 @@ public class PROCore {
       inFile.close();
       outFile.close();
     } catch (IOException e) {
-      System.err.println("IOException in PROCore.createConfigFile(double[],String,String): "
-          + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
   }
 
@@ -1638,8 +1618,7 @@ public class PROCore {
     try {
       inFile_init = new Scanner(new FileReader(paramsFileName));
     } catch (FileNotFoundException e) {
-      System.err.println("FileNotFoundException in PROCore.processParamFile(): " + e.getMessage());
-      System.exit(99901);
+      throw new RuntimeException(e);
     }
 
     String dummy = "";
@@ -1662,8 +1641,7 @@ public class PROCore {
       } else if (dummy.equals("Fix")) {
         isOptimizable[c] = false;
       } else {
-        println("Unknown isOptimizable string " + dummy + " (must be either Opt or Fix)");
-        System.exit(21);
+        throw new RuntimeException("Unknown isOptimizable string " + dummy + " (must be either Opt or Fix)");
       }
 
       if (!isOptimizable[c]) { // skip next two values
@@ -1678,25 +1656,22 @@ public class PROCore {
         // set minRandValue[c] and maxRandValue[c] (range for random values)
         dummy = inFile_init.next();
         if (dummy.equals("-Inf") || dummy.equals("+Inf")) {
-          println("minRandValue[" + c + "] cannot be -Inf or +Inf!");
-          System.exit(21);
+          throw new RuntimeException("minRandValue[" + c + "] cannot be -Inf or +Inf!");
         } else {
           minRandValue[c] = Double.parseDouble(dummy);
         }
 
         dummy = inFile_init.next();
         if (dummy.equals("-Inf") || dummy.equals("+Inf")) {
-          println("maxRandValue[" + c + "] cannot be -Inf or +Inf!");
-          System.exit(21);
+          throw new RuntimeException("maxRandValue[" + c + "] cannot be -Inf or +Inf!");
         } else {
           maxRandValue[c] = Double.parseDouble(dummy);
         }
 
         // check for illogical values
         if (minRandValue[c] > maxRandValue[c]) {
-          println("minRandValue[" + c + "]=" + minRandValue[c] + " > " + maxRandValue[c]
+          throw new RuntimeException("minRandValue[" + c + "]=" + minRandValue[c] + " > " + maxRandValue[c]
               + "=maxRandValue[" + c + "]!");
-          System.exit(21);
         }
 
         // check for odd values
@@ -1747,40 +1722,34 @@ public class PROCore {
       normalizationOptions[2] = Vocabulary.id(pName);
 
       if (normalizationOptions[1] <= 0) {
-        println("Value for the absval normalization method must be positive.");
-        System.exit(21);
+        throw new RuntimeException("Value for the absval normalization method must be positive.");
       }
       if (normalizationOptions[2] == 0) {
-        println("Unrecognized feature name " + normalizationOptions[2]
-            + " for absval normalization method.", 1);
-        System.exit(21);
+        throw new RuntimeException("Unrecognized feature name " + normalizationOptions[2]
+            + " for absval normalization method.");
       }
     } else if (dummyA[0].equals("maxabsval")) {
       normalizationOptions[0] = 2;
       normalizationOptions[1] = Double.parseDouble(dummyA[1]);
       if (normalizationOptions[1] <= 0) {
-        println("Value for the maxabsval normalization method must be positive.");
-        System.exit(21);
+        throw new RuntimeException("Value for the maxabsval normalization method must be positive.");
       }
     } else if (dummyA[0].equals("minabsval")) {
       normalizationOptions[0] = 3;
       normalizationOptions[1] = Double.parseDouble(dummyA[1]);
       if (normalizationOptions[1] <= 0) {
-        println("Value for the minabsval normalization method must be positive.");
-        System.exit(21);
+        throw new RuntimeException("Value for the minabsval normalization method must be positive.");
       }
     } else if (dummyA[0].equals("LNorm")) {
       normalizationOptions[0] = 4;
       normalizationOptions[1] = Double.parseDouble(dummyA[1]);
       normalizationOptions[2] = Double.parseDouble(dummyA[2]);
       if (normalizationOptions[1] <= 0 || normalizationOptions[2] <= 0) {
-        println("Both values for the LNorm normalization method must be positive.");
-        System.exit(21);
+        throw new RuntimeException("Both values for the LNorm normalization method must be positive.");
       }
     } else {
-      println("Unrecognized normalization method " + dummyA[0] + "; "
+      throw new RuntimeException("Unrecognized normalization method " + dummyA[0] + "; "
           + "must be one of none, absval, maxabsval, and LNorm.");
-      System.exit(21);
     } // if (dummyA[0])
 
     inFile_init.close();
@@ -1892,12 +1861,8 @@ public class PROCore {
 
         }
 
-      } catch (FileNotFoundException e) {
-        System.err.println("FileNotFoundException in PROCore.processDocInfo(): " + e.getMessage());
-        System.exit(99901);
       } catch (IOException e) {
-        System.err.println("IOException in PROCore.processDocInfo(): " + e.getMessage());
-        System.exit(99902);
+        throw new RuntimeException(e);
       }
     }
 
@@ -1998,8 +1963,7 @@ public class PROCore {
         outFile_lambdas.close();
 
       } catch (IOException e) {
-        System.err.println("IOException in PROCore.finish(): " + e.getMessage());
-        System.exit(99902);
+        throw new RuntimeException(e);
       }
     }
 
@@ -2080,9 +2044,7 @@ public class PROCore {
               argsVector.add(paramA[opt]);
             }
           } else {
-            println("Malformed line in config file:");
-            println(origLine);
-            System.exit(70);
+            throw new RuntimeException("Malformed line in config file:" + origLine);
           }
 
         }
@@ -2091,12 +2053,9 @@ public class PROCore {
       inFile.close();
     } catch (FileNotFoundException e) {
       println("PRO configuration file " + fileName + " was not found!");
-      System.err.println("FileNotFoundException in PROCore.cfgFileToArgsArray(String): "
-          + e.getMessage());
-      System.exit(99901);
+      throw new RuntimeException(e);
     } catch (IOException e) {
-      System.err.println("IOException in PROCore.cfgFileToArgsArray(String): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
 
     String[] argsArray = new String[argsVector.size()];
@@ -2174,14 +2133,12 @@ public class PROCore {
       } else if (option.equals("-rps")) {
         refsPerSen = Integer.parseInt(args[i + 1]);
         if (refsPerSen < 1) {
-          println("refsPerSen must be positive.");
-          System.exit(10);
+          throw new RuntimeException("refsPerSen must be positive.");
         }
       } else if (option.equals("-txtNrm")) {
         textNormMethod = Integer.parseInt(args[i + 1]);
         if (textNormMethod < 0 || textNormMethod > 4) {
-          println("textNormMethod should be between 0 and 4");
-          System.exit(10);
+          throw new RuntimeException("textNormMethod should be between 0 and 4");
         }
       } else if (option.equals("-p")) {
         paramsFileName = args[i + 1];
@@ -2201,8 +2158,7 @@ public class PROCore {
           }
           i += optionCount;
         } else {
-          println("Unknown metric name " + metricName + ".");
-          System.exit(10);
+          throw new RuntimeException("Unknown metric name " + metricName + ".");
         }
       } else if (option.equals("-docSet")) {
         String method = args[i + 1];
@@ -2247,32 +2203,27 @@ public class PROCore {
           docSubsetInfo[6] = Integer.parseInt(a2);
           i += 3;
         } else {
-          println("Unknown docSet method " + method + ".");
-          System.exit(10);
+          throw new RuntimeException("Unknown docSet method " + method + ".");
         }
       } else if (option.equals("-maxIt")) {
         maxMERTIterations = Integer.parseInt(args[i + 1]);
         if (maxMERTIterations < 1) {
-          println("maxMERTIts must be positive.");
-          System.exit(10);
+          throw new RuntimeException("maxMERTIts must be positive.");
         }
       } else if (option.equals("-minIt")) {
         minMERTIterations = Integer.parseInt(args[i + 1]);
         if (minMERTIterations < 1) {
-          println("minMERTIts must be positive.");
-          System.exit(10);
+          throw new RuntimeException("minMERTIts must be positive.");
         }
       } else if (option.equals("-prevIt")) {
         prevMERTIterations = Integer.parseInt(args[i + 1]);
         if (prevMERTIterations < 0) {
-          println("prevMERTIts must be non-negative.");
-          System.exit(10);
+          throw new RuntimeException("prevMERTIts must be non-negative.");
         }
       } else if (option.equals("-stopIt")) {
         stopMinIts = Integer.parseInt(args[i + 1]);
         if (stopMinIts < 1) {
-          println("stopMinIts must be positive.");
-          System.exit(10);
+          throw new RuntimeException("stopMinIts must be positive.");
         }
       } else if (option.equals("-stopSig")) {
         stopSigValue = Double.parseDouble(args[i + 1]);
@@ -2283,20 +2234,17 @@ public class PROCore {
       else if (option.equals("-thrCnt")) {
         numOptThreads = Integer.parseInt(args[i + 1]);
         if (numOptThreads < 1) {
-          println("threadCount must be positive.");
-          System.exit(10);
+          throw new RuntimeException("threadCount must be positive.");
         }
       } else if (option.equals("-save")) {
         saveInterFiles = Integer.parseInt(args[i + 1]);
         if (saveInterFiles < 0 || saveInterFiles > 3) {
-          println("save should be between 0 and 3");
-          System.exit(10);
+          throw new RuntimeException("save should be between 0 and 3");
         }
       } else if (option.equals("-compress")) {
         compressFiles = Integer.parseInt(args[i + 1]);
         if (compressFiles < 0 || compressFiles > 1) {
-          println("compressFiles should be either 0 or 1");
-          System.exit(10);
+          throw new RuntimeException("compressFiles should be either 0 or 1");
         }
       } else if (option.equals("-opi")) {
         int opi = Integer.parseInt(args[i + 1]);
@@ -2305,8 +2253,7 @@ public class PROCore {
         } else if (opi == 0) {
           oneModificationPerIteration = false;
         } else {
-          println("oncePerIt must be either 0 or 1.");
-          System.exit(10);
+          throw new RuntimeException("oncePerIt must be either 0 or 1.");
         }
       } else if (option.equals("-rand")) {
         int rand = Integer.parseInt(args[i + 1]);
@@ -2315,8 +2262,7 @@ public class PROCore {
         } else if (rand == 0) {
           randInit = false;
         } else {
-          println("randInit must be either 0 or 1.");
-          System.exit(10);
+          throw new RuntimeException("randInit must be either 0 or 1.");
         }
       } else if (option.equals("-seed")) {
         if (args[i + 1].equals("time")) {
@@ -2355,8 +2301,7 @@ public class PROCore {
         else if (retBest == 0)
           returnBest = false;
         else {
-          println("-returnBest must be either 0 or 1.");
-          System.exit(10);
+          throw new RuntimeException("-returnBest must be either 0 or 1.");
         }
       }
       // interpolation coefficient between current & previous weights
@@ -2374,8 +2319,7 @@ public class PROCore {
       } else if (option.equals("-passIt")) {
         int val = Integer.parseInt(args[i + 1]);
         if (val < 0 || val > 1) {
-          println("passIterationToDecoder should be either 0 or 1");
-          System.exit(10);
+          throw new RuntimeException("passIterationToDecoder should be either 0 or 1");
         }
         passIterationToDecoder = (val == 1) ? true : false;
       } else if (option.equals("-decOut")) {
@@ -2387,35 +2331,30 @@ public class PROCore {
       } else if (option.equals("-N")) {
         sizeOfNBest = Integer.parseInt(args[i + 1]);
         if (sizeOfNBest < 1) {
-          println("N must be positive.");
-          System.exit(10);
+          throw new RuntimeException("N must be positive.");
         }
       }
       // Output specs
       else if (option.equals("-v")) {
         verbosity = Integer.parseInt(args[i + 1]);
         if (verbosity < 0 || verbosity > 4) {
-          println("verbosity should be between 0 and 4");
-          System.exit(10);
+          throw new RuntimeException("verbosity should be between 0 and 4");
         }
       } else if (option.equals("-decV")) {
         decVerbosity = Integer.parseInt(args[i + 1]);
         if (decVerbosity < 0 || decVerbosity > 1) {
-          println("decVerbosity should be either 0 or 1");
-          System.exit(10);
+          throw new RuntimeException("decVerbosity should be either 0 or 1");
         }
       } else if (option.equals("-fake")) {
         fakeFileNameTemplate = args[i + 1];
         int QM_i = fakeFileNameTemplate.indexOf("?");
         if (QM_i <= 0) {
-          println("fakeFileNameTemplate must contain '?' to indicate position of iteration number");
-          System.exit(10);
+          throw new RuntimeException("fakeFileNameTemplate must contain '?' to indicate position of iteration number");
         }
         fakeFileNamePrefix = fakeFileNameTemplate.substring(0, QM_i);
         fakeFileNameSuffix = fakeFileNameTemplate.substring(QM_i + 1);
       } else {
-        println("Unknown option " + option);
-        System.exit(10);
+        throw new RuntimeException("Unknown option " + option);
       }
 
       i += 2;
@@ -2487,10 +2426,10 @@ public class PROCore {
     if (!canRunCommand && !canRunJoshua) { // can only run fake decoder
 
       if (!canRunFake) {
-        println("PRO cannot decode; must provide one of: command file (for external decoder),");
-        println("                                           source file (for Joshua decoder),");
-        println("                                        or prefix for existing output files (for fake decoder).");
-        System.exit(12);
+        String msg = "PRO cannot decode; must provide one of: command file (for external decoder),"
+            + " source file (for Joshua decoder), or prefix for existing output files "
+            + "(for fake decoder).";
+        throw new RuntimeException(msg);
       }
 
       int lastGoodIt = 0;
@@ -2503,9 +2442,8 @@ public class PROCore {
       }
 
       if (lastGoodIt == 0) {
-        println("Fake decoder cannot find first output file "
+        throw new RuntimeException("Fake decoder cannot find first output file "
             + (fakeFileNamePrefix + 1 + fakeFileNameSuffix));
-        System.exit(13);
       } else if (lastGoodIt < maxMERTIterations) {
         if (firstTime)
           println("Warning: can only run fake decoder; existing output files "
@@ -2597,8 +2535,7 @@ public class PROCore {
 
   private void checkFile(String fileName) {
     if (!fileExists(fileName)) {
-      println("The file " + fileName + " was not found!");
-      System.exit(40);
+      throw new RuntimeException("The file " + fileName + " was not found!");
     }
   }
 
@@ -2633,8 +2570,7 @@ public class PROCore {
       deleteFile(inputFileName);
 
     } catch (IOException e) {
-      System.err.println("IOException in PROCore.gzipFile(String,String): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
   }
 
@@ -2666,8 +2602,7 @@ public class PROCore {
       deleteFile(gzippedFileName);
 
     } catch (IOException e) {
-      System.err.println("IOException in PROCore.gunzipFile(String,String): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
   }
 
@@ -2683,8 +2618,7 @@ public class PROCore {
       if (!checker.exists()) {
         checker = new File(prefix + ".1");
         if (!checker.exists()) {
-          println("Can't find reference files.");
-          System.exit(50);
+          throw new RuntimeException("Can't find reference files.");
         } else {
           prefix = prefix + ".";
         }
@@ -2713,8 +2647,7 @@ public class PROCore {
 
         for (int r = 0; r < numFiles; ++r) {
           if (countLines(prefix + nextIndex) != lineCount) {
-            println("Line count mismatch in " + (prefix + nextIndex) + ".");
-            System.exit(60);
+            throw new RuntimeException("Line count mismatch in " + (prefix + nextIndex) + ".");
           }
           InputStream inStream = new FileInputStream(new File(prefix + nextIndex));
           inFile[r] = new BufferedReader(new InputStreamReader(inStream, "utf8"));
@@ -2735,14 +2668,8 @@ public class PROCore {
         for (int r = 0; r < numFiles; ++r) {
           inFile[r].close();
         }
-      } catch (FileNotFoundException e) {
-        System.err.println("FileNotFoundException in PROCore.createUnifiedRefFile(String,int): "
-            + e.getMessage());
-        System.exit(99901);
       } catch (IOException e) {
-        System.err.println("IOException in PROCore.createUnifiedRefFile(String,int): "
-            + e.getMessage());
-        System.exit(99902);
+        throw new RuntimeException(e);
       }
 
       return outFileName;
@@ -2895,8 +2822,7 @@ public class PROCore {
 
       inFile.close();
     } catch (IOException e) {
-      System.err.println("IOException in PROCore.countLines(String): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
 
     return count;
@@ -2917,8 +2843,7 @@ public class PROCore {
 
       inFile.close();
     } catch (IOException e) {
-      System.err.println("IOException in PROCore.countNonEmptyLines(String): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
 
     return count;

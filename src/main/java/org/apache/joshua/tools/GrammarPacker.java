@@ -104,8 +104,7 @@ public class GrammarPacker {
     if (!packAlignments) {
       logger.info("No alignments file or grammar specified, skipping.");
     } else if (alignments != null && !new File(alignments_filename).exists()) {
-      logger.severe("Alignments file does not exist: " + alignments);
-      System.exit(1);
+      throw new RuntimeException("Alignments file does not exist: " + alignments);
     }
 
     if (config_filename != null) {
@@ -119,8 +118,7 @@ public class GrammarPacker {
     File working_dir = new File(output);
     working_dir.mkdir();
     if (!working_dir.exists()) {
-      logger.severe("Failed creating output directory.");
-      System.exit(1);
+      throw new RuntimeException("Failed creating output directory.");
     }
   }
 
@@ -136,8 +134,7 @@ public class GrammarPacker {
       String[] fields = line.split("[\\s]+");
 
       if (fields.length < 2) {
-        logger.severe("Incomplete line in config.");
-        System.exit(1);
+        throw new RuntimeException("Incomplete line in config.");
       }
       if ("slice_size".equals(fields[0])) {
         // Number of records to concurrently load into memory for sorting.

@@ -152,8 +152,7 @@ public class Translation {
 
         out.flush();
       } catch (IOException e) {
-        e.printStackTrace();
-        System.exit(1);
+        throw new RuntimeException(e);
       }
       
       this.output = sw.toString();

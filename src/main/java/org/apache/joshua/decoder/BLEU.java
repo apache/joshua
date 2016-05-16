@@ -213,8 +213,7 @@ public class BLEU {
   // sentence-bleu: BLEU= bp * prec; where prec = exp (sum 1/4 * log(prec[order]))
   public static float computeBleu(int hypLen, float refLen, int[] numNgramMatch, int bleuOrder) {
     if (hypLen <= 0 || refLen <= 0) {
-      System.out.println("error: ref or hyp is zero len");
-      System.exit(1);
+      throw new RuntimeException("error: ref or hyp is zero len");
     }
     float res = 0;
     float wt = 1.0f / bleuOrder;
@@ -376,10 +375,9 @@ public class BLEU {
           try {
             ngramState = (NgramDPState) edge.getTailNodes().get(tailIndex).getDPState(0);
           } catch (ClassCastException e) {
-            System.err.println(String.format(
+            throw new RuntimeException(String.format(
                 "* FATAL: first state needs to be NgramDPState (found %s)", edge.getTailNodes()
                     .get(tailIndex).getDPState(0).getClass()));
-            System.exit(1);
           }
           
           // Compute ngrams overlapping with left context of tail node

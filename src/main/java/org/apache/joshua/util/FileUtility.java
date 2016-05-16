@@ -118,11 +118,8 @@ public class FileUtility {
       File f1 = new File(srFile);
       File f2 = new File(dtFile);
       copyFile(f1, f2);
-    } catch (FileNotFoundException ex) {
-      System.out.println(ex.getMessage() + " in the specified directory.");
-      System.exit(0);
     } catch (IOException e) {
-      System.out.println(e.getMessage());
+      throw new RuntimeException(e);
     }
   }
 
@@ -145,11 +142,8 @@ public class FileUtility {
       in.close();
       out.close();
       System.out.println("File copied.");
-    } catch (FileNotFoundException ex) {
-      System.out.println(ex.getMessage() + " in the specified directory.");
-      System.exit(0);
     } catch (IOException e) {
-      System.out.println(e.getMessage());
+      throw new RuntimeException(e);
     }
   }
 
@@ -227,8 +221,7 @@ public class FileUtility {
    * Method to handle standard IO xceptions. catch (Exception e) {Utility.handleIO_exception(e);}
    */
   public static void handleExceptions(Exception e) {
-    e.printStackTrace();
-    System.exit(-1);
+    throw new RuntimeException(e);
   }
 
   /**

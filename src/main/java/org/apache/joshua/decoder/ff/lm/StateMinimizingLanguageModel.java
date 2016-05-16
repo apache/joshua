@@ -49,9 +49,9 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
     super(weights, args, config);
     this.type = "kenlm";
     if (parsedArgs.containsKey("lm_type") && ! parsedArgs.get("lm_type").equals("kenlm")) {
-      System.err.println("* FATAL: StateMinimizingLanguageModel only supports 'kenlm' lm_type backend");
-      System.err.println("*        Remove lm_type from line or set to 'kenlm'");
-      System.exit(-1);
+      String msg = "* FATAL: StateMinimizingLanguageModel only supports 'kenlm' lm_type backend"
+          + "*        Remove lm_type from line or set to 'kenlm'";
+      throw new RuntimeException(msg);
     }
   }
   

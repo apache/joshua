@@ -59,8 +59,7 @@ public class GradeLevelBLEU extends BLEU {
     try {
       loadSources(options[2]);
     } catch (IOException e) {
-      logger.severe("Error loading the source sentences from " + options[2]);
-      System.exit(1);
+      throw new RuntimeException("Error loading the source sentences from " + options[2], e);
     }
     if (useBLEUplus) srcBLEU = new SourceBLEU(4, "closest", srcIndex, true);
     initialize();
@@ -183,9 +182,10 @@ public class GradeLevelBLEU extends BLEU {
 
   public double score(int[] stats) {
     if (stats.length != suffStatsCount) {
-      logger.severe("Mismatch between stats.length and suffStatsCount (" + stats.length + " vs. "
-          + suffStatsCount + ") in BLEU.score(int[])");
-      System.exit(2);
+      String msg = "Mismatch between stats.length and suffStatsCount (" + stats.length + " vs. "
+          + suffStatsCount + ") in BLEU.score(int[])";
+      logger.severe(msg);
+      throw new RuntimeException(msg);
     }
     double BLEUscore = super.score(stats);
     double candGL =

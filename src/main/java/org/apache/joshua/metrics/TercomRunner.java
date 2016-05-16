@@ -96,12 +96,8 @@ public class TercomRunner implements Runnable {
       fd = new File(refFileName);
       if (fd.exists()) fd.delete();
 
-    } catch (IOException e) {
-      System.err.println("IOException in TER.runTercom(...): " + e.getMessage());
-      System.exit(99902);
-    } catch (InterruptedException e) {
-      System.err.println("InterruptedException in TER.runTercom(...): " + e.getMessage());
-      System.exit(99903);
+    } catch (IOException| InterruptedException e) {
+      throw new RuntimeException(e);
     }
 
     blocker.release();
@@ -112,8 +108,7 @@ public class TercomRunner implements Runnable {
     try {
       real_run();
     } catch (Exception e) {
-      System.err.println("Exception in TercomRunner.run(): " + e.getMessage());
-      System.exit(99905);
+      throw new RuntimeException(e);
     }
   }
 

@@ -303,9 +303,8 @@ public abstract class EvaluationMetric {
       outFile.close();
 
     } catch (IOException e) {
-      System.err.println("IOException in EvaluationMetric.createSuffStatsFile(...): "
-          + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException("IOException in EvaluationMetric.createSuffStatsFile(...): "
+          + e.getMessage(), e);
     }
 
   }

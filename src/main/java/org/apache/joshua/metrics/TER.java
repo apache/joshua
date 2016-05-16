@@ -57,9 +57,9 @@ public class TER extends EvaluationMetric {
     } else if (Metric_options[0].equals("nocase")) {
       caseSensitive = false;
     } else {
-      System.out.println("Unknown case sensitivity string " + Metric_options[0] + ".");
-      System.out.println("Should be one of case or nocase.");
-      System.exit(1);
+      String msg = "Unknown case sensitivity string " + Metric_options[0]
+          + ". Should be one of case or nocase.";
+      throw new RuntimeException(msg);
     }
 
     if (Metric_options[1].equals("punc")) {
@@ -67,41 +67,37 @@ public class TER extends EvaluationMetric {
     } else if (Metric_options[1].equals("nopunc")) {
       withPunctuation = false;
     } else {
-      System.out.println("Unknown with-punctuation string " + Metric_options[1] + ".");
-      System.out.println("Should be one of punc or nopunc.");
-      System.exit(1);
+      String msg = "Unknown with-punctuation string " + Metric_options[1]
+          + ". Should be one of punc or nopunc.";
+      throw new RuntimeException(msg);
     }
 
     beamWidth = Integer.parseInt(Metric_options[2]);
     if (beamWidth < 1) {
-      System.out.println("Beam width must be positive");
-      System.exit(1);
+      throw new RuntimeException("Beam width must be positive");
     }
 
     maxShiftDist = Integer.parseInt(Metric_options[3]);
     if (maxShiftDist < 1) {
-      System.out.println("Maximum shift distance must be positive");
-      System.exit(1);
+      throw new RuntimeException("Maximum shift distance must be positive");
     }
 
     tercomJarFileName = Metric_options[4];
 
     if (tercomJarFileName == null || tercomJarFileName.equals("")) {
-      System.out.println("Problem processing tercom's jar filename");
-      System.exit(1);
+      throw new RuntimeException("Problem processing tercom's jar filename");
     } else {
       File checker = new File(tercomJarFileName);
       if (!checker.exists()) {
-        System.out.println("Could not find tercom jar file " + tercomJarFileName);
-        System.out.println("(Please make sure you use the full path in the filename)");
-        System.exit(1);
+        String msg = "Could not find tercom jar file " + tercomJarFileName
+            + "(Please make sure you use the full path in the filename)";
+        throw new RuntimeException(msg);
       }
     }
 
     numScoringThreads = Integer.parseInt(Metric_options[5]);
     if (numScoringThreads < 1) {
-      System.out.println("Number of TER scoring threads must be positive");
-      System.exit(1);
+      throw new RuntimeException("Number of TER scoring threads must be positive");
     }
 
 
@@ -206,8 +202,7 @@ public class TER extends EvaluationMetric {
       if (fd.exists()) fd.delete();
 
     } catch (IOException e) {
-      System.err.println("IOException in TER.suffStats(String[],int[]): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
 
     return stats;
@@ -259,9 +254,7 @@ public class TER extends EvaluationMetric {
       try {
         blocker.acquire(batchCount);
       } catch (java.lang.InterruptedException e) {
-        System.err.println("InterruptedException in TER.createSuffStatsFile(...): "
-            + e.getMessage());
-        System.exit(99906);
+        throw new RuntimeException(e);
       }
 
       PrintWriter outFile = new PrintWriter(outputFileName);
@@ -275,8 +268,7 @@ public class TER extends EvaluationMetric {
       outFile.close();
 
     } catch (IOException e) {
-      System.err.println("IOException in TER.createSuffStatsFile(...): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
 
   }
@@ -317,8 +309,7 @@ public class TER extends EvaluationMetric {
       outFile.close();
 
     } catch (IOException e) {
-      System.err.println("IOException in TER.createTercomHypFile(...): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException("IOException in TER.createTercomHypFile(...): " + e.getMessage(), e);
     }
 
     return readCount;
@@ -367,8 +358,7 @@ public class TER extends EvaluationMetric {
       outFile.close();
 
     } catch (IOException e) {
-      System.err.println("IOException in TER.createTercomRefFile(...): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
 
     return readCount;
@@ -407,12 +397,8 @@ public class TER extends EvaluationMetric {
 
       exitValue = p.waitFor();
 
-    } catch (IOException e) {
-      System.err.println("IOException in TER.runTercom(...): " + e.getMessage());
-      System.exit(99902);
-    } catch (InterruptedException e) {
-      System.err.println("InterruptedException in TER.runTercom(...): " + e.getMessage());
-      System.exit(99903);
+    } catch (IOException | InterruptedException e) {
+      throw new RuntimeException(e);
     }
 
     return exitValue;
@@ -438,16 +424,14 @@ public class TER extends EvaluationMetric {
       
       inFile.close();
     } catch (IOException e) {
-      System.err.println("IOException in TER.copySS(String,PrintWriter): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
   }
 
   public double score(int[] stats) {
     if (stats.length != suffStatsCount) {
-      System.out.println("Mismatch between stats.length and suffStatsCount (" + stats.length
+      throw new RuntimeException("Mismatch between stats.length and suffStatsCount (" + stats.length
           + " vs. " + suffStatsCount + ") in TER.score(int[])");
-      System.exit(2);
     }
 
     double sc = 0.0;

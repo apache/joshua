@@ -152,11 +152,9 @@ public class EncoderConfiguration {
       }
 
     } catch (ArrayIndexOutOfBoundsException e) {
-      System.err.println("Usage: EncoderConfiguration <packed_directory>");
-      System.exit(1);
+      throw new RuntimeException("Usage: EncoderConfiguration <packed_directory>");
     } catch (IOException e) {
-      System.err.println(String.format("* FATAL: can't find file %s/encoding", grammar_dir));
-      System.exit(1);
+      throw new RuntimeException(String.format("* FATAL: can't find file %s/encoding", grammar_dir));
     }
   }
 }

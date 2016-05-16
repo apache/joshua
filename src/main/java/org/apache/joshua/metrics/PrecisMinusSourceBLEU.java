@@ -132,16 +132,14 @@ public class PrecisMinusSourceBLEU extends EvaluationMetric {
       fd = new File(outputFileName + ".SRC_BLEU");
       if (fd.exists()) fd.delete();
     } catch (IOException e) {
-      System.err.println("IOException: " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
   }
 
   public double score(int[] stats) {
     if (stats.length != suffStatsCount) {
-      System.out.println("Mismatch between stats.length and suffStatsCount (" + stats.length
+      throw new RuntimeException("Mismatch between stats.length and suffStatsCount (" + stats.length
           + " vs. " + suffStatsCount + ") in PrecisMinusSourceBLEU.score(int[])");
-      System.exit(1);
     }
 
     double sc = 0.0;

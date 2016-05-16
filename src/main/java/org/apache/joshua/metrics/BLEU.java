@@ -49,7 +49,7 @@ public class BLEU extends EvaluationMetric {
       setMaxGramLength(mxGrmLn);
     } else {
       logger.severe("Maximum gram length must be positive");
-      System.exit(1);
+      throw new RuntimeException("Maximum gram length must be positive");
     }
 
     if (methodStr.equals("closest")) {
@@ -62,7 +62,7 @@ public class BLEU extends EvaluationMetric {
       logger.severe("Unknown effective length method string " + methodStr + ".");
       // System.out.println("Should be one of closest, shortest, or average.");
       logger.severe("Should be one of closest or shortest.");
-      System.exit(1);
+      throw new RuntimeException("Should be one of closest or shortest.");
     }
 
     initialize();
@@ -261,9 +261,10 @@ public class BLEU extends EvaluationMetric {
 
   public double score(int[] stats) {
     if (stats.length != suffStatsCount) {
-      logger.severe("Mismatch between stats.length and suffStatsCount (" + stats.length + " vs. "
-          + suffStatsCount + ") in BLEU.score(int[])");
-      System.exit(2);
+      String msg = "Mismatch between stats.length and suffStatsCount (" + stats.length + " vs. "
+          + suffStatsCount + ") in BLEU.score(int[])";
+      logger.severe(msg);
+      throw new RuntimeException(msg);
     }
 
     double BLEUsum = 0.0;

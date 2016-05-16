@@ -517,9 +517,8 @@ public class Tree implements Serializable {
         rulesToFragmentStrings.put(fields[1].trim(), fields[0].trim()); // buildFragment(fields[0]));
       }
     } catch (IOException e) {
-      System.err.println(String.format("* WARNING: couldn't read fragment mapping file '%s'",
-          fragmentMappingFile));
-      System.exit(1);
+      throw new RuntimeException(String.format("* WARNING: couldn't read fragment mapping file '%s'",
+          fragmentMappingFile), e);
     }
     System.err.println(String.format("FragmentLMFF: Read %d mappings from '%s'",
         rulesToFragmentStrings.size(), fragmentMappingFile));
@@ -729,13 +728,13 @@ public class Tree implements Serializable {
             frontierTree.children = tree.children;
           }
         } catch (IndexOutOfBoundsException e) {
+          //TODO: send these prints to LOG.err
           System.err.println(String.format("ERROR at index %d", i));
           System.err.println(String.format("RULE: %s  TREE: %s", rule.getEnglishWords(), tree));
           System.err.println("  FRONTIER:");
           for (Tree kid : frontier)
             System.err.println("    " + kid);
-          e.printStackTrace();
-          System.exit(1);
+          throw new RuntimeException(String.format("ERROR at index %d", i), e);
         }
       }
     }

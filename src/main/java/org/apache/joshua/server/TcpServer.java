@@ -58,8 +58,8 @@ public class TcpServer {
       serverSocket.close();
 
     } catch (IOException e) {
-      System.err.println(String.format("Could not listen on port: %d.", joshuaConfiguration.server_port));
-      System.exit(-1);
+      throw new RuntimeException(String.format("Could not listen on port: %d.",
+          joshuaConfiguration.server_port));
     }
   }
 }

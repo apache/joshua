@@ -99,18 +99,9 @@ public class Optimizer {
       // System.out.println(output);
 
       return finalLambda;
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
-      System.exit(50);
-    } catch (InstantiationException e) {
-      e.printStackTrace();
-      System.exit(55);
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
-      System.exit(60);
+    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+      throw new RuntimeException(e);
     }
-
-    return null;
   }
 
   public double computeCorpusMetricScore(double[] finalLambda) {

@@ -66,9 +66,8 @@ public class ZeroOneLoss extends EvaluationMetric {
 
   public double score(int[] stats) {
     if (stats.length != suffStatsCount) {
-      System.out.println("Mismatch between stats.length and suffStatsCount (" + stats.length
+      throw new RuntimeException("Mismatch between stats.length and suffStatsCount (" + stats.length
           + " vs. " + suffStatsCount + ") in ZeroOneLoss.score(int[])");
-      System.exit(1);
     }
 
     return 1.0 - (stats[0] / (double) stats[1]);

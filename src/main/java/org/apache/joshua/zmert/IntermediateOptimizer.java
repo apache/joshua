@@ -613,12 +613,8 @@ public class IntermediateOptimizer implements Runnable {
 
       inFile.close();
 
-    } catch (FileNotFoundException e) {
-      System.err.println("FileNotFoundException in MertCore.initialize(int): " + e.getMessage());
-      System.exit(99901);
     } catch (IOException e) {
-      System.err.println("IOException in MertCore.initialize(int): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
 
   } // set_suffStats_array(HashMap[] suffStats_array, TreeSet[] indicesOfInterest, Vector[]
@@ -961,13 +957,7 @@ public class IntermediateOptimizer implements Runnable {
   }
 
   public void run() {
-    try {
-      real_run();
-    } catch (Exception e) {
-      System.err.println("Exception in IntermediateOptimizer.run(): " + e.getMessage());
-      e.printStackTrace();
-      System.exit(99905);
-    }
+    real_run();
     if (!strToPrint.equals("")) {
       threadOutput.add(strToPrint);
     }

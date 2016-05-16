@@ -20,7 +20,7 @@ package org.apache.joshua.decoder.ff;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.LinkedList;	
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.joshua.corpus.Vocabulary;
@@ -36,32 +36,32 @@ import org.apache.joshua.util.io.LineReader;
 /***
  * The RuleBigram feature is an indicator feature that counts target word bigrams that are created when
  * a rule is applied. It accepts three parameters:
- * 
+ *
  * -vocab /path/to/vocab
- * 
+ *
  *  The path to a vocabulary, where each line is of the format ID WORD COUNT.
- *  
+ *
  * -threshold N
- * 
+ *
  *  Mask to UNK all words whose COUNT is less than N.
- *  
+ *
  * -top-n N
- * 
+ *
  *  Only use the top N words.
  */
 
 public class TargetBigram extends StatefulFF {
-  
+
   private HashSet<String> vocab = null;
   private int maxTerms = 1000000;
   private int threshold = 0;
 
   public TargetBigram(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, "TargetBigram", args, config);
-    
+
     if (parsedArgs.containsKey("threshold"))
       threshold = Integer.parseInt(parsedArgs.get("threshold"));
-    
+
     if (parsedArgs.containsKey("top-n"))
       maxTerms = Integer.parseInt(parsedArgs.get("top-n"));
 
@@ -72,11 +72,11 @@ public class TargetBigram extends StatefulFF {
 
   /**
    * Load vocabulary items passing the 'threshold' and 'top-n' filters.
-   * 
+   *
    * @param filename
    */
   private void loadVocab(String filename) {
-    this.vocab = new HashSet<String>(); 
+    this.vocab = new HashSet<String>();
     this.vocab.add("<s>");
     this.vocab.add("</s>");
     try {
@@ -84,18 +84,18 @@ public class TargetBigram extends StatefulFF {
       for (String line: lineReader) {
         if (lineReader.lineno() > maxTerms)
           break;
-        
+
         String[] tokens = line.split("\\s+");
         String word = tokens[1];
         int count = Integer.parseInt(tokens[2]);
-        
+
         if (count >= threshold)
           vocab.add(word);
       }
 
     } catch (IOException e) {
-      System.err.println(String.format("* FATAL: couldn't load TargetBigram vocabulary '%s'", filename));
-      System.exit(1);
+      throw new RuntimeException(String.format(
+          "* FATAL: couldn't load TargetBigram vocabulary '%s'", filename), e);
     }
   }
 
@@ -107,7 +107,7 @@ public class TargetBigram extends StatefulFF {
 
     int left = -1;
     int right = -1;
-    
+
     List<String> currentNgram = new LinkedList<String>();
     for (int c = 0; c < enWords.length; c++) {
       int curID = enWords[c];
@@ -127,7 +127,7 @@ public class TargetBigram extends StatefulFF {
           if (currentNgram.size() == 2) {
             String ngram = join(currentNgram);
             acc.add(String.format("%s_%s", name, ngram), 1);
-//            System.err.println(String.format("ADDING %s_%s", name, ngram));
+            //            System.err.println(String.format("ADDING %s_%s", name, ngram));
             currentNgram.remove(0);
           }
         }
@@ -144,20 +144,20 @@ public class TargetBigram extends StatefulFF {
         if (currentNgram.size() == 2) {
           String ngram = join(currentNgram);
           acc.add(String.format("%s_%s", name, ngram), 1);
-//          System.err.println(String.format("ADDING %s_%s", name, ngram));
+          //          System.err.println(String.format("ADDING %s_%s", name, ngram));
           currentNgram.remove(0);
         }
       }
     }
 
     NgramDPState state = new NgramDPState(new int[] { left }, new int[] { right });
-//    System.err.println(String.format("RULE %s -> state %s", rule.getRuleString(), state));
+    //    System.err.println(String.format("RULE %s -> state %s", rule.getRuleString(), state));
     return state;
   }
 
   /**
    * Returns the word after comparing against the private vocabulary (if set).
-   * 
+   *
    * @param curID
    * @return the word
    */
@@ -165,9 +165,9 @@ public class TargetBigram extends StatefulFF {
     String word = Vocabulary.word(curID);
 
     if (vocab != null && ! vocab.contains(word)) {
-      return "UNK"; 
+      return "UNK";
     }
-    
+
     return word;
   }
 
@@ -186,7 +186,7 @@ public class TargetBigram extends StatefulFF {
   @Override
   public DPState computeFinal(HGNode tailNode, int i, int j, SourcePath sourcePath,
       Sentence sentence, Accumulator acc) {
-    
+
     return tailNode.getDPState(stateIndex);
   }
 
@@ -200,7 +200,7 @@ public class TargetBigram extends StatefulFF {
 
   /**
    * Join a list with the _ character. I am sure this is in a library somewhere.
-   * 
+   *
    * @param list a list of strings
    * @return the joined String
    */

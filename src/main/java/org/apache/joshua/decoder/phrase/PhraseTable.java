@@ -60,9 +60,9 @@ public class PhraseTable implements Grammar {
     if (grammarFile != null && new File(grammarFile).isDirectory()) {
       this.backend = new PackedGrammar(grammarFile, spanLimit, owner, type, config);
       if (this.backend.getMaxSourcePhraseLength() == -1) {
-        System.err.println("FATAL: Using a packed grammar for a phrase table backend requires that you");
-        System.err.println("       packed the grammar with Joshua 6.0.2 or greater");
-        System.exit(-1);
+        String msg = "FATAL: Using a packed grammar for a phrase table backend requires that you "
+            + "packed the grammar with Joshua 6.0.2 or greater";
+        throw new RuntimeException(msg);
       }
 
     } else {

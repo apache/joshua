@@ -64,15 +64,8 @@ public class SocketUtility {
       // res.data_out = new DataOutputStream(new BufferedOutputStream
       // (res.socket.getOutputStream()));
 
-    } catch (UnknownHostException e) {
-      System.out.println("unknown host exception");
-      System.exit(1);
-    } catch (SocketTimeoutException e) {
-      System.out.println("socket timeout exception");
-      System.exit(1);
-    } catch (IOException e) {
-      System.out.println("io exception");
-      System.exit(1);
+    } catch ( IOException e) {
+      throw new RuntimeException(e);
     }
     return res;
   }

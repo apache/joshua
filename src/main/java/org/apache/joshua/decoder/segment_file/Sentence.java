@@ -410,8 +410,7 @@ public class Sentence {
     if (this.sourceLattice == null) {
       if (config.lattice_decoding && rawSource().startsWith("(((")) {
         if (config.search_algorithm.equals("stack")) {
-          System.err.println("* FATAL: lattice decoding currently not supported for stack-based search algorithm.");
-          System.exit(12);
+          throw new RuntimeException("* FATAL: lattice decoding currently not supported for stack-based search algorithm.");
         }
         this.sourceLattice = Lattice.createTokenLatticeFromPLF(rawSource(), config);
       } else

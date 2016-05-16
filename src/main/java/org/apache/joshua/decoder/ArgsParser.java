@@ -71,7 +71,7 @@ public class ArgsParser {
               System.out.println(line);
             }
           } catch (IOException e) {
-            System.err.println("FATAL: missing license file!");
+            throw new RuntimeException("FATAL: missing license file!", e);
           }
           System.exit(0);
         }
@@ -86,8 +86,7 @@ public class ArgsParser {
             Decoder.LOG(1, "Parameters read from configuration file:");
             joshuaConfiguration.readConfigFile(getConfigFile());
           } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new RuntimeException(e);
           }
 
           break;

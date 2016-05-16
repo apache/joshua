@@ -128,9 +128,8 @@ public class FragmentLMFF extends StatefulFF {
         // lmFragments.get(lmFragments.size()-1)));
       }
     } catch (IOException e) {
-      System.err.println(String.format("* WARNING: couldn't read fragment LM file '%s'",
-          fragmentLMFile));
-      System.exit(1);
+      throw new RuntimeException(String.format("* WARNING: couldn't read fragment LM file '%s'",
+          fragmentLMFile), e);
     }
     System.err.println(String.format("FragmentLMFF: Read %d LM fragments from '%s'", numFragments,
         fragmentLMFile));

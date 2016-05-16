@@ -241,9 +241,7 @@ public class HGNode {
    */
   // sort by estTotalLogP: for pruning purpose
   public int compareTo(HGNode anotherItem) {
-    System.out.println("HGNode, compare functiuon should never be called");
-    System.exit(1);
-    return 0;
+    throw new RuntimeException("HGNode, compare functiuon should never be called");
     /*
      * if (this.estTotalLogP > anotherItem.estTotalLogP) { return -1; } else if (this.estTotalLogP
      * == anotherItem.estTotalLogP) { return 0; } else { return 1; }

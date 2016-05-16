@@ -72,8 +72,7 @@ public class LMGrammarBerkeley extends DefaultNGramLanguageModel {
     vocabIdToMyIdMapping = new int[10];
 
     if (!new File(lm_file).exists()) {
-      System.err.println("Can't read lm_file '" + lm_file + "'");
-      System.exit(1);
+      throw new RuntimeException("Can't read lm_file '" + lm_file + "'");
     }
 
     if (logRequests) {

@@ -37,9 +37,9 @@ public class Distortion extends StatelessFF {
     super(weights, "Distortion", args, config);
     
     if (! config.search_algorithm.equals("stack")) {
-      System.err.println("* FATAL: Distortion feature only application for phrase-based decoding");
-      System.err.println("         Use -search phrase or remove this feature");
-      System.exit(1);
+      String msg = "* FATAL: Distortion feature only application for phrase-based decoding. "
+          + "Use -search phrase or remove this feature";
+      throw new RuntimeException(msg);
     }
   }
   

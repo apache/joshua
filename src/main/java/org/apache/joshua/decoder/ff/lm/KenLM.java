@@ -38,13 +38,14 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
     try {
       System.loadLibrary("ken");
     } catch (UnsatisfiedLinkError e) {
+      //TODO: send these prints to LOG.err
       System.err.println("* FATAL: Can't find libken.so (libken.dylib on OS X) in $JOSHUA/lib");
       System.err.println("*        This probably means that the KenLM library didn't compile.");
       System.err.println("*        Make sure that BOOST_ROOT is set to the root of your boost");
       System.err.println("*        installation (it's not /opt/local/, the default), change to");
       System.err.println("*        $JOSHUA, and type 'ant kenlm'. If problems persist, see the");
       System.err.println("*        website (joshua-decoder.org).");
-      System.exit(1);
+      throw new RuntimeException(e);
     }
   }
 
@@ -161,8 +162,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
     try {
       estimate = estimateRule(pointer, words);
     } catch (NoSuchMethodError e) {
-      e.printStackTrace();
-      System.exit(1);
+      throw new RuntimeException(e);
     }
     
     return estimate;

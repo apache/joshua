@@ -72,8 +72,7 @@ public class ClassifierMegaM implements ClassifierInterface {
 
       int decStatus = p.waitFor();
       if (decStatus != 0) {
-        System.out.println("Call to decoder returned " + decStatus + "; was expecting " + 0 + ".");
-        System.exit(30);
+        throw new RuntimeException("Call to decoder returned " + decStatus + "; was expecting " + 0 + ".");
       }
 
       // read the weights
@@ -86,11 +85,8 @@ public class ClassifierMegaM implements ClassifierInterface {
       file.delete();
       file = new File(weightFilePath);
       file.delete();
-    } catch (IOException exception) {
-      exception.getStackTrace();
-    } catch (InterruptedException e) {
-      System.err.println("InterruptedException in MertCore.run_decoder(int): " + e.getMessage());
-      System.exit(99903);;
+    } catch (IOException | InterruptedException e) {
+      throw new RuntimeException(e);
     }
 
     System.out.println("------- MegaM training ends ------");
@@ -111,8 +107,7 @@ public class ClassifierMegaM implements ClassifierInterface {
    */
   public void setClassifierParam(String[] param) {
     if (param == null) {
-      System.out.println("ERROR: must provide parameters for MegaM classifier!");
-      System.exit(10);
+      throw new RuntimeException("ERROR: must provide parameters for MegaM classifier!");
     } else {
       commandFilePath = param[0];
       trainingFilePath = param[1];

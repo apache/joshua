@@ -74,8 +74,7 @@ public class FeatureTypeAnalyzer {
       if ("encoder".equals(fields[0])) {
         // Adding an encoder to the mix.
         if (fields.length < 3) {
-          logger.severe("Incomplete encoder line in config.");
-          System.exit(0);
+          throw new RuntimeException("Incomplete encoder line in config.");
         }
         String encoder_key = fields[1];
         ArrayList<Integer> feature_ids = new ArrayList<Integer>();

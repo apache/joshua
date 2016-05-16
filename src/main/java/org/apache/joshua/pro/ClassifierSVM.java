@@ -73,8 +73,8 @@ public class ClassifierSVM implements ClassifierInterface {
 
       int decStatus = p.waitFor();
       if (decStatus != 0) {
-        System.out.println("Call to decoder returned " + decStatus + "; was expecting " + 0 + ".");
-        System.exit(30);
+        throw new RuntimeException("Call to decoder returned " + decStatus + "; was expecting "
+            + 0 + ".");
       }
 
       // read the model file
@@ -109,11 +109,8 @@ public class ClassifierSVM implements ClassifierInterface {
       file.delete();
       file = new File(modelFilePath);
       file.delete();
-    } catch (IOException exception) {
-      exception.getStackTrace();
-    } catch (InterruptedException e) {
-      System.err.println("InterruptedException in MertCore.run_decoder(int): " + e.getMessage());
-      System.exit(99903);;
+    } catch (IOException | InterruptedException e) {
+      throw new RuntimeException(e);
     }
 
     System.out.println("------- SVM training ends ------");
@@ -129,8 +126,7 @@ public class ClassifierSVM implements ClassifierInterface {
    */
   public void setClassifierParam(String[] param) {
     if (param == null) {
-      System.out.println("ERROR: must provide parameters for LibSVM classifier!");
-      System.exit(10);
+      throw new RuntimeException("ERROR: must provide parameters for LibSVM classifier!");
     } else {
       commandFilePath = param[0];
       trainingFilePath = param[1];

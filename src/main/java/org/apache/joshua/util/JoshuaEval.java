@@ -102,13 +102,11 @@ public class JoshuaEval {
     // testIndex=candPerSen means last candidate should be evaluated
 
     if (inFileFormat.equals("plain") && candPerSen < 1) {
-      println("candPerSen must be positive for a file in plain format.");
-      System.exit(30);
+      throw new RuntimeException("candPerSen must be positive for a file in plain format.");
     }
 
     if (inFileFormat.equals("plain") && (testIndex < 1 || testIndex > candPerSen)) {
-      println("For the plain format, testIndex must be in [1,candPerSen]");
-      System.exit(31);
+      throw new RuntimeException("For the plain format, testIndex must be in [1,candPerSen]");
     }
 
 
@@ -170,8 +168,7 @@ public class JoshuaEval {
           if (line == null) {
             println("Not enough candidates in " + inFileName + " to extract the " + candRank
                 + "'th candidate for each sentence.");
-            println("(Failed to extract one for the " + i + "'th sentence (0-indexed).)");
-            System.exit(32);
+            throw new RuntimeException("(Failed to extract one for the " + i + "'th sentence (0-indexed).)");
           }
 
           int read_i = Integer.parseInt(line.substring(0, line.indexOf(" |||")).trim());
@@ -188,30 +185,25 @@ public class JoshuaEval {
             n = 1;
             i += 1;
           } else {
-            println("Not enough candidates in " + inFileName + " to extract the " + candRank
-                + "'th candidate for each sentence.");
-            println("(Failed to extract one for the " + i + "'th sentence (0-indexed).)");
-            System.exit(32);
+            String msg = "Not enough candidates in " + inFileName + " to extract the " + candRank
+                + "'th candidate for each sentence. (Failed to extract one for the "
+                + i + "'th sentence (0-indexed).)";
+            throw new RuntimeException(msg);
           }
 
         } // while (line != null)
 
         if (i != numSentences) {
-          println("Not enough candidates were found (i = " + i + "; was expecting " + numSentences
+          throw new RuntimeException("Not enough candidates were found (i = " + i + "; was expecting " + numSentences
               + ")");
-          System.exit(33);
         }
 
       } // nbest format
 
       inFile.close();
 
-    } catch (FileNotFoundException e) {
-      System.err.println("FileNotFoundException in MertCore.initialize(int): " + e.getMessage());
-      System.exit(99901);
     } catch (IOException e) {
-      System.err.println("IOException in MertCore.initialize(int): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
 
 
@@ -296,28 +288,24 @@ public class JoshuaEval {
       } else if (option.equals("-format")) {
         candFileFormat = args[argno + 1];
         if (!candFileFormat.equals("plain") && !candFileFormat.equals("nbest")) {
-          println("candFileFormat must be either plain or nbest.");
-          System.exit(10);
+          throw new RuntimeException("candFileFormat must be either plain or nbest.");
         }
       } else if (option.equals("-rank")) {
         candRank = Integer.parseInt(args[argno + 1]);
         if (refsPerSen < 1) {
-          println("Argument for -rank must be positive.");
-          System.exit(10);
+          throw new RuntimeException("Argument for -rank must be positive.");
         }
       } else if (option.equals("-ref")) {
         refFileName = args[argno + 1];
       } else if (option.equals("-rps")) {
         refsPerSen = Integer.parseInt(args[argno + 1]);
         if (refsPerSen < 1) {
-          println("refsPerSen must be positive.");
-          System.exit(10);
+          throw new RuntimeException("refsPerSen must be positive.");
         }
       } else if (option.equals("-txtNrm")) {
         textNormMethod = Integer.parseInt(args[argno + 1]);
         if (textNormMethod < 0 || textNormMethod > 4) {
-          println("textNormMethod should be between 0 and 4");
-          System.exit(10);
+          throw new RuntimeException("textNormMethod should be between 0 and 4");
         }
       } else if (option.equals("-m")) {
         metricName = args[argno + 1];
@@ -329,8 +317,7 @@ public class JoshuaEval {
           }
           argno += optionCount;
         } else {
-          println("Unknown metric name " + metricName + ".");
-          System.exit(10);
+          throw new RuntimeException("Unknown metric name " + metricName + ".");
         }
       } else if (option.equals("-evr")) {
         int evr = Integer.parseInt(args[argno + 1]);
@@ -339,8 +326,7 @@ public class JoshuaEval {
         } else if (evr == 0) {
           evaluateRefs = false;
         } else {
-          println("evalRefs must be either 0 or 1.");
-          System.exit(10);
+          throw new RuntimeException("evalRefs must be either 0 or 1.");
         }
       } else if (option.equals("-v")) {
         int v = Integer.parseInt(args[argno + 1]);
@@ -349,12 +335,10 @@ public class JoshuaEval {
         } else if (v == 0) {
           verbose = false;
         } else {
-          println("verbose must be either 0 or 1.");
-          System.exit(10);
+          throw new RuntimeException("verbose must be either 0 or 1.");
         }
       } else {
-        println("Unknown option " + option);
-        System.exit(10);
+        throw new RuntimeException("Unknown option " + option);
       }
 
       argno += 2;
@@ -366,8 +350,7 @@ public class JoshuaEval {
 			if (! new File(refFile).exists())
 				refFile = refFileName + ".0";
 			if (! new File(refFile).exists()) {
-				System.err.println(String.format("* FATAL: can't find first reference file '%s{0,.0}'", refFileName));
-				System.exit(1);
+        throw new RuntimeException(String.format("* FATAL: can't find first reference file '%s{0,.0}'", refFileName));
 			}
 
 			numSentences = countLines(refFile);
@@ -390,8 +373,7 @@ public class JoshuaEval {
 					if (! new File(refFile).exists())
 						refFile = refFileName + "." + i;
 					if (! new File(refFile).exists()) {
-						System.err.println(String.format("* FATAL: can't find reference file '%s'", refFile));
-						System.exit(1);
+            throw new RuntimeException(String.format("* FATAL: can't find reference file '%s'", refFile));
 					}
 
 					reference_readers[i] = new BufferedReader(new InputStreamReader(new FileInputStream(new File(refFile)), "utf8"));
@@ -409,12 +391,8 @@ public class JoshuaEval {
 			for (int i = 0; i < refsPerSen; i++) 
 				reference_readers[i].close();
 
-    } catch (FileNotFoundException e) {
-      System.err.println("FileNotFoundException in JoshuaEval.processArgsAndInitialize(): " + e.getMessage());
-      System.exit(99901);
     } catch (IOException e) {
-      System.err.println("IOException in JoshuaEval.processArgsAndInitialize(): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
 
     // set static data members for the EvaluationMetric class
@@ -587,8 +565,7 @@ public class JoshuaEval {
 
       inFile.close();
     } catch (IOException e) {
-      System.err.println("IOException in MertCore.countLines(String): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException(e);
     }
 
     return count;

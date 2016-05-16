@@ -144,16 +144,14 @@ public class TERMinusBLEU extends EvaluationMetric {
       fd = new File(outputFileName + ".BLEU");
       if (fd.exists()) fd.delete();
     } catch (IOException e) {
-      System.err.println("IOException in TER.createTercomHypFile(...): " + e.getMessage());
-      System.exit(99902);
+      throw new RuntimeException("IOException in TER.createTercomHypFile(...): " + e.getMessage());
     }
   }
 
   public double score(int[] stats) {
     if (stats.length != suffStatsCount) {
-      System.out.println("Mismatch between stats.length and suffStatsCount (" + stats.length
+     throw new RuntimeException("Mismatch between stats.length and suffStatsCount (" + stats.length
           + " vs. " + suffStatsCount + ") in TERMinusBLEU.score(int[])");
-      System.exit(1);
     }
 
     double sc = 0.0;

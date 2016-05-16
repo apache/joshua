@@ -39,23 +39,23 @@ import org.apache.joshua.util.io.LineReader;
 
 /**
  * Configuration file for Joshua decoder.
- * 
+ *
  * When adding new features to Joshua, any new configurable parameters should be added to this
  * class.
- * 
+ *
  * @author Zhifei Li, <zhifei.work@gmail.com>
  * @author Matt Post <post@cs.jhu.edu>
  */
 public class JoshuaConfiguration {
-  
+
   // whether to construct a StructuredTranslation object for each request instead of 
   // printing to stdout. Used when the Decoder is used from Java directly.
   public Boolean use_structured_output = false;
-  
+
   // If set to true, Joshua will lowercase the input, creating an annotation that marks the
   // original case
   public boolean lowercase = false;
-  
+
   // If set to true, Joshua will recapitalize the output by projecting the case from aligned
   // source-side words
   public boolean project_case = false;
@@ -89,7 +89,7 @@ public class JoshuaConfiguration {
    * 
    * If this is empty, an unweighted default_non_terminal is used.
    */
-  
+
   public class OOVItem implements Comparable<OOVItem> {
     public String label;
     public float weight;
@@ -98,10 +98,10 @@ public class JoshuaConfiguration {
       label = l;
       weight = w;
     }
-    
+
     @Override
     public int compareTo(OOVItem other) {
-      if (weight > other.weight) 
+      if (weight > other.weight)
         return -1;
       else if (weight < other.weight)
         return 1;
@@ -114,12 +114,12 @@ public class JoshuaConfiguration {
    * Whether to segment OOVs into a lattice
    */
   public boolean segment_oovs = false;
-  
+
   /*
    * Enable lattice decoding.
    */
   public boolean lattice_decoding = false;
-  
+
   /*
    * If false, sorting of the complete grammar is done at load time. If true, grammar tries are not
    * sorted till they are first accessed. Amortized sorting means you get your first translation
@@ -154,12 +154,12 @@ public class JoshuaConfiguration {
 
   /* The number of hypotheses to output by default. */
   public int topN = 1;
-  
+
   /**
    * This string describes the format of each line of output from the decoder (i.e., the
    * translations). The string can include arbitrary text and also variables. The following
    * variables are available:
-   * 
+   *
    * <pre>
    * - %i the 0-indexed sentence number 
    * - %e the source string %s the translated sentence 
@@ -204,7 +204,7 @@ public class JoshuaConfiguration {
   /* Type of server. Not sure we need to keep the regular TCP one around. */
   public enum SERVER_TYPE { none, TCP, HTTP };
   public SERVER_TYPE server_type = SERVER_TYPE.TCP;
-  
+
   /* If set, Joshua will start a (multi-threaded, per "threads") TCP/IP server on this port. */
   public int server_port = 0;
 
@@ -240,10 +240,10 @@ public class JoshuaConfiguration {
   
   /* The search algorithm: currently either "cky" or "stack" */
   public String search_algorithm = "cky";
-  
+
   /* The distortion limit */
   public int reordering_limit = 8;
-  
+
   /* The number of target sides considered for each source side (after sorting by model weight) */
   public int num_translation_options = 20;
 
@@ -251,16 +251,16 @@ public class JoshuaConfiguration {
    * version of Sennrich (SSST 2014)
    */
   public boolean use_dot_chart = true;
-  
+
   /* Moses compatibility */
   public boolean moses = false;
-  
+
   /* If true, just print out the weights found in the config file, and exit. */
   public boolean show_weights_and_quit = false;
-  
+
   /* Read input from a file (Moses compatible flag) */
   public String input_file = null;
-  
+
   /* Write n-best output to this file */
   public String n_best_file = null;
 
@@ -269,17 +269,17 @@ public class JoshuaConfiguration {
 
   /* Weights overridden from the command line */
   public String weight_overwrite = "";
-  
+
   /**
    * This method resets the state of JoshuaConfiguration back to the state after initialization.
    * This is useful when for example making different calls to the decoder within the same java
    * program, which otherwise leads to potential errors due to inconsistent state as a result of
    * loading the configuration multiple times without resetting etc.
-   * 
+   *
    * This leads to the insight that in fact it may be an even better idea to refactor the code and
    * make JoshuaConfiguration an object that is is created and passed as an argument, rather than a
    * shared static object. This is just a suggestion for the next step.
-   * 
+   *
    */
   public void reset() {
     logger.info("Resetting the JoshuaConfiguration to its defaults ...");
@@ -289,7 +289,7 @@ public class JoshuaConfiguration {
     tms = new ArrayList<String>();
     weights_file = "";
     default_non_terminal = "[X]";
-    oovList = new ArrayList<OOVItem>(); 
+    oovList = new ArrayList<OOVItem>();
     oovList.add(new OOVItem(default_non_terminal, 1.0f));
     goal_symbol = "[GOAL]";
     amortized_sorting = true;
@@ -311,7 +311,7 @@ public class JoshuaConfiguration {
     features = new ArrayList<String>();
     weights = new ArrayList<String>();
     server_port = 0;
-    
+
     reordering_limit = 8;
     num_translation_options = 20;
     logger.info("...done");
@@ -353,8 +353,7 @@ public class JoshuaConfiguration {
       tmpFile.delete();
 
     } catch (IOException e) {
-      e.printStackTrace();
-      System.exit(1);
+      throw new RuntimeException(e);
     }
   }
 
@@ -364,7 +363,7 @@ public class JoshuaConfiguration {
     try {
       for (String line : configReader) {
         line = line.trim(); // .toLowerCase();
-        
+
         if (Regex.commentOrEmptyLine.matches(line))
           continue;
 
@@ -398,7 +397,7 @@ public class JoshuaConfiguration {
              *              
              * feature-function = StateMinimizingLanguageModel -lm_order 5 -lm_file lm.gz
              */
-            
+
             String[] tokens = fds[1].split("\\s+");
             if (tokens[2].equals("true"))
               features.add(String.format("feature_function = StateMinimizingLanguageModel -lm_type kenlm -lm_order %s -lm_file %s",
@@ -414,14 +413,14 @@ public class JoshuaConfiguration {
              *   tm = TYPE -owner OWNER -maxspan MAXSPAN -path PATH    
              */
             String tmLine = fds[1];
-            
+
             String[] tokens = fds[1].split("\\s+");
             if (! tokens[1].startsWith("-")) { // old format
               tmLine = String.format("%s -owner %s -maxspan %s -path %s", tokens[0], tokens[1], tokens[2], tokens[3]);
               Decoder.LOG(1, String.format("WARNING: Converting deprecated TM line from '%s' -> '%s'", fds[1], tmLine));
             }
             tms.add(tmLine);
-            
+
           } else if (parameter.equals("v")) {
             Decoder.VERBOSE = Integer.parseInt(fds[1]);
 
@@ -446,7 +445,7 @@ public class JoshuaConfiguration {
                     String[] tokens = str.trim().split("\\s+");
 
                     oovList.add(new OOVItem(FormatUtils.markup(tokens[0]),
-                            (float) Math.log(Float.parseFloat(tokens[1]))));
+                        (float) Math.log(Float.parseFloat(tokens[1]))));
 
                     str = br.readLine();
                   }
@@ -462,10 +461,8 @@ public class JoshuaConfiguration {
             } else {
               String[] tokens = fds[1].trim().split("\\s+");
               if (tokens.length % 2 != 0) {
-                  System.err.println(String.format("* FATAL: invalid format for '%s'", fds[0]));
-                  System.exit(1);
-                }
-
+                throw new RuntimeException(String.format("* FATAL: invalid format for '%s'", fds[0]));
+              }
               oovList = new ArrayList<OOVItem>();
 
               for (int i = 0; i < tokens.length; i += 2)
@@ -477,7 +474,7 @@ public class JoshuaConfiguration {
 
           } else if (parameter.equals(normalize_key("lattice-decoding"))) {
             lattice_decoding = true;
-            
+
           } else if (parameter.equals(normalize_key("segment-oovs"))) {
             segment_oovs = true;
             lattice_decoding = true;
@@ -542,13 +539,12 @@ public class JoshuaConfiguration {
             logger.finest(String.format("pop-limit: %s", pop_limit));
 
           } else if (parameter.equals(normalize_key("input-type"))) {
-            if (fds[1].equals("json"))
+            if (fds[1].equals("json")) {
               input_type = INPUT_TYPE.json;
-            else if (fds[1].equals("plain"))
+            } else if (fds[1].equals("plain")) {
               input_type = INPUT_TYPE.plain;
-            else {
-              System.err.println(String.format("* FATAL: invalid server type '%s'", fds[1]));
-              System.exit(1);
+            } else {
+              throw new RuntimeException(String.format("* FATAL: invalid server type '%s'", fds[1]));
             }
             logger.info(String.format("    input-type: %s", input_type));
 
@@ -559,7 +555,7 @@ public class JoshuaConfiguration {
               server_type = SERVER_TYPE.HTTP;
 
             logger.info(String.format("    server-type: %s", server_type));
-            
+
           } else if (parameter.equals(normalize_key("server-port"))) {
             server_port = Integer.parseInt(fds[1]);
             logger.info(String.format("    server-port: %d", server_port));
@@ -597,16 +593,16 @@ public class JoshuaConfiguration {
             fragmentMapFile = fds[1];
             Tree.readMapping(fragmentMapFile);
 
-          /** PHRASE-BASED PARAMETERS **/
+            /** PHRASE-BASED PARAMETERS **/
           } else if (parameter.equals(normalize_key("search"))) {
             search_algorithm = fds[1];
-            
+
             if (!search_algorithm.equals("cky") && !search_algorithm.equals("stack")) {
               throw new RuntimeException(
                   "-search must be one of 'stack' (for phrase-based decoding) " +
-                  "or 'cky' (for hierarchical / syntactic decoding)");
+                      "or 'cky' (for hierarchical / syntactic decoding)");
             }
-            
+
             if (search_algorithm.equals("cky") && include_align_index) {
               throw new RuntimeException(
                   "include_align_index is currently not supported with cky search");
@@ -617,13 +613,13 @@ public class JoshuaConfiguration {
 
           } else if (parameter.equals(normalize_key("num-translation-options"))) {
             num_translation_options = Integer.parseInt(fds[1]);
-            
+
           } else if (parameter.equals(normalize_key("no-dot-chart"))) {
             use_dot_chart = false;
-            
+
           } else if (parameter.equals(normalize_key("moses"))) {
             moses = true; // triggers some Moses-specific compatibility options
-            
+
           } else if (parameter.equals(normalize_key("show-weights"))) {
             show_weights_and_quit = true;
 
@@ -637,23 +633,23 @@ public class JoshuaConfiguration {
           } else if (parameter.equals(normalize_key("input-file"))) {
             // for Moses compatibility
             input_file = fds[1];
-            
+
           } else if (parameter.equals(normalize_key("weight-file"))) {
             // for Moses, ignore
 
           } else if (parameter.equals(normalize_key("weight-overwrite"))) {
             weight_overwrite = fds[1];
-            
+
           } else if (parameter.equals(normalize_key("source-annotations"))) {
             // Check source sentence
             source_annotations = true;
 
           } else if (parameter.equals(normalize_key("cached-rules-size"))) {
-              // Check source sentence
-              cachedRuleSize = Integer.parseInt(fds[1]);
+            // Check source sentence
+            cachedRuleSize = Integer.parseInt(fds[1]);
           } else if (parameter.equals(normalize_key("lowercase"))) {
             lowercase = true;
-            
+
           } else if (parameter.equals(normalize_key("project-case"))) {
             project_case = true;
 
@@ -669,8 +665,7 @@ public class JoshuaConfiguration {
               logger.warning(String.format("WARNING: ignoring deprecated parameter '%s'", fds[0]));
 
             } else {
-              logger.warning("FATAL: unknown configuration parameter '" + fds[0] + "'");
-              System.exit(1);
+              throw new RuntimeException("FATAL: unknown configuration parameter '" + fds[0] + "'");
             }
           }
 
@@ -701,7 +696,7 @@ public class JoshuaConfiguration {
    * equivalence classes on external use of parameter names, permitting arbitrary_under_scores and
    * camelCasing in paramter names without forcing the user to memorize them all. Here are some
    * examples of equivalent ways to refer to parameter names:
-   * 
+   *
    * {pop-limit, poplimit, PopLimit, popLimit, pop_lim_it} {lmfile, lm-file, LM-FILE, lm_file}
    */
   public static String normalize_key(String text) {

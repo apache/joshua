@@ -52,9 +52,9 @@ public class METEOR extends EvaluationMetric {
     } else if (Metric_options[0].equals("es")) {
       targetLanguage = "es";
     } else {
-      System.out.println("Unknown language string " + Metric_options[0] + ".");
-      System.out.println("Should be one of {en,cz,fr,de,es}.");
-      System.exit(1);
+      String msg = "Unknown language string " + Metric_options[0]
+          + ". Should be one of {en,cz,fr,de,es}.";
+      throw new RuntimeException(msg);
     }
 
     if (Metric_options[1].equals("norm_yes")) {
@@ -62,9 +62,9 @@ public class METEOR extends EvaluationMetric {
     } else if (Metric_options[1].equals("norm_no")) {
       normalize = false;
     } else {
-      System.out.println("Unknown normalize string " + Metric_options[1] + ".");
-      System.out.println("Should be one of norm_yes or norm_no.");
-      System.exit(1);
+      String msg = "Unknown normalize string " + Metric_options[1]
+          + ". Should be one of norm_yes or norm_no.";
+      throw new RuntimeException(msg);
     }
 
     if (Metric_options[2].equals("keepPunc")) {
@@ -72,15 +72,14 @@ public class METEOR extends EvaluationMetric {
     } else if (Metric_options[1].equals("removePunk")) {
       keepPunctuation = false;
     } else {
-      System.out.println("Unknown keepPunctuation string " + Metric_options[1] + ".");
-      System.out.println("Should be one of keepPunc or removePunk.");
-      System.exit(1);
+      String msg = "Unknown keepPunctuation string " + Metric_options[1]
+          + ". Should be one of keepPunc or removePunk.";
+      throw new RuntimeException(msg);
     }
 
     maxComputations = Integer.parseInt(Metric_options[3]);
     if (maxComputations < 1) {
-      System.out.println("Maximum computations must be positive");
-      System.exit(2);
+      throw new RuntimeException("Maximum computations must be positive");
     }
 
     initialize(); // set the data members of the metric
@@ -124,7 +123,7 @@ public class METEOR extends EvaluationMetric {
 
       // 1a) Create hypothesis file
       FileOutputStream outStream = new FileOutputStream("hyp.txt.METEOR", false); // false: don't
-                                                                                  // append
+      // append
       OutputStreamWriter outStreamWriter = new OutputStreamWriter(outStream, "utf8");
       BufferedWriter outFile = new BufferedWriter(outStreamWriter);
 
@@ -191,15 +190,10 @@ public class METEOR extends EvaluationMetric {
         stats[d][3] = (int) Double.parseDouble(strA[3]);
         stats[d][4] = (int) Double.parseDouble(strA[4]);
       }
-      
+
       inFile.close();
-    } catch (IOException e) {
-      System.err.println("IOException in METEOR.suffStats(String[],int[]): " + e.getMessage());
-      System.exit(99902);
-    } catch (InterruptedException e) {
-      System.err.println("InterruptedException in METEOR.suffStats(String[],int[]): "
-          + e.getMessage());
-      System.exit(99903);
+    } catch (IOException | InterruptedException e) {
+      throw new RuntimeException(e);
     }
 
     return stats;
@@ -207,9 +201,8 @@ public class METEOR extends EvaluationMetric {
 
   public double score(int[] stats) {
     if (stats.length != suffStatsCount) {
-      System.out.println("Mismatch between stats.length and suffStatsCount (" + stats.length
+      throw new RuntimeException("Mismatch between stats.length and suffStatsCount (" + stats.length
           + " vs. " + suffStatsCount + ") in METEOR.score(int[])");
-      System.exit(1);
     }
 
     double sc = 0.0;

@@ -173,9 +173,9 @@ public class LanguageModelFF extends StatefulFF {
       this.languageModel = new LMGrammarBerkeley(ngramOrder, path);
 
     } else {
-      System.err.println(String.format("* FATAL: Invalid backend lm_type '%s' for LanguageModel", type));
-      System.err.println(String.format("*        Permissible values for 'lm_type' are 'kenlm' and 'berkeleylm'"));
-      System.exit(-1);
+      String msg = String.format("* FATAL: Invalid backend lm_type '%s' for LanguageModel", type)
+          + "*        Permissible values for 'lm_type' are 'kenlm' and 'berkeleylm'";
+      throw new RuntimeException(msg);
     }
 
     Vocabulary.registerLanguageModel(this.languageModel);
@@ -278,8 +278,7 @@ public class LanguageModelFF extends StatefulFF {
    */
   protected int[] getClasses(Rule rule) {
     if (this.classMap == null) {
-      System.err.println("The class map is not set. Cannot use the class LM ");
-      System.exit(2);
+      throw new RuntimeException("The class map is not set. Cannot use the class LM ");
     }
     /* Very important to make a copy here, so the original rule is not modified */
     int[] tokens = Arrays.copyOf(rule.getEnglish(), rule.getEnglish().length);
