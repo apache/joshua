@@ -19,7 +19,6 @@
 package org.apache.joshua.decoder.segment_file;
 
 import static org.apache.joshua.util.FormatUtils.addSentenceMarkers;
-import static org.apache.joshua.util.FormatUtils.escapeSpecialSymbols;
 
 import java.util.ArrayList;
 import java.util.HashSet;

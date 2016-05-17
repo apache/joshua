@@ -115,7 +115,7 @@ public class BLEUTest {
   }
 
   @Parameters({"referenceFile","testFile"})
-  @Test
+  @Test(enabled=false)
   public void fileTest(String referenceFile, String testFile) throws FileNotFoundException {
 
     //TODO You can now read in the files, and do something useful with them.

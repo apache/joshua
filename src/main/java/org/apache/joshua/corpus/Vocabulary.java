@@ -22,10 +22,13 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.Externalizable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +46,7 @@ import org.apache.joshua.util.FormatUtils;
  * @author Juri Ganitkevitch
  */
 
-public class Vocabulary {
+public class Vocabulary implements Externalizable {
 
   private final static ArrayList<NGramLanguageModel> LMs = new ArrayList<>();
 
@@ -185,7 +188,7 @@ public class Vocabulary {
   public static int[] addAll(String sentence) {
     return addAll(sentence.split("\\s+"));
   }
-  
+
   public static int[] addAll(String[] tokens) {
     int[] ids = new int[tokens.length];
     for (int i = 0; i < tokens.length; i++)
@@ -273,6 +276,28 @@ public class Vocabulary {
 
   public static void unregisterLanguageModels() {
     LMs.clear();
+  }
+
+  @Override
+  public void writeExternal(ObjectOutput out) throws IOException {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void readExternal(ObjectInput in)
+      throws IOException, ClassNotFoundException {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if(getClass() == o.getClass()) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
 }

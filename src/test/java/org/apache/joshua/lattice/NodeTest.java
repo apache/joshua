@@ -37,13 +37,10 @@ public class NodeTest {
 
   @Test
   public void constructNode() {
-
     node = new Node<String>(id);
-
     Assert.assertEquals((int) node.id(), (int) id);
     Assert.assertTrue(node.getOutgoingArcs().isEmpty());
     Assert.assertEquals(node.size(), 0);
-
   }
 
 
@@ -63,19 +60,19 @@ public class NodeTest {
   }
 
 
-  @Test(dependsOnMethods = { "constructNode", "org.apache.joshua.lattice.ArcTest.constructArc" })
+  @Test(dependsOnMethods = { "constructNode" })
   public void addArc() {
 
     Node<String> n2 = new Node<String>(2);
-    double w2 = 0.123;
+    float w2 = (float) 0.123;
     String l2 = "somthing cool";
 
     Node<String> n3 = new Node<String>(3);
-    double w3 = 124.78;
+    float w3 = (float) 124.78;
     String l3 = "hurray!";
 
     Node<String> n4 = new Node<String>(4);
-    double w4 = Double.POSITIVE_INFINITY;
+    float w4 = (float) Double.POSITIVE_INFINITY;
     String l4 = "\u0000";
 
     Assert.assertEquals(node.size(), 0);
@@ -83,24 +80,24 @@ public class NodeTest {
     node.addArc(n2,(float) w2, l2);
     Assert.assertEquals(node.size(), 1);
     Arc<String> a2 = node.getOutgoingArcs().get(0);
-    Assert.assertEquals(a2.getHead(), node);
-    Assert.assertEquals(a2.getTail(), n2);
+    Assert.assertEquals(a2.getHead(), n2);
+    Assert.assertEquals(a2.getTail(), node);
     Assert.assertEquals(a2.getCost(), w2);
     Assert.assertEquals(a2.getLabel(), l2);
 
     node.addArc(n3,(float) w3, l3);
     Assert.assertEquals(node.size(), 2);
     Arc<String> a3 = node.getOutgoingArcs().get(1);
-    Assert.assertEquals(a3.getHead(), node);
-    Assert.assertEquals(a3.getTail(), n3);
+    Assert.assertEquals(a3.getHead(), n3);
+    Assert.assertEquals(a3.getTail(), node);
     Assert.assertEquals(a3.getCost(), w3);
     Assert.assertEquals(a3.getLabel(), l3);
 
     node.addArc(n4, (float) w4, l4);
     Assert.assertEquals(node.size(), 3);
     Arc<String> a4 = node.getOutgoingArcs().get(2);
-    Assert.assertEquals(a4.getHead(), node);
-    Assert.assertEquals(a4.getTail(), n4);
+    Assert.assertEquals(a4.getHead(), n4);
+    Assert.assertEquals(a4.getTail(), node);
     Assert.assertEquals(a4.getCost(), w4);
     Assert.assertEquals(a4.getLabel(), l4);
 

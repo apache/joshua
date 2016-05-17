@@ -59,8 +59,8 @@ public class ArgsParser {
           LineReader reader = new LineReader(String.format("%s/VERSION", System.getenv("JOSHUA")));
           reader.readLine();
           String version = reader.readLine().split("\\s+")[2];
-          System.out.println(String.format("The Joshua machine translator, version %s", version));
-          System.out.println("joshua-decoder.org");
+          System.out.println(String.format("The Apache Joshua machine translator, version %s", version));
+          System.out.println("joshua.incubator.apache.org");
           System.exit(0);
 
         } else if (args[i].equals("-license")) {
