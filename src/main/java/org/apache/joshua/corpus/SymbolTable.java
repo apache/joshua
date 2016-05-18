@@ -164,8 +164,9 @@ public interface SymbolTable {
   *  
   * @see #getUnknownWordID 
   * @return the unique integer identifier for wordString,  
-  *         or the result of <code>getUnknownWordID<code>  
+  *         or the result of <code>getUnknownWordID</code>  
   *         if wordString is not in the vocabulary 
+  * @param wordString the word to retrieve the integer identifier
   */ 
  int getID(String wordString); 
   

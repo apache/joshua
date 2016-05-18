@@ -60,8 +60,8 @@ import org.apache.joshua.util.ChartSpan;
  * index of sentences: start from zero index of cell: cell (i,j) represent span
  * of words indexed [i,j-1] where i is in [0,n-1] and j is in [1,n]
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Zhifei Li, zhifei.work@gmail.com
+ * @author Matt Post post@cs.jhu.edu
  */
 
 public class Chart {
@@ -728,7 +728,7 @@ public class Chart {
   }
 
   /***
-   * Add a terminal production (X -> english phrase) to the hypergraph.
+   * Add a terminal production (X -&gt; english phrase) to the hypergraph.
    * 
    * @param i the start index
    * @param j stop index

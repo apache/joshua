@@ -18,11 +18,7 @@
  */
 package org.apache.joshua.decoder.ff.lm; 
 
-import org.apache.joshua.decoder.JoshuaConfiguration; 
 import org.apache.joshua.decoder.Support; 
-import org.apache.joshua.corpus.SymbolTable; 
-
-
 import java.util.List; 
 
 /**
@@ -31,7 +27,7 @@ import java.util.List;
  * methods are declared final, in an attempt to limit what subclasses 
  * may be defined. 
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com> 
+ * @author Zhifei Li, zhifei.work@gmail.com
  * @version $LastChangedDate: 2009-12-30 10:10:38 -0600 (Wed, 30 Dec 2009) $ 
  */ 
 public abstract class AbstractLM extends DefaultNGramLanguageModel { 
@@ -40,7 +36,7 @@ public abstract class AbstractLM extends DefaultNGramLanguageModel {
     super(symbolTable, order); 
   } 
 
-
+  @SuppressWarnings("null")
   public final double sentenceLogProbability( 
       List<Integer> sentence, int order, int startIndex 
       ) { 
@@ -48,11 +44,9 @@ public abstract class AbstractLM extends DefaultNGramLanguageModel {
     return (Double) null;
   } 
 
-
   public final float ngramLogProbability(int[] ngram) { 
     return super.ngramLogProbability(ngram); 
   } 
-
 
   public final float ngramLogProbability(int[] ngram, int order) { 
     if (ngram.length > order) { 
@@ -77,11 +71,6 @@ public abstract class AbstractLM extends DefaultNGramLanguageModel {
 
   protected abstract float ngramLogProbability_helper(int[] ngram, int order); 
 
-
-  /**
-   * @deprecated this function is much slower than the int[] 
-   *             version 
-   */ 
   @Deprecated 
   public final double logProbOfBackoffState(List<Integer> ngram, int order, int qtyAdditionalBackoffWeight) { 
     return logProbabilityOfBackoffState( 

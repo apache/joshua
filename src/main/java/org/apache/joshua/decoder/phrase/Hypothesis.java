@@ -28,13 +28,13 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.hypergraph.HyperEdge;
 
 /**
- * Represents a hypothesis, a translation of some coverage of the input. Extends {@link HGNode}, 
- * through a bit of a hack. Whereas (i,j) represents the span of an {@link HGNode}, i here is not used,
+ * Represents a hypothesis, a translation of some coverage of the input. Extends {@link org.apache.joshua.decoder.hypergraph.HGNode}, 
+ * through a bit of a hack. Whereas (i,j) represents the span of an {@link org.apache.joshua.decoder.hypergraph.HGNode}, i here is not used,
  * and j is overloaded to denote the span of the phrase being applied. The complete coverage vector 
  * can be obtained by looking at the tail pointer and casting it.
  * 
  * @author Kenneth Heafield
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 public class Hypothesis extends HGNode implements Comparable<Hypothesis> {
 

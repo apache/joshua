@@ -42,7 +42,7 @@ import org.apache.joshua.util.io.LineReader;
  * maintain different states for different hyp length (3) brief penalty is calculated based on the
  * avg ref length (4) using sentence-level BLEU, instead of doc-level BLEU
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com> (Johns Hopkins University)
+ * @author Zhifei Li, zhifei.work@gmail.com (Johns Hopkins University)
  */
 public class OracleExtractionHG extends SplitHg {
   static String BACKOFF_LEFT_LM_STATE_SYM = "<lzfbo>";

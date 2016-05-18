@@ -126,7 +126,7 @@ public class Stack extends ArrayList<Hypothesis> {
   /**
    * Receives a partially-initialized translation candidate and places it on the
    * priority queue after scoring it with all of the feature functions. In this
-   * respect it is like {@link CubePruneState} (it could make use of that class with
+   * respect it is like {@link org.apache.joshua.decoder.chart_parser.CubePruneState} (it could make use of that class with
    * a little generalization of spans / coverage).
    * 
    * This function is also used to (fairly concisely) implement constrained decoding. Before
@@ -168,9 +168,6 @@ public class Stack extends ArrayList<Hypothesis> {
    * Cube pruning. Repeatedly pop the top candidate, creating a new hyperedge from it, adding it to
    * the k-best list, and then extending the list of candidates with extensions of the current
    * candidate.
-   * 
-   * @param context
-   * @param output
    */
   public void search() {
     int to_pop = config.pop_limit;

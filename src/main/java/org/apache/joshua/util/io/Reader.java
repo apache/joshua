@@ -24,7 +24,7 @@ import java.util.Iterator;
 /**
  * Common interface for Reader type objects.
  * 
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate: 2009-03-26 15:06:57 -0400 (Thu, 26 Mar 2009) $
  */
 public interface Reader<E> extends Iterable<E>, Iterator<E> {

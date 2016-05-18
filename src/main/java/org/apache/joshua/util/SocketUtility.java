@@ -33,7 +33,7 @@ import java.net.UnknownHostException;
 
 /**
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Zhifei Li, zhifei.work@gmail.com
  * @version $LastChangedDate$
  */
 public class SocketUtility {

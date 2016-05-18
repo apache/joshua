@@ -32,8 +32,8 @@ import org.apache.commons.cli.Options;
  * A subsampler which takes in word-alignments as well as the F and E files. To remove redundant
  * code, this class uses callback techniques in order to "override" the superclass methods.
  * 
- * @see joshua.subsample.Subsampler
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @see org.apache.joshua.subsample.Subsampler
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate$
  */
 public class AlignedSubsampler extends Subsampler {

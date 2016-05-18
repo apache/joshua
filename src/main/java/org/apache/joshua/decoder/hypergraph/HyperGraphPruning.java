@@ -26,7 +26,7 @@ import org.apache.joshua.corpus.Vocabulary;
  * during the pruning process, many Item/Deductions may not be explored at all due to the early-stop
  * in pruning_deduction
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Zhifei Li, zhifei.work@gmail.com
  * @version $LastChangedDate$
  */
 public class HyperGraphPruning extends TrivialInsideOutside {

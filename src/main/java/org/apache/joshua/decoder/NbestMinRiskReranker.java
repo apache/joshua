@@ -42,7 +42,7 @@ import org.apache.joshua.util.Regex;
  * uses a Viterbi approximation: the probability of a string is its best derivation probability So,
  * if one want to deal with spurious ambiguity, he/she should do that before calling this class
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Zhifei Li, zhifei.work@gmail.com
  */
 public class NbestMinRiskReranker {
 
@@ -182,7 +182,10 @@ public class NbestMinRiskReranker {
   /**
    * based on a list of log-probabilities in nbestLogProbs, obtain a normalized distribution, and
    * put the normalized probability (real value in [0,1]) into nbestLogProbs
-   * */
+   * 
+   * @param nbestLogProbs a {@link java.util.List} of {@link java.lang.Double} representing nbestLogProbs
+   * @param scalingFactor double value representing scaling factor
+   */
   // get a normalized distributeion and put it back to nbestLogProbs
   static public void computeNormalizedProbs(List<Double> nbestLogProbs, double scalingFactor) {
 

@@ -33,10 +33,9 @@ import org.apache.joshua.decoder.hypergraph.HyperGraph;
 import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
- * structuredTranslation provides a more structured access to translation
+ * <p>structuredTranslation provides a more structured access to translation
  * results than the Translation class.
- * Members of instances of this class can be used upstream.
- * <br/>
+ * Members of instances of this class can be used upstream.</p>
  * TODO:
  * Enable K-Best extraction.
  * 

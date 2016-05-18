@@ -128,7 +128,7 @@ public class Vocabulary implements Externalizable {
    * Get the id of the token if it already exists, new id is created otherwise.
    *
    * TODO: currently locks for every call. Separate constant (frozen) ids from
-   * changing (e.g. OOV) ids. Constant ids could be immutable -> no locking.
+   * changing (e.g. OOV) ids. Constant ids could be immutable -&gt; no locking.
    * Alternatively: could we use ConcurrentHashMap to not have to lock if
    * actually contains it and only lock for modifications?
    */

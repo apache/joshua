@@ -26,7 +26,7 @@ import java.util.NoSuchElementException;
 /**
  * Wraps a reader with "line" index information.
  * 
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate: 2009-03-26 15:06:57 -0400 (Thu, 26 Mar 2009) $
  */
 public class IndexedReader<E> implements Reader<E> {

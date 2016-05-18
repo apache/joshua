@@ -27,7 +27,7 @@ import org.apache.joshua.corpus.Phrase;
  * Papineni.
  * 
  * @author UMD (Jimmy Lin, Chris Dyer, et al.)
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate$
  */
 public class Subsampler {

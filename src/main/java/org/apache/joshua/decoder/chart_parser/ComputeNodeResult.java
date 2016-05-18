@@ -35,8 +35,8 @@ import org.apache.joshua.decoder.segment_file.Sentence;
 /**
  * This class computes the cost of applying a rule.
  * 
- * @author Matt Post <post@cs.jhu.edu>
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Matt Post post@cs.jhu.edu
+ * @author Zhifei Li, zhifei.work@gmail.com
  */
 
 public class ComputeNodeResult {
@@ -130,7 +130,8 @@ public class ComputeNodeResult {
   }
   
   /**
-   * This is called from Cell.java when making the final transition to the goal state.
+   * This is called from {@link org.apache.joshua.decoder.chart_parser.Cell} 
+   * when making the final transition to the goal state.
    * This is done to allow feature functions to correct for partial estimates, since
    * they now have the knowledge that the whole sentence is complete. Basically, this
    * is only used by LanguageModelFF, which does not score partial n-grams, and therefore
@@ -140,6 +141,14 @@ public class ComputeNodeResult {
    * too: it makes search better (more accurate at the beginning, for example), and would
    * also do away with the need for the computeFinal* class of functions (and hooks in
    * the feature function interface).
+   * 
+   * @param featureFunctions {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
+   * @param tailNodes {@link java.util.List} of {@link org.apache.joshua.decoder.hypergraph.HGNode}'s
+   * @param i todo
+   * @param j todo
+   * @param sourcePath information about a path taken through the source lattice
+   * @param sentence the lattice input
+   * @return the final cost for the Node
    */
   public static float computeFinalCost(List<FeatureFunction> featureFunctions,
       List<HGNode> tailNodes, int i, int j, SourcePath sourcePath, Sentence sentence) {
@@ -176,6 +185,7 @@ public class ComputeNodeResult {
 
   /**
    *  The complete cost of the Viterbi derivation at this point
+   *  @return float representing cost
    */
   public float getViterbiCost() {
     return this.viterbiCost;
@@ -188,7 +198,7 @@ public class ComputeNodeResult {
   /**
    * The cost incurred by this edge alone
    * 
-   * @return
+   * @return float representing cost
    */
   public float getTransitionCost() {
     return this.transitionCost;

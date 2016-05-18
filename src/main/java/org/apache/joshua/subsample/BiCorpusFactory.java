@@ -26,7 +26,7 @@ import java.io.IOException;
  * {@link AlignedSubsampler} in order to "override" methods of {@link Subsampler}, minimizing code
  * duplication.
  * 
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate$
  */
 public class BiCorpusFactory {

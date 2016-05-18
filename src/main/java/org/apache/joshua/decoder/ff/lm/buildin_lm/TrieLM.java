@@ -30,9 +30,7 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.joshua.corpus.SymbolTable;
 import org.apache.joshua.corpus.Vocabulary;
-import  org.apache.joshua.decoder.JoshuaConfiguration;
 import  org.apache.joshua.decoder.ff.lm.AbstractLM;
 import  org.apache.joshua.decoder.ff.lm.ArpaFile;
 import  org.apache.joshua.decoder.ff.lm.ArpaNgram;
@@ -94,8 +92,8 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
   /**
    * Constructs a language model object from the specified ARPA file.
    * 
-   * @param arpaFile
-   * @throws FileNotFoundException 
+   * @param arpaFile input ARPA file
+   * @throws FileNotFoundException if the input file cannot be located
    */
   public TrieLM(ArpaFile arpaFile) throws FileNotFoundException {
     super(arpaFile.getVocab().size(), arpaFile.getOrder());

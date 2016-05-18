@@ -21,7 +21,7 @@ package org.apache.joshua.decoder;
 import java.util.List;
 
 /**
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Zhifei Li, zhifei.work@gmail.com
  */
 public class Support {
 

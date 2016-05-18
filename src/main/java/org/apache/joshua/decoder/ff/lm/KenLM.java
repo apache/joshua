@@ -29,7 +29,7 @@ import org.apache.joshua.decoder.ff.state_maintenance.KenLMState;
  * state by itself and just passes in the ngrams for scoring.
  * 
  * @author Kenneth Heafield
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 
 public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
@@ -115,6 +115,8 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
   /**
    * Query for n-gram probability using strings.
+   * @param words a string array of words
+   * @return float value denoting probability
    */
   public float prob(String[] words) {
     return probForString(pointer, words);
@@ -127,14 +129,15 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
   /**
    * This function is the bridge to the interface in kenlm/lm/left.hh, which has KenLM score the
-   * whole rule. It takes a list of words and states retrieved from tail nodes (nonterminals in the
+   * whole rule. It takes an array of words and states retrieved from tail nodes (nonterminals in the
    * rule). Nonterminals have a negative value so KenLM can distinguish them. The sentence number is
    * needed so KenLM knows which memory pool to use. When finished, it returns the updated KenLM
    * state and the LM probability incurred along this rule.
    * 
-   * @param words
-   * @param sentId
-   * @return
+   * @param words array of words
+   * @param poolPointer todo
+   * @return the updated {@link org.apache.joshua.decoder.ff.lm.KenLM.StateProbPair} e.g. 
+   * KenLM state and the LM probability incurred along this rule
    */
   public StateProbPair probRule(long[] words, long poolPointer) {
 
@@ -153,7 +156,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
    * Public facing function that estimates the cost of a rule, which value is used for sorting
    * rules during cube pruning.
    * 
-   * @param words
+   * @param words array of words
    * @return the estimated cost of the rule (the (partial) n-gram probabilities of all words in the rule)
    */
   public float estimateRule(long[] words) {
@@ -170,6 +173,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
   /**
    * The start symbol for a KenLM is the Vocabulary.START_SYM.
+   * @return "&lt;s&gt;"
    */
   public String getStartSymbol() {
     return Vocabulary.START_SYM;

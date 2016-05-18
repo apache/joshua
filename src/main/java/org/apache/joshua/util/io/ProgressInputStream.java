@@ -26,7 +26,7 @@ import java.io.InputStream;
  * Generic progress meter for reading files (compressed or not). Pass it the raw input file stream
  * and it will keep track for you.
  * 
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 public class ProgressInputStream extends FilterInputStream {
 

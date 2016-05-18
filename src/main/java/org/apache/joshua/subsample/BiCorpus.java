@@ -25,7 +25,7 @@ import org.apache.joshua.corpus.Phrase;
  * <code>subsample(String, float, PhraseWriter, BiCorpusFactory)</code> method.
  * 
  * @author UMD (Jimmy Lin, Chris Dyer, et al.)
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate$
  */
 public class BiCorpus implements Iterable<PhrasePair> {

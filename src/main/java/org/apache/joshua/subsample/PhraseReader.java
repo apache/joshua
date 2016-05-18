@@ -17,7 +17,7 @@ import org.apache.joshua.corpus.BasicPhrase;
  * Wrapper class to read in each line as a BasicPhrase.
  * 
  * @author UMD (Jimmy Lin, Chris Dyer, et al.)
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate$
  */
 public class PhraseReader extends BufferedReader {

@@ -27,7 +27,7 @@ import org.apache.joshua.corpus.Span;
  * Uses {@link ForestWalker} to visit one {@link HGNode} per span of the chart. No guarantees are
  * provided as to which HGNode will be visited in each span.
  * 
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  * 
  */
 
@@ -42,8 +42,9 @@ public class AllSpansWalker {
    * This function wraps a {@link ForestWalker}, preventing calls to its walker function for all but
    * the first node reached for each span.
    * 
-   * @param node
-   * @param walker
+   * @param node the {@link org.apache.joshua.decoder.hypergraph.HGNode} we wish to walk
+   * @param walker the {@link org.apache.joshua.decoder.hypergraph.WalkerFunction} 
+   * implementation to do the walking
    */
   public void walk(HGNode node, final WalkerFunction walker) {
     new ForestWalker().walk(node, new org.apache.joshua.decoder.hypergraph.WalkerFunction() {

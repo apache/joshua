@@ -28,7 +28,6 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -80,10 +79,10 @@ import org.apache.joshua.util.io.LineReader;
  * Translations object). Translations itself is an iterator whose next() call blocks until the next
  * translation is available.
  * 
- * @author Matt Post <post@cs.jhu.edu>
- * @author Zhifei Li, <zhifei.work@gmail.com>
- * @author wren ng thornton <wren@users.sourceforge.net>
- * @author Lane Schwartz <dowobeha@users.sourceforge.net>
+ * @author Matt Post post@cs.jhu.edu
+ * @author Zhifei Li, zhifei.work@gmail.com
+ * @author wren ng thornton wren@users.sourceforge.net
+ * @author Lane Schwartz dowobeha@users.sourceforge.net
  */
 public class Decoder {
 

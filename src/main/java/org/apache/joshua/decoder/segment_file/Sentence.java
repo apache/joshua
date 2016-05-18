@@ -43,9 +43,11 @@ import org.apache.joshua.util.Regex;
  * This class represents lattice input. The lattice is contained on a single line and is represented
  * in PLF (Python Lattice Format), e.g.,
  * 
+ * <pre>
  * ((('ein',0.1,1),('dieses',0.2,1),('haus',0.4,2),),(('haus',0.8,1),),)
+ * </pre>
  * 
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 
 public class Sentence {
@@ -134,7 +136,7 @@ public class Sentence {
 
   /**
    * Returns the length of the sentence. For lattices, the length is the shortest path through the
-   * lattice. The length includes the <s> and </s> sentence markers. 
+   * lattice. The length includes the &lt;s&gt; and &lt;/s&gt; sentence markers. 
    * 
    * @return number of input tokens + 2 (for start and end of sentence markers)
    */
@@ -254,7 +256,7 @@ public class Sentence {
   }
 
   /**
-   * If the input sentence is too long (not counting the <s> and </s> tokens), it is truncated to
+   * If the input sentence is too long (not counting the &lt;s&gt; and &lt;/s&gt; tokens), it is truncated to
    * the maximum length, specified with the "maxlen" parameter.
    * 
    * Note that this code assumes the underlying representation is a sentence, and not a lattice. Its

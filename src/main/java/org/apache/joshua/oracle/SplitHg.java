@@ -30,7 +30,7 @@ import org.apache.joshua.decoder.hypergraph.HyperGraph;
  * This class implements general ways of splitting the hypergraph based on coarse-to-fine idea input
  * is a hypergraph output is another hypergraph that has changed state structures.
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com> (Johns Hopkins University)
+ * @author Zhifei Li, zhifei.work@gmail.com (Johns Hopkins University)
  */
 public abstract class SplitHg {
 

@@ -24,7 +24,7 @@ import org.apache.joshua.decoder.ff.tm.Rule;
 /**
  * Stores a collection of all rules with the same french side (and thus same arity).
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Zhifei Li, zhifei.work@gmail.com
  */
 public class MemoryBasedRuleBin extends BasicRuleCollection {
 

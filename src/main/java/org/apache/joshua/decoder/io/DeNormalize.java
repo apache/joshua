@@ -26,25 +26,23 @@ import java.util.regex.Pattern;
  * <UL>
  * <LI>Capitalize the first character in the string</LI>
  * <LI>Detokenize</LI>
- * <UL>
  * <LI>Delete whitespace in front of periods and commas</LI>
  * <LI>Join contractions</LI>
  * <LI>Capitalize name titles (Mr Ms Miss Dr etc.)</LI>
- * <LI>TODO: Handle surrounding characters ([{<"''">}])</LI>
+ * <LI>TODO: Handle surrounding characters ([{&lt;"''"&gt;}])</LI>
  * <LI>TODO: Join multi-period abbreviations (e.g. M.Phil. i.e.)</LI>
  * <LI>TODO: Handle ambiguities like "st.", which can be an abbreviation for both "Saint" and
  * "street"</LI>
  * <LI>TODO: Capitalize both the title and the name of a person, e.g. Mr. Morton (named entities
  * should be demarcated).</LI>
  * </UL>
- * </UL> <bold>N.B.</bold> These methods all assume that every translation result that will be
+ * <b>N.B.</b> These methods all assume that every translation result that will be
  * denormalized has the following format:
  * <UL>
  * <LI>There is only one space between every pair of tokens</LI>
  * <LI>There is no whitespace before the first token</LI>
  * <LI>There is no whitespace after the final token</LI>
  * <LI>Standard spaces are the only type of whitespace</LI>
- * </UL>
  * </UL>
  */
 

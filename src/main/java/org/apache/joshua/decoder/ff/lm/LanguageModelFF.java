@@ -45,14 +45,14 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * This class performs the following:
  * <ol>
  * <li>Gets the additional LM score due to combinations of small items into larger ones by using
- * rules
- * <li>Gets the LM state
- * <li>Gets the left-side LM state estimation score
+ * rules</li>
+ * <li>Gets the LM state</li>
+ * <li>Gets the left-side LM state estimation score</li>
  * </ol>
  * 
- * @author Matt Post <post@cs.jhu.edu>
- * @author Juri Ganitkevitch <juri@cs.jhu.edu>
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Matt Post post@cs.jhu.edu
+ * @author Juri Ganitkevitch juri@cs.jhu.edu
+ * @author Zhifei Li, zhifei.work@gmail.com
  */
 public class LanguageModelFF extends StatefulFF {
 
@@ -65,13 +65,14 @@ public class LanguageModelFF extends StatefulFF {
    * <ol>
    * <li>We assume it is a backoff lm, and high-order ngram implies low-order ngram; absense of
    * low-order ngram implies high-order ngram</li>
-   * <li>For a ngram, existence of backoffweight => existence a probability Two ways of dealing with
+   * <li>For a ngram, existence of backoffweight =&gt; existence a probability Two ways of dealing with
    * low counts:
    * <ul>
    * <li>SRILM: don't multiply zeros in for unknown words</li>
    * <li>Pharaoh: cap at a minimum score exp(-10), including unknown words</li>
    * </ul>
    * </li>
+   * </ol>
    */
   protected NGramLanguageModel languageModel;
 
@@ -160,10 +161,6 @@ public class LanguageModelFF extends StatefulFF {
 
   /**
    * Initializes the underlying language model.
-   * 
-   * @param config
-   * @param type
-   * @param path
    */
   protected void initializeLM() {
     if (type.equals("kenlm")) {
@@ -265,7 +262,7 @@ public class LanguageModelFF extends StatefulFF {
   
   /** 
    * Sets the class map if this is a class LM 
-   * @param classMap
+   * @param fileName
    * @throws IOException 
    */
   public void setClassMap(String fileName) throws IOException {

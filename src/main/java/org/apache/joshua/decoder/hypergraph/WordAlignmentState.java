@@ -83,6 +83,7 @@ public class WordAlignmentState {
   /**
    * if there are no more NonTerminals to substitute,
    * this state is said to be complete
+   * @return true if complete
    */
   public boolean isComplete() {
     return numNT == 0;
@@ -91,6 +92,7 @@ public class WordAlignmentState {
   /**
    * builds the final alignment string in the standard alignment format: src -
    * trg. Sorted by trg indexes. Disregards the sentence markers.
+   * @return result string
    */
   public String toFinalString() {
     StringBuilder sb = new StringBuilder();
@@ -111,6 +113,7 @@ public class WordAlignmentState {
    * builds the final alignment list.
    * each entry in the list corresponds to a list of aligned source tokens.
    * First and last item in trgPoints is skipped.
+   * @return a final alignment list
    */
   public List<List<Integer>> toFinalList() {
     assert (isComplete() == true);

@@ -33,8 +33,8 @@ import org.apache.joshua.corpus.Vocabulary;
  * arity within a specific range. It expects three parameters upon initialization: the owner, the
  * minimum arity, and the maximum arity.
  * 
- * @author Matt Post <post@cs.jhu.edu
- * @author Zhifei Li <zhifei.work@gmail.com>
+ * @author Matt Post post@cs.jhu.edu
+ * @author Zhifei Li zhifei.work@gmail.com
  */
 public class ArityPhrasePenalty extends StatelessFF {
 

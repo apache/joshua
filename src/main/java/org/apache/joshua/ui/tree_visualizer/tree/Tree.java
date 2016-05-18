@@ -48,7 +48,7 @@ import java.util.Comparator;
  * Using a Tree the source sentence it was aligned to, we can create
  * a DerivationTree object suitable for display. 
  *
- * @author Jonny Weese <jonny@cs.jhu.edu>
+ * @author Jonny Weese jonny@cs.jhu.edu
  */
 public class Tree {
 

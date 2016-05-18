@@ -69,8 +69,7 @@ public class Coverage {
   /**
    * Initialize a coverage vector from another Coverage vector, creating a separate object.
    * 
-   * @param firstZero
-   * @param bits
+   * @param other an existing coverage vector from which to create a new coverage vector
    */
   public Coverage(Coverage other) {
     this.firstZero = other.firstZero;
@@ -81,8 +80,8 @@ public class Coverage {
    * Turns on all bits from position start to position (end - 1), that is, in the range [start .. end).
    * This is done relative to the current coverage vector, of course, which may not start at 0.
    * 
-   * @param begin
-   * @param end
+   * @param begin bits at start position
+   * @param end bits at end position (end - 1)
    */
   public void set(int begin, int end) {
     assert compatible(begin, end);
@@ -112,6 +111,7 @@ public class Coverage {
   
   /**
    * Convenience function.
+   * @param todo
    */
   public final void set(Span span) {
     set(span.start, span.end);
@@ -155,7 +155,7 @@ public class Coverage {
    * Find the left bound of the gap in which the phrase [begin, ...) sits.                         
    * 
    * @param begin the start index of the phrase being applied.
-   * @return
+   * @return todo
    */
   public int leftOpening(int begin) {
     for (int i = begin - firstZero; i > 0; --i) {
@@ -173,12 +173,15 @@ public class Coverage {
   /**
    * LeftOpen() and RightOpen() find the larger gap in which a new source phrase pair sits.
    * When using a phrase pair covering (begin, end), the pair
-   * 
+   * <pre>
    *     (LeftOpen(begin), RightOpen(end, sentence_length))  
+   * </pre>
    *     
    * provides this gap.                                           
    * 
    * Finds the right bound of the enclosing gap, or the end of sentence, whichever is less.
+   * @param end end of phrase pair
+   * @param senetenceLength length of sentence
    */
   public int rightOpening(int end, int sentenceLength) {
     for (int i = end - firstZero; i < Math.min(64, sentenceLength - firstZero); i++) {

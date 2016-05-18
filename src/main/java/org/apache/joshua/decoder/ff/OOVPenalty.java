@@ -39,7 +39,7 @@ import org.apache.joshua.decoder.chart_parser.SourcePath;
  * "mark-oovs") . These rules are all stored in a grammar whose owner is "oov". The OOV feature
  * function template then fires the "OOVPenalty" feature whenever it is asked to score an OOV rule.
  * 
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 public class OOVPenalty extends StatelessFF {
   private int ownerID = -1;

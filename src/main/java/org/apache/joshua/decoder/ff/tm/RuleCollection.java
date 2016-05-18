@@ -29,7 +29,7 @@ import org.apache.joshua.decoder.ff.FeatureFunction;
  * 
  * @author Zhifei Li
  * @author Lane Schwartz
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 public interface RuleCollection {
 
@@ -37,18 +37,22 @@ public interface RuleCollection {
    * Returns true if the rules are sorted. This is used to allow rules to be sorted in an amortized
    * fashion; rather than sorting all trie nodes when the grammar is originally loaded, we sort them
    * only as the decoder actually needs them.
+   * @return true if rules are sorted
    */
   boolean isSorted();
 
   /**
-   * This returns a list of the rules, sorting them if necessary. 
+   * This returns a list of the rules, sorting them if necessary.
    * 
-   * Implementations of this function should be synchronized.  
+   * Implementations of this function should be synchronized.
+   * @param models {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
+   * @return the {@link java.util.List} of sorted rules
    */
   List<Rule> getSortedRules(List<FeatureFunction> models);
 
   /**
    * Get the list of rules. There are no guarantees about whether they're sorted or not.
+   * @return the {@link java.util.List} of rules, there is no gurantee they will be sorted
    */
   List<Rule> getRules();
 

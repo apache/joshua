@@ -35,9 +35,11 @@ import java.util.Set;
  * queries each of them for their sparse features via {@link registerDenseFeatures}. Those features
  * returned by each decoder are then *removed* from the sparse feature hash and placed in the dense
  * feature array. Therefore, when a feature registers a dense feature, it should take care to
- * query either {@link getDense()} or {@link getSparse} when asking for the feature values later on. 
+ * query either {@link org.apache.joshua.decoder.ff.FeatureVector#getDense(int)} or 
+ * {@link org.apache.joshua.decoder.ff.FeatureVector#getSparse(String)} when asking for the feature 
+ * values later on. 
  * 
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 
 public class FeatureVector {
@@ -75,8 +77,8 @@ public class FeatureVector {
    * **IMPORTANT** The feature values are inverted, for historical reasons, which leads to a lot
    * of confusion. They have to be inverted here and when the score is actually computed. They 
    * are inverted here (which is used to build the feature vector representation of a rule's dense
-   * features) and in {@link BilingualRule::estimateRuleCost()}, where the rule's precomputable
-   * (weighted) score is cached.
+   * features) and in {@link org.apache.joshua.decoder.ff.tm.BilingualRule#estimateRuleCost(java.util.List)}
+   * , where the rule's precomputable (weighted) score is cached.
    * 
    * @param featureString, the string of labeled and unlabeled features (probably straight from the
    *          grammar text file)
@@ -138,8 +140,7 @@ public class FeatureVector {
    * can infer them all). This *must* be called by every feature function wishing to register
    * dense features!
    * 
-   * @param names
-   * @return
+   * @param featureFunctions {@link java.util.ArrayList} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    */
   public void registerDenseFeatures(ArrayList<FeatureFunction> featureFunctions) {
     for (FeatureFunction feature: featureFunctions) {
@@ -181,6 +182,8 @@ public class FeatureVector {
    * Subtracts the weights in the other feature vector from this one. Note that this is not set
    * subtraction; keys found in the other FeatureVector but not in this one will be initialized with
    * a value of 0.0f before subtraction.
+   * 
+   * @param other another {@link org.apache.joshua.decoder.ff.FeatureVector} from which to subtract its score
    */
   public void subtract(FeatureVector other) {
     for (int i = 0; i < denseFeatures.size(); i++)
@@ -195,6 +198,8 @@ public class FeatureVector {
   /**
    * Adds the weights in the other feature vector to this one. This is set union, with values shared
    * between the two being summed.
+   * 
+   * @param other another {@link org.apache.joshua.decoder.ff.FeatureVector} from which to add its score
    */
   public void add(FeatureVector other) {
     while (denseFeatures.size() < other.denseFeatures.size())
@@ -214,6 +219,8 @@ public class FeatureVector {
   /**
    * Return the weight of a feature by name, after checking to determine if it is sparse or dense.
    * 
+   * @param feature String name of some feature
+   * @return the feature's weight
    */
   public float getWeight(String feature) {
     for (int i = 0; i < DENSE_FEATURE_NAMES.size(); i++) {
@@ -227,7 +234,7 @@ public class FeatureVector {
   /**
    * Return the weight of a sparse feature, indexed by its name.
    * 
-   * @param feature
+   * @param feature String name of some feature
    * @return the sparse feature's weight, or 0 if not found.
    */
   public float getSparse(String feature) {
@@ -244,7 +251,7 @@ public class FeatureVector {
    * Return the weight of a dense feature, indexed by its feature index, or 0.0f, if the feature
    * is not found. In other words, this is a safe way to query the dense feature vector.
    * 
-   * @param id
+   * @param id int representing of some dense feature
    * @return the dense feature's value, or 0 if not found.
    */
   public float getDense(int id) {
@@ -267,8 +274,8 @@ public class FeatureVector {
    * Set the value of a feature. We need to first determine whether the feature is a dense or
    * sparse one, then set accordingly.
    * 
-   * @param feature
-   * @param value
+   * @param feature String name of some feature
+   * @param value float value to set to the featue with the associated name
    */
   public void set(String feature, float value) {
     for (int i = 0; i < DENSE_FEATURE_NAMES.size(); i++) {
@@ -293,6 +300,9 @@ public class FeatureVector {
 
   /**
    * Computes the inner product between this feature vector and another one.
+   * 
+   * @param other a {@link org.apache.joshua.decoder.ff.FeatureVector} with which to compute the inner product
+   * @return float value representing the computation
    */
   public float innerProduct(FeatureVector other) {
     float cost = 0.0f;
@@ -313,6 +323,8 @@ public class FeatureVector {
   /***
    * Moses distinguishes sparse features as those containing an underscore, so we have to fake it
    * to be compatible with their tuners.
+   * 
+   * @return trimmed Moses output string
    */
   public String mosesString() {
     StringBuilder outputString = new StringBuilder();

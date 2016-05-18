@@ -15,7 +15,7 @@ import org.apache.joshua.corpus.Phrase;
  * word-alignments. This is primarily for maintaining sentence-alignment.
  * 
  * @author UMD (Jimmy Lin, Chris Dyer, et al.)
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate$
  */
 public class PhrasePair {

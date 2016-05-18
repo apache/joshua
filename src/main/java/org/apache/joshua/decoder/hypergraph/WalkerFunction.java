@@ -28,6 +28,9 @@ public interface WalkerFunction {
    * Function that is applied to node at tail node index nodeIndex.
    * nodeIndex indicates the index of node in the list of tailnodes for the
    * outgoing edge.
+   * @param node the {{@link org.apache.joshua.decoder.hypergraph.HGNode} we
+   * wish to apply some Walker Function to.
+   * @param nodeIndex node in the list of tailnodes for the outgoing edge
    */
   void apply(HGNode node, int nodeIndex);
 

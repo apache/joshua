@@ -44,8 +44,8 @@ import org.apache.joshua.corpus.Vocabulary;
  * 
  * The DecoderFactory class is responsible for launching the threads.
  * 
- * @author Matt Post <post@cs.jhu.edu>
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Matt Post post@cs.jhu.edu
+ * @author Zhifei Li, zhifei.work@gmail.com
  */
 
 public class DecoderThread extends Thread {

@@ -39,8 +39,8 @@ import java.util.Scanner;
 /**
  * utility functions for file operations
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author Zhifei Li, zhifei.work@gmail.com
+ * @author wren ng thornton wren@users.sourceforge.net
  * @since 28 February 2009
  */
 public class FileUtility {
@@ -182,7 +182,7 @@ public class FileUtility {
   }
 
   /**
-   * Returns the base directory of the file. For example, dirname('/usr/local/bin/emacs') ->
+   * Returns the base directory of the file. For example, dirname('/usr/local/bin/emacs') -&gt;
    * '/usr/local/bin'
    */
   static public String dirname(String fileName) {

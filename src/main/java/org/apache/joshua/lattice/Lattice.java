@@ -39,10 +39,9 @@ import org.apache.joshua.util.ChartSpan;
  * A lattice representation of a directed graph.
  * 
  * @author Lane Schwartz
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  * @since 2008-07-08
  * 
- * @param Label Type of label associated with an arc.
  */
 public class Lattice<Value> implements Iterable<Node<Value>> {
 
@@ -126,9 +125,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    * Computes the shortest distance between two nodes, which is used (perhaps among other places) in
    * computing which rules can apply over which spans of the input
    * 
-   * @param tail
-   * @param head
-   * @return the distance, a positive number, or -1 if there is no path between the nodes
+   * @param arc
    */
   public int distance(Arc<Value> arc) {
     return this.getShortestPath(arc.getTail().getNumber(), arc.getHead().getNumber());
@@ -141,7 +138,8 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
   /**
    * Convenience method to get a lattice from a linear sequence of {@link Token} objects.
    * 
-   * @param linearChain
+   * @param source
+   * @param config
    * @return Lattice representation of the linear chain.
    */
   public static Lattice<Token> createTokenLatticeFromString(String source, JoshuaConfiguration config) {
@@ -446,7 +444,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    * 
    * @param i
    * @param j
-   * @param lattice
+   * @param newNodes
    */
   public void insert(int i, int j, List<Node<Value>> newNodes) {
 

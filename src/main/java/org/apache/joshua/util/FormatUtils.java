@@ -49,8 +49,8 @@ public class FormatUtils {
    * Nonterminals are stored in the vocabulary in square brackets. This removes them when you 
    * just want the raw nonterminal word.
    * Supports indexed and non-indexed nonTerminals:
-   * [GOAL] -> GOAL
-   * [X,1] -> [X]
+   * [GOAL] -&gt; GOAL
+   * [X,1] -&gt; [X]
    * 
    * @param nt the nonterminal, e.g., "[GOAL]"
    * @return the cleaned nonterminal, e.g., "GOAL"
@@ -72,7 +72,7 @@ public class FormatUtils {
   }
 
   /**
-   * Removes the index from a nonTerminal: [X,1] -> [X].
+   * Removes the index from a nonTerminal: [X,1] -&gt; [X].
    */
   public static String stripNonTerminalIndex(String nt) {
     return markup(cleanNonTerminal(nt));

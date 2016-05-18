@@ -44,8 +44,8 @@ import org.apache.joshua.util.FormatUtils;
  * french sides so far (2) A HashMap of next-layer trie nodes, the next french word used as the key
  * in HashMap
  * 
- * @author Zhifei Li <zhifei.work@gmail.com>
- * @author Matt Post <post@cs.jhu.edu
+ * @author Zhifei Li zhifei.work@gmail.com
+ * @author Matt Post post@cs.jhu.edu
  */
 public class MemoryBasedBatchGrammar extends AbstractGrammar {
 
@@ -254,8 +254,8 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
   /***
    * Takes an input word and creates an OOV rule in the current grammar for that word.
    * 
-   * @param sourceWord
-   * @param featureFunctions
+   * @param sourceWord integer representation of word
+   * @param featureFunctions {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    */
   @Override
   public void addOOVRules(int sourceWord, List<FeatureFunction> featureFunctions) {
@@ -288,7 +288,7 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
   /**
    * Adds a default set of glue rules.
    * 
-   * @param featureFunctions
+   * @param featureFunctions an {@link java.util.ArrayList} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    */
   public void addGlueRules(ArrayList<FeatureFunction> featureFunctions) {
     HieroFormatReader reader = new HieroFormatReader();

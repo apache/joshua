@@ -28,8 +28,8 @@ import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
- * @author Zhifei Li, <zhifei.work@gmail.com>
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Zhifei Li, zhifei.work@gmail.com
+ * @author Matt Post post@cs.jhu.edu
  */
 
 public class ViterbiExtractor {
@@ -61,25 +61,33 @@ public class ViterbiExtractor {
       }
     }
   }
-  
+
   public static void viterbiWalk(final HGNode node, final WalkerFunction walker) {
     viterbiWalk(node, walker, 0);
   }
-  
+
   /**
    * Returns the Viterbi translation of the Hypergraph (includes sentence markers)
+   * @param hg a {@link org.apache.joshua.decoder.hypergraph.HyperGraph} we wish to 
+   * obtain a Viterbi translation for
+   * @return a String Viterbi translation
    */
   public static String getViterbiString(final HyperGraph hg) {
     if (hg == null)
       return "";
-    
+
     final WalkerFunction viterbiOutputStringWalker = new OutputStringExtractor(false);
     viterbiWalk(hg.goalNode, viterbiOutputStringWalker);
     return viterbiOutputStringWalker.toString();
   }
-  
+
   /**
    * Returns the Viterbi feature vector
+   * @param hg a {@link org.apache.joshua.decoder.hypergraph.HyperGraph} we wish to 
+   * obtain a Viterbi features for
+   * @param featureFunctions a {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
+   * @param sentence {@link org.apache.joshua.lattice.Lattice} input
+   * @return a Viterbi {@link org.apache.joshua.decoder.ff.FeatureVector.FeatureVector}
    */
   public static FeatureVector getViterbiFeatures(
       final HyperGraph hg,
@@ -87,38 +95,46 @@ public class ViterbiExtractor {
       final Sentence sentence) {
     if (hg == null)
       return new FeatureVector();
-    
+
     final FeatureVectorExtractor extractor = new FeatureVectorExtractor(
         featureFunctions, sentence);
-      viterbiWalk(hg.goalNode, extractor);
-      return extractor.getFeatures();
+    viterbiWalk(hg.goalNode, extractor);
+    return extractor.getFeatures();
   }
-  
+
   /**
    * Returns the Viterbi Word Alignments as String.
+   * @param hg input {@link org.apache.joshua.decoder.hypergraph.HyperGraph}
+   * @return the Viterbi Word Alignments as String
    */
   public static String getViterbiWordAlignments(final HyperGraph hg) {
     if (hg == null)
       return "";
-    
+
     final WordAlignmentExtractor wordAlignmentWalker = new WordAlignmentExtractor();
     viterbiWalk(hg.goalNode, wordAlignmentWalker);
     return wordAlignmentWalker.toString();
   }
-  
+
   /**
    * Returns the Viterbi Word Alignments as list of lists (target-side).
+   * @param hg input {@link org.apache.joshua.decoder.hypergraph.HyperGraph}
+   * @return a {@link java.util.List} of Viterbi Word Alignments
    */
   public static List<List<Integer>> getViterbiWordAlignmentList(final HyperGraph hg) {
     if (hg == null)
       return emptyList();
-    
+
     final WordAlignmentExtractor wordAlignmentWalker = new WordAlignmentExtractor();
     viterbiWalk(hg.goalNode, wordAlignmentWalker);
     return wordAlignmentWalker.getFinalWordAlignments();
   }
-  
-  /** find 1best hypergraph */
+
+  /**
+   * find 1best hypergraph 
+   * @param hg_in input {@link org.apache.joshua.decoder.hypergraph.HyperGraph}
+   * @return new best {@link org.apache.joshua.decoder.hypergraph.HyperGraph}
+   */
   public static HyperGraph getViterbiTreeHG(HyperGraph hg_in) {
     HyperGraph res =
         new HyperGraph(cloneNodeWithBestHyperedge(hg_in.goalNode), -1, -1, null); 
@@ -152,7 +168,7 @@ public class ViterbiExtractor {
     List<HGNode> antNodes = null;
     if (null != inEdge.getTailNodes()) {
       antNodes = new ArrayList<HGNode>(inEdge.getTailNodes());// l_ant_items will be changed in
-                                                             // get_1best_tree_item
+      // get_1best_tree_item
     }
     HyperEdge res =
         new HyperEdge(inEdge.getRule(), inEdge.getBestDerivationScore(), inEdge.getTransitionLogP(false),

@@ -28,7 +28,7 @@ import org.apache.commons.cli.ParseException;
  * one-use nature of subclasses of <code>SubsampleCLI</code>, they generally should be implemented
  * as anonymous local classes.
  * 
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate$
  */
 @SuppressWarnings("static-access")

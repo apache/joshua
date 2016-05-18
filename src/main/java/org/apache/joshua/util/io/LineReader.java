@@ -37,8 +37,8 @@ import org.apache.joshua.decoder.Decoder;
  * This class provides an Iterator interface to a BufferedReader. This covers the most common
  * use-cases for reading from files without ugly code to check whether we got a line or not.
  * 
- * @author wren ng thornton <wren@users.sourceforge.net>
- * @author Matt Post <post@cs.jhu.edu>
+ * @author wren ng thornton wren@users.sourceforge.net
+ * @author Matt Post post@cs.jhu.edu
  */
 public class LineReader implements Reader<String> {
 

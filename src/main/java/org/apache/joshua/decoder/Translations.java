@@ -30,7 +30,7 @@ import org.apache.joshua.decoder.io.TranslationRequestStream;
  * Translation in the right place. When the next translation in a sequence is available, next() is
  * notified.
  * 
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 public class Translations {
 
@@ -73,7 +73,7 @@ public class Translations {
    * the ID of the translation is the same as the one being waited for (currentID). If so, the
    * thread waiting for it is notified.
    * 
-   * @param translation
+   * @param translation a translated input object
    */
   public void record(Translation translation) {
     synchronized (this) {
@@ -98,6 +98,8 @@ public class Translations {
   /**
    * Returns the next Translation, blocking if necessary until it's available, since the next
    * Translation might not have been produced yet.
+   * 
+   * @return first element from the list of {@link org.apache.joshua.decoder.Translation}'s
    */
   public Translation next() {
     synchronized (this) {
