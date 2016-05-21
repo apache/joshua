@@ -123,8 +123,8 @@ public class FeatureTypeAnalyzer {
     for (FeatureType ft : types)
       ft.inferUncompressedType();
     for (int id : featureToType.keySet())
-      LOG.info("Type inferred: {}" + (labeled ? Vocabulary.word(id) : "Feature " + id) + " is "
-          + types.get(featureToType.get(id)).encoder.getKey());
+      LOG.info("Type inferred: {} is {}", (labeled ? Vocabulary.word(id) : "Feature " + id),
+          types.get(featureToType.get(id)).encoder.getKey());
   }
 
   public void buildFeatureMap() {

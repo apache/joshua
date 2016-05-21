@@ -142,7 +142,7 @@ public class DecoderThread extends Thread {
       }
       
     } catch (java.lang.OutOfMemoryError e) {
-      LOG.info("Input {}: out of memory", sentence.id());
+      LOG.error("Input {}: out of memory", sentence.id());
       hypergraph = null;
     }
 
@@ -184,7 +184,7 @@ public class DecoderThread extends Thread {
     long secondParseTime = System.currentTimeMillis();
     LOG.info("Sentence {}: Finished second chart expansion ({} seconds).",
         sentence.id(), (secondParseTime - sortTime) / 1000);
-    LOG.info("Sentence %d total time: {} seconds.\n", sentence.id(),
+    LOG.info("Sentence {} total time: {} seconds.\n", sentence.id(),
         (secondParseTime - startTime) / 1000);
     LOG.info("Memory used after sentence {} is {} MB", sentence.id(), (Runtime
         .getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1000000.0);

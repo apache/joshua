@@ -104,18 +104,14 @@ public class Cache<K, V> extends LinkedHashMap<K, V> {
 
   @Override
   public V get(Object key) {
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Cache get   key: {}", key.toString());
-    }
+    LOG.debug("Cache get   key: {}", key);
     return super.get(key);
   }
 
 
   @Override
   public V put(K key, V value) {
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Cache put   key: {}", key.toString());
-    }
+    LOG.debug("Cache put   key: {}", key);
     return super.put(key, value);
   }
 
@@ -126,11 +122,10 @@ public class Cache<K, V> extends LinkedHashMap<K, V> {
   @Override
   public boolean containsKey(Object key) {
     boolean contains = super.containsKey(key);
-
-    if (LOG.isDebugEnabled()) {
-      String message =
-          (contains) ? "Cache has   key:	" + key.toString() : "Cache lacks key: 	" + key.toString();
-      LOG.debug(message);
+    if (contains){
+      LOG.debug("Cache has key: {}", key);
+    } else {
+      LOG.debug("Cache lacks key: {}", key);
     }
     return contains;
   }
@@ -154,9 +149,8 @@ public class Cache<K, V> extends LinkedHashMap<K, V> {
    */
   protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
     boolean removing = size() > maxCapacity;
-
-    if (removing && LOG.isDebugEnabled()) {
-      LOG.debug("Cache loses key: {}",  eldest.getKey().toString());
+    if (removing ) {
+      LOG.debug("Cache loses key: {}",  eldest.getKey());
     }
     return removing;
   }

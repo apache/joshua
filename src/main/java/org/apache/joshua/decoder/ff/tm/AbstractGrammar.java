@@ -153,8 +153,7 @@ public abstract class AbstractGrammar implements Grammar {
     if (node != null) {
       if (node.hasRules()) {
         RuleCollection rules = node.getRuleCollection();
-        if (LOG.isDebugEnabled())
-          LOG.debug("Sorting node {}", Arrays.toString(rules.getSourceSide()));
+        LOG.debug("Sorting node {}", Arrays.toString(rules.getSourceSide()));
 
         /* This causes the rules at this trie node to be sorted */
         rules.getSortedRules(models);
@@ -167,7 +166,7 @@ public abstract class AbstractGrammar implements Grammar {
                 + r.getEstimatedCost() + "  " + r.getClass().getName() + "@"
                 + Integer.toHexString(System.identityHashCode(r)));
           }
-          LOG.debug(s.toString());
+          LOG.debug("{}", s);
         }
       }
 
@@ -175,7 +174,7 @@ public abstract class AbstractGrammar implements Grammar {
         for (Trie child : node.getExtensions()) {
           sort(child, models);
         }
-      } else if (LOG.isDebugEnabled()) {
+      } else {
         LOG.debug("Node has 0 children to extend: {}", node);
       }
     }

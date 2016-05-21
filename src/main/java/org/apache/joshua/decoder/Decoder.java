@@ -783,7 +783,7 @@ public class Decoder {
       checkSharedVocabularyChecksumsForPackedGrammars(packed_grammars);
 
     } else {
-      LOG.info("* WARNING: no grammars supplied!  Supplying dummy glue grammar.");
+      LOG.warn("no grammars supplied!  Supplying dummy glue grammar.");
       MemoryBasedBatchGrammar glueGrammar = new MemoryBasedBatchGrammar("glue", joshuaConfiguration);
       glueGrammar.setSpanLimit(-1);
       glueGrammar.addGlueRules(featureFunctions);

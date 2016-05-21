@@ -87,11 +87,8 @@ public abstract class DefaultNGramLanguageModel implements NGramLanguageModel {
       // start_index=2. othercase, need to check)
       int[] ngram = Arrays.copyOfRange(sentence, 0, j);
       double logProb = ngramLogProbability(ngram, order);
-      if (LOG.isDebugEnabled()) {
-        String words = Vocabulary.getWords(ngram);
-        LOG.debug("\tlogp ({})  =  {}", words, logProb);
-      }
 
+      LOG.debug("\tlogp ({}) = {}", Vocabulary.getWords(ngram), logProb);
       probability += logProb;
     }
 

@@ -563,8 +563,7 @@ public class Chart {
     for (int width = 1; width <= sourceLength; width++) {
       for (int i = 0; i <= sourceLength - width; i++) {
         int j = i + width;
-        if (LOG.isDebugEnabled())
-          LOG.debug("Processing span (%d, %d)", i, j);
+        LOG.debug("Processing span ({}, {})", i, j);
 
         /* Skips spans for which no path exists (possible in lattices). */
         if (inputLattice.distance(i, j) == Float.POSITIVE_INFINITY) {
@@ -681,8 +680,7 @@ public class Chart {
     ArrayList<HGNode> queue = new ArrayList<HGNode>(chartBin.getSortedNodes());
     HashSet<Integer> seen_lhs = new HashSet<Integer>();
 
-    if (LOG.isDebugEnabled())
-      LOG.debug("Adding unary to [{}, {}]", i, j);
+    LOG.debug("Adding unary to [{}, {}]", i, j);
 
     while (queue.size() > 0) {
       HGNode node = queue.remove(0);
@@ -712,9 +710,8 @@ public class Chart {
                 new SourcePath(), true);
 
             if (LOG.isDebugEnabled()){
-              LOG.debug(rule.toString());
+              LOG.debug("{}", rule);
             }
-
             if (null != resNode && !seen_lhs.contains(resNode.lhs)) {
               queue.add(resNode);
               qtyAdditionsToQueue++;

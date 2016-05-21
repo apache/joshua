@@ -65,8 +65,7 @@ public class JoshuaDecoder {
     /* Step-1: initialize the decoder, test-set independent */
     Decoder decoder = new Decoder(joshuaConfiguration, userArgs.getConfigFile());
 
-    LOG.info("Model loading took %d seconds",
-        (System.currentTimeMillis() - startTime) / 1000);
+    LOG.info("Model loading took {} seconds", (System.currentTimeMillis() - startTime) / 1000);
     LOG.info("Memory used {} MB", ((Runtime.getRuntime().totalMemory()
         - Runtime.getRuntime().freeMemory()) / 1000000.0));
 
@@ -79,13 +78,12 @@ public class JoshuaDecoder {
 
       } else if (joshuaConfiguration.server_type == SERVER_TYPE.HTTP) {
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
-        LOG.info("** HTTP Server running and listening on port %d.", port);
+        LOG.info("HTTP Server running and listening on port {}.", port);
         server.createContext("/", new ServerThread(null, decoder, joshuaConfiguration));
         server.setExecutor(null); // creates a default executor
         server.start();
       } else {
-        System.err.println("* FATAL: unknown server type");
-        LOG.error("* FATAL: unknown server type");
+        LOG.error("Unknown server type");
         System.exit(1);
       }
       return;

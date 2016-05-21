@@ -147,7 +147,7 @@ public class GrammarPackerCli {
       parser.parseArgument(args);
       cli.run();
     } catch (CmdLineException e) {
-      LOG.info(e.toString());
+      LOG.error(e.getMessage(), e);
       parser.printUsage(System.err);
       System.exit(1);
     }

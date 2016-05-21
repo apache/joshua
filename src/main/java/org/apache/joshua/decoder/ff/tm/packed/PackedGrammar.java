@@ -162,7 +162,7 @@ public class PackedGrammar extends AbstractGrammar {
     root = new PackedRoot(slices);
     cached_rules = CacheBuilder.newBuilder().maximumSize(joshuaConfiguration.cachedRuleSize).build();
 
-    LOG.info("Loaded %d rules", count);
+    LOG.info("Loaded {} rules", count);
   }
 
   @Override

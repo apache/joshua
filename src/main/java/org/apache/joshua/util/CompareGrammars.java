@@ -103,7 +103,7 @@ public class CompareGrammars {
           LOG.debug("Line {}:  Score mismatch: {} vs {}", counter, score1, score2);
           set.add(line1);
           totalOverDiffs += diff;
-        } else if (LOG.isDebugEnabled()) {
+        } else {
           LOG.debug("Line {}: Scores MATCH: {} vs ", counter, score1, score2);
         }
       } else {

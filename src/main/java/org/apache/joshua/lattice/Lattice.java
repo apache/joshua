@@ -305,7 +305,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
     List<Node<String>> nodeList = new ArrayList<Node<String>>(nodes.values());
     Collections.sort(nodeList, new NodeIdentifierComparator());
 
-    LOG.debug(nodeList.toString());
+    LOG.debug("Nodelist={}", nodeList);
 
     return new Lattice<String>(nodeList, config);
   }
@@ -578,7 +578,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
     List<Node<String>> nodeList = new ArrayList<Node<String>>(nodes.values());
     Collections.sort(nodeList, new NodeIdentifierComparator());
 
-    LOG.debug(nodeList.toString());
+    LOG.debug("Nodelist={}", nodeList);
 
     return new Lattice<String>(nodeList, new JoshuaConfiguration());
   }

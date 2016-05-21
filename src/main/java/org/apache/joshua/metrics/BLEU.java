@@ -62,7 +62,7 @@ public class BLEU extends EvaluationMetric {
       // } else if (methodStr.equals("average")) {
       // effLengthMethod = EffectiveLengthMethod.AVERAGE;
     } else {
-      LOG.error("Unknown effective length method string " + methodStr + ".");
+      LOG.error("Unknown effective length method string {}", methodStr);
       // System.out.println("Should be one of closest, shortest, or average.");
       LOG.error("Should be one of closest or shortest.");
       throw new RuntimeException("Should be one of closest or shortest.");

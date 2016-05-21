@@ -18,10 +18,16 @@
  */
 package org.apache.joshua.pro;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Vector;
 
 // sparse feature representation version
 public class ClassifierPerceptron implements ClassifierInterface {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ClassifierPerceptron.class);
+
   @Override
   public double[] runClassifier(Vector<String> samples, double[] initialLambda, int featDim) {
     System.out.println("------- Average-perceptron training starts ------");
@@ -94,8 +100,7 @@ public class ClassifierPerceptron implements ClassifierInterface {
    */
   public void setClassifierParam(String[] param) {
     if (param == null)
-      System.out
-          .println("WARNING: no parameters specified for perceptron classifier, using default settings.");
+      LOG.warn("no parameters specified for perceptron classifier, using default settings.");
     else {
       maxIter = Integer.parseInt(param[0]);
       learningRate = Double.parseDouble(param[1]);

@@ -109,7 +109,7 @@ public class ArpaFile implements Iterable<ArpaNgram> {
           String[] words = Regex.spaces.split(parts[1]); 
 
           for (String word : words) { 
-            if (LOG.isDebugEnabled()) LOG.debug("Adding to vocab: " + word);
+            LOG.debug("Adding to vocab: {}", word);
             Vocabulary.addAll(word);
           } 
         } else {
@@ -191,7 +191,7 @@ public class ArpaFile implements Iterable<ArpaNgram> {
   public int getOrder() throws FileNotFoundException { 
 
     Pattern pattern = Pattern.compile("^ngram (\\d+)=\\d+$"); 
-    if (LOG.isDebugEnabled()) LOG.debug("Pattern is {}", pattern.toString());
+    LOG.debug("Pattern is {}", pattern);
     @SuppressWarnings("resource")
     final Scanner scanner = new Scanner(arpaFile); 
 

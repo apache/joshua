@@ -97,7 +97,7 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
     super(arpaFile.getVocab().size(), arpaFile.getOrder());
 
     int ngramCounts = arpaFile.size();
-    if (LOG.isDebugEnabled()) LOG.debug("ARPA file contains {} n-grams", ngramCounts);
+    LOG.debug("ARPA file contains {} n-grams", ngramCounts);
 
     this.children = new HashMap<Long,Integer>(ngramCounts);
     this.logProbs = new HashMap<Long,Float>(ngramCounts);
@@ -138,7 +138,7 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
         {
           long key = Bits.encodeAsLong(contextNodeID, word);
           float logProb = ngram.getValue();
-          if (LOG.isDebugEnabled()) LOG.debug("logProbs.put({}:{}, {}", contextNodeID, word, logProb);
+          LOG.debug("logProbs.put({}:{}, {}", contextNodeID, word, logProb);
           this.logProbs.put(key, logProb);
         }
       }
@@ -166,8 +166,7 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
               childID = children.get(key);
             } else {
               childID = ++nodeCounter;
-              if (LOG.isDebugEnabled())
-                LOG.debug("children.put({}:{}, )", backoffNodeID, context[i], childID);
+              LOG.debug("children.put({}:{}, )", backoffNodeID, context[i], childID);
               children.put(key, childID);
             }
             backoffNodeID = childID;
@@ -315,7 +314,7 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
             i++;
           }
 
-          LOG.info("logProb {} = {}", window.toString(), lm.ngramLogProbability(wordIDs, n));
+          LOG.info("logProb {} = {}", window, lm.ngramLogProbability(wordIDs, n));
         }
       }
 

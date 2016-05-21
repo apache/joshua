@@ -40,6 +40,8 @@ import org.apache.joshua.decoder.ff.state_maintenance.NgramDPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class performs the following:
@@ -55,6 +57,8 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * @author Zhifei Li, <zhifei.work@gmail.com>
  */
 public class LanguageModelFF extends StatefulFF {
+
+  private static final Logger LOG = LoggerFactory.getLogger(LanguageModelFF.class);
 
   public static int LM_INDEX = 0;
   private int startSymbolId;
@@ -120,7 +124,8 @@ public class LanguageModelFF extends StatefulFF {
         try {
           this.classMap.put(Vocabulary.id(lineComp[0]), Vocabulary.id(lineComp[1]));
         } catch (java.lang.ArrayIndexOutOfBoundsException e) {
-          System.err.println(String.format("* WARNING: bad vocab line #%d '%s'", lineno, line));
+          LOG.warn("bad vocab line #{} '{}'", lineno, line);
+          LOG.warn(e.getMessage(), e);
         }
       }
     }

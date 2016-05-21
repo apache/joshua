@@ -199,7 +199,7 @@ public class GrammarPacker {
     binarize(grammar_reader, alignment_reader);
     LOG.info("Packing complete.");
 
-    LOG.info("Packed grammar in: " + output);
+    LOG.info("Packed grammar in: {}", output);
     LOG.info("Done.");
   }
 
@@ -218,14 +218,14 @@ public class GrammarPacker {
       if (line.startsWith("[")) {
         // hierarchical model
         if (fields.size() < 4) {
-          LOG.warn(String.format("Incomplete grammar line at line %d: '%s'", counter, line));
+          LOG.warn("Incomplete grammar line at line {}: '{}'", counter, line);
           continue;
         }
         lhs = fields.remove(0);
       } else {
         // phrase-based model
         if (fields.size() < 3) {
-          LOG.warn("Incomplete phrase line at line " + counter);
+          LOG.warn("Incomplete phrase line at line {}", counter);
           LOG.warn(line);
           continue;
         }

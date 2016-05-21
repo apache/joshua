@@ -588,7 +588,7 @@ public class JoshuaConfiguration {
           } else if (parameter
               .equals(normalize_key(SOFT_SYNTACTIC_CONSTRAINT_DECODING_PROPERTY_NAME))) {
             fuzzy_matching = Boolean.parseBoolean(fds[1]);
-            LOG.debug("fuzzy_matching : {}", fuzzy_matching);
+            LOG.debug("fuzzy_matching: {}", fuzzy_matching);
 
           } else if (parameter.equals(normalize_key("fragment-map"))) {
             fragmentMapFile = fds[1];
@@ -663,7 +663,7 @@ public class JoshuaConfiguration {
                 || parameter.equals(normalize_key("useCubePrune"))
                 || parameter.equals(normalize_key("useBeamAndThresholdPrune"))
                 || parameter.equals(normalize_key("regexp-grammar"))) {
-              LOG.warn("WARNING: ignoring deprecated parameter '{}'", fds[0]);
+              LOG.warn("ignoring deprecated parameter '{}'", fds[0]);
 
             } else {
               throw new RuntimeException("FATAL: unknown configuration parameter '" + fds[0] + "'");

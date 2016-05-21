@@ -30,6 +30,9 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.hypergraph.HyperEdge;
 import org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationState;
 import org.apache.joshua.util.io.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Represent phrase-structure trees, with each node consisting of a label and a list of children.
  * Borrowed from the Berkeley Parser, and extended to allow the representation of tree fragments in
@@ -42,6 +45,7 @@ import org.apache.joshua.util.io.LineReader;
  */
 public class Tree implements Serializable {
 
+  private static final Logger LOG = LoggerFactory.getLogger(Tree.class);
   private static final long serialVersionUID = 1L;
 
   protected int label;
@@ -509,8 +513,7 @@ public class Tree implements Serializable {
       for (String line : reader) {
         String[] fields = line.split("\\s+\\|{3}\\s+");
         if (fields.length != 2 || !fields[0].startsWith("(")) {
-          System.err.println(String.format("* WARNING: malformed line %d: %s", reader.lineno(),
-              line));
+          LOG.warn("malformed line {}: {}", reader.lineno(), line);
           continue;
         }
 
@@ -520,8 +523,8 @@ public class Tree implements Serializable {
       throw new RuntimeException(String.format("* WARNING: couldn't read fragment mapping file '%s'",
           fragmentMappingFile), e);
     }
-    System.err.println(String.format("FragmentLMFF: Read %d mappings from '%s'",
-        rulesToFragmentStrings.size(), fragmentMappingFile));
+    LOG.info("FragmentLMFF: Read {} mappings from '{}'", rulesToFragmentStrings.size(),
+        fragmentMappingFile);
   }
 
   /**
@@ -728,12 +731,12 @@ public class Tree implements Serializable {
             frontierTree.children = tree.children;
           }
         } catch (IndexOutOfBoundsException e) {
-          //TODO: send these prints to LOG.err
-          System.err.println(String.format("ERROR at index %d", i));
-          System.err.println(String.format("RULE: %s  TREE: %s", rule.getEnglishWords(), tree));
-          System.err.println("  FRONTIER:");
-          for (Tree kid : frontier)
-            System.err.println("    " + kid);
+          LOG.error("ERROR at index {}", i);
+          LOG.error("RULE: {}  TREE: {}", rule.getEnglishWords(), tree);
+          LOG.error("  FRONTIER:");
+          for (Tree kid : frontier) {
+            LOG.error("    {}", kid);
+          }
           throw new RuntimeException(String.format("ERROR at index %d", i), e);
         }
       }

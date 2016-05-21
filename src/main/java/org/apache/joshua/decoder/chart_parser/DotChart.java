@@ -361,7 +361,7 @@ class DotChart {
       if (rules != null) {
         for (Rule r : rules.getRules()) {
           // System.out.println("rule: "+r.toString());
-          LOG.debug(r.toString());
+          LOG.debug("{}", r);
         }
       }
     }

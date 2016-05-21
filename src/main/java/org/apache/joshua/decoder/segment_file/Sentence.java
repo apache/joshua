@@ -271,8 +271,7 @@ public class Sentence {
     int size = this.getLattice().size() - 2; // subtract off the start- and end-of-sentence tokens
 
     if (size > length) {
-      LOG.info("* WARNING: sentence {} too long {}, truncating to length {}",
-          id(), size, length);
+      LOG.warn("sentence {} too long {}, truncating to length {}", id(), size, length);
 
       // Replace the input sentence (and target) -- use the raw string, not source()
       String[] tokens = source.split("\\s+");
