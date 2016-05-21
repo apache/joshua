@@ -127,7 +127,7 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
               childID = children.get(key);
             } else {
               childID = ++nodeCounter;
-              LOG.debug("children.put({}:{} , {})", contextNodeID, context[i], childID);
+              LOG.debug("children.put({}:{}, {})", contextNodeID, context[i], childID);
               children.put(key, childID);
             }
             contextNodeID = childID;
@@ -154,7 +154,7 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
           } else {
             wordChildID = ++nodeCounter;
             if (LOG.isDebugEnabled())
-              LOG.debug("children.put({}:{} , {})", backoffNodeID, word, wordChildID );
+              LOG.debug("children.put({}:{}, {})", backoffNodeID, word, wordChildID);
             children.put(backoffNodeKey, wordChildID);
           }
           backoffNodeID = wordChildID;
@@ -166,7 +166,7 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
               childID = children.get(key);
             } else {
               childID = ++nodeCounter;
-              LOG.debug("children.put({}:{}, )", backoffNodeID, context[i], childID);
+              LOG.debug("children.put({}:{}, {})", backoffNodeID, context[i], childID);
               children.put(key, childID);
             }
             backoffNodeID = childID;

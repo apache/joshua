@@ -209,7 +209,7 @@ public class ArpaFile implements Iterable<ArpaNgram> {
           LOG.debug("DOES  match: '{}'", line);
           order = Integer.valueOf(matcher.group(1)); 
         } else {
-          LOG.debug("Doesn't match: '{}'", line );
+          LOG.debug("Doesn't match: '{}'", line);
         } 
       } 
     } 

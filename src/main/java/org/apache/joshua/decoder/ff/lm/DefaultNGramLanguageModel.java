@@ -98,7 +98,7 @@ public abstract class DefaultNGramLanguageModel implements NGramLanguageModel {
       double logProb = ngramLogProbability(ngram, order);
       if (LOG.isDebugEnabled()) {
         String words = Vocabulary.getWords(ngram);
-        LOG.debug("\tlogp ( {} )  = {} ", words, logProb);
+        LOG.debug("\tlogp ({})  = {} ", words, logProb);
       }
       probability += logProb;
     }
