@@ -19,11 +19,12 @@
 package org.apache.joshua.tools;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.corpus.syntax.ArraySyntaxTree;
 import org.apache.joshua.util.io.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Finds labeling for a set of phrases.
@@ -32,8 +33,7 @@ import org.apache.joshua.util.io.LineReader;
  */
 public class LabelPhrases {
 
-  /** Logger for this class. */
-  private static final Logger logger = Logger.getLogger(LabelPhrases.class.getName());
+  public static final Logger LOG = LoggerFactory.getLogger(LabelPhrases.class);
 
   /**
    * Main method.
@@ -57,7 +57,7 @@ public class LabelPhrases {
       if ("-p".equals(args[i])) phrase_file_name = args[++i];
     }
     if (phrase_file_name == null) {
-      logger.severe("a phrase file is required for operation");
+      LOG.error("a phrase file is required for operation");
       System.exit(-1);
     }
 

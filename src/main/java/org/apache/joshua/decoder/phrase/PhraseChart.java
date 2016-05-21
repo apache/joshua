@@ -27,12 +27,16 @@ import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.RuleCollection;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents a bundle of phrase tables that have been read in,
  * reporting some stats about them. Probably could be done away with.
  */
 public class PhraseChart {
+
+  public static final Logger LOG = LoggerFactory.getLogger(PhraseChart.class);
 
   private int sentence_length;
   private int max_source_phrase_length;
@@ -92,18 +96,18 @@ public class PhraseChart {
         phrases.finish(features, Decoder.weights, num_options);
     }
 
-    Decoder.LOG(1, String.format("Input %d: Collecting options took %.3f seconds", source.id(),
-        (System.currentTimeMillis() - startTime) / 1000.0f));
+    LOG.info("Input {}: Collecting options took {} seconds", source.id(),
+        (System.currentTimeMillis() - startTime) / 1000.0f);
     
-    if (Decoder.VERBOSE(3)) {
+    if (LOG.isDebugEnabled()) {
       for (int i = 1; i < sentence_length - 1; i++) {
         for (int j = i + 1; j < sentence_length && j <= i + max_source_phrase_length; j++) {
           if (source.hasPath(i, j)) {
             TargetPhrases phrases = getRange(i, j);
             if (phrases != null) {
-              System.err.println(String.format("%s (%d-%d)", source.source(i,j), i, j));
+              LOG.debug("{} ({}-{})", source.source(i,j), i, j);
               for (Rule rule: phrases)
-                System.err.println(String.format("    %s :: est=%.3f", rule.getEnglishWords(), rule.getEstimatedCost()));
+                LOG.debug("    {} :: est={}", rule.getEnglishWords(), rule.getEstimatedCost());
             }
           }
         }

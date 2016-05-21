@@ -18,16 +18,16 @@
  */
 package org.apache.joshua.decoder.ff.tm.format;
 
-import java.util.logging.Logger;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.GrammarReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SamtFormatReader extends GrammarReader<Rule> {
 
-  private static final Logger logger = Logger.getLogger(SamtFormatReader.class.getName());
-
+  public static final Logger LOG = LoggerFactory.getLogger(SamtFormatReader.class);
   private static final String samtNonTerminalMarkup;
 
   static {
@@ -51,8 +51,8 @@ public class SamtFormatReader extends GrammarReader<Rule> {
   protected Rule parseLine(String line) {
     String[] fields = line.split(fieldDelimiter);
     if (fields.length != 4) {
-      logger.severe("Rule line does not have four fields: " + line);
-      logger.severe("Skipped.");
+      LOG.error("Rule line does not have four fields: {}", line);
+      LOG.error("Skipped.");
       return null;
     }
 

@@ -18,16 +18,19 @@
  */
 package org.apache.joshua.metrics;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class GradeLevelBLEU extends BLEU {
-  private static final Logger logger = Logger.getLogger(GradeLevelBLEU.class.getName());
+
+  public static final Logger LOG = LoggerFactory.getLogger(GradeLevelBLEU.class);
 
   // syllable pattern matches /C*V+/
   private static final Pattern syllable = Pattern.compile("([^aeiouy]*[aeiouy]+)");
@@ -184,7 +187,7 @@ public class GradeLevelBLEU extends BLEU {
     if (stats.length != suffStatsCount) {
       String msg = "Mismatch between stats.length and suffStatsCount (" + stats.length + " vs. "
           + suffStatsCount + ") in BLEU.score(int[])";
-      logger.severe(msg);
+      LOG.error(msg);
       throw new RuntimeException(msg);
     }
     double BLEUscore = super.score(stats);

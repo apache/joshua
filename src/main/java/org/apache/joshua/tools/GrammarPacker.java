@@ -34,7 +34,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.TreeMap;
-import java.util.logging.Logger;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.util.FormatUtils;
@@ -42,10 +41,12 @@ import org.apache.joshua.util.encoding.EncoderConfiguration;
 import org.apache.joshua.util.encoding.FeatureTypeAnalyzer;
 import org.apache.joshua.util.encoding.IntEncoder;
 import org.apache.joshua.util.io.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GrammarPacker {
 
-  private static final Logger logger = Logger.getLogger(GrammarPacker.class.getName());
+  public static final Logger LOG = LoggerFactory.getLogger(GrammarPacker.class);
 
   // Size limit for slice in bytes.
   private static int DATA_SIZE_LIMIT = (int) (Integer.MAX_VALUE * 0.8);
@@ -102,7 +103,7 @@ public class GrammarPacker {
     this.alignments = alignments_filename;
     packAlignments = grammarAlignments || (alignments != null);
     if (!packAlignments) {
-      logger.info("No alignments file or grammar specified, skipping.");
+      LOG.info("No alignments file or grammar specified, skipping.");
     } else if (alignments != null && !new File(alignments_filename).exists()) {
       throw new RuntimeException("Alignments file does not exist: " + alignments);
     }
@@ -111,9 +112,9 @@ public class GrammarPacker {
       readConfig(config_filename);
       types.readConfig(config_filename);
     } else {
-      logger.info("No config specified. Attempting auto-detection of feature types.");
+      LOG.info("No config specified. Attempting auto-detection of feature types.");
     }
-    logger.info(String.format("Approximate maximum slice size (in # of rules) set to %s", approximateMaximumSliceSize));
+    LOG.info("Approximate maximum slice size (in # of rules) set to {}", approximateMaximumSliceSize);
 
     File working_dir = new File(output);
     working_dir.mkdir();
@@ -150,16 +151,16 @@ public class GrammarPacker {
    * @throws IOException
    */
   public void pack() throws IOException {
-    logger.info("Beginning exploration pass.");
+    LOG.info("Beginning exploration pass.");
     LineReader grammar_reader = null;
     LineReader alignment_reader = null;
 
     // Explore pass. Learn vocabulary and feature value histograms.
-    logger.info("Exploring: " + grammar);
+    LOG.info("Exploring: {}", grammar);
     grammar_reader = new LineReader(grammar);
     explore(grammar_reader);
 
-    logger.info("Exploration pass complete. Freezing vocabulary and finalizing encoders.");
+    LOG.info("Exploration pass complete. Freezing vocabulary and finalizing encoders.");
     if (dump != null) {
       PrintWriter dump_writer = new PrintWriter(dump);
       dump_writer.println(types.toString());
@@ -167,39 +168,39 @@ public class GrammarPacker {
     }
 
     types.inferTypes(this.labeled);
-    logger.info("Type inference complete.");
+    LOG.info("Type inference complete.");
 
-    logger.info("Finalizing encoding.");
+    LOG.info("Finalizing encoding.");
 
-    logger.info("Writing encoding.");
+    LOG.info("Writing encoding.");
     types.write(output + File.separator + "encoding");
 
     writeVocabulary();
 
     String configFile = output + File.separator + "config";
-    logger.info(String.format("Writing config to '%s'", configFile));
+    LOG.info("Writing config to '{}'", configFile);
     // Write config options
     FileWriter config = new FileWriter(configFile);
-    config.write(String.format("max-source-len = %d\n", max_source_len));
+    config.write(String.format("max-source-len = {}\n", max_source_len));
     config.close();
     
     // Read previously written encoder configuration to match up to changed
     // vocabulary id's.
-    logger.info("Reading encoding.");
+    LOG.info("Reading encoding.");
     encoderConfig = new EncoderConfiguration();
     encoderConfig.load(output + File.separator + "encoding");
 
-    logger.info("Beginning packing pass.");
+    LOG.info("Beginning packing pass.");
     // Actual binarization pass. Slice and pack source, target and data.
     grammar_reader = new LineReader(grammar);
 
     if (packAlignments && !grammarAlignments)
       alignment_reader = new LineReader(alignments);
     binarize(grammar_reader, alignment_reader);
-    logger.info("Packing complete.");
+    LOG.info("Packing complete.");
 
-    logger.info("Packed grammar in: " + output);
-    logger.info("Done.");
+    LOG.info("Packed grammar in: " + output);
+    LOG.info("Done.");
   }
 
   private void explore(LineReader grammar) {
@@ -217,15 +218,15 @@ public class GrammarPacker {
       if (line.startsWith("[")) {
         // hierarchical model
         if (fields.size() < 4) {
-          logger.warning(String.format("Incomplete grammar line at line %d: '%s'", counter, line));
+          LOG.warn(String.format("Incomplete grammar line at line %d: '%s'", counter, line));
           continue;
         }
         lhs = fields.remove(0);
       } else {
         // phrase-based model
         if (fields.size() < 3) {
-          logger.warning("Incomplete phrase line at line " + counter);
-          logger.warning(line);
+          LOG.warn("Incomplete phrase line at line " + counter);
+          LOG.warn(line);
           continue;
         }
         lhs = "[X]";
@@ -350,8 +351,9 @@ public class GrammarPacker {
         // Thus, we can only flush if the current first two source words differ from the ones
         // when the slice size limit was reached.
         if (!first_two_source_words.equals(prev_first_two_source_words)) {
-          logger.warning(String.format("ready to flush and first two words have changed (%s vs. %s)", prev_first_two_source_words, first_two_source_words));
-          logger.info(String.format("flushing %d rules to slice.", slice_counter));
+          LOG.warn("ready to flush and first two words have changed ({} vs. {})",
+              prev_first_two_source_words, first_two_source_words);
+          LOG.info("flushing {} rules to slice.", slice_counter);
           flush(source_trie, target_trie, feature_buffer, alignment_buffer, num_slices);
           source_trie.clear();
           target_trie.clear();
@@ -373,7 +375,7 @@ public class GrammarPacker {
           alignment_line = fields.get(3);
         } else {
           if (!alignment_reader.hasNext()) {
-            logger.severe("No more alignments starting in line " + counter);
+            LOG.error("No more alignments starting in line {}", counter);
             throw new RuntimeException("No more alignments starting in line " + counter);
           }
           alignment_line = alignment_reader.next().trim();
@@ -416,8 +418,8 @@ public class GrammarPacker {
 
       // Sanity check on the data block index.
       if (packAlignments && features_index != alignment_index) {
-        logger.severe("Block index mismatch between features (" + features_index
-            + ") and alignments (" + alignment_index + ").");
+        LOG.error("Block index mismatch between features ({}) and alignments ({}).",
+            features_index, alignment_index);
         throw new RuntimeException("Data block index mismatch.");
       }
 
@@ -567,7 +569,7 @@ public class GrammarPacker {
         if (packAlignments) {
           int alignment_block_index = alignment_buffer.write(sv.data);
           if (alignment_block_index != feature_block_index) {
-            logger.severe("Block index mismatch.");
+            LOG.error("Block index mismatch.");
             throw new RuntimeException("Block index mismatch: alignment (" + alignment_block_index
                 + ") and features (" + feature_block_index + ") don't match.");
           }
@@ -591,7 +593,7 @@ public class GrammarPacker {
 
   public void writeVocabulary() throws IOException {
     final String vocabularyFilename = output + File.separator + VOCABULARY_FILENAME;
-    logger.info("Writing vocabulary to " + vocabularyFilename);
+    LOG.info("Writing vocabulary to {}", vocabularyFilename);
     Vocabulary.write(vocabularyFilename);
   }
 
@@ -840,7 +842,7 @@ public class GrammarPacker {
     FeatureBuffer() throws IOException {
       super();
       idEncoder = types.getIdEncoder();
-      logger.info("Encoding feature ids in: " + idEncoder.getKey());
+      LOG.info("Encoding feature ids in: {}", idEncoder.getKey());
     }
 
     /**
@@ -929,7 +931,7 @@ public class GrammarPacker {
       if (packAlignments)
         alignmentFile = new File(output + File.separator + prefix + ".alignments");
 
-      logger.info("Allocated slice: " + sourceFile.getAbsolutePath());
+      LOG.info("Allocated slice: {}", sourceFile.getAbsolutePath());
     }
 
     DataOutputStream getSourceOutput() throws IOException {

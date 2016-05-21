@@ -39,6 +39,8 @@ import org.apache.joshua.lattice.Lattice;
 import org.apache.joshua.lattice.Node;
 import org.apache.joshua.util.ChartSpan;
 import org.apache.joshua.util.Regex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents lattice input. The lattice is contained on a single line and is represented
@@ -50,6 +52,8 @@ import org.apache.joshua.util.Regex;
  */
 
 public class Sentence {
+
+  public static final Logger LOG = LoggerFactory.getLogger(Sentence.class);
 
   /* The sentence number. */
   public int id = -1;
@@ -267,8 +271,8 @@ public class Sentence {
     int size = this.getLattice().size() - 2; // subtract off the start- and end-of-sentence tokens
 
     if (size > length) {
-      Decoder.LOG(1, String.format("* WARNING: sentence %d too long (%d), truncating to length %d",
-          id(), size, length));
+      LOG.info("* WARNING: sentence {} too long {}, truncating to length {}",
+          id(), size, length);
 
       // Replace the input sentence (and target) -- use the raw string, not source()
       String[] tokens = source.split("\\s+");

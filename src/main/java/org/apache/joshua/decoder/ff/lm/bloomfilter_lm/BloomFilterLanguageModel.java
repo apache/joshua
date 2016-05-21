@@ -29,7 +29,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
-import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -37,6 +36,8 @@ import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.ff.lm.DefaultNGramLanguageModel;
 import org.apache.joshua.util.Regex;
 import org.apache.joshua.util.io.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An n-gram language model with linearly-interpolated Witten-Bell smoothing, using a Bloom filter
@@ -62,7 +63,7 @@ public class BloomFilterLanguageModel extends DefaultNGramLanguageModel implemen
   /**
    * The logger for this class.
    */
-  public static final Logger logger = Logger.getLogger(BloomFilterLanguageModel.class.getName());
+  public static final Logger LOG = LoggerFactory.getLogger(BloomFilterLanguageModel.class);
 
   /**
    * The Bloom filter data structure itself.

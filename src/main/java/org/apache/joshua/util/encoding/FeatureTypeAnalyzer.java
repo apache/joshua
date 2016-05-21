@@ -28,14 +28,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.util.io.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FeatureTypeAnalyzer {
 
-  private static final Logger logger = Logger.getLogger(FeatureTypeAnalyzer.class.getName());
+  public static final Logger LOG = LoggerFactory.getLogger(FeatureTypeAnalyzer.class);
 
   private ArrayList<FeatureType> types;
 
@@ -122,7 +123,7 @@ public class FeatureTypeAnalyzer {
     for (FeatureType ft : types)
       ft.inferUncompressedType();
     for (int id : featureToType.keySet())
-      logger.info("Type inferred: " + (labeled ? Vocabulary.word(id) : "Feature " + id) + " is "
+      LOG.info("Type inferred: {}" + (labeled ? Vocabulary.word(id) : "Feature " + id) + " is "
           + types.get(featureToType.get(id)).encoder.getKey());
   }
 

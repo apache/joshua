@@ -28,6 +28,8 @@ import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.util.FormatUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Stores the identity of a word and its annotations in a sentence.
@@ -36,6 +38,9 @@ import org.apache.joshua.util.FormatUtils;
  * @author Matt Post
  */
 public class Token {
+
+  public static final Logger LOG = LoggerFactory.getLogger(Token.class);
+
   // The token without the annotations
   private String token; 
   private int tokenID;
@@ -104,7 +109,7 @@ public class Token {
       else
         annotations.put("lettercase",  "lower");
       
-      Decoder.LOG(2, String.format("TOKEN: %s -> %s (%s)", token, token.toLowerCase(), annotations.get("lettercase")));
+      LOG.info("TOKEN: {} -> {} ({})", token, token.toLowerCase(), annotations.get("lettercase"));
       token = token.toLowerCase(); 
     }
     

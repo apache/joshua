@@ -29,13 +29,14 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.logging.Logger;
 
 import org.apache.joshua.decoder.ff.StatefulFF;
 import org.apache.joshua.decoder.ff.fragmentlm.Tree;
 import org.apache.joshua.util.FormatUtils;
 import org.apache.joshua.util.Regex;
 import org.apache.joshua.util.io.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Configuration file for Joshua decoder.
@@ -48,7 +49,9 @@ import org.apache.joshua.util.io.LineReader;
  */
 public class JoshuaConfiguration {
 
-  // whether to construct a StructuredTranslation object for each request instead of 
+  public static final Logger LOG = LoggerFactory.getLogger(JoshuaConfiguration.class);
+
+  // whether to construct a StructuredTranslation object for each request instead of
   // printing to stdout. Used when the Decoder is used from Java directly.
   public Boolean use_structured_output = false;
 
@@ -72,33 +75,32 @@ public class JoshuaConfiguration {
    * also just be listed in the main config file.
    */
   public String weights_file = "";
-
   // Default symbols. The symbol here should be enclosed in square brackets.
   public String default_non_terminal = FormatUtils.markup("X");
+
   public String goal_symbol = FormatUtils.markup("GOAL");
 
   /*
    * A list of OOV symbols in the form
-   * 
+   *
    * [X1] weight [X2] weight [X3] weight ...
-   * 
+   *
    * where the [X] symbols are nonterminals and the weights are weights. For each OOV word w in the
    * input sentence, Joshua will create rules of the form
-   * 
+   *
    * X1 -> w (weight)
-   * 
+   *
    * If this is empty, an unweighted default_non_terminal is used.
    */
-
   public class OOVItem implements Comparable<OOVItem> {
     public String label;
+
     public float weight;
 
     OOVItem(String l, float w) {
       label = l;
       weight = w;
     }
-
     @Override
     public int compareTo(OOVItem other) {
       if (weight > other.weight)
@@ -108,6 +110,7 @@ public class JoshuaConfiguration {
       return 0;
     }
   }
+
   public ArrayList<OOVItem> oovList = null;
 
   /*
@@ -126,9 +129,9 @@ public class JoshuaConfiguration {
    * much, much quicker (good for debugging), but that per-sentence decoding is a bit slower.
    */
   public boolean amortized_sorting = true;
-
   // syntax-constrained decoding
   public boolean constrain_parse = false;
+
   public boolean use_pos_labels = false;
 
   // oov-specific
@@ -161,14 +164,14 @@ public class JoshuaConfiguration {
    * variables are available:
    *
    * <pre>
-   * - %i the 0-indexed sentence number 
-   * - %e the source string %s the translated sentence 
-   * - %S the translated sentence with some basic capitalization and denormalization 
-   * - %t the synchronous derivation 
-   * - %f the list of feature values (as name=value pairs) 
+   * - %i the 0-indexed sentence number
+   * - %e the source string %s the translated sentence
+   * - %S the translated sentence with some basic capitalization and denormalization
+   * - %t the synchronous derivation
+   * - %f the list of feature values (as name=value pairs)
    * - %c the model cost
-   * - %w the weight vector 
-   * - %a the alignments between source and target words (currently unimplemented) 
+   * - %w the weight vector
+   * - %a the alignments between source and target words (currently unimplemented)
    * - %d a verbose, many-line version of the derivation
    * </pre>
    */
@@ -189,7 +192,6 @@ public class JoshuaConfiguration {
   /* Enables synchronous parsing. */
   public boolean parse = false; // perform synchronous parsing
 
-  private final Logger logger = Logger.getLogger(JoshuaConfiguration.class.getName());
 
   /* A list of the feature functions. */
   public ArrayList<String> features = new ArrayList<String>();
@@ -282,9 +284,9 @@ public class JoshuaConfiguration {
    *
    */
   public void reset() {
-    logger.info("Resetting the JoshuaConfiguration to its defaults ...");
-    logger.info("\n\tResetting the StatefullFF global state index ...");
-    logger.info("\n\t...done");
+    LOG.info("Resetting the JoshuaConfiguration to its defaults ...");
+    LOG.info("\n\tResetting the StatefullFF global state index ...");
+    LOG.info("\n\t...done");
     StatefulFF.resetGlobalStateIndex();
     tms = new ArrayList<String>();
     weights_file = "";
@@ -314,7 +316,7 @@ public class JoshuaConfiguration {
 
     reordering_limit = 8;
     num_translation_options = 20;
-    logger.info("...done");
+    LOG.info("...done");
   }
 
   // ===============================================================
@@ -376,7 +378,7 @@ public class JoshuaConfiguration {
         if (line.indexOf("=") != -1) { // parameters; (not feature function)
           String[] fds = Regex.equalsWithSpaces.split(line, 2);
           if (fds.length < 2) {
-            Decoder.LOG(1, String.format("* WARNING: skipping config file line '%s'", line));
+            LOG.warn("skipping config file line '{}'", line);
             continue;
           }
 
@@ -417,7 +419,7 @@ public class JoshuaConfiguration {
             String[] tokens = fds[1].split("\\s+");
             if (! tokens[1].startsWith("-")) { // old format
               tmLine = String.format("%s -owner %s -maxspan %s -path %s", tokens[0], tokens[1], tokens[2], tokens[3]);
-              Decoder.LOG(1, String.format("WARNING: Converting deprecated TM line from '%s' -> '%s'", fds[1], tmLine));
+              LOG.warn("Converting deprecated TM line from '{}' -> '{}'", fds[1], tmLine);
             }
             tms.add(tmLine);
 
@@ -426,12 +428,11 @@ public class JoshuaConfiguration {
 
           } else if (parameter.equals(normalize_key("parse"))) {
             parse = Boolean.parseBoolean(fds[1]);
-            logger.finest(String.format("parse: %s", parse));
+            LOG.debug("parse: {}", parse);
 
           } else if (parameter.equals(normalize_key("dump-hypergraph"))) {
             hypergraphFilePattern = fds[1].trim();
-            logger
-                .finest(String.format("  hypergraph dump file format: %s", hypergraphFilePattern));
+            LOG.debug("  hypergraph dump file format: {}", hypergraphFilePattern);
 
           } else if (parameter.equals(normalize_key("oov-list"))) {
             if (new File(fds[1]).exists()) {
@@ -481,11 +482,11 @@ public class JoshuaConfiguration {
 
           } else if (parameter.equals(normalize_key("default-non-terminal"))) {
             default_non_terminal = markup(cleanNonTerminal(fds[1].trim()));
-            logger.finest(String.format("default_non_terminal: %s", default_non_terminal));
+            LOG.debug("default_non_terminal: {}", default_non_terminal);
 
           } else if (parameter.equals(normalize_key("goal-symbol"))) {
             goal_symbol = markup(cleanNonTerminal(fds[1].trim()));
-            logger.finest("goalSymbol: " + goal_symbol);
+            LOG.debug("goalSymbol: {}", goal_symbol);
 
           } else if (parameter.equals(normalize_key("weights-file"))) {
             weights_file = fds[1];
@@ -507,19 +508,19 @@ public class JoshuaConfiguration {
 
           } else if (parameter.equals(normalize_key("use_unique_nbest"))) {
             use_unique_nbest = Boolean.valueOf(fds[1]);
-            logger.finest(String.format("use_unique_nbest: %s", use_unique_nbest));
+            LOG.debug("use_unique_nbest: {}", use_unique_nbest);
 
           } else if (parameter.equals(normalize_key("output-format"))) {
             outputFormat = fds[1];
-            logger.finest(String.format("output-format: %s", outputFormat));
+            LOG.debug("output-format: {}", outputFormat);
 
           } else if (parameter.equals(normalize_key("include_align_index"))) {
             include_align_index = Boolean.valueOf(fds[1]);
-            logger.finest(String.format("include_align_index: %s", include_align_index));
+            LOG.debug("include_align_index: {}", include_align_index);
 
           } else if (parameter.equals(normalize_key("top_n"))) {
             topN = Integer.parseInt(fds[1]);
-            logger.finest(String.format("topN: %s", topN));
+            LOG.debug("topN: {}", topN);
 
           } else if (parameter.equals(normalize_key("num_parallel_decoders"))
               || parameter.equals(normalize_key("threads"))) {
@@ -528,15 +529,15 @@ public class JoshuaConfiguration {
               throw new IllegalArgumentException(
                   "Must specify a positive number for num_parallel_decoders");
             }
-            logger.finest(String.format("num_parallel_decoders: %s", num_parallel_decoders));
+            LOG.debug("num_parallel_decoders: {}", num_parallel_decoders);
 
           } else if (parameter.equals(normalize_key("mark_oovs"))) {
             mark_oovs = Boolean.valueOf(fds[1]);
-            logger.finest(String.format("mark_oovs: %s", mark_oovs));
+            LOG.debug("mark_oovs: {}", mark_oovs);
 
           } else if (parameter.equals(normalize_key("pop-limit"))) {
             pop_limit = Integer.parseInt(fds[1]);
-            logger.finest(String.format("pop-limit: %s", pop_limit));
+            LOG.info("pop-limit: {}", pop_limit);
 
           } else if (parameter.equals(normalize_key("input-type"))) {
             if (fds[1].equals("json")) {
@@ -546,7 +547,7 @@ public class JoshuaConfiguration {
             } else {
               throw new RuntimeException(String.format("* FATAL: invalid server type '%s'", fds[1]));
             }
-            logger.info(String.format("    input-type: %s", input_type));
+            LOG.info("    input-type: {}", input_type);
 
           } else if (parameter.equals(normalize_key("server-type"))) {
             if (fds[1].toLowerCase().equals("tcp"))
@@ -554,19 +555,19 @@ public class JoshuaConfiguration {
             else if (fds[1].toLowerCase().equals("http"))
               server_type = SERVER_TYPE.HTTP;
 
-            logger.info(String.format("    server-type: %s", server_type));
+            LOG.info("    server-type: {}", server_type);
 
           } else if (parameter.equals(normalize_key("server-port"))) {
             server_port = Integer.parseInt(fds[1]);
-            logger.info(String.format("    server-port: %d", server_port));
+            LOG.info("    server-port: {}", server_port);
 
           } else if (parameter.equals(normalize_key("rescore-forest"))) {
             rescoreForest = true;
-            logger.info(String.format("    rescore-forest: %s", rescoreForest));
+            LOG.info("    rescore-forest: {}", rescoreForest);
 
           } else if (parameter.equals(normalize_key("rescore-forest-weight"))) {
             rescoreForestWeight = Float.parseFloat(fds[1]);
-            logger.info(String.format("    rescore-forest-weight: %f", rescoreForestWeight));
+            LOG.info("    rescore-forest-weight: {}", rescoreForestWeight);
 
           } else if (parameter.equals(normalize_key("maxlen"))) {
             // reset the maximum length
@@ -587,7 +588,7 @@ public class JoshuaConfiguration {
           } else if (parameter
               .equals(normalize_key(SOFT_SYNTACTIC_CONSTRAINT_DECODING_PROPERTY_NAME))) {
             fuzzy_matching = Boolean.parseBoolean(fds[1]);
-            logger.finest(String.format(fuzzy_matching + ": %s", fuzzy_matching));
+            LOG.debug("fuzzy_matching : {}", fuzzy_matching);
 
           } else if (parameter.equals(normalize_key("fragment-map"))) {
             fragmentMapFile = fds[1];
@@ -662,14 +663,14 @@ public class JoshuaConfiguration {
                 || parameter.equals(normalize_key("useCubePrune"))
                 || parameter.equals(normalize_key("useBeamAndThresholdPrune"))
                 || parameter.equals(normalize_key("regexp-grammar"))) {
-              logger.warning(String.format("WARNING: ignoring deprecated parameter '%s'", fds[0]));
+              LOG.warn("WARNING: ignoring deprecated parameter '{}'", fds[0]);
 
             } else {
               throw new RuntimeException("FATAL: unknown configuration parameter '" + fds[0] + "'");
             }
           }
 
-          Decoder.LOG(1, String.format("    %s = '%s'", normalize_key(fds[0]), fds[1]));
+          LOG.info("    {} = '{}'", normalize_key(fds[0]), fds[1]);
 
         } else {
           /*

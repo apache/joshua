@@ -23,13 +23,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
-import org.apache.joshua.decoder.chart_parser.CubePruneState;
 import org.apache.joshua.decoder.chart_parser.DotChart.DotNode;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.SourceDependentFF;
@@ -47,6 +43,8 @@ import org.apache.joshua.lattice.Arc;
 import org.apache.joshua.lattice.Lattice;
 import org.apache.joshua.lattice.Node;
 import org.apache.joshua.util.ChartSpan;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Chart class this class implements chart-parsing: (1) seeding the chart (2)
@@ -66,6 +64,7 @@ import org.apache.joshua.util.ChartSpan;
 
 public class Chart {
 
+  public static final Logger LOG = LoggerFactory.getLogger(Chart.class);
   private final JoshuaConfiguration config;
   // ===========================================================
   // Statistics
@@ -100,7 +99,6 @@ public class Chart {
 //  private ManualConstraintsHandler manualConstraintsHandler;
   private StateConstraint stateConstraint;
 
-  private static final Logger logger = Logger.getLogger(Chart.class.getName());
 
   // ===============================================================
   // Constructors
@@ -169,7 +167,7 @@ public class Chart {
       if (ff instanceof SourceDependentFF)
         ((SourceDependentFF) ff).setSource(sentence);
 
-    Decoder.LOG(2, "Finished seeding chart.");
+    LOG.debug("Finished seeding chart.");
   }
 
   /**
@@ -434,8 +432,8 @@ public class Chart {
     if (null == this.cells.get(0, sourceLength)
         || !this.goalBin.transitToGoal(this.cells.get(0, sourceLength), this.featureFunctions,
             this.sourceLength)) {
-      Decoder.LOG(1, String.format("Input %d: Parse failure (either no derivations exist or pruning is too aggressive",
-          sentence.id()));
+      LOG.info("Input {}: Parse failure (either no derivations exist or pruning is too aggressive",
+          sentence.id());
       return null;
     }
 
@@ -565,8 +563,8 @@ public class Chart {
     for (int width = 1; width <= sourceLength; width++) {
       for (int i = 0; i <= sourceLength - width; i++) {
         int j = i + width;
-        if (logger.isLoggable(Level.FINEST))
-          logger.finest(String.format("Processing span (%d, %d)", i, j));
+        if (LOG.isDebugEnabled())
+          LOG.debug("Processing span (%d, %d)", i, j);
 
         /* Skips spans for which no path exists (possible in lattices). */
         if (inputLattice.distance(i, j) == Float.POSITIVE_INFINITY) {
@@ -578,7 +576,7 @@ public class Chart {
          * rules over (i,j-1) that need the terminal at (j-1,j) and looking at
          * all split points k to expand nonterminals.
          */
-        logger.finest("Expanding cell");
+        LOG.debug("Expanding cell");
         for (int k = 0; k < this.grammars.length; k++) {
           /**
            * Each dotChart can act individually (without consulting other
@@ -592,17 +590,17 @@ public class Chart {
          * 2. The regular CKY part: add completed items onto the chart via cube
          * pruning.
          */
-        logger.finest("Adding complete items into chart");
+        LOG.debug("Adding complete items into chart");
         completeSpan(i, j);
 
         /* 3. Process unary rules. */
-        logger.finest("Adding unary items into chart");
+        LOG.debug("Adding unary items into chart");
         addUnaryNodes(this.grammars, i, j);
 
         // (4)=== in dot_cell(i,j), add dot-nodes that start from the /complete/
         // superIterms in
         // chart_cell(i,j)
-        logger.finest("Initializing new dot-items that start from complete items in this cell");
+        LOG.debug("Initializing new dot-items that start from complete items in this cell");
         for (int k = 0; k < this.grammars.length; k++) {
           if (this.grammars[k].hasRuleForSpan(i, j, inputLattice.distance(i, j))) {
             this.dotcharts[k].startDotItems(i, j);
@@ -621,18 +619,18 @@ public class Chart {
       }
     }
 
-    logStatistics(Level.INFO);
+    logStatistics();
 
     // transition_final: setup a goal item, which may have many deductions
     if (null == this.cells.get(0, sourceLength)
         || !this.goalBin.transitToGoal(this.cells.get(0, sourceLength), this.featureFunctions,
             this.sourceLength)) {
-      Decoder.LOG(1, String.format("Input %d: Parse failure (either no derivations exist or pruning is too aggressive",
-          sentence.id()));
+      LOG.info("Input {}: Parse failure (either no derivations exist or pruning is too aggressive",
+          sentence.id());
       return null;
     }
 
-    logger.fine("Finished expand");
+    LOG.debug("Finished expand");
     return new HyperGraph(this.goalBin.getSortedNodes().get(0), -1, -1, this.sentence);
   }
 
@@ -657,9 +655,9 @@ public class Chart {
   // Private methods
   // ===============================================================
 
-  private void logStatistics(Level level) {
-    Decoder.LOG(2, String.format("Input %d: Chart: added %d merged %d dot-items added: %d",
-        this.sentence.id(), this.nAdded, this.nMerged, this.nDotitemAdded));
+  private void logStatistics() {
+    LOG.info("Input {}: Chart: added {} merged {} dot-items added: {}",
+        this.sentence.id(), this.nAdded, this.nMerged, this.nDotitemAdded);
   }
 
   /**
@@ -683,8 +681,8 @@ public class Chart {
     ArrayList<HGNode> queue = new ArrayList<HGNode>(chartBin.getSortedNodes());
     HashSet<Integer> seen_lhs = new HashSet<Integer>();
 
-    if (logger.isLoggable(Level.FINEST))
-      logger.finest("Adding unary to [" + i + ", " + j + "]");
+    if (LOG.isDebugEnabled())
+      LOG.debug("Adding unary to [{}, {}]", i, j);
 
     while (queue.size() > 0) {
       HGNode node = queue.remove(0);
@@ -713,8 +711,9 @@ public class Chart {
             HGNode resNode = chartBin.addHyperEdgeInCell(states, rule, i, j, antecedents,
                 new SourcePath(), true);
 
-            if (logger.isLoggable(Level.FINEST))
-              logger.finest(rule.toString());
+            if (LOG.isDebugEnabled()){
+              LOG.debug(rule.toString());
+            }
 
             if (null != resNode && !seen_lhs.contains(resNode.lhs)) {
               queue.add(resNode);

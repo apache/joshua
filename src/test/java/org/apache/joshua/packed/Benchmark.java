@@ -18,6 +18,9 @@
  */
 package org.apache.joshua.packed;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,7 +29,6 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.Random;
-import java.util.logging.Logger;
 
 /**
  * This program runs a little benchmark to check reading speed on various data
@@ -36,7 +38,9 @@ import java.util.logging.Logger;
  */
 
 public class Benchmark {
-  private static final Logger	logger = Logger.getLogger(Benchmark.class.getName());
+
+  
+  public static final Logger LOG = LoggerFactory.getLogger(Benchmark.class);
 
   private IntBuffer intBuffer;
   private MappedByteBuffer byteBuffer;
@@ -57,7 +61,7 @@ public class Benchmark {
   }
 
   public void benchmark(int times) {
-    logger.info("Beginning benchmark.");
+    LOG.info("Beginning benchmark.");
 
     Random r = new Random();
     r.setSeed(1234567890);
@@ -73,28 +77,28 @@ public class Benchmark {
     for (int t = 0; t < times; t++)
       for (int i = 0; i < positions.length; i++)
         sum += byteBuffer.getInt(positions[i] * 4);
-    logger.info("Sum: " + sum);
+    LOG.info("Sum: {}", sum);
     long byte_time = System.currentTimeMillis();
 
     sum = 0;
     for (int t = 0; t < times; t++)
       for (int i = 0; i < positions.length; i++)
         sum += intBuffer.get(positions[i]);
-    logger.info("Sum: " + sum);
+    LOG.info("Sum: {}", sum);
     long int_time = System.currentTimeMillis();
 
     sum = 0;
     for (int t = 0; t < times; t++)
       for (int i = 0; i < positions.length; i++)
         sum += intArray[positions[i]];
-    logger.info("Sum: " + sum);
+    LOG.info("Sum: {}", sum);
     long array_time = System.currentTimeMillis();
 
     sum = 0;
     for (int t = 0; t < times; t++)
       for (int i = 0; i < (intArray.length / 8); i++)
         sum += intArray[i * 6] + intArray[i * 6 + 2];
-    logger.info("Sum: " + sum);
+    LOG.info("Sum: {}", sum);
     long mult_time = System.currentTimeMillis();
 
     sum = 0;
@@ -105,14 +109,14 @@ public class Benchmark {
         index += 6;
       }
     }
-    logger.info("Sum: " + sum);
+    LOG.info("Sum: {}", sum);
     long add_time = System.currentTimeMillis();
 
-    logger.info("ByteBuffer: " + (byte_time - start_time));
-    logger.info("IntBuffer:  " + (int_time - byte_time));
-    logger.info("Array:      " + (array_time - int_time));
-    logger.info("Multiply:   " + (mult_time - array_time));
-    logger.info("Add:        " + (add_time - mult_time));
+    LOG.info("ByteBuffer: {}", (byte_time - start_time));
+    LOG.info("IntBuffer:  {}", (int_time - byte_time));
+    LOG.info("Array:      {}", (array_time - int_time));
+    LOG.info("Multiply:   {}", (mult_time - array_time));
+    LOG.info("Add:        {}", (add_time - mult_time));
   }
 
   public static void main(String args[]) throws IOException {

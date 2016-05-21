@@ -99,16 +99,19 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PackedGrammar extends AbstractGrammar {
 
-  private EncoderConfiguration encoding;
+  public static final Logger LOG = LoggerFactory.getLogger(PackedGrammar.class);
+  public static final String VOCABULARY_FILENAME = "vocabulary";
 
+  private EncoderConfiguration encoding;
   private PackedRoot root;
   private ArrayList<PackedSlice> slices;
-  private final File vocabFile; // store path to vocabulary file
 
-  public static final String VOCABULARY_FILENAME = "vocabulary";
+  private final File vocabFile; // store path to vocabulary file
 
   // The grammar specification keyword (e.g., "thrax" or "moses")
   private String type;
@@ -118,14 +121,14 @@ public class PackedGrammar extends AbstractGrammar {
   private final Cache<Trie, List<Rule>> cached_rules;
 
   public PackedGrammar(String grammar_dir, int span_limit, String owner, String type,
-      JoshuaConfiguration joshuaConfiguration) throws FileNotFoundException, IOException {
+      JoshuaConfiguration joshuaConfiguration) throws IOException {
     super(joshuaConfiguration);
     this.spanLimit = span_limit;
     this.type = type;
 
     // Read the vocabulary.
     vocabFile = new File(grammar_dir + File.separator + VOCABULARY_FILENAME);
-    Decoder.LOG(1, String.format("Reading vocabulary: %s", vocabFile));
+    LOG.info("Reading vocabulary: {}", vocabFile);
     if (!Vocabulary.read(vocabFile)) {
       throw new RuntimeException("mismatches or collisions while reading on-disk vocabulary");
     }
@@ -133,12 +136,12 @@ public class PackedGrammar extends AbstractGrammar {
     // Read the config
     String configFile = grammar_dir + File.separator + "config";
     if (new File(configFile).exists()) {
-      Decoder.LOG(1, String.format("Reading packed config: %s", configFile));
+      LOG.info("Reading packed config: {}", configFile);
       readConfig(configFile);
     }
     
     // Read the quantizer setup.
-    Decoder.LOG(1, String.format("Reading encoder configuration: %s%sencoding", grammar_dir, File.separator));
+    LOG.info("Reading encoder configuration: {}{}encoding", grammar_dir, File.separator);
     encoding = new EncoderConfiguration();
     encoding.load(grammar_dir + File.separator + "encoding");
 
@@ -159,7 +162,7 @@ public class PackedGrammar extends AbstractGrammar {
     root = new PackedRoot(slices);
     cached_rules = CacheBuilder.newBuilder().maximumSize(joshuaConfiguration.cachedRuleSize).build();
 
-    Decoder.LOG(1, String.format("Loaded %d rules", count));
+    LOG.info("Loaded %d rules", count);
   }
 
   @Override
@@ -519,12 +522,12 @@ public class PackedGrammar extends AbstractGrammar {
       try {
         alignments.get(alignment, 0, num_points * 2);
       } catch (BufferUnderflowException bue) {
-        Decoder.LOG(4, "Had an exception when accessing alignment mapped byte buffer");
-        Decoder.LOG(4, "Attempting to access alignments at position: " + alignment_position + 1);
-        Decoder.LOG(4, "And to read this many bytes: " + num_points * 2);
-        Decoder.LOG(4, "Buffer capacity is : " + alignments.capacity());
-        Decoder.LOG(4, "Buffer position is : " + alignments.position());
-        Decoder.LOG(4, "Buffer limit is : " + alignments.limit());
+        LOG.warn("Had an exception when accessing alignment mapped byte buffer");
+        LOG.warn("Attempting to access alignments at position: {}",  alignment_position + 1);
+        LOG.warn("And to read this many bytes: {}",  num_points * 2);
+        LOG.warn("Buffer capacity is : {}", alignments.capacity());
+        LOG.warn("Buffer position is : {}", alignments.position());
+        LOG.warn("Buffer limit is : {}", alignments.limit());
         throw bue;
       }
       return alignment;

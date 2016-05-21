@@ -35,6 +35,8 @@ import java.util.concurrent.locks.StampedLock;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.ff.lm.NGramLanguageModel;
 import org.apache.joshua.util.FormatUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Static singular vocabulary class.
@@ -45,6 +47,7 @@ import org.apache.joshua.util.FormatUtils;
 
 public class Vocabulary {
 
+  public static final Logger LOG = LoggerFactory.getLogger(Vocabulary.class);
   private final static ArrayList<NGramLanguageModel> LMs = new ArrayList<>();
 
   private static List<String> idToString;
@@ -88,7 +91,7 @@ public class Vocabulary {
     DataInputStream vocab_stream =
         new DataInputStream(new BufferedInputStream(new FileInputStream(vocab_file)));
     int size = vocab_stream.readInt();
-    Decoder.LOG(1, String.format("Read %d entries from the vocabulary", size));
+    LOG.info("Read {} entries from the vocabulary", size);
     clear();
     for (int i = 0; i < size; i++) {
       int id = vocab_stream.readInt();
@@ -109,7 +112,7 @@ public class Vocabulary {
       DataOutputStream vocab_stream =
           new DataOutputStream(new BufferedOutputStream(new FileOutputStream(vocab_file)));
       vocab_stream.writeInt(idToString.size() - 1);
-      Decoder.LOG(1, String.format("Writing vocabulary: %d tokens", idToString.size() - 1));
+      LOG.info("Writing vocabulary: {} tokens", idToString.size() - 1);
       for (int i = 1; i < idToString.size(); i++) {
         vocab_stream.writeInt(i);
         vocab_stream.writeUTF(idToString.get(i));

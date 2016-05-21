@@ -19,10 +19,11 @@
 package org.apache.joshua.util;
 
 // Imports
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Cache is a class that implements a least recently used cache. It is a straightforward extension
@@ -41,8 +42,7 @@ public class Cache<K, V> extends LinkedHashMap<K, V> {
   private static final long serialVersionUID = 6073387072740892061L;
 
   /** Logger for this class. */
-  private static Logger logger = Logger.getLogger(Cache.class.getName());
-
+  public static final Logger LOG = LoggerFactory.getLogger(Cache.class);
   // ===============================================================
   // Constants
   // ===============================================================
@@ -104,8 +104,8 @@ public class Cache<K, V> extends LinkedHashMap<K, V> {
 
   @Override
   public V get(Object key) {
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("Cache get   key:	" + key.toString());
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Cache get   key: {}", key.toString());
     }
     return super.get(key);
   }
@@ -113,11 +113,9 @@ public class Cache<K, V> extends LinkedHashMap<K, V> {
 
   @Override
   public V put(K key, V value) {
-
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("Cache put   key:	" + key.toString());
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Cache put   key: {}", key.toString());
     }
-
     return super.put(key, value);
   }
 
@@ -129,12 +127,11 @@ public class Cache<K, V> extends LinkedHashMap<K, V> {
   public boolean containsKey(Object key) {
     boolean contains = super.containsKey(key);
 
-    if (logger.isLoggable(Level.FINEST)) {
+    if (LOG.isDebugEnabled()) {
       String message =
           (contains) ? "Cache has   key:	" + key.toString() : "Cache lacks key: 	" + key.toString();
-      logger.finest(message);
+      LOG.debug(message);
     }
-
     return contains;
   }
 
@@ -158,10 +155,9 @@ public class Cache<K, V> extends LinkedHashMap<K, V> {
   protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
     boolean removing = size() > maxCapacity;
 
-    if (removing && logger.isLoggable(Level.FINEST)) {
-      logger.finest("Cache loses key:	" + eldest.getKey().toString());
+    if (removing && LOG.isDebugEnabled()) {
+      LOG.debug("Cache loses key: {}",  eldest.getKey().toString());
     }
-
     return removing;
   }
 

@@ -23,10 +23,10 @@ import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class allows two grammars (loaded from disk) to be compared.
@@ -35,8 +35,7 @@ import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
  */
 public class CompareGrammars {
 
-  /** Logger for this class. */
-  private static final Logger logger = Logger.getLogger(CompareGrammars.class.getName());
+  public static final Logger LOG = LoggerFactory.getLogger(CompareGrammars.class);
 
   /**
    * Gets a set containing all unique instances of the specified field.
@@ -101,13 +100,12 @@ public class CompareGrammars {
         float diff = (diff1 < diff2) ? diff1 : diff2;
 
         if (diff > delta) {
-          logger.fine("Line " + counter + ":  Score mismatch: " + score1 + " vs " + score2);
+          LOG.debug("Line {}:  Score mismatch: {} vs {}", counter, score1, score2);
           set.add(line1);
           totalOverDiffs += diff;
-        } else if (logger.isLoggable(Level.FINEST)) {
-          logger.finest("Line " + counter + ": Scores MATCH: " + score1 + " vs " + score2);
+        } else if (LOG.isDebugEnabled()) {
+          LOG.debug("Line {}: Scores MATCH: {} vs ", counter, score1, score2);
         }
-
       } else {
         throw new RuntimeException("Lines don't match: " + line1 + " and " + line2);
       }
@@ -117,11 +115,11 @@ public class CompareGrammars {
     grammarScanner2.close();
     
     if (set.isEmpty()) {
-      logger.info("No score mismatches");
+      LOG.info("No score mismatches");
     } else {
-      logger.warning("Number of mismatches: " + set.size() + " out of " + counter);
-      logger.warning("Total mismatch logProb mass: " + totalOverDiffs + " (" + totalOverDiffs
-          / set.size() + ") (" + totalOverDiffs / counter + ")");
+      LOG.warn("Number of mismatches: {} out of {}", set.size(),  counter);
+      LOG.warn("Total mismatch logProb mass: {} ({}) ({})", totalOverDiffs,
+          totalOverDiffs / set.size(),  totalOverDiffs / counter );
     }
   }
 
@@ -134,15 +132,15 @@ public class CompareGrammars {
   public static void main(String[] args) throws FileNotFoundException {
 
     if (args.length != 2) {
-      logger.severe("Usage: " + CompareGrammars.class.toString() + " grammarFile1 grammarFile2");
+      System.err.println("Usage: " + CompareGrammars.class.toString() + " grammarFile1 grammarFile2");
       System.exit(-1);
     }
 
     // Tell standard in and out to use UTF-8
     FormatUtils.useUTF8();
-    logger.finest("Using UTF-8");
+    LOG.debug("Using UTF-8");
 
-    logger.info("Comparing grammar files " + args[0] + " and " + args[1]);
+    LOG.info("Comparing grammar files {} and {}", args[0], args[1]);
 
     File grammarFile1 = new File(args[0]);
     File grammarFile2 = new File(args[1]);
@@ -157,9 +155,9 @@ public class CompareGrammars {
       Set<String> leftHandSides2 = getFields(grammarFile2, fieldDelimiter, 0);
 
       if (leftHandSides1.equals(leftHandSides2)) {
-        logger.info("Grammar files have the same set of left-hand sides");
+        LOG.info("Grammar files have the same set of left-hand sides");
       } else {
-        logger.warning("Grammar files have differing sets of left-hand sides");
+        LOG.warn("Grammar files have differing sets of left-hand sides");
         compareScores = false;
       }
     }
@@ -170,9 +168,9 @@ public class CompareGrammars {
       Set<String> sourceRHSs2 = getFields(grammarFile2, fieldDelimiter, 1);
 
       if (sourceRHSs1.equals(sourceRHSs2)) {
-        logger.info("Grammar files have the same set of source right-hand sides");
+        LOG.info("Grammar files have the same set of source right-hand sides");
       } else {
-        logger.warning("Grammar files have differing sets of source right-hand sides");
+        LOG.warn("Grammar files have differing sets of source right-hand sides");
         compareScores = false;
       }
     }
@@ -184,9 +182,9 @@ public class CompareGrammars {
       Set<String> targetRHSs2 = getFields(grammarFile2, fieldDelimiter, 2);
 
       if (targetRHSs1.equals(targetRHSs2)) {
-        logger.info("Grammar files have the same set of target right-hand sides");
+        LOG.info("Grammar files have the same set of target right-hand sides");
       } else {
-        logger.warning("Grammar files have differing sets of target right-hand sides");
+        LOG.warn("Grammar files have differing sets of target right-hand sides");
         compareScores = false;
       }
     }
@@ -197,11 +195,6 @@ public class CompareGrammars {
       compareValues(grammarFile1, grammarFile2, fieldDelimiter, 3, "\\s+", 0, delta);
       compareValues(grammarFile1, grammarFile2, fieldDelimiter, 3, "\\s+", 1, delta);
       compareValues(grammarFile1, grammarFile2, fieldDelimiter, 3, "\\s+", 2, delta);
-
     }
-
   }
-
-
-
 }

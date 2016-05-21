@@ -27,17 +27,15 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.apache.joshua.corpus.SymbolTable;
 import org.apache.joshua.corpus.Vocabulary;
-import  org.apache.joshua.decoder.JoshuaConfiguration;
 import  org.apache.joshua.decoder.ff.lm.AbstractLM;
 import  org.apache.joshua.decoder.ff.lm.ArpaFile;
 import  org.apache.joshua.decoder.ff.lm.ArpaNgram;
 import  org.apache.joshua.util.Bits;
 import  org.apache.joshua.util.Regex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Relatively memory-compact language model
@@ -56,9 +54,7 @@ import  org.apache.joshua.util.Regex;
  */
 public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
 
-  /** Logger for this class. */
-  private static Logger logger =
-      Logger.getLogger(TrieLM.class.getName());
+  public static final Logger LOG = LoggerFactory.getLogger(TrieLM.class);
 
   /**
    * Node ID for the root node.
@@ -101,7 +97,7 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
     super(arpaFile.getVocab().size(), arpaFile.getOrder());
 
     int ngramCounts = arpaFile.size();
-    if (logger.isLoggable(Level.FINE)) logger.fine("ARPA file contains " + ngramCounts + " n-grams");
+    if (LOG.isDebugEnabled()) LOG.debug("ARPA file contains {} n-grams", ngramCounts);
 
     this.children = new HashMap<Long,Integer>(ngramCounts);
     this.logProbs = new HashMap<Long,Float>(ngramCounts);
@@ -112,9 +108,10 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
     int lineNumber = 0;
     for (ArpaNgram ngram : arpaFile) {
       lineNumber += 1;
-      if (lineNumber%100000==0) logger.info("Line: " + lineNumber);
+      if (lineNumber%100000==0) LOG.info("Line: {}", lineNumber);
 
-      if (logger.isLoggable(Level.FINEST)) logger.finest(ngram.order() + "-gram: (" + ngram.getWord() + " | " + Arrays.toString(ngram.getContext()) + ")");
+      if (LOG.isDebugEnabled()) LOG.debug("{}-gram: ({} | {})", ngram.order(), ngram.getWord(),
+          Arrays.toString(ngram.getContext()));
       int word = ngram.getWord();
 
       int[] context = ngram.getContext();
@@ -130,7 +127,7 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
               childID = children.get(key);
             } else {
               childID = ++nodeCounter;
-              if (logger.isLoggable(Level.FINEST)) logger.finest("children.put(" + contextNodeID + ":"+context[i] + " , " + childID + ")");
+              LOG.debug("children.put({}:{} , {})", contextNodeID, context[i], childID);
               children.put(key, childID);
             }
             contextNodeID = childID;
@@ -141,7 +138,7 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
         {
           long key = Bits.encodeAsLong(contextNodeID, word);
           float logProb = ngram.getValue();
-          if (logger.isLoggable(Level.FINEST)) logger.finest("logProbs.put(" + contextNodeID + ":"+word + " , " + logProb);
+          if (LOG.isDebugEnabled()) LOG.debug("logProbs.put({}:{}, {}", contextNodeID, word, logProb);
           this.logProbs.put(key, logProb);
         }
       }
@@ -156,7 +153,8 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
             wordChildID = children.get(backoffNodeKey);
           } else {
             wordChildID = ++nodeCounter;
-            if (logger.isLoggable(Level.FINEST)) logger.finest("children.put(" + backoffNodeID + ":"+word + " , " + wordChildID + ")");
+            if (LOG.isDebugEnabled())
+              LOG.debug("children.put({}:{} , {})", backoffNodeID, word, wordChildID );
             children.put(backoffNodeKey, wordChildID);
           }
           backoffNodeID = wordChildID;
@@ -168,7 +166,8 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
               childID = children.get(key);
             } else {
               childID = ++nodeCounter;
-              if (logger.isLoggable(Level.FINEST)) logger.finest("children.put(" + backoffNodeID + ":"+context[i] + " , " + childID + ")");
+              if (LOG.isDebugEnabled())
+                LOG.debug("children.put({}:{}, )", backoffNodeID, context[i], childID);
               children.put(key, childID);
             }
             backoffNodeID = childID;
@@ -178,7 +177,8 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
         // Store the backoff for this n-gram at this node in the trie
         {
           float backoff = ngram.getBackoff();
-          if (logger.isLoggable(Level.FINEST)) logger.finest("backoffs.put(" + backoffNodeID + ":" +word+" , " + backoff + ")");
+          if (LOG.isDebugEnabled())
+            LOG.debug("backoffs.put({}:{}, {})", backoffNodeID, word, backoff);
           this.backoffs.put(backoffNodeID, backoff);
         }
       }
@@ -252,29 +252,29 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
 
   public static void main(String[] args) throws IOException {
 
-    logger.info("Constructing ARPA file");
+    LOG.info("Constructing ARPA file");
     ArpaFile arpaFile = new ArpaFile(args[0]);
 
-    logger.info("Getting symbol table");
+    LOG.info("Getting symbol table");
     Vocabulary vocab = arpaFile.getVocab();
 
-    logger.info("Constructing TrieLM");
+    LOG.info("Constructing TrieLM");
     TrieLM lm = new TrieLM(arpaFile);
 
     int n = Integer.valueOf(args[2]);
-    logger.info("N-gram order will be " + n);
+    LOG.info("N-gram order will be {}", n);
 
     Scanner scanner = new Scanner(new File(args[1]));
 
     LinkedList<String> wordList = new LinkedList<String>();
     LinkedList<String> window = new LinkedList<String>();
 
-    logger.info("Starting to scan " + args[1]);
+    LOG.info("Starting to scan {}", args[1]);
     while (scanner.hasNext()) {
 
-      logger.info("Getting next line...");
+      LOG.info("Getting next line...");
       String line = scanner.nextLine();
-      logger.info("Line: " + line);
+      LOG.info("Line: {}", line);
 
       String[] words = Regex.spaces.split(line);
       wordList.clear();
@@ -315,15 +315,15 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
             i++;
           }
 
-          logger.info("logProb " + window.toString() + " = " + lm.ngramLogProbability(wordIDs, n));
+          LOG.info("logProb {} = {}", window.toString(), lm.ngramLogProbability(wordIDs, n));
         }
       }
 
       double logProb = lm.sentenceLogProbability(sentence, n, 2);//.ngramLogProbability(ids, n);
       double prob = Math.exp(logProb);
 
-      logger.info("Total logProb = " + logProb);
-      logger.info("Total    prob = " + prob);
+      LOG.info("Total logProb = {}", logProb);
+      LOG.info("Total    prob = {}",  prob);
     }
 
   }

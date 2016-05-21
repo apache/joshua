@@ -37,6 +37,7 @@ import edu.berkeley.nlp.lm.WordIndexer;
 import edu.berkeley.nlp.lm.cache.ArrayEncodedCachingLmWrapper;
 import edu.berkeley.nlp.lm.io.LmReaders;
 import edu.berkeley.nlp.lm.util.StrUtils;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class wraps Berkeley LM.
@@ -44,6 +45,8 @@ import edu.berkeley.nlp.lm.util.StrUtils;
  * @author adpauls@gmail.com
  */
 public class LMGrammarBerkeley extends DefaultNGramLanguageModel {
+
+  public static final org.slf4j.Logger LOG = LoggerFactory.getLogger(LMGrammarBerkeley.class);
 
   private ArrayEncodedNgramLanguageModel<String> lm;
 
@@ -83,10 +86,10 @@ public class LMGrammarBerkeley extends DefaultNGramLanguageModel {
 
     try { // try binary format (even gzipped)
       lm = (ArrayEncodedNgramLanguageModel<String>) LmReaders.<String>readLmBinary(lm_file);
-      Decoder.LOG(1, "Loading Berkeley LM from binary " + lm_file);
+      LOG.info("Loading Berkeley LM from binary {}", lm_file);
     } catch (RuntimeException e) {
       ConfigOptions opts = new ConfigOptions();
-      Decoder.LOG(1, "Loading Berkeley LM from ARPA file " + lm_file);
+      LOG.info("Loading Berkeley LM from ARPA file {}", lm_file);
       final StringWordIndexer wordIndexer = new StringWordIndexer();
       ArrayEncodedNgramLanguageModel<String> berkeleyLm =
           LmReaders.readArrayEncodedLmFromArpa(lm_file, false, wordIndexer, opts, order);

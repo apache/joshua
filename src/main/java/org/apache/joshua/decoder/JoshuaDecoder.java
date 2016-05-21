@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.InetSocketAddress;
-import java.util.logging.Logger;
 
 import com.sun.net.httpserver.HttpServer;
 
@@ -34,6 +33,8 @@ import org.apache.joshua.decoder.JoshuaConfiguration.SERVER_TYPE;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
 import org.apache.joshua.server.TcpServer;
 import org.apache.joshua.server.ServerThread;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implements decoder initialization, including interaction with <code>JoshuaConfiguration</code>
@@ -45,8 +46,8 @@ import org.apache.joshua.server.ServerThread;
  */
 public class JoshuaDecoder {
 
-  private static final Logger logger = Logger.getLogger(JoshuaDecoder.class.getName());
-  
+  public static final Logger LOG = LoggerFactory.getLogger(JoshuaDecoder.class);
+
   // ===============================================================
   // Main
   // ===============================================================
@@ -55,12 +56,6 @@ public class JoshuaDecoder {
     JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
     ArgsParser userArgs = new ArgsParser(args,joshuaConfiguration);
 
-    String logFile = System.getenv().get("JOSHUA") + "/logging.properties";
-    try {
-      java.util.logging.LogManager.getLogManager().readConfiguration(new FileInputStream(logFile));
-    } catch (IOException e) {
-      logger.warning("Couldn't initialize logging properties from '" + logFile + "'");
-    }
 
     long startTime = System.currentTimeMillis();
 
@@ -70,10 +65,10 @@ public class JoshuaDecoder {
     /* Step-1: initialize the decoder, test-set independent */
     Decoder decoder = new Decoder(joshuaConfiguration, userArgs.getConfigFile());
 
-    Decoder.LOG(1, String.format("Model loading took %d seconds",
-        (System.currentTimeMillis() - startTime) / 1000));
-    Decoder.LOG(1, String.format("Memory used %.1f MB", ((Runtime.getRuntime().totalMemory() - Runtime
-        .getRuntime().freeMemory()) / 1000000.0)));  
+    LOG.info("Model loading took %d seconds",
+        (System.currentTimeMillis() - startTime) / 1000);
+    LOG.info("Memory used {} MB", ((Runtime.getRuntime().totalMemory()
+        - Runtime.getRuntime().freeMemory()) / 1000000.0));
 
     /* Step-2: Decoding */
     // create a server if requested, which will create TranslationRequest objects
@@ -84,12 +79,13 @@ public class JoshuaDecoder {
 
       } else if (joshuaConfiguration.server_type == SERVER_TYPE.HTTP) {
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
-        Decoder.LOG(1, String.format("** HTTP Server running and listening on port %d.", port));  
+        LOG.info("** HTTP Server running and listening on port %d.", port);
         server.createContext("/", new ServerThread(null, decoder, joshuaConfiguration));
         server.setExecutor(null); // creates a default executor
         server.start();
       } else {
         System.err.println("* FATAL: unknown server type");
+        LOG.error("* FATAL: unknown server type");
         System.exit(1);
       }
       return;
@@ -112,13 +108,12 @@ public class JoshuaDecoder {
     if (joshuaConfiguration.n_best_file != null)
       out.close();
 
-    Decoder.LOG(1, "Decoding completed.");
-    Decoder.LOG(1, String.format("Memory used %.1f MB", ((Runtime.getRuntime().totalMemory() - Runtime
-        .getRuntime().freeMemory()) / 1000000.0)));
+    LOG.info("Decoding completed.");
+    LOG.info("Memory used {} MB", ((Runtime.getRuntime().totalMemory()
+        - Runtime.getRuntime().freeMemory()) / 1000000.0));
 
     /* Step-3: clean up */
     decoder.cleanUp();
-    Decoder.LOG(1, String.format("Total running time: %d seconds",
-      (System.currentTimeMillis() - startTime) / 1000));
+    LOG.info("Total running time: {} seconds",  (System.currentTimeMillis() - startTime) / 1000);
   }
 }

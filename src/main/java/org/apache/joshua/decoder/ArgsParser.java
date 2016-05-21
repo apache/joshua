@@ -24,12 +24,16 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import org.apache.joshua.util.io.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author orluke
  * 
  */
 public class ArgsParser {
+
+  public static final Logger LOG = LoggerFactory.getLogger(ArgsParser.class);
 
   private String configFile = null;
 
@@ -83,18 +87,17 @@ public class ArgsParser {
 
           setConfigFile(args[i + 1].trim());
           try {
-            Decoder.LOG(1, "Parameters read from configuration file:");
+            LOG.info("Parameters read from configuration file: {}", getConfigFile());
             joshuaConfiguration.readConfigFile(getConfigFile());
           } catch (IOException e) {
             throw new RuntimeException(e);
           }
-
           break;
         }
       }
 
       // Now process all the command-line args
-      Decoder.LOG(1, "Parameters overridden from the command line:");
+      LOG.info("Parameters overridden from the command line:");
       joshuaConfiguration.processCommandLineOptions(args);
     }
   }

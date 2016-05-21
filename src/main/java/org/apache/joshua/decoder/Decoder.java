@@ -28,7 +28,6 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -59,6 +58,8 @@ import org.apache.joshua.util.FileUtility;
 import org.apache.joshua.util.FormatUtils;
 import org.apache.joshua.util.Regex;
 import org.apache.joshua.util.io.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class handles decoder initialization and the complication introduced by multithreading.
@@ -86,6 +87,8 @@ import org.apache.joshua.util.io.LineReader;
  * @author Lane Schwartz <dowobeha@users.sourceforge.net>
  */
 public class Decoder {
+
+  public static final Logger LOG = LoggerFactory.getLogger(Decoder.class);
 
   private final JoshuaConfiguration joshuaConfiguration;
 
@@ -270,7 +273,7 @@ public class Decoder {
             String.format("[X] ||| [X,1] %s ||| [X,1] %s ||| custom=1", tokens[0], tokens[1]));
         Decoder.this.customPhraseTable.addRule(rule);
         rule.estimateRuleCost(featureFunctions);
-        Decoder.LOG(1, String.format("Added custom rule %s", formatRule(rule)));
+        LOG.info("Added custom rule {}", formatRule(rule));
 
         String response = String.format("Added rule %s", formatRule(rule));
         out.write(response.getBytes());
@@ -649,7 +652,7 @@ public class Decoder {
             feature = demoses(feature);
 
           joshuaConfiguration.weights.add(String.format("%s %s", feature, tokens[i+1]));
-          Decoder.LOG(1, String.format("COMMAND LINE WEIGHT: %s -> %.3f", feature, value));
+          LOG.info("COMMAND LINE WEIGHT: {} -> {}", feature, value);
         }
       }
 
@@ -671,8 +674,7 @@ public class Decoder {
         weights.set(pair[0], Float.parseFloat(pair[1]));
       }
 
-      Decoder.LOG(1, String.format("Read %d weights (%d of them dense)", weights.size(),
-          DENSE_FEATURE_NAMES.size()));
+      LOG.info("Read {} weights ({} of them dense)", weights.size(), DENSE_FEATURE_NAMES.size());
 
       // Do this before loading the grammars and the LM.
       this.featureFunctions = new ArrayList<FeatureFunction>();
@@ -680,9 +682,8 @@ public class Decoder {
       // Initialize and load grammars. This must happen first, since the vocab gets defined by
       // the packed grammar (if any)
       this.initializeTranslationGrammars();
-
-      Decoder.LOG(1, String.format("Grammar loading took: %d seconds.",
-          (System.currentTimeMillis() - pre_load_time) / 1000));
+      LOG.info("Grammar loading took: {} seconds.",
+          (System.currentTimeMillis() - pre_load_time) / 1000);
 
       // Initialize the features: requires that LM model has been initialized.
       this.initializeFeatureFunctions();
@@ -701,14 +702,14 @@ public class Decoder {
 
       // Sort the TM grammars (needed to do cube pruning)
       if (joshuaConfiguration.amortized_sorting) {
-        Decoder.LOG(1, "Grammar sorting happening lazily on-demand.");
+        LOG.info("Grammar sorting happening lazily on-demand.");
       } else {
         long pre_sort_time = System.currentTimeMillis();
         for (Grammar grammar : this.grammars) {
           grammar.sortGrammar(this.featureFunctions);
         }
-        Decoder.LOG(1, String.format("Grammar sorting took %d seconds.",
-            (System.currentTimeMillis() - pre_sort_time) / 1000));
+        LOG.info("Grammar sorting took {} seconds.",
+            (System.currentTimeMillis() - pre_sort_time) / 1000);
       }
 
       // Create the threads
@@ -716,12 +717,8 @@ public class Decoder {
         this.threadPool.put(new DecoderThread(this.grammars, Decoder.weights,
             this.featureFunctions, joshuaConfiguration));
       }
-
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    } catch (IOException | InterruptedException e) {
+      LOG.warn(e.getMessage(), e);
     }
 
     return this;
@@ -786,7 +783,7 @@ public class Decoder {
       checkSharedVocabularyChecksumsForPackedGrammars(packed_grammars);
 
     } else {
-      Decoder.LOG(1, "* WARNING: no grammars supplied!  Supplying dummy glue grammar.");
+      LOG.info("* WARNING: no grammars supplied!  Supplying dummy glue grammar.");
       MemoryBasedBatchGrammar glueGrammar = new MemoryBasedBatchGrammar("glue", joshuaConfiguration);
       glueGrammar.setSpanLimit(-1);
       glueGrammar.addGlueRules(featureFunctions);
@@ -799,7 +796,7 @@ public class Decoder {
     
     /* Create an epsilon-deleting grammar */
     if (joshuaConfiguration.lattice_decoding) {
-      Decoder.LOG(1, "Creating an epsilon-deleting grammar");
+      LOG.info("Creating an epsilon-deleting grammar");
       MemoryBasedBatchGrammar latticeGrammar = new MemoryBasedBatchGrammar("lattice", joshuaConfiguration);
       latticeGrammar.setSpanLimit(-1);
       HieroFormatReader reader = new HieroFormatReader();
@@ -807,6 +804,7 @@ public class Decoder {
       String goalNT = FormatUtils.cleanNonTerminal(joshuaConfiguration.goal_symbol);
       String defaultNT = FormatUtils.cleanNonTerminal(joshuaConfiguration.default_non_terminal);
 
+      //FIXME: too many arguments
       String ruleString = String.format("[%s] ||| [%s,1] <eps> ||| [%s,1] ||| ", goalNT, goalNT, defaultNT,
           goalNT, defaultNT);
 
@@ -829,8 +827,8 @@ public class Decoder {
       }
     }
 
-    Decoder.LOG(1, String.format("Memory used %.1f MB",
-        ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1000000.0)));
+    LOG.info("Memory used {} MB",
+        ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1000000.0));
   }
 
   /**
@@ -889,7 +887,7 @@ public class Decoder {
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
     }
-    Decoder.LOG(1, String.format("Read %d weights from file '%s'", weights.size(), fileName));
+    LOG.info("Read {} weights from file '{}'", weights.size(), fileName);
   }
 
   private String demoses(String feature) {
@@ -911,7 +909,6 @@ public class Decoder {
    *
    * Weights for features are listed separately.
    *
-   * @param tmOwnersSeen
    * @throws IOException
    *
    */
@@ -938,7 +935,7 @@ public class Decoder {
     }
 
     for (FeatureFunction feature : featureFunctions) {
-      Decoder.LOG(1, String.format("FEATURE: %s", feature.logString()));
+      LOG.info("FEATURE: {}", feature.logString());
 
     }
 
@@ -955,6 +952,7 @@ public class Decoder {
    */
   private Class<?> getClass(String featureName) {
     Class<?> clas = null;
+
     String[] packages = { "joshua.decoder.ff", "joshua.decoder.ff.lm", "joshua.decoder.ff.phrase" };
     for (String path : packages) {
       try {
@@ -970,14 +968,5 @@ public class Decoder {
       }
     }
     return clas;
-  }
-
-  public static boolean VERBOSE(int i) {
-    return i <= VERBOSE;
-  }
-
-  public static void LOG(int i, String msg) {
-    if (VERBOSE(i))
-      System.err.println(msg);
   }
 }

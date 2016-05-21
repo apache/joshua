@@ -24,7 +24,6 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
@@ -32,6 +31,8 @@ import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.hypergraph.ForestWalker.TRAVERSAL;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * this class implement (1) HyperGraph-related data structures (Item and Hyper-edges)
@@ -43,14 +44,14 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  */
 public class HyperGraph {
 
+  public static final Logger LOG = LoggerFactory.getLogger(HyperGraph.class);
+
   // pointer to goal HGNode
   public HGNode goalNode = null;
 
   public int numNodes = -1;
   public int numEdges = -1;
   public Sentence sentence = null;
-
-  static final Logger logger = Logger.getLogger(HyperGraph.class.getName());
 
   public HyperGraph(HGNode goalNode, int numNodes, int numEdges, Sentence sentence) {
     this.goalNode = goalNode;

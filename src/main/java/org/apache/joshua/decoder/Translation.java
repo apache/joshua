@@ -35,6 +35,8 @@ import org.apache.joshua.decoder.hypergraph.HyperGraph;
 import org.apache.joshua.decoder.hypergraph.KBestExtractor;
 import org.apache.joshua.decoder.io.DeNormalize;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents translated input objects (sentences or lattices). It is aware of the source
@@ -45,6 +47,7 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  */
 
 public class Translation {
+  public static final Logger LOG = LoggerFactory.getLogger(Translation.class);
   private Sentence source;
 
   /**
@@ -87,8 +90,7 @@ public class Translation {
             /* construct Viterbi output */
             final String best = getViterbiString(hypergraph);
             
-            Decoder.LOG(1, String.format("Translation %d: %.3f %s", source.id(), hypergraph.goalNode.getScore(),
-                best));
+            LOG.info("Translation {}: {} {}", source.id(), hypergraph.goalNode.getScore(), best);
             
             /*
              * Setting topN to 0 turns off k-best extraction, in which case we need to parse through
@@ -129,8 +131,8 @@ public class Translation {
           }
 
           float seconds = (float) (System.currentTimeMillis() - startTime) / 1000.0f;
-          Decoder.LOG(1, String.format("Input %d: %d-best extraction took %.3f seconds", id(),
-              joshuaConfiguration.topN, seconds));
+          LOG.info("Input {}: {}-best extraction took {} seconds", id(),
+              joshuaConfiguration.topN, seconds);
 
       } else {
         

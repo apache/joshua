@@ -20,12 +20,12 @@ package org.apache.joshua.decoder.ff.tm;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.util.io.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is a base class for simple, ASCII line-based grammars that are stored on disk.
@@ -34,6 +34,8 @@ import org.apache.joshua.util.io.LineReader;
  * 
  */
 public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iterator<R> {
+
+  public static final Logger LOG = LoggerFactory.getLogger(GrammarReader.class);
 
   protected static String fieldDelimiter;
   protected static String nonTerminalRegEx;
@@ -46,7 +48,6 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
   protected String lookAhead;
   protected int numRulesRead;
 
-  private static final Logger logger = Logger.getLogger(GrammarReader.class.getName());
 
   // dummy constructor for
   public GrammarReader() {
@@ -65,7 +66,7 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
           + (null != e.getMessage() ? e.getMessage() : "No details available. Sorry."), e);
     }
 
-    Decoder.LOG(1, String.format("Reading grammar from file %s...", fileName));
+    LOG.info("Reading grammar from file {}...", fileName);
     numRulesRead = 0;
     advanceReader();
   }
@@ -86,8 +87,7 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
         this.reader.close();
       } catch (IOException e) {
         // FIXME: is this the right logging level?
-        if (logger.isLoggable(Level.WARNING))
-          logger.info("Error closing grammar file stream: " + this.fileName);
+        LOG.warn("Error closing grammar file stream: {}",  this.fileName);
       }
       this.reader = null;
     }
@@ -97,13 +97,13 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
    * For correct behavior <code>close</code> must be called on every GrammarReader, however this
    * code attempts to avoid resource leaks.
    * 
-   * @see joshua.util.io.LineReader
+   * @see org.apache.joshua.util.io.LineReader
    */
   @Override
   protected void finalize() throws Throwable {
     if (this.reader != null) {
-      logger.severe("Grammar file stream was not closed, this indicates a coding error: "
-          + this.fileName);
+      LOG.error("Grammar file stream was not closed, this indicates a coding error: {}",
+          this.fileName);
     }
 
     this.close();
@@ -120,7 +120,8 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
       lookAhead = reader.readLine();
       numRulesRead++;
     } catch (IOException e) {
-      logger.severe("Error reading grammar from file: " + fileName);
+      LOG.error("Error reading grammar from file: {}", fileName);
+      LOG.error(e.getMessage(), e);
     }
     if (lookAhead == null && reader != null) {
       this.close();

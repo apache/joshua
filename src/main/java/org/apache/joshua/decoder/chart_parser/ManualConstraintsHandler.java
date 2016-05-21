@@ -21,20 +21,22 @@ package org.apache.joshua.decoder.chart_parser;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.ff.tm.Grammar;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.segment_file.ConstraintRule;
 import org.apache.joshua.decoder.segment_file.ConstraintSpan;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Zhifei Li, <zhifei.work@gmail.com>
  */
 
 public class ManualConstraintsHandler {
+
+  public static final Logger LOG = LoggerFactory.getLogger(ManualConstraintsHandler.class);
 
   // TODO: each span only has one ConstraintSpan
   // contain spans that have LHS or RHS constraints (they are always hard)
@@ -43,11 +45,9 @@ public class ManualConstraintsHandler {
   // contain spans that have hard "rule" constraint; key: start_span; value:
   // end_span
   private ArrayList<Span> spansWithHardRuleConstraint;
-
   private Chart chart;
-  private Grammar grammarForConstructManualRule;
 
-  private static final Logger logger = Logger.getLogger(ManualConstraintsHandler.class.getName());
+  private Grammar grammarForConstructManualRule;
 
   public ManualConstraintsHandler(Chart chart, Grammar grammarForConstructManualRule,
       List<ConstraintSpan> constraintSpans) {
@@ -109,19 +109,16 @@ public class ManualConstraintsHandler {
 
                 // add to the chart
                 chart.addAxiom(cSpan.start(), cSpan.end(), rule, new SourcePath());
-                if (logger.isLoggable(Level.INFO))
-                  logger.info("Adding RULE constraint for span " + cSpan.start() + ", "
-                      + cSpan.end() + "; isHard=" + cSpan.isHard() + rule.getLHS());
+                LOG.info("Adding RULE constraint for span {}, {}; isHard={}",
+                    cSpan.start(), cSpan.end(),  cSpan.isHard() + "" + rule.getLHS());
                 break;
-
               default:
                 shouldAdd = true;
             }
           }
           if (shouldAdd) {
-            if (logger.isLoggable(Level.INFO))
-              logger.info("Adding LHS or RHS constraint for span " + cSpan.start() + ", "
-                  + cSpan.end());
+            LOG.info("Adding LHS or RHS constraint for span {}, {}",
+                cSpan.start(), cSpan.end());
             if (null == this.constraintSpansForFiltering) {
               this.constraintSpansForFiltering = new HashMap<String, ConstraintSpan>();
             }

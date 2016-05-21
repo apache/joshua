@@ -28,13 +28,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.logging.Logger;
 
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.hypergraph.HyperEdge;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * this class implement functions: (1) combine small itesm into larger ones using rules, and create
@@ -45,6 +46,12 @@ import org.apache.joshua.decoder.hypergraph.HyperEdge;
  * @author Zhifei Li, <zhifei.work@gmail.com>
  */
 class Cell {
+
+  // ===============================================================
+  // Static fields
+  // ===============================================================
+  public static final Logger LOG = LoggerFactory.getLogger(Cell.class);
+
 
   // The chart this cell belongs to
   private Chart chart = null;
@@ -63,10 +70,6 @@ class Cell {
    */
   private List<HGNode> sortedNodes = null;
 
-  // ===============================================================
-  // Static fields
-  // ===============================================================
-  private static final Logger logger = Logger.getLogger(Cell.class.getName());
 
   // ===============================================================
   // Constructor
@@ -131,7 +134,7 @@ class Cell {
 
     int itemsInGoalBin = getSortedNodes().size();
     if (1 != itemsInGoalBin) {
-      logger.severe("the goal_bin does not have exactly one item");
+      LOG.error("the goal_bin does not have exactly one item");
       return false;
     }
 

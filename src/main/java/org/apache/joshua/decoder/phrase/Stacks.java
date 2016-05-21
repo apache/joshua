@@ -49,8 +49,12 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.hypergraph.HyperEdge;
 import org.apache.joshua.decoder.hypergraph.HyperGraph;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Stacks {
+
+  public static final Logger LOG = LoggerFactory.getLogger(Stacks.class);
 
   // The list of stacks, grouped according to number of source words covered
   private List<Stack> stacks;
@@ -199,8 +203,8 @@ public class Stacks {
       targetStack.search();
     }
     
-    Decoder.LOG(1, String.format("Input %d: Search took %.3f seconds", sentence.id(),
-        (System.currentTimeMillis() - startTime) / 1000.0f));
+    LOG.info("Input {}: Search took {} seconds", sentence.id(),
+        (System.currentTimeMillis() - startTime) / 1000.0f);
     
     return createGoalNode();
   }
