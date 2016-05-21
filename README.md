@@ -52,8 +52,14 @@ Some example usage scenarios and scripts can be found in the [examples/](https:/
 ----
 ### Maven Build
 
-    . scripts/download_libs.sh 
+### Create executable jar
+
     mvn clean compile assembly:single
+
+### Run the jar 
+
+    java -jar target/joshua-6.0.6-SNAPSHOT-jar-with-dependencies.jar
+    
 
 ## Working with "language packs"
 
