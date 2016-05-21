@@ -108,9 +108,11 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
     int lineNumber = 0;
     for (ArpaNgram ngram : arpaFile) {
       lineNumber += 1;
-      if (lineNumber%100000==0) LOG.info("Line: {}", lineNumber);
+      if (lineNumber % 100000 == 0){
+        LOG.info("Line: {}", lineNumber);
+      }
 
-      if (LOG.isDebugEnabled()) LOG.debug("{}-gram: ({} | {})", ngram.order(), ngram.getWord(),
+      LOG.debug("{}-gram: ({} | {})", ngram.order(), ngram.getWord(),
           Arrays.toString(ngram.getContext()));
       int word = ngram.getWord();
 
@@ -153,8 +155,7 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
             wordChildID = children.get(backoffNodeKey);
           } else {
             wordChildID = ++nodeCounter;
-            if (LOG.isDebugEnabled())
-              LOG.debug("children.put({}:{}, {})", backoffNodeID, word, wordChildID);
+            LOG.debug("children.put({}: {}, {})", backoffNodeID, word, wordChildID);
             children.put(backoffNodeKey, wordChildID);
           }
           backoffNodeID = wordChildID;
@@ -176,8 +177,7 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
         // Store the backoff for this n-gram at this node in the trie
         {
           float backoff = ngram.getBackoff();
-          if (LOG.isDebugEnabled())
-            LOG.debug("backoffs.put({}:{}, {})", backoffNodeID, word, backoff);
+          LOG.debug("backoffs.put({}:{}, {})", backoffNodeID, word, backoff);
           this.backoffs.put(backoffNodeID, backoff);
         }
       }

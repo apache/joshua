@@ -117,9 +117,9 @@ public class CompareGrammars {
     if (set.isEmpty()) {
       LOG.info("No score mismatches");
     } else {
-      LOG.warn("Number of mismatches: {} out of {}", set.size(),  counter);
+      LOG.warn("Number of mismatches: {} out of {}", set.size(), counter);
       LOG.warn("Total mismatch logProb mass: {} ({}) ({})", totalOverDiffs,
-          totalOverDiffs / set.size(),  totalOverDiffs / counter );
+          totalOverDiffs / set.size(),  totalOverDiffs / counter);
     }
   }
 
@@ -132,7 +132,7 @@ public class CompareGrammars {
   public static void main(String[] args) throws FileNotFoundException {
 
     if (args.length != 2) {
-      System.err.println("Usage: " + CompareGrammars.class.toString() + " grammarFile1 grammarFile2");
+      LOG.error("Usage: {} grammarFile1 grammarFile2", CompareGrammars.class.toString());
       System.exit(-1);
     }
 

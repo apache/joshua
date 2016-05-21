@@ -86,8 +86,8 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
       try {
         this.reader.close();
       } catch (IOException e) {
-        // FIXME: is this the right logging level?
-        LOG.warn("Error closing grammar file stream: {}",  this.fileName);
+        LOG.warn(e.getMessage(), e);
+        LOG.error("Error closing grammar file stream: {}",  this.fileName);
       }
       this.reader = null;
     }
