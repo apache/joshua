@@ -27,7 +27,7 @@ import java.util.Map;
 
 public class BLEU extends EvaluationMetric {
 
-  public static final Logger LOG = LoggerFactory.getLogger(BLEU.class);
+  private static final Logger LOG = LoggerFactory.getLogger(BLEU.class);
 
   // The maximum n-gram we care about
   private int maxGramLength;

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 // The metric re-uses most of the BLEU code
 public class Precis extends BLEU {
   
-  public static final Logger LOG = LoggerFactory.getLogger(Precis.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Precis.class);
 
   private static final double REF_CR = -1.0;
 

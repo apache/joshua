@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class StatefulFF extends FeatureFunction {
 
-  public static final Logger LOG = LoggerFactory.getLogger(StatefulFF.class);
+  private static final Logger LOG = LoggerFactory.getLogger(StatefulFF.class);
   /* Every stateful FF takes a unique index value and increments this. */
   static int GLOBAL_STATE_INDEX = 0;
 

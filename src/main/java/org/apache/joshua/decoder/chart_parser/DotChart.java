@@ -62,7 +62,7 @@ class DotChart {
   // Static fields
   // ===============================================================
 
-  public static final Logger LOG = LoggerFactory.getLogger(DotChart.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DotChart.class);
 
 
   // ===============================================================

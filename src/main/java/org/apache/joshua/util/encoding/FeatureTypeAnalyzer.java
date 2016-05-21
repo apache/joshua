@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 public class FeatureTypeAnalyzer {
 
-  public static final Logger LOG = LoggerFactory.getLogger(FeatureTypeAnalyzer.class);
+  private static final Logger LOG = LoggerFactory.getLogger(FeatureTypeAnalyzer.class);
 
   private ArrayList<FeatureType> types;
 

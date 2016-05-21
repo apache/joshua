@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  */
 
 public class DecoderThread extends Thread {
-  public static final Logger LOG = LoggerFactory.getLogger(DecoderThread.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DecoderThread.class);
 
   private final JoshuaConfiguration joshuaConfiguration;
   /*

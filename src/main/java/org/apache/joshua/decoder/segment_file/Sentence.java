@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
 
 public class Sentence {
 
-  public static final Logger LOG = LoggerFactory.getLogger(Sentence.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Sentence.class);
 
   /* The sentence number. */
   public int id = -1;

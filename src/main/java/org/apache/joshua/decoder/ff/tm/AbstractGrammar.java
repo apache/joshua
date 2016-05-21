@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractGrammar implements Grammar {
 
   /** Logger for this class. */
-  public static final Logger LOG = LoggerFactory.getLogger(AbstractGrammar.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractGrammar.class);
   /**
    * Indicates whether the rules in this grammar have been sorted based on the latest feature
    * function values.

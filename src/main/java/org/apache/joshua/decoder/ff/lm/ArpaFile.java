@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */ 
 public class ArpaFile implements Iterable<ArpaNgram> { 
 
-  public static final Logger LOG = LoggerFactory.getLogger(ArpaFile.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ArpaFile.class);
 
   /** Regular expression representing a blank line. */ 
   public static final Regex BLANK_LINE  = new Regex("^\\s*$"); 

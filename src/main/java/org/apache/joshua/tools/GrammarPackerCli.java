@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 public class GrammarPackerCli {
   
-  public static final Logger LOG = LoggerFactory.getLogger(GrammarPackerCli.class);
+  private static final Logger LOG = LoggerFactory.getLogger(GrammarPackerCli.class);
   
   // Input grammars to be packed (with a joint vocabulary)
   @Option(name = "--grammars", aliases = {"-g", "-i"}, handler = StringArrayOptionHandler.class, required = true, usage = "list of grammars to pack (jointly, i.e. they share the same vocabulary)")

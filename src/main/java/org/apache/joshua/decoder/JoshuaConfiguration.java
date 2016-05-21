@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JoshuaConfiguration {
 
-  public static final Logger LOG = LoggerFactory.getLogger(JoshuaConfiguration.class);
+  private static final Logger LOG = LoggerFactory.getLogger(JoshuaConfiguration.class);
 
   // whether to construct a StructuredTranslation object for each request instead of
   // printing to stdout. Used when the Decoder is used from Java directly.

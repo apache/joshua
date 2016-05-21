@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 public class GradeLevelBLEU extends BLEU {
 
-  public static final Logger LOG = LoggerFactory.getLogger(GradeLevelBLEU.class);
+  private static final Logger LOG = LoggerFactory.getLogger(GradeLevelBLEU.class);
 
   // syllable pattern matches /C*V+/
   private static final Pattern syllable = Pattern.compile("([^aeiouy]*[aeiouy]+)");

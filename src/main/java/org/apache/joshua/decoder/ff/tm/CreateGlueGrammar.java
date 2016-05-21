@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 public class CreateGlueGrammar {
 
 
-  public static final Logger LOG = LoggerFactory.getLogger(CreateGlueGrammar.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CreateGlueGrammar.class);
 
   private final Set<String> nonTerminalSymbols = new HashSet<>();
 

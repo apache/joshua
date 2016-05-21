@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 
 public class Translation {
-  public static final Logger LOG = LoggerFactory.getLogger(Translation.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Translation.class);
   private Sentence source;
 
   /**

@@ -104,7 +104,7 @@ import org.slf4j.LoggerFactory;
 
 public class PackedGrammar extends AbstractGrammar {
 
-  public static final Logger LOG = LoggerFactory.getLogger(PackedGrammar.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PackedGrammar.class);
   public static final String VOCABULARY_FILENAME = "vocabulary";
 
   private EncoderConfiguration encoding;

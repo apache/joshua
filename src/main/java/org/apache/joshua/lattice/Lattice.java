@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Lattice<Value> implements Iterable<Node<Value>> {
 
-  public static final Logger LOG = LoggerFactory.getLogger(Lattice.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Lattice.class);
 
   /**
    * True if there is more than one path through the lattice.

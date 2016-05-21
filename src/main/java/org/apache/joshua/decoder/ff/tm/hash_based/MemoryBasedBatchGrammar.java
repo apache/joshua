@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MemoryBasedBatchGrammar extends AbstractGrammar {
 
-  public static final Logger LOG = LoggerFactory.getLogger(MemoryBasedBatchGrammar.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MemoryBasedBatchGrammar.class);
 
   // ===============================================================
   // Instance Fields

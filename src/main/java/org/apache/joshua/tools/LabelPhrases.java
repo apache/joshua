@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LabelPhrases {
 
-  public static final Logger LOG = LoggerFactory.getLogger(LabelPhrases.class);
+  private static final Logger LOG = LoggerFactory.getLogger(LabelPhrases.class);
 
   /**
    * Main method.

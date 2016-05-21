@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
 
 public class Chart {
 
-  public static final Logger LOG = LoggerFactory.getLogger(Chart.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Chart.class);
   private final JoshuaConfiguration config;
   // ===========================================================
   // Statistics

@@ -42,7 +42,7 @@ public class Cache<K, V> extends LinkedHashMap<K, V> {
   private static final long serialVersionUID = 6073387072740892061L;
 
   /** Logger for this class. */
-  public static final Logger LOG = LoggerFactory.getLogger(Cache.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Cache.class);
   // ===============================================================
   // Constants
   // ===============================================================

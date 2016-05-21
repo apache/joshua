@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
 
-  public static final Logger LOG = LoggerFactory.getLogger(TrieLM.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TrieLM.class);
 
   /**
    * Node ID for the root node.

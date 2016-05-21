@@ -63,7 +63,7 @@ public class BloomFilterLanguageModel extends DefaultNGramLanguageModel implemen
   /**
    * The logger for this class.
    */
-  public static final Logger LOG = LoggerFactory.getLogger(BloomFilterLanguageModel.class);
+  private static final Logger LOG = LoggerFactory.getLogger(BloomFilterLanguageModel.class);
 
   /**
    * The Bloom filter data structure itself.

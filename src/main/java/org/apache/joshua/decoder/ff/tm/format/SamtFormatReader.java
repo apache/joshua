@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 public class SamtFormatReader extends GrammarReader<Rule> {
 
-  public static final Logger LOG = LoggerFactory.getLogger(SamtFormatReader.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SamtFormatReader.class);
   private static final String samtNonTerminalMarkup;
 
   static {

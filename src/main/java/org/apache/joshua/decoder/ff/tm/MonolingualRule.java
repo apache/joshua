@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */ 
 public class MonolingualRule extends Rule { 
 
-  public static final Logger LOG = LoggerFactory.getLogger(MonolingualRule.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MonolingualRule.class);
 
   //=============================================================== 
   // Instance Fields 

@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JoshuaDecoder {
 
-  public static final Logger LOG = LoggerFactory.getLogger(JoshuaDecoder.class);
+  private static final Logger LOG = LoggerFactory.getLogger(JoshuaDecoder.class);
 
   // ===============================================================
   // Main

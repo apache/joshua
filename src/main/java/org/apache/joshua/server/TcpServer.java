@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * all, and writes the resulting translations back out to the socket.
  */
 public class TcpServer {
-  public static final Logger LOG = LoggerFactory.getLogger(TcpServer.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TcpServer.class);
   private final JoshuaConfiguration joshuaConfiguration;
   private Decoder decoder;
   private int port;

@@ -88,7 +88,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Decoder {
 
-  public static final Logger LOG = LoggerFactory.getLogger(Decoder.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Decoder.class);
 
   private final JoshuaConfiguration joshuaConfiguration;
 

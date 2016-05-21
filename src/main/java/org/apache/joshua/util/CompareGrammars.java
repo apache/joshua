@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CompareGrammars {
 
-  public static final Logger LOG = LoggerFactory.getLogger(CompareGrammars.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CompareGrammars.class);
 
   /**
    * Gets a set containing all unique instances of the specified field.

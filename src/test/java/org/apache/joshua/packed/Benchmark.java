@@ -40,7 +40,7 @@ import java.util.Random;
 public class Benchmark {
 
   
-  public static final Logger LOG = LoggerFactory.getLogger(Benchmark.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Benchmark.class);
 
   private IntBuffer intBuffer;
   private MappedByteBuffer byteBuffer;

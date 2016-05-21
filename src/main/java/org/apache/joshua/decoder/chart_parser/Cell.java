@@ -50,7 +50,7 @@ class Cell {
   // ===============================================================
   // Static fields
   // ===============================================================
-  public static final Logger LOG = LoggerFactory.getLogger(Cell.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Cell.class);
 
 
   // The chart this cell belongs to

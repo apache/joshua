@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HyperGraph {
 
-  public static final Logger LOG = LoggerFactory.getLogger(HyperGraph.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HyperGraph.class);
 
   // pointer to goal HGNode
   public HGNode goalNode = null;

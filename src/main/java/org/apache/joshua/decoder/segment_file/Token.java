@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Token {
 
-  public static final Logger LOG = LoggerFactory.getLogger(Token.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Token.class);
 
   // The token without the annotations
   private String token; 

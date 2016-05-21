@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iterator<R> {
 
-  public static final Logger LOG = LoggerFactory.getLogger(GrammarReader.class);
+  private static final Logger LOG = LoggerFactory.getLogger(GrammarReader.class);
 
   protected static String fieldDelimiter;
   protected static String nonTerminalRegEx;

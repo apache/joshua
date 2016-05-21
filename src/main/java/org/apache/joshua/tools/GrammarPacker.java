@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 public class GrammarPacker {
 
-  public static final Logger LOG = LoggerFactory.getLogger(GrammarPacker.class);
+  private static final Logger LOG = LoggerFactory.getLogger(GrammarPacker.class);
 
   // Size limit for slice in bytes.
   private static int DATA_SIZE_LIMIT = (int) (Integer.MAX_VALUE * 0.8);

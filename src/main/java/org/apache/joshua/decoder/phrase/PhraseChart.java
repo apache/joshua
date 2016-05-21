@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PhraseChart {
 
-  public static final Logger LOG = LoggerFactory.getLogger(PhraseChart.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PhraseChart.class);
 
   private int sentence_length;
   private int max_source_phrase_length;

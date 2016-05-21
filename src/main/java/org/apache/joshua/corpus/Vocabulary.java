@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 
 public class Vocabulary {
 
-  public static final Logger LOG = LoggerFactory.getLogger(Vocabulary.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Vocabulary.class);
   private final static ArrayList<NGramLanguageModel> LMs = new ArrayList<>();
 
   private static List<String> idToString;

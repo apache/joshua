@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 public class ManualConstraintsHandler {
 
-  public static final Logger LOG = LoggerFactory.getLogger(ManualConstraintsHandler.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ManualConstraintsHandler.class);
 
   // TODO: each span only has one ConstraintSpan
   // contain spans that have LHS or RHS constraints (they are always hard)

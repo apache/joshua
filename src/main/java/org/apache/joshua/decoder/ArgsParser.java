@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ArgsParser {
 
-  public static final Logger LOG = LoggerFactory.getLogger(ArgsParser.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ArgsParser.class);
 
   private String configFile = null;
 

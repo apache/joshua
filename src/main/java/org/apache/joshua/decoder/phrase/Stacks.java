@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
 
 public class Stacks {
 
-  public static final Logger LOG = LoggerFactory.getLogger(Stacks.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Stacks.class);
 
   // The list of stacks, grouped according to number of source words covered
   private List<Stack> stacks;

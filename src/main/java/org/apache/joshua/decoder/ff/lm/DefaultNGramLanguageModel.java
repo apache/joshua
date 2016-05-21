@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class DefaultNGramLanguageModel implements NGramLanguageModel {
 
-  public static final Logger LOG = LoggerFactory.getLogger(DefaultNGramLanguageModel.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultNGramLanguageModel.class);
 
   protected final int ngramOrder;
   

@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 public class MinimumChangeBLEU extends BLEU {
 
-  public static final Logger LOG = LoggerFactory.getLogger(MinimumChangeBLEU.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MinimumChangeBLEU.class);
 
   // we assume that the source for the paraphrasing run is
   // part of the set of references
