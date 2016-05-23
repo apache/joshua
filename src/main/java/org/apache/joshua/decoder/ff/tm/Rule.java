@@ -34,6 +34,8 @@ import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class define the interface for Rule. 
@@ -55,6 +57,7 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  */
 public class Rule implements Comparator<Rule>, Comparable<Rule> {
 
+  private static final Logger LOG = LoggerFactory.getLogger(Rule.class);
   private int lhs; // tag of this rule
   private int[] pFrench; // pointer to the RuleCollection, as all the rules under it share the same
                          // Source side
@@ -355,12 +358,10 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
     if (this.estimatedCost <= Float.NEGATIVE_INFINITY) {
       this.estimatedCost = 0.0f; // weights.innerProduct(computeFeatures());
 
-      if (Decoder.VERBOSE >= 4)
-        System.err.println(String.format("estimateCost(%s ;; %s)", getFrenchWords(), getEnglishWords()));
+      LOG.debug("estimateCost({} ;; {})", getFrenchWords(), getEnglishWords());
       for (FeatureFunction ff : models) {
         float val = ff.estimateCost(this, null);
-        if (Decoder.VERBOSE >= 4) 
-          System.err.println(String.format("  FEATURE %s -> %.3f", ff.getName(), val));
+        LOG.debug("  FEATURE {} -> {}", ff.getName(), val);
         this.estimatedCost += val; 
       }
     }

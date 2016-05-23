@@ -29,8 +29,13 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.joshua.util.io.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestSetFilter {
+
+  private static final Logger LOG = LoggerFactory.getLogger(TestSetFilter.class);
+
   private Filter filter = null;
 
   // for caching of accepted rules
@@ -96,7 +101,7 @@ public class TestSetFilter {
         count++;
       }
     } catch (FileNotFoundException e) {
-      System.err.printf("Could not open %s\n", e.getMessage());
+      LOG.error(e.getMessage(), e);
     }
 
     if (verbose)

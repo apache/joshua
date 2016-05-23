@@ -49,12 +49,17 @@ import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.metrics.EvaluationMetric;
 import org.apache.joshua.util.StreamGobbler;
 import org.apache.joshua.corpus.Vocabulary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This code was originally written by Yuan Cao, who copied the MERT code to produce this file.
  */
 
 public class MIRACore {
+
+  private static final Logger LOG = LoggerFactory.getLogger(MIRACore.class);
+
   private final JoshuaConfiguration joshuaConfiguration;
   private TreeSet<Integer>[] indicesOfInterest_all;
 
@@ -1203,14 +1208,8 @@ public class MIRACore {
 
         println("Number of features observed so far: " + numParams);
         println("", 1);
-
-      } catch (FileNotFoundException e) {
-        System.err.println("FileNotFoundException in MIRACore.run_single_iteration(6): "
-            + e.getMessage());
-        System.exit(99901);
       } catch (IOException e) {
-        System.err.println("IOException in MIRACore.run_single_iteration(6): " + e.getMessage());
-        System.exit(99902);
+        throw new RuntimeException(e);
       }
 
       // n-best list converges
@@ -1924,12 +1923,8 @@ public class MIRACore {
        * inFile.close(); outFile.close();
        */
       return true;
-    } catch (FileNotFoundException e) {
-      System.err.println("FileNotFoundException in MIRACore.copyFile(String,String): "
-          + e.getMessage());
-      return false;
     } catch (IOException e) {
-      System.err.println("IOException in MIRACore.copyFile(String,String): " + e.getMessage());
+      LOG.error(e.getMessage(), e);
       return false;
     }
   }

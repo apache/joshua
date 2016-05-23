@@ -187,8 +187,8 @@ public class PhraseChart {
         else
           entries.get(offset).addAll(rules);
       } catch (java.lang.IndexOutOfBoundsException e) {
-        System.err.println(String.format("Whoops! %s [%d-%d] too long (%d)", to, begin, end,
-            entries.size()));
+        LOG.error("Whoops! {} [{}-{}] too long ({})", to, begin, end, entries.size());
+        LOG.error(e.getMessage(), e);
       }
     }
   }

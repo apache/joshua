@@ -137,10 +137,12 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
 
     int oldProgress = reader.progress();
     advanceReader();
-    
+
+
     if (Decoder.VERBOSE >= 1) {
       int newProgress = (reader != null) ? reader.progress() : 100;
 
+      //TODO: review this code. It is better to print progress based on time gap (like for every 1s or 2sec) than %!
       if (newProgress > oldProgress) {
         for (int i = oldProgress + 1; i <= newProgress; i++)
           if (i == 97) {

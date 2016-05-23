@@ -31,6 +31,8 @@ import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.hypergraph.HyperEdge;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class computes the cost of applying a rule.
@@ -40,6 +42,8 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  */
 
 public class ComputeNodeResult {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ComputeNodeResult.class);
 
   // The cost incurred by the rule itself (and all associated feature functions)
   private float transitionCost;
@@ -67,11 +71,9 @@ public class ComputeNodeResult {
     // whatever costs we incur applying this rule to create a new hyperedge.
     float viterbiCost = 0.0f;
     
-    if (Decoder.VERBOSE >= 4) {
-      System.err.println("ComputeNodeResult():");
-      System.err.println("-> RULE " + rule);
-    }
-      
+    LOG.debug("ComputeNodeResult():");
+    LOG.info("-> RULE {}", rule);
+
     /*
      * Here we sum the accumulated cost of each of the tail nodes. The total cost of the new
      * hyperedge (the inside or Viterbi cost) is the sum of these nodes plus the cost of the
@@ -80,10 +82,8 @@ public class ComputeNodeResult {
      */
     if (null != tailNodes) {
       for (HGNode item : tailNodes) {
-        if (Decoder.VERBOSE >= 4) {
-          System.err.println("  -> item.bestedge: " + item);
-          System.err.println("-> TAIL NODE " + item);
-        }        
+        LOG.info("-> item.bestedge: {}", item);
+        LOG.info("-> TAIL NODE {}", item);
         viterbiCost += item.bestHyperedge.getBestDerivationScore();
       }
     }
@@ -105,11 +105,10 @@ public class ComputeNodeResult {
 
       DPState newState = feature.compute(rule, tailNodes, i, j, sourcePath, sentence, acc);
       transitionCost += acc.getScore();
-      
-      if (Decoder.VERBOSE >= 4)
-        System.err.println(String.format("-> FEATURE %s = %.3f * %.3f = %.3f", 
-            feature.getName(), acc.getScore() / Decoder.weights.getSparse(feature.getName()),
-            Decoder.weights.getSparse(feature.getName()), acc.getScore()));
+
+      LOG.debug("FEATURE {} = {} * {} = {}", feature.getName(),
+          acc.getScore() / Decoder.weights.getSparse(feature.getName()),
+          Decoder.weights.getSparse(feature.getName()), acc.getScore());
 
       if (feature.isStateful()) {
         futureCostEstimate += feature.estimateFutureCost(rule, newState, sentence);
@@ -118,9 +117,7 @@ public class ComputeNodeResult {
     }
   
     viterbiCost += transitionCost;
-
-    if (Decoder.VERBOSE >= 4)
-      System.err.println(String.format("-> COST = %.3f", transitionCost));
+    LOG.debug("-> COST = {}", transitionCost);
     
     // Set the final results.
     this.pruningCostEstimate = viterbiCost + futureCostEstimate;

@@ -31,13 +31,17 @@ import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Organizes all hypotheses containing the same number of source words. 
  *
  */
 public class Stack extends ArrayList<Hypothesis> {
-  
+
+  private static final Logger LOG = LoggerFactory.getLogger(Stack.class);
+
   private static final long serialVersionUID = 7885252799032416068L;
 
   private HashMap<Coverage, ArrayList<Hypothesis>> coverages;
@@ -175,10 +179,10 @@ public class Stack extends ArrayList<Hypothesis> {
   public void search() {
     int to_pop = config.pop_limit;
     
-    if (Decoder.VERBOSE >= 3) {
-      System.err.println("Stack::search(): pop: " + to_pop + " size: " + candidates.size());
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Stack::search(): pop: {} size: {}", to_pop, candidates.size());
       for (Candidate c: candidates)
-        System.err.println("  " + c);
+        LOG.debug("{}", c);
     }
     while (to_pop > 0 && !candidates.isEmpty()) {
       Candidate got = candidates.poll();
@@ -201,34 +205,26 @@ public class Stack extends ArrayList<Hypothesis> {
    */
   public void addHypothesis(Candidate complete) {
     Hypothesis added = new Hypothesis(complete);
-    
+
+    String taskName;
     if (deduper.containsKey(added)) {
+      taskName = "recombining hypothesis";
       Hypothesis existing = deduper.get(added);
       existing.absorb(added);
-      
-      if (Decoder.VERBOSE >= 3) {
-        System.err.println(String.format("recombining hypothesis from ( ... %s )", complete.getHypothesis().getRule().getEnglishWords()));
-        System.err.println(String.format("        base score %.3f", complete.getResult().getBaseCost()));
-        System.err.println(String.format("        covering %d-%d", complete.getSpan().start - 1, complete.getSpan().end - 2));
-        System.err.println(String.format("        translated as: %s", complete.getRule().getEnglishWords()));
-        System.err.println(String.format("        score %.3f + future cost %.3f = %.3f", 
-            complete.getResult().getTransitionCost(), complete.getFutureEstimate(),
-            complete.getResult().getTransitionCost() + complete.getFutureEstimate()));
-      }
-      
     } else {
+      taskName = "creating new hypothesis";
       add(added);
       deduper.put(added, added);
-      
-      if (Decoder.VERBOSE >= 3) {
-        System.err.println(String.format("creating new hypothesis from ( ... %s )", complete.getHypothesis().getRule().getEnglishWords()));
-        System.err.println(String.format("        base score %.3f", complete.getResult().getBaseCost()));
-        System.err.println(String.format("        covering %d-%d", complete.getSpan().start - 1, complete.getSpan().end - 2));
-        System.err.println(String.format("        translated as: %s", complete.getRule().getEnglishWords()));
-        System.err.println(String.format("        score %.3f + future cost %.3f = %.3f", 
-            complete.getResult().getTransitionCost(), complete.getFutureEstimate(),
-            complete.getResult().getTransitionCost() + complete.getFutureEstimate()));
-      }
+    }
+
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("{} from ( ... {} )", taskName, complete.getHypothesis().getRule().getEnglishWords());
+      LOG.debug("        base score {}", complete.getResult().getBaseCost());
+      LOG.debug("        covering {}-{}", complete.getSpan().start - 1, complete.getSpan().end - 2);
+      LOG.debug("        translated as: {}", complete.getRule().getEnglishWords());
+      LOG.debug("        score {} + future cost {} = {}",
+          complete.getResult().getTransitionCost(), complete.getFutureEstimate(),
+          complete.getResult().getTransitionCost() + complete.getFutureEstimate());
     }
   }
 }

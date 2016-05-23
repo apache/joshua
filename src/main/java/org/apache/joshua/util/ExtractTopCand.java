@@ -25,7 +25,8 @@ import java.io.OutputStreamWriter;
 
 import org.apache.joshua.util.io.IndexedReader;
 import org.apache.joshua.util.io.LineReader;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This program extracts the 1-best output translations from the n-best output translations
@@ -41,6 +42,8 @@ import org.apache.joshua.util.io.LineReader;
  * ./example2/decode_example2.sh script will need updating (as will the end-to-end code)
  */
 public class ExtractTopCand {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ExtractTopCand.class);
 
   /**
    * Usage: <code>java ExtractTopCand nbestInputFile 1bestOutputFile</code>.
@@ -98,7 +101,7 @@ public class ExtractTopCand {
       // block. Printing to a closed PrintStream generates
       // no exceptions. We should be printing to System.err
       // anyways, but this something subtle to be aware of.
-      System.err.println("There was an error: " + ioe.getMessage());
+      LOG.error(ioe.getMessage(), ioe);
     }
   }
 

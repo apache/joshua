@@ -239,13 +239,12 @@ public class Decoder {
         // Change a decoder weight
         String[] tokens = meta.tokens();
         if (tokens.length != 3) {
-          System.err.println("* Error: weight change requires three tokens");
+          LOG.error("weight change requires three tokens");
         } else {
           float old_weight = Decoder.weights.getWeight(tokens[1]);
           Decoder.weights.set(tokens[1], Float.parseFloat(tokens[2]));
-          System.err.println(String.format("@set_weight: %s %.3f -> %.3f",
-              tokens[1], old_weight,
-              Decoder.weights.getWeight(tokens[1])));
+          LOG.error("@set_weight: {} {} -> {}", tokens[1], old_weight,
+              Decoder.weights.getWeight(tokens[1]));
         }
 
         // TODO: return a JSON object with this weight or all weights
@@ -256,7 +255,7 @@ public class Decoder {
 
         String[] tokens = meta.tokens();
 
-        System.err.println(String.format("%s = %f", tokens[1], Decoder.weights.getWeight(tokens[1])));
+        LOG.error("{} = {}", tokens[1], Decoder.weights.getWeight(tokens[1]));
 
         out.write("".getBytes());
 
@@ -264,7 +263,7 @@ public class Decoder {
         String tokens[] = meta.tokens(" \\|\\|\\| ");
 
         if (tokens.length != 2) {
-          System.err.println("* INVALID RULE '" + meta.tokenString() + "'");;
+          LOG.error("* INVALID RULE '{}'", meta);
           out.write("bad rule".getBytes());
           return;
         }

@@ -139,10 +139,9 @@ public class Stacks {
           phrase_length++) {
         int from_stack = source_words - phrase_length;
         Stack tailStack = stacks.get(from_stack);
-        
-        if (Decoder.VERBOSE >= 3)
-          System.err.println(String.format("\n  WORDS %d MAX %d (STACK %d phrase_length %d)", source_words,
-              chart.MaxSourcePhraseLength(), from_stack, phrase_length));
+
+        LOG.debug("WORDS {} MAX {} (STACK {} phrase_length {})", source_words,
+            chart.MaxSourcePhraseLength(), from_stack, phrase_length);
         
         // Iterate over antecedents in this stack.
         for (Coverage coverage: tailStack.getCoverages()) {
@@ -171,8 +170,9 @@ public class Stacks {
             if (phrases == null)
               continue;
 
-            if (Decoder.VERBOSE >= 3)
-              System.err.println(String.format("  Applying %d target phrases over [%d,%d]", phrases.size(), begin, begin + phrase_length));
+
+            LOG.debug("Applying {} target phrases over [{}, {}]",
+                phrases.size(), begin, begin + phrase_length);
             
             // TODO: could also compute some number of features here (e.g., non-LM ones)
             // float score_delta = context.GetScorer().transition(ant, phrases, begin, begin + phrase_length);

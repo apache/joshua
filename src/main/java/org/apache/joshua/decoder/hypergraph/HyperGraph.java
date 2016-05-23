@@ -151,8 +151,8 @@ public class HyperGraph {
       out.println(String.format("%d %d", numNodes, numEdges));
       new ForestWalker(TRAVERSAL.POSTORDER).walk(this.goalNode, new HyperGraphDumper(out, model));
     } catch (IOException e) {
-      System.err.println("* Can't dump hypergraph to file '" + fileName + "'");
-      e.printStackTrace();
+      LOG.error("Can't dump hypergraph to file '{}'", fileName);
+      LOG.error(e.getMessage(), e);
     }
   }
 

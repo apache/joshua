@@ -27,12 +27,16 @@ import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * This feature computes a bin for the rule and activates a feature for it. It requires access to
  * the index of the RarityPenalty field, from which the rule count can be computed.
  */
 public class RuleCountBin extends StatelessFF {
+
+  private static final Logger LOG = LoggerFactory.getLogger(RuleCountBin.class);
   private int field = -1;
 
   public RuleCountBin(FeatureVector weights, String[] args, JoshuaConfiguration config) {
@@ -61,7 +65,7 @@ public class RuleCountBin extends StatelessFF {
       }
     }
 
-    System.err.println(String.format("RuleCountBin(%f) = %d ==> %s", rarityPenalty, count, feature));
+    LOG.debug("RuleCountBin({}) = {} ==> {}", rarityPenalty, count, feature);
     
     acc.add(feature, 1.0f);
 

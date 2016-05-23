@@ -31,7 +31,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.joshua.util.Ngram;
 import org.apache.joshua.util.Regex;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * this class implements: (1) nbest min risk (MBR) reranking using BLEU as a gain funtion.
@@ -45,6 +46,8 @@ import org.apache.joshua.util.Regex;
  * @author Zhifei Li, <zhifei.work@gmail.com>
  */
 public class NbestMinRiskReranker {
+
+  private static final Logger LOG = LoggerFactory.getLogger(NbestMinRiskReranker.class);
 
   // TODO: this functionality is not implemented yet; default is to produce 1best without any
   // feature scores;
@@ -67,7 +70,7 @@ public class NbestMinRiskReranker {
 
 
   public String processOneSent(List<String> nbest, int sentID) {
-    System.err.println("Now process sentence " + sentID);
+    LOG.info("Now process sentence {}", sentID);
 
     // step-0: preprocess
     // assumption: each hyp has a formate:
@@ -77,7 +80,7 @@ public class NbestMinRiskReranker {
     if (nbest.size() == 1) {
       String[] fields = Regex.threeBarsWithSpace.split(nbest.get(0));
       if (fields[1].equals("") || Regex.spaces.matches(fields[1])) {
-        System.err.println(String.format("-> sentence is empty"));
+        LOG.warn("-> sentence is empty");
         return "";
       }
     } 
@@ -171,7 +174,7 @@ public class NbestMinRiskReranker {
        */
     }
 
-    System.err.println("best gain: " + bestGain);
+    LOG.info("best gain: {}", bestGain);
     if (null == bestHyp) {
       throw new RuntimeException("mbr reranked one best is null, must be wrong");
     }
@@ -311,8 +314,10 @@ public class NbestMinRiskReranker {
     // If you don't know what to use for scaling factor, try using 1
 
     if (args.length < 2) {
-      System.err
-          .println("usage: java NbestMinRiskReranker <produce_reranked_nbest> <scaling_factor> [numThreads]");
+      String msg = "usage: java NbestMinRiskReranker <produce_reranked_nbest> <scaling_factor> "
+          + "[numThreads]";
+      System.err.println(msg);
+      LOG.error(msg);
       return;
     }
     long startTime = System.currentTimeMillis();
@@ -324,7 +329,7 @@ public class NbestMinRiskReranker {
     NbestMinRiskReranker mbrReranker =
         new NbestMinRiskReranker(produceRerankedNbest, scalingFactor);
 
-    System.err.println("##############running mbr reranking");
+    LOG.info("Running mbr reranking");
 
     int oldSentID = -1;
     List<String> nbest = new ArrayList<String>();
@@ -390,18 +395,15 @@ public class NbestMinRiskReranker {
           String best_hyp = result.toString();
           System.out.println(best_hyp);
         }
-
-
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        LOG.error(e.getMessage(), e);
       }
-
     }
     
     scanner.close();
 
-    System.err.println("Total running time (seconds) is "
-        + (System.currentTimeMillis() - startTime) / 1000.0);
+    LOG.info("Total running time (seconds) is {} ",
+        (System.currentTimeMillis() - startTime) / 1000.0);
   }
 
   private class RankerTask implements Runnable {

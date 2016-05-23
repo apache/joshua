@@ -550,10 +550,12 @@ public class Tree implements Serializable {
     }
 
     tree = tree.shallowClone();
-    
-    System.err.println(String.format("buildTree(%s)", tree));
-    for (int i = 0; i < derivationStates.length; i++) {
-      System.err.println(String.format("  -> %d: %s", i, derivationStates[i]));
+
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("buildTree({})", tree);
+      for (int i = 0; i < derivationStates.length; i++) {
+        LOG.debug("  -> {}: {}", i, derivationStates[i]);
+      }
     }
 
     List<Tree> frontier = tree.getNonterminalYield();
@@ -630,7 +632,7 @@ public class Tree implements Serializable {
 
     tree = tree.shallowClone();
     
-    System.err.println(String.format("buildTree(%s)", tree));
+    LOG.debug("buildTree({})", tree);
 
     if (rule.getArity() > 0 && maxDepth > 0) {
       List<Tree> frontier = tree.getNonterminalYield();

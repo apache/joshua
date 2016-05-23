@@ -42,8 +42,12 @@ import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.apache.joshua.util.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EdgePhraseSimilarityFF extends StatefulFF implements SourceDependentFF {
+
+  private static final Logger LOG = LoggerFactory.getLogger(EdgePhraseSimilarityFF.class);
 
   private static Cache<String, Float> cache = new Cache<String, Float>(100000000);
 
@@ -68,9 +72,8 @@ public class EdgePhraseSimilarityFF extends StatefulFF implements SourceDependen
     initializeConnection();
   }
 
-  private void initializeConnection() throws NumberFormatException, UnknownHostException,
-      IOException {
-    System.err.println("Opening connection.");
+  private void initializeConnection() throws NumberFormatException, IOException {
+    LOG.info("Opening connection.");
     socket = new Socket(host, port);
     serverAsk = new PrintWriter(socket.getOutputStream(), true);
     serverReply = new BufferedReader(new InputStreamReader(socket.getInputStream()));

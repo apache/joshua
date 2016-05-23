@@ -36,6 +36,8 @@ import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.hypergraph.HyperEdge;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Feature function that reads in a list of language model fragments and matches them against the
@@ -67,6 +69,8 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * @author Matt Post <post@cs.jhu.edu>
  */
 public class FragmentLMFF extends StatefulFF {
+
+  private static final Logger LOG = LoggerFactory.getLogger(FragmentLMFF.class);
 
   /*
    * When building a fragment from a rule rooted in the hypergraph, this parameter determines how
@@ -131,8 +135,7 @@ public class FragmentLMFF extends StatefulFF {
       throw new RuntimeException(String.format("* WARNING: couldn't read fragment LM file '%s'",
           fragmentLMFile), e);
     }
-    System.err.println(String.format("FragmentLMFF: Read %d LM fragments from '%s'", numFragments,
-        fragmentLMFile));
+    LOG.info("FragmentLMFF: Read {} LM fragments from '{}'", numFragments, fragmentLMFile);
   }
 
   /**
@@ -147,19 +150,18 @@ public class FragmentLMFF extends StatefulFF {
     int fragmentDepth = fragment.getDepth();
 
     if (MAX_DEPTH != 0 && fragmentDepth > MAX_DEPTH) {
-      System.err.println(String.format("  Skipping fragment %s (depth %d > %d)", fragment,
-          fragmentDepth, MAX_DEPTH));
+      LOG.warn("Skipping fragment {} (depth {} > {})", fragment, fragmentDepth, MAX_DEPTH);
       return;
     }
 
     if (MIN_LEX_DEPTH > 1 && fragment.isLexicalized() && fragmentDepth < MIN_LEX_DEPTH) {
-      System.err.println(String.format("  Skipping fragment %s (lex depth %d < %d)", fragment,
-          fragmentDepth, MIN_LEX_DEPTH));
+      LOG.warn("Skipping fragment {} (lex depth {} < {})", fragment, fragmentDepth, MIN_LEX_DEPTH);
       return;
     }
 
-    if (lmFragments.get(fragment.getRule()) == null)
+    if (lmFragments.get(fragment.getRule()) == null) {
       lmFragments.put(fragment.getRule(), new ArrayList<Tree>());
+    }
     lmFragments.get(fragment.getRule()).add(fragment);
     numFragments++;
   }
@@ -314,7 +316,7 @@ public class FragmentLMFF extends StatefulFF {
   
     Tree tree = Tree.buildTree(ruleS, tailNodes, 1);
     boolean matched = fragmentLMFF.match(fragment, tree);
-    System.err.println(String.format("Does\n  %s match\n  %s??\n  -> %s", fragment, tree, matched));
+    LOG.info("Does\n  {} match\n  {}??\n  -> {}", fragment, tree, matched);
   }
 
   /**

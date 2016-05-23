@@ -257,7 +257,7 @@ public class GrammarPacker {
           }
         }
       } catch (java.lang.StringIndexOutOfBoundsException e) {
-        System.err.println(String.format("* Skipping bad grammar line '%s'", line));
+        LOG.warn("* Skipping bad grammar line '{}'", line);
         continue;
       }
 

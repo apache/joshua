@@ -23,6 +23,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.regex.Pattern;
 
 import org.apache.joshua.corpus.Vocabulary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for format issues.
@@ -31,7 +33,9 @@ import org.apache.joshua.corpus.Vocabulary;
  * @author Lane Schwartz
  */
 public class FormatUtils {
-  
+
+  private static final Logger LOG = LoggerFactory.getLogger(FormatUtils.class);
+
   private static final String INDEX_SEPARATOR = ",";
 
   /**
@@ -193,12 +197,10 @@ public class FormatUtils {
       System.setErr(new PrintStream(System.err, true, "UTF8"));
       return true;
     } catch (UnsupportedEncodingException e1) {
-      System.err
-          .println("UTF8 is not a valid encoding; using system default encoding for System.out and System.err.");
+      LOG.warn("UTF8 is not a valid encoding; using system default encoding for System.out and System.err.");
       return false;
     } catch (SecurityException e2) {
-      System.err
-          .println("Security manager is configured to disallow changes to System.out or System.err; using system default encoding.");
+      LOG.warn("Security manager is configured to disallow changes to System.out or System.err; using system default encoding.");
       return false;
     }
   }

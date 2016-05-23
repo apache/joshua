@@ -26,6 +26,8 @@ import java.util.Map.Entry;
 import org.apache.joshua.decoder.ff.tm.hash_based.ExtensionIterator;
 import org.apache.joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements dynamic sentence-level filtering. This is accomplished with a parallel
@@ -35,6 +37,9 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * @author Matt Post <post@cs.jhu.edu>
  */
 public class SentenceFilteredGrammar extends MemoryBasedBatchGrammar {
+
+  private static final Logger LOG = LoggerFactory.getLogger(SentenceFilteredGrammar.class);
+
   private AbstractGrammar baseGrammar;
   private SentenceFilteredTrie filteredTrie;
   private int[] tokens;
@@ -62,9 +67,8 @@ public class SentenceFilteredGrammar extends MemoryBasedBatchGrammar {
 
     float seconds = (System.currentTimeMillis() - startTime) / 1000.0f;
 
-    System.err.println(String.format(
-        "Sentence-level filtering of sentence %d (%d -> %d rules) in %.3f seconds", sentence.id(),
-        origCount, filteredCount, seconds));
+    LOG.debug("Sentence-level filtering of sentence {} ({} -> {} rules) in {} seconds",
+        sentence.id(), origCount, filteredCount, seconds);
   }
 
   @Override

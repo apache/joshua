@@ -20,9 +20,13 @@ package org.apache.joshua.decoder.phrase;
 
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.util.ChartSpan;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Future {
-  
+
+  private static final Logger LOG = LoggerFactory.getLogger(Future.class);
+
   // Square matrix with half the values ignored.
   private ChartSpan<Float> entries;
 
@@ -71,10 +75,12 @@ public class Future {
       }
     }
     
-    if (Decoder.VERBOSE >= 3) {
-      for (int i = 1; i < chart.SentenceLength(); i++)
-        for (int j = i + 1; j < chart.SentenceLength(); j++)
-          System.err.println(String.format("future cost from %d to %d is %.3f", i-1, j-2, getEntry(i, j)));
+    if (LOG.isDebugEnabled()) {
+      for (int i = 1; i < chart.SentenceLength(); i++) {
+        for (int j = i + 1; j < chart.SentenceLength(); j++) {
+          LOG.debug("future cost from {} to {} is {}", i - 1, j - 2, getEntry(i, j));
+        }
+      }
     }
   }
   

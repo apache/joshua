@@ -332,8 +332,10 @@ public class BloomFilterLanguageModel extends DefaultNGramLanguageModel implemen
    */
   public static void main(String[] argv) {
     if (argv.length < 5) {
-      System.err
-          .println("usage: BloomFilterLanguageModel <statistics file> <order> <size> <quantization base> <output file>");
+      String msg = "usage: BloomFilterLanguageModel <statistics file> <order> <size>"
+          + " <quantization base> <output file>";
+      System.err.println(msg);
+      LOG.error(msg);
       return;
     }
     int order = Integer.parseInt(argv[1]);
@@ -347,11 +349,9 @@ public class BloomFilterLanguageModel extends DefaultNGramLanguageModel implemen
           new ObjectOutputStream(new GZIPOutputStream(new FileOutputStream(argv[4])));
 
       lm.writeExternal(out);
-      out.close();
-    } catch (FileNotFoundException e) {
-      System.err.println(e.getMessage());
+      out.close(); //TODO: try-with-resources
     } catch (IOException e) {
-      System.err.println(e.getMessage());
+      LOG.error(e.getMessage(), e);
     }
   }
   
@@ -379,16 +379,13 @@ public class BloomFilterLanguageModel extends DefaultNGramLanguageModel implemen
         estimateStream = file_in_copy;
       }
       int numObjects = estimateNumberOfObjects(estimateStream);
-      System.err.println("Estimated number of objects: " + numObjects);
+      LOG.debug("Estimated number of objects: {}", numObjects);
       bf = new BloomFilter(bloomFilterSize, numObjects);
       countFuncs = bf.initializeHashFunctions();
       populateFromInputStream(in, typesAfter);
       in.close();
-    } catch (FileNotFoundException e) {
-      System.err.println(e.getMessage());
-      return;
     } catch (IOException e) {
-      System.err.println(e.getMessage());
+      LOG.error(e.getMessage(), e);
       return;
     }
     typesFuncs = bf.initializeHashFunctions();
@@ -422,7 +419,7 @@ public class BloomFilterLanguageModel extends DefaultNGramLanguageModel implemen
         long cnt = Long.parseLong(toks[toks.length - 1]);
         if (cnt > maxCount) maxCount = cnt;
       } catch (NumberFormatException e) {
-        System.err.println("NumberFormatException! Line: " + line);
+        LOG.error(e.getMessage(), e);
         break;
       }
       numLines++;

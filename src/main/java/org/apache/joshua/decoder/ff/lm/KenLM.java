@@ -21,6 +21,8 @@ package org.apache.joshua.decoder.ff.lm;
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.ff.lm.NGramLanguageModel;
 import org.apache.joshua.decoder.ff.state_maintenance.KenLMState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JNI wrapper for KenLM. This version of KenLM supports two use cases, implemented by the separate
@@ -34,17 +36,19 @@ import org.apache.joshua.decoder.ff.state_maintenance.KenLMState;
 
 public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
+  private static final Logger LOG = LoggerFactory.getLogger(KenLM.class);
+
   static {
     try {
       System.loadLibrary("ken");
     } catch (UnsatisfiedLinkError e) {
       //TODO: send these prints to LOG.err
-      System.err.println("* FATAL: Can't find libken.so (libken.dylib on OS X) in $JOSHUA/lib");
-      System.err.println("*        This probably means that the KenLM library didn't compile.");
-      System.err.println("*        Make sure that BOOST_ROOT is set to the root of your boost");
-      System.err.println("*        installation (it's not /opt/local/, the default), change to");
-      System.err.println("*        $JOSHUA, and type 'ant kenlm'. If problems persist, see the");
-      System.err.println("*        website (joshua-decoder.org).");
+      LOG.error("* FATAL: Can't find libken.so (libken.dylib on OS X) in $JOSHUA/lib");
+      LOG.error("*        This probably means that the KenLM library didn't compile.");
+      LOG.error("*        Make sure that BOOST_ROOT is set to the root of your boost");
+      LOG.error("*        installation (it's not /opt/local/, the default), change to");
+      LOG.error("*        $JOSHUA, and type 'ant kenlm'. If problems persist, see the");
+      LOG.error("*        website (joshua-decoder.org)."); //FIXME: update link to newer url
       throw new RuntimeException(e);
     }
   }

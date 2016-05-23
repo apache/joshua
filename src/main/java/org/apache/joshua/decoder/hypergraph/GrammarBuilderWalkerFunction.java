@@ -27,6 +27,8 @@ import org.apache.joshua.decoder.ff.tm.Grammar;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
 import org.apache.joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This walker function builds up a new context-free grammar by visiting each node in a hypergraph.
@@ -42,6 +44,9 @@ import org.apache.joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
  * non-terminal symbol is annotated with the span of its node.
  */
 public class GrammarBuilderWalkerFunction implements WalkerFunction {
+
+  private static final Logger LOG = LoggerFactory.getLogger(GrammarBuilderWalkerFunction.class);
+
   private MemoryBasedBatchGrammar grammar;
   private static HieroFormatReader reader = new HieroFormatReader();
   private PrintStream outStream;
@@ -149,7 +154,7 @@ public class GrammarBuilderWalkerFunction implements WalkerFunction {
 
   private static HGNode getGoalSymbolNode(HGNode root) {
     if (root.hyperedges == null || root.hyperedges.size() == 0) {
-      System.err.println("getGoalSymbolNode: root node has no hyperedges");
+      LOG.error("getGoalSymbolNode: root node has no hyperedges");
       return null;
     }
     return root.hyperedges.get(0).getTailNodes().get(0);
@@ -158,7 +163,7 @@ public class GrammarBuilderWalkerFunction implements WalkerFunction {
 
   public static int goalSymbol(HyperGraph hg) {
     if (hg.goalNode == null) {
-      System.err.println("goalSymbol: goalNode of hypergraph is null");
+      LOG.error("goalSymbol: goalNode of hypergraph is null");
       return -1;
     }
     HGNode symbolNode = getGoalSymbolNode(hg.goalNode);

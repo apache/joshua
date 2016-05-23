@@ -20,6 +20,8 @@ import java.util.Map;
 
 import org.apache.joshua.corpus.BasicPhrase;
 import org.apache.joshua.corpus.Phrase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class for subsampling a large (F,E)-parallel sentence-aligned corpus to generate a smaller
@@ -31,6 +33,9 @@ import org.apache.joshua.corpus.Phrase;
  * @version $LastChangedDate$
  */
 public class Subsampler {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Subsampler.class);
+
   protected Map<Phrase, Integer> ngramCounts;
   protected int maxN;
   protected int targetCount;
@@ -49,7 +54,7 @@ public class Subsampler {
   private HashMap<Phrase, Integer> loadNgrams(String[] files) throws IOException {
     HashMap<Phrase, Integer> map = new HashMap<Phrase, Integer>();
     for (String fn : files) {
-      System.err.println("Loading test set from " + fn + "...");
+      LOG.debug("Loading test set from {}", fn);
 
       PhraseReader reader = new PhraseReader(new FileReader(fn), (byte) 1);
       Phrase phrase;
@@ -64,9 +69,9 @@ public class Subsampler {
       } finally {
         reader.close();
       }
-      System.err.println("Processed " + lineCount + " lines in " + fn);
+      LOG.debug("Processed {} lines in {}", lineCount, fn);
     }
-    System.err.println("Test set: " + map.size() + " ngrams");
+    LOG.debug("Test set: {} ngrams", map.size());
     return map;
   }
 
@@ -121,7 +126,7 @@ public class Subsampler {
       // Iterating on files in order biases towards files
       // earlier in the list
       for (String f : files) {
-        System.err.println("Loading training data: " + f);
+        LOG.info("Loading training data: {}", f);
 
         BiCorpus bc = bcFactory.fromFiles(f);
 
@@ -129,13 +134,11 @@ public class Subsampler {
 
         int binsize = 10; // BUG: Magic-Number
         int max_k = MAX_SENTENCE_LENGTH / binsize;
-        System.err.print("Looking in length range");
+        LOG.debug("Looking in length range");
         // Iterating bins from small to large biases
         // towards short sentences
         for (int k = 0; k < max_k; k++) {
-          System.err.print(" [" + (k * binsize + 1) + "," + ((k + 1) * binsize) + "]");
-          System.err.flush();
-
+          LOG.debug(" [{}, {}]", (k * binsize + 1), ((k + 1) * binsize));
           this.subsample(set, bc, k * binsize + 1, (k + 1) * binsize, targetFtoERatio);
 
           if (set.size() + totalSubsampled > maxSubsample) break;
@@ -154,9 +157,7 @@ public class Subsampler {
         out.flush();
 
         totalSubsampled += set.size();
-        System.err.println("\n  current=" + set.size() + " [total=" + totalSubsampled
-            + "]    currentRatio=" + (ff / ef));
-        System.err.flush();
+        LOG.info("current={} [total={}] currentRatio={}", set.size(), totalSubsampled, (ff / ef));
 
         // TODO: is this gc actually dubious? Or
         // does profiling show it helps? We only
