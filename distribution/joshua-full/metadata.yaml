@@ -16,16 +16,21 @@
 #
 
 name: joshua-full
-summary: <Fill in summary here>
-maintainer: bugg <bugg@tomsdevbox>
+summary: Joshua Runtime environment for language translation.
+maintainer: Joshua Project <dev@joshua.incubator.apache.org>
 description: |
-  <Multi-line description here>
+  Joshua is an open-source statistical machine translation decoder |
+  for phrase-based (new in 6.0), hierarchical, and syntax-based    |
+  machine translation, written in Java. It is developed at the     |
+  Human Language Technology Center of Excellence at Johns Hopkins  |
+  University. Currently under incubation at the ASF.
 tags:
   # Replace "misc" with one or more whitelisted tags from this list:
   # https://jujucharms.com/docs/stable/authors-charm-metadata
-  - misc
+  - big_data
 series:
   - trusty
+  - xenial
 provides:
   java:
     interface: java
