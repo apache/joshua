@@ -18,6 +18,8 @@
  */
 package joshua.decoder.ff.tm.format;
 
+import java.io.IOException;
+
 import joshua.corpus.Vocabulary;
 import joshua.decoder.ff.tm.Rule;
 import joshua.util.io.LineReader;
@@ -44,7 +46,7 @@ public class MosesFormatReader extends HieroFormatReader {
 
   private int lhs;
   
-  public MosesFormatReader(String grammarFile) {
+  public MosesFormatReader(String grammarFile) throws IOException {
     super(grammarFile);
     this.lhs = Vocabulary.id("[X]");
   }
@@ -76,44 +78,23 @@ public class MosesFormatReader extends HieroFormatReader {
     String[] fields = line.split(fieldDelimiter);
 
     int arity = 1;
-    int fieldIndex = 0;
-    
-    // foreign side
-    String[] foreignWords = fields[fieldIndex].split("\\s+");
-    int[] french = new int[foreignWords.length + 1];
-    french[0] = lhs; 
-    for (int i = 0; i < foreignWords.length; i++) {
-      french[i+1] = Vocabulary.id(foreignWords[i]);
-    }
 
-    // English side
-    fieldIndex++;
-    String[] englishWords = fields[fieldIndex].split("\\s+");
-    int[] english = new int[englishWords.length + 1];
-    english[0] = -1;
-    for (int i = 0; i < englishWords.length; i++) {
-      english[i+1] = Vocabulary.id(englishWords[i]);
-    }
+    StringBuffer hieroLine = new StringBuffer();
+    hieroLine.append("[X] ||| [X,1] " + fields[0] + " ||| [X,1] " + fields[1] + " |||");
 
-    // transform feature values
-    fieldIndex++;
-    
-    String mosesFeatureString = fields[fieldIndex];
-    StringBuffer values = new StringBuffer();
+    String mosesFeatureString = fields[2];
     for (String value: mosesFeatureString.split(" ")) {
       float f = Float.parseFloat(value);
-      values.append(String.format("%f ", f <= 0.0 ? -100 : -Math.log(f)));
+      hieroLine.append(String.format(" %f", f <= 0.0 ? -100 : -Math.log(f)));
     }
 
-    String sparse_features = values.toString().trim();
-
-//    System.out.println(String.format("parseLine: %s\n  ->%s", line, sparse_features));
-
     // alignments
-    fieldIndex++;
-    String alignment = (fields.length > fieldIndex) ? fields[fieldIndex] : null;
+    if (fields.length >= 4)
+      hieroLine.append(" ||| " + fields[3]);
 
-    return new Rule(lhs, french, english, sparse_features, arity, alignment);
+    System.err.println(String.format("LINE: %s -> %s", line, hieroLine.toString()));
+    
+    return super.parseLine(hieroLine.toString());
   }
   
   /**

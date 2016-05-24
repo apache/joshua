@@ -18,6 +18,8 @@
  */
 package joshua.decoder.ff.tm.format;
 
+import java.io.IOException;
+
 import joshua.corpus.Vocabulary;
 import joshua.decoder.ff.tm.GrammarReader;
 import joshua.decoder.ff.tm.Rule;
@@ -41,7 +43,7 @@ public class HieroFormatReader extends GrammarReader<Rule> {
     super();
   }
 
-  public HieroFormatReader(String grammarFile) {
+  public HieroFormatReader(String grammarFile) throws IOException {
     super(grammarFile);
   }
 
@@ -52,7 +54,7 @@ public class HieroFormatReader extends GrammarReader<Rule> {
       throw new RuntimeException(String.format("Rule '%s' does not have four fields", line));
     }
 
-    int lhs = Vocabulary.id(FormatUtils.stripNonTerminalIndex(fields[0]));
+    int lhs = Vocabulary.id(fields[0]);
 
     /**
      * On the foreign side, we map nonterminals to negative IDs, and terminals to positive IDs.
@@ -61,16 +63,14 @@ public class HieroFormatReader extends GrammarReader<Rule> {
     String[] sourceWords = fields[1].split("\\s+");
     int[] sourceIDs = new int[sourceWords.length];
     for (int i = 0; i < sourceWords.length; i++) {
+      sourceIDs[i] = Vocabulary.id(sourceWords[i]);
       if (FormatUtils.isNonterminal(sourceWords[i])) {
-        Vocabulary.id(sourceWords[i]);
         sourceIDs[i] = Vocabulary.id(FormatUtils.stripNonTerminalIndex(sourceWords[i]));
         arity++;
         
         // TODO: the arity here (after incrementing) should match the rule index. Should
         // check that arity == FormatUtils.getNonterminalIndex(foreignWords[i]), throw runtime
         // error if not
-      } else {
-        sourceIDs[i] = Vocabulary.id(sourceWords[i]);
       }
     }
 
@@ -86,10 +86,9 @@ public class HieroFormatReader extends GrammarReader<Rule> {
     String[] targetWords = fields[2].split("\\s+");
     int[] targetIDs = new int[targetWords.length];
     for (int i = 0; i < targetWords.length; i++) {
+      targetIDs[i] = Vocabulary.id(targetWords[i]);
       if (FormatUtils.isNonterminal(targetWords[i])) {
         targetIDs[i] = -FormatUtils.getNonterminalIndex(targetWords[i]);
-      } else {
-        targetIDs[i] = Vocabulary.id(targetWords[i]);
       }
     }
 

@@ -123,7 +123,7 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
     this.printGrammar();
   }
 
-  protected GrammarReader<Rule> createReader(String format, String grammarFile) {
+  protected GrammarReader<Rule> createReader(String format, String grammarFile) throws IOException {
 
     if (grammarFile != null) {
       if ("hiero".equals(format) || "thrax".equals(format) || "regexp".equals(format)) {
