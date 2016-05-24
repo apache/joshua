@@ -33,8 +33,7 @@ import joshua.decoder.ff.tm.Rule;
 import joshua.decoder.ff.tm.GrammarReader;
 import joshua.decoder.ff.tm.Trie;
 import joshua.decoder.ff.tm.format.HieroFormatReader;
-import joshua.decoder.ff.tm.format.PhraseFormatReader;
-import joshua.decoder.ff.tm.format.SamtFormatReader;
+import joshua.decoder.ff.tm.format.MosesFormatReader;
 import joshua.util.FormatUtils;
 
 /**
@@ -130,10 +129,8 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
     if (grammarFile != null) {
       if ("hiero".equals(format) || "thrax".equals(format) || "regexp".equals(format)) {
         return new HieroFormatReader(grammarFile);
-      } else if ("samt".equals(format)) {
-        return new SamtFormatReader(grammarFile);
-      } else if ("phrase".equals(format) || "moses".equals(format)) {
-        return new PhraseFormatReader(grammarFile, format.equals("moses"));
+      } else if ("moses".equals(format)) {
+        return new MosesFormatReader(grammarFile);
       } else {
         throw new RuntimeException(String.format("* FATAL: unknown grammar format '%s'", format));
       }

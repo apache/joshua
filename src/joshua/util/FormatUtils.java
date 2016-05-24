@@ -78,6 +78,15 @@ public class FormatUtils {
     return markup(cleanNonTerminal(nt));
   }
 
+  /**
+   * Nonterminals on source and target sides are represented as [X,1], where 1 is an integer
+   * that links the two sides. This function extracts the index, e.g.,
+   * 
+   * getNonterminalIndex("[X,7]") -> 7
+   * 
+   * @param the nonterminal index
+   * @return
+   */
   public static int getNonterminalIndex(String nt) {
     return Integer.parseInt(nt.substring(nt.indexOf(INDEX_SEPARATOR) + 1, nt.length() - 1));
   }

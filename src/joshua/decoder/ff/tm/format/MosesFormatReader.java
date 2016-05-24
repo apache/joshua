@@ -19,38 +19,37 @@
 package joshua.decoder.ff.tm.format;
 
 import joshua.corpus.Vocabulary;
-import joshua.decoder.ff.tm.PhraseRule;
+import joshua.decoder.ff.tm.Rule;
 import joshua.util.io.LineReader;
 
 /***
  * This class reads in the Moses phrase table format, with support for the source and target side,
- * list of features, and word alignments. It works by simply casting the phrase-based rules to
- * left-branching hierarchical rules and passing them on to its parent class, {@HieroFormatReader}.
+ * list of features, and word alignments. It works by
+ * 
+ * - casting the phrase-based rules to left-branching hierarchical rules and passing them on \
+ *   to its parent class, {@HieroFormatReader}.
+ * - converting the probabilities to -log probabilities
  * 
  * There is also a tool to convert the grammars directly, so that they can be suitably packed. Usage:
  * 
  * <pre>
- *     cat PHRASE_TABLE | java -cp $JOSHUA/class joshua.decoder.ff.tm.format.PhraseFormatReader > grammar
+ *     cat PHRASE_TABLE | java -cp $JOSHUA/class joshua.decoder.ff.tm.format.MosesFormatReader > grammar
  * </pre>
  * 
  * @author Matt Post <post@cs.jhu.edu>
  *
  */
 
-public class PhraseFormatReader extends HieroFormatReader {
+public class MosesFormatReader extends HieroFormatReader {
 
   private int lhs;
   
-  /* Whether we are reading a Moses phrase table or Thrax phrase table */
-  private boolean moses_format = false;
-
-  public PhraseFormatReader(String grammarFile, boolean is_moses) {
+  public MosesFormatReader(String grammarFile) {
     super(grammarFile);
     this.lhs = Vocabulary.id("[X]");
-    this.moses_format = is_moses;
   }
   
-  public PhraseFormatReader() {
+  public MosesFormatReader() {
     super();
     this.lhs = Vocabulary.id("[X]");
   }
@@ -73,15 +72,11 @@ public class PhraseFormatReader extends HieroFormatReader {
    *    [X] ||| [X,1] mots francaises ||| [X,1] French words ||| 1 2 3 ||| 0-1 1-0
    */
   @Override
-  public PhraseRule parseLine(String line) {
+  public Rule parseLine(String line) {
     String[] fields = line.split(fieldDelimiter);
 
     int arity = 1;
-    
-    /* For Thrax phrase-based grammars, skip over the beginning nonterminal */
     int fieldIndex = 0;
-    if (! moses_format)
-      fieldIndex++;
     
     // foreign side
     String[] foreignWords = fields[fieldIndex].split("\\s+");
@@ -102,7 +97,15 @@ public class PhraseFormatReader extends HieroFormatReader {
 
     // transform feature values
     fieldIndex++;
-    String sparse_features = fields[fieldIndex];
+    
+    String mosesFeatureString = fields[fieldIndex];
+    StringBuffer values = new StringBuffer();
+    for (String value: mosesFeatureString.split(" ")) {
+      float f = Float.parseFloat(value);
+      values.append(String.format("%f ", f <= 0.0 ? -100 : -Math.log(f)));
+    }
+
+    String sparse_features = values.toString().trim();
 
 //    System.out.println(String.format("parseLine: %s\n  ->%s", line, sparse_features));
 
@@ -110,7 +113,7 @@ public class PhraseFormatReader extends HieroFormatReader {
     fieldIndex++;
     String alignment = (fields.length > fieldIndex) ? fields[fieldIndex] : null;
 
-    return new PhraseRule(lhs, french, english, sparse_features, arity, alignment);
+    return new Rule(lhs, french, english, sparse_features, arity, alignment);
   }
   
   /**
@@ -119,9 +122,9 @@ public class PhraseFormatReader extends HieroFormatReader {
    * @param args
    */
   public static void main(String[] args) {
-    PhraseFormatReader reader = new PhraseFormatReader();
+    MosesFormatReader reader = new MosesFormatReader();
     for (String line: new LineReader(System.in)) {
-      PhraseRule rule = reader.parseLine(line);
+      Rule rule = reader.parseLine(line);
       System.out.println(rule.textFormat());
     }    
   }

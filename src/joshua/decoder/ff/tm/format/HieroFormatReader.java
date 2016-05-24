@@ -21,6 +21,7 @@ package joshua.decoder.ff.tm.format;
 import joshua.corpus.Vocabulary;
 import joshua.decoder.ff.tm.GrammarReader;
 import joshua.decoder.ff.tm.Rule;
+import joshua.util.FormatUtils;
 
 /**
  * This class implements reading files in the format defined by David Chiang for Hiero. 
@@ -33,10 +34,6 @@ public class HieroFormatReader extends GrammarReader<Rule> {
 
   static {
     fieldDelimiter = "\\s\\|{3}\\s";
-    nonTerminalRegEx = "^\\[[^\\s]+\\,[0-9]*\\]$";
-    nonTerminalCleanRegEx = ",[0-9\\s]+";
-    // nonTerminalRegEx = "^\\[[A-Z]+\\,[0-9]*\\]$";
-    // nonTerminalCleanRegEx = "[\\[\\]\\,0-9\\s]+";
     description = "Original Hiero format";
   }
 
@@ -55,69 +52,58 @@ public class HieroFormatReader extends GrammarReader<Rule> {
       throw new RuntimeException(String.format("Rule '%s' does not have four fields", line));
     }
 
-    int lhs = Vocabulary.id(cleanNonTerminal(fields[0]));
+    int lhs = Vocabulary.id(FormatUtils.stripNonTerminalIndex(fields[0]));
 
+    /**
+     * On the foreign side, we map nonterminals to negative IDs, and terminals to positive IDs.
+     */
     int arity = 0;
-    // foreign side
-    String[] foreignWords = fields[1].split("\\s+");
-    int[] french = new int[foreignWords.length];
-    for (int i = 0; i < foreignWords.length; i++) {
-      french[i] = Vocabulary.id(foreignWords[i]);
-      if (Vocabulary.nt(french[i])) {
+    String[] sourceWords = fields[1].split("\\s+");
+    int[] sourceIDs = new int[sourceWords.length];
+    for (int i = 0; i < sourceWords.length; i++) {
+      if (FormatUtils.isNonterminal(sourceWords[i])) {
+        Vocabulary.id(sourceWords[i]);
+        sourceIDs[i] = Vocabulary.id(FormatUtils.stripNonTerminalIndex(sourceWords[i]));
         arity++;
-        french[i] = cleanNonTerminal(french[i]);
+        
+        // TODO: the arity here (after incrementing) should match the rule index. Should
+        // check that arity == FormatUtils.getNonterminalIndex(foreignWords[i]), throw runtime
+        // error if not
+      } else {
+        sourceIDs[i] = Vocabulary.id(sourceWords[i]);
       }
     }
 
-    // English side
-    String[] englishWords = fields[2].split("\\s+");
-    int[] english = new int[englishWords.length];
-    for (int i = 0; i < englishWords.length; i++) {
-      english[i] = Vocabulary.id(englishWords[i]);
-      if (Vocabulary.nt(english[i])) {
-        english[i] = -Vocabulary.getTargetNonterminalIndex(english[i]);
+    /**
+     * The English side maps terminal symbols to positive IDs. Nonterminal symbols are linked
+     * to the index of the source-side nonterminal they are linked to. So for a rule
+     * 
+     * [X] ||| [X,1] [X,2] [X,3] ||| [X,2] [X,1] [X,3] ||| ...
+     * 
+     * the English side nonterminals will be -2, -1, -3. This assumes that the source side of
+     * the rule is always listed monotonically.
+     */
+    String[] targetWords = fields[2].split("\\s+");
+    int[] targetIDs = new int[targetWords.length];
+    for (int i = 0; i < targetWords.length; i++) {
+      if (FormatUtils.isNonterminal(targetWords[i])) {
+        targetIDs[i] = -FormatUtils.getNonterminalIndex(targetWords[i]);
+      } else {
+        targetIDs[i] = Vocabulary.id(targetWords[i]);
       }
     }
 
     String sparse_features = (fields.length > 3 ? fields[3] : "");
     String alignment = (fields.length > 4) ? fields[4] : null;
 
-    return new Rule(lhs, french, english, sparse_features, arity, alignment);
+    return new Rule(lhs, sourceIDs, targetIDs, sparse_features, arity, alignment);
   }
-
-  @Override
-  public String toWords(Rule rule) {
-    StringBuffer sb = new StringBuffer("");
-    sb.append(Vocabulary.word(rule.getLHS()));
-    sb.append(" ||| ");
-    sb.append(Vocabulary.getWords(rule.getFrench()));
-    sb.append(" ||| ");
-    sb.append(Vocabulary.getWords(rule.getEnglish()));
-    sb.append(" |||");
-    sb.append(" " + rule.getFeatureVector());
-
-    return sb.toString();
-  }
-
-  @Override
-  public String toWordsWithoutFeatureScores(Rule rule) {
-    StringBuffer sb = new StringBuffer();
-    sb.append(rule.getLHS());
-    sb.append(" ||| ");
-    sb.append(Vocabulary.getWords(rule.getFrench()));
-    sb.append(" ||| ");
-    sb.append(Vocabulary.getWords(rule.getEnglish()));
-    sb.append(" |||");
-
-    return sb.toString();
-  }
-
 
   public static String getFieldDelimiter() {
     return fieldDelimiter;
   }
 
   public static boolean isNonTerminal(final String word) {
-    return GrammarReader.isNonTerminal(word);
+    return FormatUtils.isNonterminal(word);
   }
 }

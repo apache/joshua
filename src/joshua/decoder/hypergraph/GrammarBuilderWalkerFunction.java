@@ -27,6 +27,7 @@ import joshua.decoder.ff.tm.Grammar;
 import joshua.decoder.ff.tm.Rule;
 import joshua.decoder.ff.tm.format.HieroFormatReader;
 import joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
+import joshua.util.FormatUtils;
 
 /**
  * This walker function builds up a new context-free grammar by visiting each node in a hypergraph.
@@ -79,8 +80,7 @@ public class GrammarBuilderWalkerFunction implements WalkerFunction {
 
   private static String getLabelWithSpanAsString(HGNode node) {
     String label = Vocabulary.word(node.lhs);
-    String cleanLabel = HieroFormatReader.cleanNonTerminal(label);
-    String unBracketedCleanLabel = cleanLabel.substring(1, cleanLabel.length() - 1);
+    String unBracketedCleanLabel = label.substring(1, label.length() - 1);
     return String.format("[%d-%s-%d]", node.i, unBracketedCleanLabel, node.j);
   }
 

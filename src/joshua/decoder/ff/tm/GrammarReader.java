@@ -36,8 +36,6 @@ import joshua.util.io.LineReader;
 public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iterator<R> {
 
   protected static String fieldDelimiter;
-  protected static String nonTerminalRegEx;
-  protected static String nonTerminalCleanRegEx;
 
   protected static String description;
 
@@ -165,43 +163,4 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
   }
 
   protected abstract R parseLine(String line);
-
-  // TODO: keep these around or not?
-  public abstract String toWords(R rule);
-
-  public abstract String toWordsWithoutFeatureScores(R rule);
-
-  /**
-   * Removes square brackets (and index, if present) from nonterminal id 
-   * @param tokenID
-   * @return cleaned ID
-   */
-  public static int cleanNonTerminal(int tokenID) {
-    // cleans NT of any markup, e.g., [X,1] may becomes [X], depending
-    return Vocabulary.id(cleanNonTerminal(Vocabulary.word(tokenID)));
-  }
-
-  /**
-   * Removes square brackets (and index, if present) from nonterminal id 
-   * @param token
-   * @return cleaned token
-   */
-  public static String cleanNonTerminal(String token) {
-    // cleans NT of any markup, e.g., [X,1] may becomes [X], depending on nonTerminalCleanRegEx
-    return token.replaceAll(nonTerminalCleanRegEx, "");
-  }
-
-  public static boolean isNonTerminal(final String word) {
-    // checks if word matches NT regex
-    return word.matches(nonTerminalRegEx);
-  }
-
-  public String getNonTerminalRegEx() {
-    return nonTerminalRegEx;
-  }
-
-  public String getNonTerminalCleanRegEx() {
-    return nonTerminalCleanRegEx;
-  }
-
 }
