@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -12,28 +14,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-FROM java:latest
+set -ex
 
-RUN apt-get update && \
-    apt-get install -y \
-            ant \
-            cmake \
-            g++ \
-            libboost-all-dev \
-            libz-dev \
-            make
+pack_name=`action-get name`
 
+wget http://cs.jhu.edu/~post/language-packs/language-pack-es-en-phrase-2015-03-06.tgz -O /tmp/lpack.tgz
 
-RUN mkdir /opt/joshua
-WORKDIR /opt/joshua
-
-# set environment variables
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
-ENV JOSHUA=/opt/joshua
-
-
-# copy Joshua source code to image
-COPY . $JOSHUA
-
-RUN ant
+tar xvfz /tmp/lpack.tgz -C /opt/
+rm -rf /opt/language-pack
+mv /opt/language-pack-es-en-phrase-2015-03-06 /opt/language-pack/
+charms.reactive set_state languagepack.installed
+hooks/update-status
