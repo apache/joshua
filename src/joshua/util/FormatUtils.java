@@ -75,7 +75,7 @@ public class FormatUtils {
    * Removes the index from a nonTerminal: [X,1] -> [X].
    */
   public static String stripNonTerminalIndex(String nt) {
-    return markup(cleanNonTerminal(nt));
+    return ensureNonTerminalBrackets(cleanNonTerminal(nt));
   }
 
   /**
@@ -97,18 +97,11 @@ public class FormatUtils {
    * @param nt the nonterminal string
    * @return the nonterminal string surrounded in square brackets (if not already)
    */
-  public static String markup(String nt) {
+  public static String ensureNonTerminalBrackets(String nt) {
     if (isNonterminal(nt)) 
       return nt;
     else 
       return "[" + nt + "]";
-  }
-
-  public static String markup(String nt, int index) {
-    if (isNonterminal(nt)) {
-      return markup(cleanNonTerminal(nt), index);
-    }
-    return "[" + nt + INDEX_SEPARATOR + index + "]";
   }
   
   public static String escapeSpecialSymbols(String s) {
