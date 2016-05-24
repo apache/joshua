@@ -359,7 +359,7 @@ public class Chart {
         /* Use the updated ranks to assign the next rule and tail node. */
         Rule nextRule = rules.get(nextRanks[0] - 1);
         // HGNode[] nextAntNodes = new HGNode[state.antNodes.size()];
-        List<HGNode> nextAntNodes = new ArrayList<HGNode>();
+        List<HGNode> nextAntNodes = new ArrayList<HGNode>(state.antNodes.size());
         for (int x = 0; x < state.ranks.length - 1; x++)
           nextAntNodes.add(superNodes.get(x).nodes.get(nextRanks[x + 1] - 1));
 
