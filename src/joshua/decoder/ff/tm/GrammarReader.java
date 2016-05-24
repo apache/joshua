@@ -51,18 +51,9 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
     this.fileName = null;
   }
 
-  public GrammarReader(String fileName) {
+  public GrammarReader(String fileName) throws IOException {
     this.fileName = fileName;
-  }
-
-  public void initialize() {
-    try {
-      this.reader = new LineReader(fileName);
-    } catch (IOException e) {
-      throw new RuntimeException("Error opening translation model file: " + fileName + "\n"
-          + (null != e.getMessage() ? e.getMessage() : "No details available. Sorry."), e);
-    }
-
+    this.reader = new LineReader(fileName);
     Decoder.LOG(1, String.format("Reading grammar from file %s...", fileName));
     numRulesRead = 0;
     advanceReader();

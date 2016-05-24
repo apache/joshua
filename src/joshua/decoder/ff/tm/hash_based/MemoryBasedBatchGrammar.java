@@ -111,7 +111,6 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
     // ==== loading grammar
     this.modelReader = createReader(formatKeyword, grammarFile);
     if (modelReader != null) {
-      modelReader.initialize();
       for (Rule rule : modelReader)
         if (rule != null) {
           addRule(rule);
