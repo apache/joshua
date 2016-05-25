@@ -256,7 +256,8 @@ public class GrammarPacker {
        * NOTE: In case of nonterminals, we add both stripped versions ("[X]")
        * and "[X,1]" to the vocabulary.
        * 
-       * TODO: MJP May 2016: Is it necessary to add [X,1]?
+       * TODO: MJP May 2016: Is it necessary to add [X,1]? This is currently being done in
+       * {@link HieroFormatReader}, which is called by {@link MosesFormatReader}. 
        */
 
       // Add feature names to vocabulary and pass the value through the
