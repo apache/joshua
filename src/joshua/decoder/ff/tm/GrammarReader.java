@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import joshua.corpus.Vocabulary;
 import joshua.decoder.Decoder;
 import joshua.util.io.LineReader;
 

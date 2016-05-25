@@ -44,16 +44,14 @@ import joshua.util.io.LineReader;
 
 public class MosesFormatReader extends HieroFormatReader {
 
-  private int lhs;
-  
   public MosesFormatReader(String grammarFile) throws IOException {
     super(grammarFile);
-    this.lhs = Vocabulary.id("[X]");
+    Vocabulary.id("[X]");
   }
   
   public MosesFormatReader() {
     super();
-    this.lhs = Vocabulary.id("[X]");
+    Vocabulary.id("[X]");
   }
   
   /**
@@ -77,8 +75,6 @@ public class MosesFormatReader extends HieroFormatReader {
   public Rule parseLine(String line) {
     String[] fields = line.split(fieldDelimiter);
     
-    int arity = 1;
-
     StringBuffer hieroLine = new StringBuffer();
     hieroLine.append("[X] ||| [X,1] " + fields[0] + " ||| [X,1] " + fields[1] + " |||");
 

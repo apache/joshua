@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -28,7 +28,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,6 +49,20 @@ public class GrammarPacker {
 
   private static final Logger logger = Logger.getLogger(GrammarPacker.class.getName());
 
+  /**
+   * The packed grammar version number. Increment this any time you add new features, and update
+   * the documentation.
+   * 
+   * Version history:
+   * 
+   * - 3 (May 2016). This was the first version that was marked. It removed the special phrase-
+   * table packing that packed phrases without the [X,1] on the source and target sides, which
+   * then required special handling in the decoder to use for phrase-based decoding.
+   * 
+   * 
+   */
+  public static final int VERSION = 3;
+  
   // Size limit for slice in bytes.
   private static int DATA_SIZE_LIMIT = (int) (Integer.MAX_VALUE * 0.8);
   // Estimated average number of feature entries for one rule.
@@ -66,7 +79,7 @@ public class GrammarPacker {
   public String getGrammar() {
     return grammar;
   }
-  
+
   public String getOutputDirectory() {
     return output;
   }
@@ -160,7 +173,7 @@ public class GrammarPacker {
 
     // Explore pass. Learn vocabulary and feature value histograms.
     logger.info("Exploring: " + grammar);
-    
+
     HieroFormatReader grammarReader = getGrammarReader();
     explore(grammarReader);
 
@@ -185,9 +198,10 @@ public class GrammarPacker {
     logger.info(String.format("Writing config to '%s'", configFile));
     // Write config options
     FileWriter config = new FileWriter(configFile);
+    config.write(String.format("version = %d\n", VERSION));
     config.write(String.format("max-source-len = %d\n", max_source_len));
     config.close();
-    
+
     // Read previously written encoder configuration to match up to changed
     // vocabulary id's.
     logger.info("Reading encoding.");
@@ -212,7 +226,7 @@ public class GrammarPacker {
    * 
    * @param grammarFile
    * @return
-   * @throws IOException 
+   * @throws IOException
    */
   private HieroFormatReader getGrammarReader() throws IOException {
     LineReader reader = new LineReader(grammar);
@@ -224,14 +238,17 @@ public class GrammarPacker {
     }
   }
 
+  /**
+   * This first pass over the grammar 
+   * @param reader
+   */
   private void explore(HieroFormatReader reader) {
-    int counter = 0;
+
     // We always assume a labeled grammar. Unlabeled features are assumed to be dense and to always
     // appear in the same order. They are assigned numeric names in order of appearance.
     this.types.setLabeled(true);
 
     for (Rule rule: reader) {
-      counter++;
 
       max_source_len = Math.max(max_source_len, rule.getFrench().length);
 
@@ -239,7 +256,7 @@ public class GrammarPacker {
        * NOTE: In case of nonterminals, we add both stripped versions ("[X]")
        * and "[X,1]" to the vocabulary.
        * 
-       * TODO: MJP May 2016: do we need to add [X,1]? If so, should be done in FormatReaders.
+       * TODO: MJP May 2016: Is it necessary to add [X,1]?
        */
 
       // Add feature names to vocabulary and pass the value through the
@@ -359,7 +376,7 @@ public class GrammarPacker {
       for (int f = 0; f < feature_entries.length; ++f) {
         String feature_entry = feature_entries[f];
         int feature_id;
-        float feature_value; 
+        float feature_value;
         if (feature_entry.contains("=")) {
           String[] parts = feature_entry.split("=");
           if (parts[0].equals("Alignment"))
