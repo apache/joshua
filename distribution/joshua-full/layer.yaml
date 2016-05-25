@@ -17,3 +17,4 @@
 #
 
 includes: ['layer:basic', 'interface:java', 'layer:hadoop-client']
+repo: https://github.com/buggtb/incubator-joshua.git
