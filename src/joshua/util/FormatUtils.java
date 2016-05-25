@@ -44,6 +44,14 @@ public class FormatUtils {
   public static boolean isNonterminal(String token) {
     return (token.length() >=3 && token.charAt(0) == '[') && (token.charAt(token.length() - 1) == ']');
   }
+  
+  /**
+   * Determines whether the ID represents a nonterminal. This is a trivial check, since nonterminal
+   * IDs are simply negative ones.
+   */
+  public static boolean isNonterminal(int id) {
+    return id < 0;
+  }
 
   /**
    * Nonterminals are stored in the vocabulary in square brackets. This removes them when you 

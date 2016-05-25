@@ -115,16 +115,16 @@ public class GrammarBuilderWalkerFunction implements WalkerFunction {
     int[] result = new int[english.length];
     for (int i = 0; i < english.length; i++) {
       int curr = english[i];
-      if (!Vocabulary.nt(curr)) {
-				// If it's a terminal symbol, we just copy it into the new rule.
+      if (! FormatUtils.isNonterminal(curr)) {
+        // If it's a terminal symbol, we just copy it into the new rule.
         result[i] = curr;
       } else {
-				// If it's a nonterminal, its value is -N, where N is the index
-				// of the nonterminal on the source side.
-				//
-				// That is, if we would call a nonterminal "[X,2]", the value of
-				// curr at this point is -2. And the tail node that it points at
-				// is #1 (since getTailNodes() is 0-indexed).
+        // If it's a nonterminal, its value is -N, where N is the index
+        // of the nonterminal on the source side.
+        //
+        // That is, if we would call a nonterminal "[X,2]", the value of
+        // curr at this point is -2. And the tail node that it points at
+        // is #1 (since getTailNodes() is 0-indexed).
         int index = -curr - 1;
         result[i] = getLabelWithSpan(edge.getTailNodes().get(index));
       }
@@ -135,12 +135,12 @@ public class GrammarBuilderWalkerFunction implements WalkerFunction {
 
   private static int[] getNewTargetFromSource(int[] source) {
     int[] result = new int[source.length];
-		int currNT = -1; // value to stick into NT slots
+    int currNT = -1; // value to stick into NT slots
     for (int i = 0; i < source.length; i++) {
       result[i] = source[i];
-      if (Vocabulary.nt(result[i])) {
+      if (FormatUtils.isNonterminal(result[i])) {
         result[i] = currNT;
-				currNT--;
+        currNT--;
       }
     }
     // System.err.printf("target: %s\n", result);

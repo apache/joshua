@@ -21,6 +21,8 @@ package joshua.corpus;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import joshua.util.FormatUtils;
+
 /**
  * Iterator capable of iterating over those word identifiers in a phrase which represent terminals.
  * <p>
@@ -49,7 +51,7 @@ public class TerminalIterator implements Iterator<Integer> {
   /* See Javadoc for java.util.Iterator#next(). */
   public boolean hasNext() {
 
-    while (dirty || Vocabulary.nt(next)) {
+    while (dirty || FormatUtils.isNonterminal(next)) {
       nextIndex++;
       if (nextIndex < words.length) {
         next = words[nextIndex];

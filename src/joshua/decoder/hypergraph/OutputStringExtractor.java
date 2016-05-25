@@ -20,13 +20,13 @@ package joshua.decoder.hypergraph;
 
 import static java.lang.Math.min;
 import static joshua.corpus.Vocabulary.getWords;
-import static joshua.corpus.Vocabulary.nt;
 
 import java.util.Stack;
 
 import joshua.decoder.ff.tm.Rule;
 import joshua.decoder.hypergraph.KBestExtractor.DerivationState;
 import joshua.decoder.hypergraph.KBestExtractor.DerivationVisitor;
+import joshua.util.FormatUtils;
 
 public class OutputStringExtractor implements WalkerFunction, DerivationVisitor {
   
@@ -66,7 +66,7 @@ public class OutputStringExtractor implements WalkerFunction, DerivationVisitor 
   private static int getSourceNonTerminalPosition(final int[] words, int nonTerminalIndex) {
     int nonTerminalsSeen = 0;
     for (int i = 0; i < words.length; i++) {
-      if (nt(words[i])) {
+      if (FormatUtils.isNonterminal(words[i])) {
         nonTerminalsSeen++;
         if (nonTerminalsSeen == nonTerminalIndex) {
           return i;
@@ -89,7 +89,7 @@ public class OutputStringExtractor implements WalkerFunction, DerivationVisitor 
    */
   private static int getTargetNonTerminalPosition(int[] words, int nonTerminalIndex) {
     for (int pos = 0; pos < words.length; pos++) {
-      if (nt(words[pos]) && -(words[pos] + 1) == nonTerminalIndex) {
+      if (FormatUtils.isNonterminal(words[pos]) && -(words[pos] + 1) == nonTerminalIndex) {
         return pos;
       }
     }
@@ -174,7 +174,7 @@ public class OutputStringExtractor implements WalkerFunction, DerivationVisitor 
      * of child and the arity of this.
      */
     private void substituteNonTerminalAtPosition(final int[] words, final int position) {
-      assert(nt(this.words[position]));
+      assert(FormatUtils.isNonterminal(this.words[position]));
       final int[] result = new int[words.length + this.words.length - 1];
       int resultIndex = 0;
       for (int i = 0; i < position; i++) {

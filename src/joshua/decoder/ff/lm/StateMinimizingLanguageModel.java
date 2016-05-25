@@ -33,6 +33,7 @@ import joshua.decoder.ff.state_maintenance.KenLMState;
 import joshua.decoder.ff.tm.Rule;
 import joshua.decoder.hypergraph.HGNode;
 import joshua.decoder.segment_file.Sentence;
+import joshua.util.FormatUtils;
 
 /**
  * Wrapper for KenLM LMs with left-state minimization. We inherit from the regular
@@ -99,7 +100,7 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
     for (int x = 0; x < ruleWords.length; x++) {
       int id = ruleWords[x];
 
-      if (Vocabulary.nt(id)) {
+      if (FormatUtils.isNonterminal(id)) {
         // For the estimate, we can just mark negative values
         words[x] = -1;
 
@@ -131,7 +132,7 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
     for (int x = 0; x < ruleWords.length; x++) {
       int id = ruleWords[x];
 
-      if (Vocabulary.nt(id)) {
+      if (FormatUtils.isNonterminal(id)) {
         // Nonterminal: retrieve the KenLM long that records the state
         int index = -(id + 1);
         KenLMState state = (KenLMState) tailNodes.get(index).getDPState(stateIndex);
