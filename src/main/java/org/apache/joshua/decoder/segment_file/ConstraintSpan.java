@@ -49,18 +49,21 @@ public interface ConstraintSpan {
 
   /**
    * Return the starting index of the span covered by this constraint.
+   * @return the starting index of the span covered by this constraint
    */
   int start();
 
   /**
    * Return the ending index of the span covered by this constraint. Clients may assume
    * <code>this.end() &gt;= 1 + this.start()</code>.
+   * @return the ending index of the span covered by this constraint
    */
   int end();
 
   /**
    * Return whether this is a hard constraint which should override the grammar. This value only
    * really matters for sets of <code>RULE</code> type constraints.
+   * @return true if a hard constraint exists which should override the grammar
    */
   boolean isHard();
 
@@ -71,6 +74,7 @@ public interface ConstraintSpan {
    * {@link java.util.Iterator} instead in order to reduce the coupling between this class and
    * Chart. See the note above about the fact that this interface should not be used internally by
    * the Chart class because it will not be performant.
+   * @return a {@link java.util.List} of {@link org.apache.joshua.decoder.segment_file.ConstraintRule}'s
    */
   List<ConstraintRule> rules();
 }

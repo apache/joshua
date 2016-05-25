@@ -37,8 +37,9 @@ public class ArgsParser {
    * Parse the arguments passed from the command line when the JoshuaDecoder application was
    * executed from the command line.
    * 
-   * @param args
-   * @throws IOException 
+   * @param args string array of input arguments
+   * @param joshuaConfiguration the {@link org.apache.joshua.decoder.JoshuaConfiguration}
+   * @throws IOException if there is an error wit the input arguments
    */
   public ArgsParser(String[] args, JoshuaConfiguration joshuaConfiguration) throws IOException {
 

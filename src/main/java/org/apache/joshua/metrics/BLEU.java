@@ -147,6 +147,9 @@ public class BLEU extends EvaluationMetric {
 
   /**
    * Computes the BLEU sufficient statistics on a hypothesis.
+   * @param cand_str todo
+   * @param i todo 
+   * @return int[] representing statistics on a hypothesis
    */
   public int[] suffStats(String cand_str, int i) {
     int[] stats = new int[suffStatsCount];
@@ -172,9 +175,9 @@ public class BLEU extends EvaluationMetric {
   /**
    * Computes the precision sufficient statistics, clipping counts.
    * 
-   * @param stats
-   * @param words
-   * @param i
+   * @param stats int[] representing statistics on a hypothesis.
+   * @param words String[] of input terms
+   * @param i todo
    */
   public void set_prec_suffStats(int[] stats, String[] words, int i) {
     HashMap<String, Integer>[] candCountsArray = getNgramCountsArray(words);

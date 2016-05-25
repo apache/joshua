@@ -83,9 +83,9 @@ public class Vocabulary implements Externalizable {
    * Reads a vocabulary from file. This deletes any additions to the vocabulary made prior to
    * reading the file.
    *
-   * @param file_name
+   * @param vocab_file path to a vocabulary file
    * @return Returns true if vocabulary was read without mismatches or collisions.
-   * @throws IOException
+   * @throws IOException of the file cannot be found or read properly
    */
   public static boolean read(final File vocab_file) throws IOException {
     DataInputStream vocab_stream =
@@ -131,6 +131,9 @@ public class Vocabulary implements Externalizable {
    * changing (e.g. OOV) ids. Constant ids could be immutable -&gt; no locking.
    * Alternatively: could we use ConcurrentHashMap to not have to lock if
    * actually contains it and only lock for modifications?
+   * 
+   * @param token a token to obtain an id for
+   * @return the token id
    */
   public static int id(String token) {
     // First attempt an optimistic read
@@ -233,8 +236,8 @@ public class Vocabulary implements Externalizable {
   /**
    * Returns true if the Vocabulary ID represents a nonterminal.
    *
-   * @param id
-   * @return
+   * @param id vocabularly ID to check
+   * @return true if the Vocabulary ID represents a nonterminal
    */
   public static boolean nt(int id) {
     return (id < 0);

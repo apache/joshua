@@ -29,24 +29,28 @@ import org.apache.joshua.corpus.Phrase;
  * @version $LastChangedDate$
  */
 public class BiCorpus implements Iterable<PhrasePair> {
-  // Making these final requires Java6, doesn't work in Java5
   protected final String foreignFileName;
   protected final String nativeFileName;
   protected final String alignmentFileName;
 
-  // ===============================================================
-  // Constructors
-  // ===============================================================
   /**
    * Constructor for unaligned BiCorpus.
+   * @param foreignFileName todo
+   * @param nativeFileName todo
+   * @throws IOException todo
    */
   public BiCorpus(String foreignFileName, String nativeFileName) throws IOException {
     this(foreignFileName, nativeFileName, null);
   }
 
-
   /**
    * Constructor for word-aligned BiCorpus.
+   * @param foreignFileName todo
+   * @param nativeFileName todo
+   * @param alignmentFileName todo
+   * @throws IOException todo
+   * @throws IllegalArgumentException todo
+   * @throws IndexOutOfBoundsException todo
    */
   public BiCorpus(String foreignFileName, String nativeFileName, String alignmentFileName)
       throws IOException, IllegalArgumentException, IndexOutOfBoundsException {

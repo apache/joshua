@@ -90,6 +90,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
   /**
    * Constructor if order is not known.
    * Order will be inferred from the model.
+   * @param file_name string path to an input file
    */
   public KenLM(String file_name) {
     pointer = construct(file_name);

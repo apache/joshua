@@ -86,7 +86,7 @@ public class Hypothesis extends HGNode implements Comparable<Hypothesis> {
    * HGNodes (designed for chart parsing) maintain a span (i,j). We overload j
    * here to record the index of the last translated source word.
    * 
-   * @return
+   * @return the int 'j' which is overloaded to denote the span of the phrase being applied
    */
   public int LastSourceIndex() {
     return j;

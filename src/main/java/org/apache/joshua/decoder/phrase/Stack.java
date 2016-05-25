@@ -58,9 +58,9 @@ public class Stack extends ArrayList<Hypothesis> {
   /**
    * Create a new stack. Stacks are organized one for each number of source words that are covered.
    * 
-   * @param featureFunctions
-   * @param sentence
-   * @param config
+   * @param featureFunctions {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
+   * @param sentence input for a {@link org.apache.joshua.lattice.Lattice}
+   * @param config populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
   public Stack(List<FeatureFunction> featureFunctions, Sentence sentence, JoshuaConfiguration config) {
     this.featureFunctions = featureFunctions;
@@ -76,6 +76,8 @@ public class Stack extends ArrayList<Hypothesis> {
   /**
    * A Stack is an ArrayList; here, we intercept the add so we can maintain a list of the items
    * stored under each distinct coverage vector
+   * @param hyp a {@link org.apache.joshua.decoder.phrase.Hypothesis} to add to the {@link org.apache.joshua.decoder.phrase.Stack}
+   * @return true if the {@link org.apache.joshua.decoder.phrase.Hypothesis} is appended to the list
    */
   @Override
   public boolean add(Hypothesis hyp) {
@@ -106,6 +108,7 @@ public class Stack extends ArrayList<Hypothesis> {
   /** 
    * Returns the set of coverages contained in this stack. This is used to iterate over them
    * in the main decoding loop in Stacks.java.
+   * @return a {@link java.util.Set} of {@link org.apache.joshua.decoder.phrase.Coverage}'s
    */
   public Set<Coverage> getCoverages() {
     return coverages.keySet();
@@ -114,8 +117,8 @@ public class Stack extends ArrayList<Hypothesis> {
   /**
    * Get all items with the same coverage vector.
    * 
-   * @param cov
-   * @return
+   * @param cov the {@link org.apache.joshua.decoder.phrase.Coverage} vector to get
+   * @return an {@link java.util.ArrayList} of {@link org.apache.joshua.decoder.phrase.Hypothesis}'
    */
   public ArrayList<Hypothesis> get(Coverage cov) {
     ArrayList<Hypothesis> list = coverages.get(cov);
@@ -133,8 +136,7 @@ public class Stack extends ArrayList<Hypothesis> {
    * adding a candidate, we ensure that the sequence of English words match the sentence. If not,
    * the code extends the dot in the cube-pruning chart to the next phrase, since that one might
    * be a match.
-   * 
-   * @param cand
+   * @param cand a partially-initialized translation {@link org.apache.joshua.decoder.phrase.Candidate}
    */
   public void addCandidate(Candidate cand) {
     if (visitedStates.contains(cand))
@@ -194,6 +196,7 @@ public class Stack extends ArrayList<Hypothesis> {
   /**
    * Adds a popped candidate to the chart / main stack. This is a candidate we have decided to
    * keep around.
+   * @param complete a completely-initialized translation {@link org.apache.joshua.decoder.phrase.Candidate}
    * 
    */
   public void addHypothesis(Candidate complete) {

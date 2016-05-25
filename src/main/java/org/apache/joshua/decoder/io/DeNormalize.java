@@ -51,8 +51,8 @@ public class DeNormalize {
   /**
    * Apply all the denormalization methods to the normalized input line.
    * 
-   * @param normalized
-   * @return
+   * @param normalized a normalized input line
+   * @return the denormalized String
    */
   public static String processSingleLine(String normalized) {
     // The order in which the methods are applied could matter in some situations. E.g., a token to

@@ -58,7 +58,10 @@ public interface ConstraintRule {
     RULE, LHS, RHS
   };
 
-  /** Return the type of this ConstraintRule. */
+  /** 
+   * Return the type of this ConstraintRule.
+   * @return the {@link org.apache.joshua.decoder.segment_file.ConstraintRule.Type}
+   */
   Type type();
 
 
@@ -66,6 +69,7 @@ public interface ConstraintRule {
    * Return the left hand side of the constraint rule. If this is null, then this object is
    * specifying a translation for the span, but that translation may be derived from any
    * nonterminal. The nonterminal here must be one used by the regular grammar.
+   * @return the left hand side of the constraint rule
    */
   String lhs();
 
@@ -73,6 +77,7 @@ public interface ConstraintRule {
   /**
    * Return the native right hand side of the constraint rule. If this is null, then the regular
    * grammar will be used to fill in the derivation from the lhs.
+   * @return the native right hand side of the constraint rule
    */
   String nativeRhs();
 
@@ -80,6 +85,7 @@ public interface ConstraintRule {
   /**
    * Return the foreign right hand side of the constraint rule. This must be consistent with the
    * sentence for the associated span, and is provided as a convenience method.
+   * @return the foreign right hand side of the constraint rule
    */
   String foreignRhs();
 
@@ -88,6 +94,7 @@ public interface ConstraintRule {
    * Return the grammar feature values for the RULE. The length of this array must be the same as
    * for the regular grammar. We cannot enforce this requirement, but the
    * {@link org.apache.joshua.decoder.chart_parser.Chart} must throw an error if there is a mismatch.
+   * @return an array of floating feature values for the RULE 
    */
   float[] features();
 }

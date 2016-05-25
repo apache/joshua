@@ -87,7 +87,7 @@ public class ViterbiExtractor {
    * obtain a Viterbi features for
    * @param featureFunctions a {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    * @param sentence {@link org.apache.joshua.lattice.Lattice} input
-   * @return a Viterbi {@link org.apache.joshua.decoder.ff.FeatureVector.FeatureVector}
+   * @return a Viterbi {@link org.apache.joshua.decoder.ff.FeatureVector}
    */
   public static FeatureVector getViterbiFeatures(
       final HyperGraph hg,

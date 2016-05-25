@@ -213,9 +213,9 @@ public abstract class EvaluationMetric {
   /**
    * Calculates sufficient statistics on each sentence in the corpus, returning them as arrays.
    * 
-   * @param cand_strings
-   * @param cand_indices
-   * @return
+   * @param cand_strings todo
+   * @param cand_indices todo
+   * @return todo
    */
   public int[][] suffStats(String[] cand_strings, int[] cand_indices) {
 

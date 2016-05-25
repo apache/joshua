@@ -33,14 +33,15 @@ public class Support {
     return (a > b) ? a : b;
   }
 
-  
   public static int[] toArray(List<Integer> in) {
     return subIntArray(in, 0, in.size());
   }
 
   /**
+   * @param in a {@link java.util.List} of Integer
    * @param start inclusive
    * @param end exclusive
+   * @return sub int[] from start to end
    */
   public static int[] subIntArray(List<Integer> in, int start, int end) {
     int[] res = new int[end - start];

@@ -59,7 +59,7 @@ public class Token {
    *   PRO -&gt; PRO
    * </pre>
    * 
-   * <p>and the following for "voudrais":<p>
+   * <p>and the following for "voudrais":</p>
    * 
    * <pre>
    *   FUT  -&gt; FUT
@@ -67,6 +67,7 @@ public class Token {
    * </pre>
    * 
    * @param rawWord A word with annotation information (possibly)
+   * @param config a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    *  
    */
   public Token(String rawWord, JoshuaConfiguration config) {
@@ -140,7 +141,8 @@ public class Token {
   /**
    * Returns the annotationID (vocab ID)
    * associated with this token
-   * @return int A type ID
+   * @param key A type ID
+   * @return the annotationID (vocab ID)
    */
   public String getAnnotation(String key) {
     if (annotations.containsKey(key)) {

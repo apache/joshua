@@ -78,8 +78,9 @@ public class Sentence {
    * Constructor. Receives a string representing the input sentence. This string may be a
    * string-encoded lattice or a plain text string for decoding.
    * 
-   * @param inputString
-   * @param id
+   * @param inputString representing the input sentence
+   * @param id ID to associate with the input string
+   * @param joshuaConfiguration a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
   public Sentence(String inputString, int id, JoshuaConfiguration joshuaConfiguration) {
   
@@ -262,7 +263,7 @@ public class Sentence {
    * Note that this code assumes the underlying representation is a sentence, and not a lattice. Its
    * behavior is undefined for lattices.
    * 
-   * @param length
+   * @param length int representing the length to truncate the sentence to
    */
   protected void adjustForLength(int length) {
     int size = this.getLattice().size() - 2; // subtract off the start- and end-of-sentence tokens
@@ -293,6 +294,7 @@ public class Sentence {
 
   /**
    * Returns the raw source-side input string.
+   * @return the raw source-side input string
    */
   public String rawSource() {
     return source;
@@ -301,7 +303,7 @@ public class Sentence {
   /**
    * Returns the source-side string with annotations --- if any --- stripped off.
    * 
-   * @return
+   * @return  the source-side string with annotations --- if any --- stripped off
    */
   public String source() {
     StringBuilder str = new StringBuilder();
@@ -333,7 +335,7 @@ public class Sentence {
    * 
    * If the parameter parse=true is set, parsing will be triggered, otherwise constrained decoding.
    * 
-   * @return
+   * @return target side of sentence translation
    */
   public String target() {
     return target;
@@ -369,7 +371,7 @@ public class Sentence {
    * Returns the sequence of tokens comprising the sentence. This assumes you've done the checking
    * to makes sure the input string (the source side) isn't a PLF waiting to be parsed.
    * 
-   * @return
+   * @return a {@link java.util.List} of {@link org.apache.joshua.decoder.segment_file.Token}'s comprising the sentence
    */
   public List<Token> getTokens() {
     assert isLinearChain();
@@ -383,6 +385,7 @@ public class Sentence {
   /**
    * Returns the sequence of word IDs comprising the input sentence. Assumes this is not a general
    * lattice, but a linear chain.
+   * @return an int[] comprising all word ID's
    */
   public int[] getWordIDs() {
     List<Token> tokens = getTokens();
@@ -396,7 +399,7 @@ public class Sentence {
    * Returns the sequence of word ids comprising the sentence. Assumes this is a sentence and
    * not a lattice.
    *  
-   * @return
+   * @return the sequence of word ids comprising the sentence
    */
   public Lattice<String> stringLattice() {
     assert isLinearChain();

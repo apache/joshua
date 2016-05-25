@@ -536,7 +536,7 @@ public class Tree implements Serializable {
    * recursively visit the derivation state objects, following the route through the hypergraph
    * defined by them.
    * 
-   * This function is like {@link org.apache.joshua.decoder.ff.fragmentlm.Tree#buildTree(DerivationState, int)},
+   * This function is like Tree#buildTree(DerivationState, int),
    * but that one simply follows the best incoming hyperedge for each node.
    * 
    * @param rule for which corresponding internal fragment can be used to initialize the tree

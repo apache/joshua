@@ -72,6 +72,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    * order, the behavior of the lattice is not defined.
    * 
    * @param nodes A list of nodes which must be in topological order.
+   * @param config a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
   public Lattice(List<Node<Value>> nodes, JoshuaConfiguration config) {
     this.nodes = nodes;
@@ -91,6 +92,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    * Instantiates a lattice from a linear chain of values, i.e., a sentence.
    * 
    * @param linearChain a sequence of Value objects
+   * @param config a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
   public Lattice(Value[] linearChain, JoshuaConfiguration config) {
     this.latticeHasAmbiguity = false;
@@ -125,7 +127,8 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    * Computes the shortest distance between two nodes, which is used (perhaps among other places) in
    * computing which rules can apply over which spans of the input
    * 
-   * @param arc
+   * @param arc an {@link org.apache.joshua.lattice.Arc} of values
+   * @return the shortest distance between two nodes
    */
   public int distance(Arc<Value> arc) {
     return this.getShortestPath(arc.getTail().getNumber(), arc.getHead().getNumber());
@@ -138,8 +141,8 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
   /**
    * Convenience method to get a lattice from a linear sequence of {@link Token} objects.
    * 
-   * @param source
-   * @param config
+   * @param source input string from which to create a {@link org.apache.joshua.lattice.Lattice}
+   * @param config a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    * @return Lattice representation of the linear chain.
    */
   public static Lattice<Token> createTokenLatticeFromString(String source, JoshuaConfiguration config) {
@@ -243,6 +246,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    * Constructs a lattice from a given string representation.
    * 
    * @param data String representation of a lattice.
+   * @param config a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    * @return A lattice that corresponds to the given string.
    */
   public static Lattice<String> createStringLatticeFromString(String data, JoshuaConfiguration config) {
@@ -325,7 +329,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
 
   /**
    * Gets the shortest distance through the lattice.
-   * 
+   * @return int representing the shortest distance through the lattice
    */
   public int getShortestDistance() {
     if (distances == null)
@@ -442,9 +446,9 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    * Replaced the arc from node i to j with the supplied lattice. This is used to do OOV
    * segmentation of words in a lattice.
    * 
-   * @param i
-   * @param j
-   * @param newNodes
+   * @param i start node of arc
+   * @param j end node of arc
+   * @param newNodes new nodes used within the replacement operation
    */
   public void insert(int i, int j, List<Node<Value>> newNodes) {
 

@@ -29,7 +29,7 @@ import org.apache.joshua.corpus.Span;
  */
 
 public class Coverage {
-  
+
   // The index of the first uncovered word
   private int firstZero;
 
@@ -45,12 +45,12 @@ public class Coverage {
     firstZero = 0;
     bits = new BitSet(INITIAL_LENGTH);
   }
-  
+
   public Coverage(int firstZero) {
     this.firstZero = firstZero;
     bits = new BitSet(INITIAL_LENGTH);
   }
-  
+
   /**
    * Pretty-prints the coverage vector, making a guess about the length
    */
@@ -86,8 +86,8 @@ public class Coverage {
   public void set(int begin, int end) {
     assert compatible(begin, end);
 
-//    StringBuffer sb = new StringBuffer();
-//    sb.append(String.format("SET(%d,%d) %s", begin, end, this));
+    //    StringBuffer sb = new StringBuffer();
+    //    sb.append(String.format("SET(%d,%d) %s", begin, end, this));
 
     if (begin == firstZero) {
       // A concatenation. 
@@ -105,13 +105,13 @@ public class Coverage {
       bits.or(pattern(begin, end));
     }
 
-//    sb.append(String.format(" -> %s", this));
-//    System.err.println(sb);
+    //    sb.append(String.format(" -> %s", this));
+    //    System.err.println(sb);
   }
-  
+
   /**
    * Convenience function.
-   * @param todo
+   * @param span todo
    */
   public final void set(Span span) {
     set(span.start, span.end);
@@ -134,7 +134,7 @@ public class Coverage {
     }
     return false;
   }
-  
+
   /**
    * Returns the source sentence index of the first uncovered word.
    * 
@@ -181,7 +181,8 @@ public class Coverage {
    * 
    * Finds the right bound of the enclosing gap, or the end of sentence, whichever is less.
    * @param end end of phrase pair
-   * @param senetenceLength length of sentence
+   * @param sentenceLength length of sentence
+   * @return todo
    */
   public int rightOpening(int end, int sentenceLength) {
     for (int i = end - firstZero; i < Math.min(64, sentenceLength - firstZero); i++) {
@@ -191,7 +192,7 @@ public class Coverage {
     }
     return sentenceLength;
   }
-  
+
   /**
    * Creates a bit vector with the same offset as the current coverage vector, flipping on
    * bits begin..end.
@@ -201,7 +202,7 @@ public class Coverage {
    * @return a bit vector (relative) with positions [begin..end) on
    */
   public BitSet pattern(int begin, int end) {
-//    System.err.println(String.format("pattern(%d,%d) %d %s %s", begin, end, firstZero, begin >= firstZero, toString()));
+    //    System.err.println(String.format("pattern(%d,%d) %d %s %s", begin, end, firstZero, begin >= firstZero, toString()));
     assert begin >= firstZero;
     BitSet pattern = new BitSet(INITIAL_LENGTH);
     pattern.set(begin - firstZero, end - firstZero);
@@ -211,12 +212,12 @@ public class Coverage {
   /**
    * Returns the underlying coverage bits.
    * 
-   * @return
+   * @return {@link java.util.BitSet} vector of bits
    */
   public BitSet getCoverage() {
     return bits;
   }
-  
+
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof Coverage) {
