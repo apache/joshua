@@ -137,7 +137,7 @@ public class Stacks {
         Stack tailStack = stacks.get(from_stack);
         
         if (Decoder.VERBOSE >= 3)
-          System.err.println(String.format("\n  WORDS %d MAX %d (STACK %d phrase_length %d)", source_words,
+          Decoder.LOG(3, String.format("\n  WORDS %d MAX %d (STACK %d phrase_length %d)", source_words,
               chart.MaxSourcePhraseLength(), from_stack, phrase_length));
         
         // Iterate over antecedents in this stack.

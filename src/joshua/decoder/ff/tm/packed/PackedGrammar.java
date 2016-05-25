@@ -91,6 +91,7 @@ import joshua.decoder.ff.tm.Rule;
 import joshua.decoder.ff.tm.RuleCollection;
 import joshua.decoder.ff.tm.Trie;
 import joshua.decoder.ff.tm.hash_based.ExtensionIterator;
+import joshua.util.FormatUtils;
 import joshua.util.encoding.EncoderConfiguration;
 import joshua.util.encoding.FloatEncoder;
 import joshua.util.io.LineReader;
@@ -109,19 +110,22 @@ public class PackedGrammar extends AbstractGrammar {
   private final File vocabFile; // store path to vocabulary file
 
   public static final String VOCABULARY_FILENAME = "vocabulary";
-
-  // The grammar specification keyword (e.g., "thrax" or "moses")
-  private String type;
+  
+  // The version number of the earliest supported grammar packer
+  public static final int SUPPORTED_VERSION = 3;
 
   // A rule cache for commonly used tries to avoid excess object allocations
   // Testing shows there's up to ~95% hit rate when cache size is 5000 Trie nodes.
   private final Cache<Trie, List<Rule>> cached_rules;
 
+  private String grammarDir;
+
   public PackedGrammar(String grammar_dir, int span_limit, String owner, String type,
       JoshuaConfiguration joshuaConfiguration) throws FileNotFoundException, IOException {
     super(joshuaConfiguration);
+
+    this.grammarDir = grammar_dir;
     this.spanLimit = span_limit;
-    this.type = type;
 
     // Read the vocabulary.
     vocabFile = new File(grammar_dir + File.separator + VOCABULARY_FILENAME);
@@ -566,7 +570,7 @@ public class PackedGrammar extends AbstractGrammar {
         System.arraycopy(parent_src, 0, src, 0, parent_src.length);
         src[src.length - 1] = symbol;
         arity = parent_arity;
-        if (Vocabulary.nt(symbol))
+        if (FormatUtils.isNonterminal(symbol))
           arity++;
       }
 
@@ -652,10 +656,7 @@ public class PackedGrammar extends AbstractGrammar {
 
         rules = new ArrayList<Rule>(num_rules);
         for (int i = 0; i < num_rules; i++) {
-          if (type.equals("moses") || type.equals("phrase"))
-            rules.add(new PackedPhrasePair(rule_position + 3 * i));
-          else
-            rules.add(new PackedRule(rule_position + 3 * i));
+          rules.add(new PackedRule(rule_position + 3 * i));
         }
 
         cached_rules.put(this, rules);
@@ -794,105 +795,6 @@ public class PackedGrammar extends AbstractGrammar {
         }
       }
       
-      /**
-       * A packed phrase pair represents a rule of the form of a phrase pair, packed with the
-       * grammar-packer.pl script, which simply adds a nonterminal [X] to the left-hand side of
-       * all phrase pairs (and converts the Moses features). The packer then packs these. We have
-       * to then put a nonterminal on the source and target sides to treat the phrase pairs like
-       * left-branching rules, which is how Joshua deals with phrase decoding. 
-       * 
-       * @author Matt Post <post@cs.jhu.edu>
-       *
-       */
-      public final class PackedPhrasePair extends PackedRule {
-
-        private final Supplier<int[]> englishSupplier;
-        private final Supplier<byte[]> alignmentSupplier;
-
-        public PackedPhrasePair(int address) {
-          super(address);
-          englishSupplier = initializeEnglishSupplier();
-          alignmentSupplier = initializeAlignmentSupplier();
-        }
-
-        @Override
-        public int getArity() {
-          return PackedTrie.this.getArity() + 1;
-        }
-
-        /**
-         * Initialize a number of suppliers which get evaluated when their respective getters
-         * are called.
-         * Inner lambda functions are guaranteed to only be called once, because of this underlying
-         * structures are accessed in a threadsafe way.
-         * Guava's implementation makes sure only one read of a volatile variable occurs per get.
-         * This means this implementation should be as thread-safe and performant as possible.
-         */
-
-        private Supplier<int[]> initializeEnglishSupplier(){
-          Supplier<int[]> result = Suppliers.memoize(() ->{
-            int[] phrase = getTarget(source[address + 1]);
-            int[] tgt = new int[phrase.length + 1];
-            tgt[0] = -1;
-            for (int i = 0; i < phrase.length; i++)
-              tgt[i+1] = phrase[i];
-            return tgt;
-          });
-          return result;
-        }
-
-        private Supplier<byte[]> initializeAlignmentSupplier(){
-          Supplier<byte[]> result = Suppliers.memoize(() ->{
-            byte[] raw_alignment = getAlignmentArray(source[address + 2]);
-            byte[] points = new byte[raw_alignment.length + 2];
-            points[0] = points[1] = 0;
-            for (int i = 0; i < raw_alignment.length; i++)
-              points[i + 2] = (byte) (raw_alignment[i] + 1);
-            return points;
-          });
-          return result;
-        }
-
-        /**
-         * Take the English phrase of the underlying rule and prepend an [X].
-         * 
-         * @return
-         */
-        @Override
-        public int[] getEnglish() {
-          return this.englishSupplier.get();
-        }
-        
-        /**
-         * Take the French phrase of the underlying rule and prepend an [X].
-         * 
-         * @return
-         */
-        @Override
-        public int[] getFrench() {
-          int phrase[] = new int[src.length + 1];
-          int ntid = Vocabulary.id(PackedGrammar.this.joshuaConfiguration.default_non_terminal);
-          phrase[0] = ntid;
-          System.arraycopy(src,  0, phrase, 1, src.length);
-          return phrase;
-        }
-        
-        /**
-         * Similarly the alignment array needs to be shifted over by one.
-         * 
-         * @return
-         */
-        @Override
-        public byte[] getAlignment() {
-          // if no alignments in grammar do not fail
-          if (alignments == null) {
-            return null;
-          }
-
-          return this.alignmentSupplier.get();
-        }
-      }
-
       public class PackedRule extends Rule {
         protected final int address;
         private final Supplier<int[]> englishSupplier;
@@ -1043,11 +945,30 @@ public class PackedGrammar extends AbstractGrammar {
     throw new RuntimeException("PackedGrammar.addRule(): I can't add rules");
   }
   
+  /** 
+   * Read the config file
+   * 
+   * TODO: this should be rewritten using typeconfig.
+   * 
+   * @param config
+   * @throws IOException
+   */
   private void readConfig(String config) throws IOException {
+    int version = 0;
+    
     for (String line: new LineReader(config)) {
       String[] tokens = line.split(" = ");
       if (tokens[0].equals("max-source-len"))
         this.maxSourcePhraseLength = Integer.parseInt(tokens[1]);
+      else if (tokens[0].equals("version")) {
+        version = Integer.parseInt(tokens[1]);
+      }
+    }
+    
+    if (version != 3) {
+      String message = String.format("The grammar at %s was packed with packer version %d, but the earliest supported version is %d",
+          this.grammarDir, version, SUPPORTED_VERSION);
+      throw new RuntimeException(message);
     }
   }
 }

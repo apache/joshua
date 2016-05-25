@@ -40,6 +40,7 @@ import joshua.decoder.ff.state_maintenance.NgramDPState;
 import joshua.decoder.ff.tm.Rule;
 import joshua.decoder.hypergraph.HGNode;
 import joshua.decoder.segment_file.Sentence;
+import joshua.util.FormatUtils;
 
 /**
  * This class performs the following:
@@ -318,7 +319,7 @@ public class LanguageModelFF extends StatefulFF {
      */
     for (int c = 0; c < enWords.length; c++) {
       int currentWord = enWords[c];
-      if (Vocabulary.nt(currentWord)) {
+      if (FormatUtils.isNonterminal(currentWord)) {
         estimate += scoreChunkLogP(words, considerIncompleteNgrams, skipStart);
         words.clear();
         skipStart = false;
@@ -376,7 +377,7 @@ public class LanguageModelFF extends StatefulFF {
     for (int c = 0; c < enWords.length; c++) {
       int curID = enWords[c];
 
-      if (Vocabulary.nt(curID)) {
+      if (FormatUtils.isNonterminal(curID)) {
         int index = -(curID + 1);
 
         NgramDPState state = (NgramDPState) tailNodes.get(index).getDPState(stateIndex);

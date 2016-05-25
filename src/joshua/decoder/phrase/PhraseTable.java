@@ -77,18 +77,14 @@ public class PhraseTable implements Grammar {
   }
       
   /**
-   * Returns the longest source phrase read. For {@link MemoryBasedBatchGrammar}s, we subtract 1
-   * since the grammar includes the nonterminal. For {@link PackedGrammar}s, the value was either
-   * in the packed config file (Joshua 6.0.2+) or was passed in via the TM config line.
+   * Returns the longest source phrase read. Because phrases have a dummy nonterminal prepended to
+   * them, we need to subtract 1.
    * 
    * @return
    */
   @Override
   public int getMaxSourcePhraseLength() {
-    if (backend instanceof MemoryBasedBatchGrammar)
-      return this.backend.getMaxSourcePhraseLength() - 1;
-    else
-      return this.backend.getMaxSourcePhraseLength();
+    return this.backend.getMaxSourcePhraseLength() - 1;
   }
 
   /**
@@ -100,8 +96,7 @@ public class PhraseTable implements Grammar {
   public RuleCollection getPhrases(int[] sourceWords) {
     if (sourceWords.length != 0) {
       Trie pointer = getTrieRoot();
-      if (! (backend instanceof PackedGrammar))
-        pointer = pointer.match(Vocabulary.id("[X]"));
+      pointer = pointer.match(Vocabulary.id("[X]"));
       int i = 0;
       while (pointer != null && i < sourceWords.length)
         pointer = pointer.match(sourceWords[i++]);

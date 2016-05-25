@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -28,7 +28,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,6 +36,9 @@ import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import joshua.corpus.Vocabulary;
+import joshua.decoder.ff.tm.Rule;
+import joshua.decoder.ff.tm.format.HieroFormatReader;
+import joshua.decoder.ff.tm.format.MosesFormatReader;
 import joshua.util.FormatUtils;
 import joshua.util.encoding.EncoderConfiguration;
 import joshua.util.encoding.FeatureTypeAnalyzer;
@@ -47,6 +49,20 @@ public class GrammarPacker {
 
   private static final Logger logger = Logger.getLogger(GrammarPacker.class.getName());
 
+  /**
+   * The packed grammar version number. Increment this any time you add new features, and update
+   * the documentation.
+   * 
+   * Version history:
+   * 
+   * - 3 (May 2016). This was the first version that was marked. It removed the special phrase-
+   * table packing that packed phrases without the [X,1] on the source and target sides, which
+   * then required special handling in the decoder to use for phrase-based decoding.
+   * 
+   * 
+   */
+  public static final int VERSION = 3;
+  
   // Size limit for slice in bytes.
   private static int DATA_SIZE_LIMIT = (int) (Integer.MAX_VALUE * 0.8);
   // Estimated average number of feature entries for one rule.
@@ -63,7 +79,7 @@ public class GrammarPacker {
   public String getGrammar() {
     return grammar;
   }
-  
+
   public String getOutputDirectory() {
     return output;
   }
@@ -154,13 +170,12 @@ public class GrammarPacker {
    */
   public void pack() throws IOException {
     logger.info("Beginning exploration pass.");
-    LineReader grammar_reader = null;
-    LineReader alignment_reader = null;
 
     // Explore pass. Learn vocabulary and feature value histograms.
     logger.info("Exploring: " + grammar);
-    grammar_reader = new LineReader(grammar);
-    explore(grammar_reader);
+
+    HieroFormatReader grammarReader = getGrammarReader();
+    explore(grammarReader);
 
     logger.info("Exploration pass complete. Freezing vocabulary and finalizing encoders.");
     if (dump != null) {
@@ -183,9 +198,10 @@ public class GrammarPacker {
     logger.info(String.format("Writing config to '%s'", configFile));
     // Write config options
     FileWriter config = new FileWriter(configFile);
+    config.write(String.format("version = %d\n", VERSION));
     config.write(String.format("max-source-len = %d\n", max_source_len));
     config.close();
-    
+
     // Read previously written encoder configuration to match up to changed
     // vocabulary id's.
     logger.info("Reading encoding.");
@@ -194,78 +210,59 @@ public class GrammarPacker {
 
     logger.info("Beginning packing pass.");
     // Actual binarization pass. Slice and pack source, target and data.
-    grammar_reader = new LineReader(grammar);
-
+    grammarReader = getGrammarReader();
+    LineReader alignment_reader = null;
     if (packAlignments && !grammarAlignments)
       alignment_reader = new LineReader(alignments);
-    binarize(grammar_reader, alignment_reader);
+    binarize(grammarReader, alignment_reader);
     logger.info("Packing complete.");
 
     logger.info("Packed grammar in: " + output);
     logger.info("Done.");
   }
 
-  private void explore(LineReader grammar) {
-    int counter = 0;
+  /**
+   * Returns a reader that turns whatever file format is found into Hiero grammar rules.
+   * 
+   * @param grammarFile
+   * @return
+   * @throws IOException
+   */
+  private HieroFormatReader getGrammarReader() throws IOException {
+    LineReader reader = new LineReader(grammar);
+    String line = reader.next();
+    if (line.startsWith("[")) {
+      return new HieroFormatReader(grammar);
+    } else {
+      return new MosesFormatReader(grammar);
+    }
+  }
+
+  /**
+   * This first pass over the grammar 
+   * @param reader
+   */
+  private void explore(HieroFormatReader reader) {
+
     // We always assume a labeled grammar. Unlabeled features are assumed to be dense and to always
     // appear in the same order. They are assigned numeric names in order of appearance.
     this.types.setLabeled(true);
 
-    while (grammar.hasNext()) {
-      String line = grammar.next().trim();
-      counter++;
-      ArrayList<String> fields = new ArrayList<String>(Arrays.asList(line.split("\\s\\|{3}\\s")));
+    for (Rule rule: reader) {
 
-      String lhs = null;
-      if (line.startsWith("[")) {
-        // hierarchical model
-        if (fields.size() < 4) {
-          logger.warning(String.format("Incomplete grammar line at line %d: '%s'", counter, line));
-          continue;
-        }
-        lhs = fields.remove(0);
-      } else {
-        // phrase-based model
-        if (fields.size() < 3) {
-          logger.warning("Incomplete phrase line at line " + counter);
-          logger.warning(line);
-          continue;
-        }
-        lhs = "[X]";
-      }
+      max_source_len = Math.max(max_source_len, rule.getFrench().length);
 
-      String[] source = fields.get(0).split("\\s");
-      String[] target = fields.get(1).split("\\s");
-      String[] features = fields.get(2).split("\\s");
-      
-      max_source_len = Math.max(max_source_len, source.length);
-
-      Vocabulary.id(lhs);
-      try {
-        /* Add symbols to vocabulary.
-         * NOTE: In case of nonterminals, we add both stripped versions ("[X]")
-         * and "[X,1]" to the vocabulary.
-         */
-        for (String source_word : source) {
-          Vocabulary.id(source_word);
-          if (FormatUtils.isNonterminal(source_word)) {
-            Vocabulary.id(FormatUtils.stripNonTerminalIndex(source_word));
-          }
-        }
-        for (String target_word : target) {
-          Vocabulary.id(target_word);
-          if (FormatUtils.isNonterminal(target_word)) {
-            Vocabulary.id(FormatUtils.stripNonTerminalIndex(target_word));
-          }
-        }
-      } catch (java.lang.StringIndexOutOfBoundsException e) {
-        System.err.println(String.format("* Skipping bad grammar line '%s'", line));
-        continue;
-      }
+      /* Add symbols to vocabulary.
+       * NOTE: In case of nonterminals, we add both stripped versions ("[X]")
+       * and "[X,1]" to the vocabulary.
+       * 
+       * TODO: MJP May 2016: Is it necessary to add [X,1]?
+       */
 
       // Add feature names to vocabulary and pass the value through the
       // appropriate encoder.
       int feature_counter = 0;
+      String[] features = rule.getFeatureString().split("\\s+");
       for (int f = 0; f < features.length; ++f) {
         if (features[f].contains("=")) {
           String[] fe = features[f].split("=");
@@ -288,7 +285,7 @@ public class GrammarPacker {
     return source_words[0] + SOURCE_WORDS_SEPARATOR + ((source_words.length > 1) ? source_words[1] : "");
   }
 
-  private void binarize(LineReader grammar_reader, LineReader alignment_reader) throws IOException {
+  private void binarize(HieroFormatReader grammarReader, LineReader alignment_reader) throws IOException {
     int counter = 0;
     int slice_counter = 0;
     int num_slices = 0;
@@ -306,36 +303,14 @@ public class GrammarPacker {
       alignment_buffer = new AlignmentBuffer();
 
     TreeMap<Integer, Float> features = new TreeMap<Integer, Float>();
-    while (grammar_reader.hasNext()) {
-      String grammar_line = grammar_reader.next().trim();
+    for (Rule rule: grammarReader) {
       counter++;
       slice_counter++;
 
-      ArrayList<String> fields = new ArrayList<String>(Arrays.asList(grammar_line.split("\\s\\|{3}\\s")));
-      String lhs_word;
-      String[] source_words;
-      String[] target_words;
-      String[] feature_entries;
-      if (grammar_line.startsWith("[")) {
-        if (fields.size() < 4)
-          continue;
-
-        lhs_word = fields.remove(0);
-        source_words = fields.get(0).split("\\s");
-        target_words = fields.get(1).split("\\s");
-        feature_entries = fields.get(2).split("\\s");
-
-      } else {
-        if (fields.size() < 3)
-          continue;
-        
-        lhs_word = "[X]";
-        String tmp = "[X,1] " + fields.get(0);
-        source_words = tmp.split("\\s");
-        tmp = "[X,1] " + fields.get(1);
-        target_words = tmp.split("\\s");
-        feature_entries = fields.get(2).split("\\s");
-      }
+      String lhs_word = Vocabulary.word(rule.getLHS());
+      String[] source_words = rule.getFrenchWords().split("\\s+");
+      String[] target_words = rule.getEnglishWords().split("\\s+");
+      String[] feature_entries = rule.getFeatureString().split("\\s+");
 
       // Reached slice limit size, indicate that we're closing up.
       if (!ready_to_flush
@@ -373,7 +348,7 @@ public class GrammarPacker {
       if (packAlignments) {
         String alignment_line;
         if (grammarAlignments) {
-          alignment_line = fields.get(3);
+          alignment_line = rule.getAlignmentString();
         } else {
           if (!alignment_reader.hasNext()) {
             logger.severe("No more alignments starting in line " + counter);
@@ -401,7 +376,7 @@ public class GrammarPacker {
       for (int f = 0; f < feature_entries.length; ++f) {
         String feature_entry = feature_entries[f];
         int feature_id;
-        float feature_value; 
+        float feature_value;
         if (feature_entry.contains("=")) {
           String[] parts = feature_entry.split("=");
           if (parts[0].equals("Alignment"))
