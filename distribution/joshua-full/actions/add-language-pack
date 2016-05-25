@@ -20,10 +20,17 @@ set -ex
 
 pack_name=`action-get name`
 
+if [ "$pack_name" = "es-en" ]; then
 wget http://cs.jhu.edu/~post/language-packs/language-pack-es-en-phrase-2015-03-06.tgz -O /tmp/lpack.tgz
+else if [ "$pack_name" = "ar-en" ]; then
+wget http://cs.jhu.edu/~post/language-packs/language-pack-ar-en-phrase-2015-03-18.tgz -O /tmp/lpack.tgz
+else if [ "$pack_name" = "zh-en" ]; then
+wget http://cs.jhu.edu/~post/language-packs/zh-en-hiero-2016-01-13.tgz -O /tmp/lpack.tgz
+fi
 
-tar xvfz /tmp/lpack.tgz -C /opt/
-rm -rf /opt/language-pack
-mv /opt/language-pack-es-en-phrase-2015-03-06 /opt/language-pack/
+
+mkdir /opt/language-pack
+tar xvfz /tmp/lpack.tgz -C /opt/language-pack  --strip-components=1
+rm -rf /tmp/lpack.tgz
 charms.reactive set_state languagepack.installed
 hooks/update-status

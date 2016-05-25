@@ -16,7 +16,7 @@ cluster for the Thrax execution
 
 To deploy joshua-full:
 
-   juju deploy cs:~apachefoundation/joshua-full
+   juju deploy cs:~apachesoftwarefoundation/joshua-full
 
 ## Known Limitations and Issues
 

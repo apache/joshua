@@ -18,12 +18,7 @@
 name: joshua-runtime
 summary: Joshua Runtime environment for language translation.
 maintainer: Joshua Project <dev@joshua.incubator.apache.org>
-description: |
-  Joshua is an open-source statistical machine translation decoder |
-  for phrase-based (new in 6.0), hierarchical, and syntax-based    |
-  machine translation, written in Java. It is developed at the     |
-  Human Language Technology Center of Excellence at Johns Hopkins  |
-  University. Currently under incubation at the ASF.
+description: Joshua is an open-source statistical machine translation decoder for phrase-based (new in 6.0), hierarchical, and syntax-based  machine translation, written in Java. It is developed at the Human Language Technology Center of Excellence at Johns Hopkins  University. Currently under incubation at the ASF.
 tags:
   - big_data
 series:

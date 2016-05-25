@@ -16,7 +16,7 @@ their own using the joshua-full charm available in the charm store.
 
 To deploy joshua-runtime:
 
-   juju deploy cs:~apachefoundation/joshua-runtime
+   juju deploy cs:~apachesoftwarefoundation/joshua-runtime
 
 ## Known Limitations and Issues
 
