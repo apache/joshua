@@ -258,7 +258,6 @@ public class GrammarPacker {
         }
       }
     }
-    System.err.println("COUNTER: " + counter);
   }
 
   /**

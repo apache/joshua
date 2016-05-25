@@ -76,7 +76,7 @@ public class MosesFormatReader extends HieroFormatReader {
   @Override
   public Rule parseLine(String line) {
     String[] fields = line.split(fieldDelimiter);
-
+    
     int arity = 1;
 
     StringBuffer hieroLine = new StringBuffer();
@@ -92,8 +92,6 @@ public class MosesFormatReader extends HieroFormatReader {
     if (fields.length >= 4)
       hieroLine.append(" ||| " + fields[3]);
 
-    System.err.println(String.format("LINE: %s -> %s", line, hieroLine.toString()));
-    
     return super.parseLine(hieroLine.toString());
   }
   
