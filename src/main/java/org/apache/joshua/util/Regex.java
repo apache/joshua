@@ -88,6 +88,8 @@ public class Regex {
 
   /**
    * Returns whether the input string matches this <code>Regex</code>.
+   * @param input a String to match against the Regex
+   * @return true if the input string matches this Regex
    */
   public final boolean matches(String input) {
     return this.pattern.matcher(input).matches();
@@ -96,6 +98,8 @@ public class Regex {
 
   /**
    * Split a character sequence, removing instances of this <code>Regex</code>.
+   * @param input an input string to split
+   * @return a String array representing the split character sequences less the regex characters patterns
    */
   public final String[] split(CharSequence input) {
     return this.pattern.split(input);
@@ -105,6 +109,9 @@ public class Regex {
   /**
    * Split a character sequence, removing instances of this <code>Regex</code>, up to a limited
    * number of segments.
+   * @param input an input string to split
+   * @param limit maximum number of splits
+   * @return a String array representing the split character sequences less the regex characters patterns
    */
   public final String[] split(CharSequence input, int limit) {
     return this.pattern.split(input, limit);
@@ -114,6 +121,9 @@ public class Regex {
   /**
    * Replace all substrings of the input which match this <code>Regex</code> with the specified
    * replacement string.
+   * @param input an input string for which to make replacements
+   * @param replacement the replacement string
+   * @return a new replacement string
    */
   public final String replaceAll(String input, String replacement) {
     return this.pattern.matcher(input).replaceAll(replacement);
@@ -123,6 +133,9 @@ public class Regex {
   /**
    * Replace the first substring of the input which matches this <code>Regex</code> with the
    * specified replacement string.
+   * @param input the input string for replacement
+   * @param replacement the first substring of the input to replace
+   * @return the new string
    */
   public final String replaceFirst(String input, String replacement) {
     return this.pattern.matcher(input).replaceFirst(replacement);

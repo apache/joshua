@@ -64,17 +64,14 @@ public class ChartSpan<Type> {
   /**
    * This computes the offset into the one-dimensional array for a given span.
    * 
-   * @param i
-   * @param j
+   * @param i source node in span
+   * @param j target node in span
    * @return the offset
-   * @throws InvalidSpanException
    */
   private int offset(int i, int j) {
     if (i < 0 || j > max || i > j) {
       throw new RuntimeException(String.format("Invalid span (%d,%d | %d)", i, j, max));
     }
-
-    // System.err.println(String.format("ChartSpan::offset(%d,%d) = %d / %d", i, j, i * (max + 1) - i * (i + 1) / 2 + j, max * (max + 1) - max * (max + 1) / 2 + max));
     
     return i * (max + 1) - i * (i + 1) / 2 + j;
   }
@@ -82,7 +79,7 @@ public class ChartSpan<Type> {
   /**
    * Convenience function for setting the values along the diagonal.
    * 
-   * @param value
+   * @param value input Type for which to set values
    */
   public void setDiagonal(Type value) {
     for (int i = 0; i <= max; i++)

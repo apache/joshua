@@ -130,7 +130,7 @@ public class EncoderConfiguration {
   /**
    * For now, this just loads a configuration and prints out the number of features.
    * 
-   * @param args
+   * @param args an input configuration file
    */
   public static void main(String[] args) {
     String grammar_dir = null;

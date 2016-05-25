@@ -49,6 +49,7 @@ public class ExtractTopCand {
    * file name is "-" then output is directed to <code>System.out</code>. If a file already exists
    * with the output file name, it is truncated before writing. The bulk of this program is
    * implemented by {@link org.apache.joshua.util.ExtractTopCand#extractOneBest(IndexedReader, BufferedWriter, int)}.
+   * @param args input arguments for the tool
    */
   public static void main(String[] args) {
     String inFile = "-";
@@ -121,6 +122,11 @@ public class ExtractTopCand {
    * ensure future compatibility with being able to configure the output format of the decoder. The
    * MERT code needs such a SegmentFileParser anyways, so that will reduce the code duplication
    * between these two classes.
+   * 
+   * @param nbestReader todo
+   * @param onebestWriter todo
+   * @param field todo
+   * @throws IOException if there is an issue reading or writing input/output data
    */
   protected static void extractOneBest(IndexedReader<String> nbestReader,
     BufferedWriter onebestWriter, int field) throws IOException {

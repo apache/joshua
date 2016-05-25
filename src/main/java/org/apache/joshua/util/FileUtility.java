@@ -52,7 +52,12 @@ public class FileUtility {
    */
   private static final Charset FILE_ENCODING = Charset.forName(DEFAULT_ENCODING);
 
-  /** Warning, will truncate/overwrite existing files */
+  /**
+   * Warning, will truncate/overwrite existing files
+   * @param filename a file for which to obtain a writer
+   * @return the buffered writer object
+   * @throws IOException if there is a problem reading the inout file
+   */
   public static BufferedWriter getWriteFileStream(String filename) throws IOException {
     return new BufferedWriter(new OutputStreamWriter(
     // TODO: add GZIP
@@ -83,7 +88,7 @@ public class FileUtility {
    * 
    * @param data The integer array to write to disk.
    * @param filename The filename where the data should be written.
-   * @throws IOException
+   * @throws IOException if there is a problem writing to the output file
    * @return the FileOutputStream on which the bytes were written
    */
   public static FileOutputStream writeBytes(int[] data, String filename) throws IOException {
@@ -97,7 +102,7 @@ public class FileUtility {
    * 
    * @param data The integer array to write to disk.
    * @param out The output stream where the data should be written.
-   * @throws IOException
+   * @throws IOException if there is a problem writing bytes
    */
   public static void writeBytes(int[] data, OutputStream out) throws IOException {
 
@@ -184,6 +189,8 @@ public class FileUtility {
   /**
    * Returns the base directory of the file. For example, dirname('/usr/local/bin/emacs') -&gt;
    * '/usr/local/bin'
+   * @param fileName the input path
+   * @return the parent path
    */
   static public String dirname(String fileName) {
     if (fileName.indexOf(File.separator) != -1)
@@ -217,14 +224,15 @@ public class FileUtility {
    * Returns the directory were the program has been started,
    * the base directory you will implicitly get when specifying no
    * full path when e.g. opening a file
-   * @return
+   * @return the current 'user.dir'
    */
   public static String getWorkingDirectory() {
     return System.getProperty("user.dir");
   }
 
   /**
-   * Method to handle standard IO xceptions. catch (Exception e) {Utility.handleIO_exception(e);}
+   * Method to handle standard IO exceptions. catch (Exception e) {Utility.handleIO_exception(e);}
+   * @param e an input {@link java.lang.Exception}
    */
   public static void handleExceptions(Exception e) {
     e.printStackTrace();
@@ -233,7 +241,7 @@ public class FileUtility {
 
   /**
    * Convenience method to get a full file as a String
-   * @param file
+   * @param file the input {@link java.io.File}
    * @return The file as a String. Lines are separated by newline character.
    */
   public static String getFileAsString(File file) {
@@ -252,6 +260,9 @@ public class FileUtility {
    * This method returns a List of String. Each element of the list corresponds to a line from the
    * input file. The boolean keepDuplicates in the input determines if duplicate lines are allowed
    * in the output LinkedList or not.
+   * @param file the input file
+   * @param keepDuplicates whether to retain duplicate lines
+   * @return a {@link java.util.List} of lines
    */
   static public List<String> getLines(File file, boolean keepDuplicates) {
     LinkedList<String> list = new LinkedList<String>();
@@ -280,8 +291,9 @@ public class FileUtility {
   /**
    * Returns a Scanner of the inputFile using a specific encoding
    * 
-   * @param inputFile
-   * @return : Scanner
+   * @param inputFile the file for which to get a {@link java.util.Scanner} object
+   * @param encoding the encoding to use within the Scanner
+   * @return a {@link java.util.Scanner} object for a given file
    */
   public static Scanner getScanner(File inputFile, String encoding) {
     Scanner scan = null;
@@ -296,8 +308,8 @@ public class FileUtility {
   /**
    * Returns a Scanner of the inputFile using default encoding
    * 
-   * @param inputFile
-   * @return : Scanner
+   * @param inputFile the file for which to get a {@link java.util.Scanner} object
+   * @return a {@link java.util.Scanner} object for a given file
    */
   public static Scanner getScanner(File inputFile) {
     return getScanner(inputFile, DEFAULT_ENCODING);

@@ -106,6 +106,8 @@ public class TestSetFilter {
   /**
    * Top-level filter, responsible for calling the fast or exact version. Takes the source side 
    * of a rule and determines whether there is any sentence in the test set that can match it.
+   * @param sourceSide an input source sentence
+   * @return true if is any sentence in the test set can match the source input
    */
   public boolean inTestSet(String sourceSide) {
     if (!sourceSide.equals(lastSourceSide)) {

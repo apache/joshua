@@ -97,8 +97,8 @@ public class BinaryOut implements DataOutput, ObjectOutput, Flushable, Closeable
    * If necessary, the current contents of the buffer will be written to the underlying output
    * stream.
    * 
-   * @param size
-   * @throws IOException
+   * @param size the size of the buffer
+   * @throws IOException if there is an error determining the current size
    */
   protected void prepareBuffer(int size) throws IOException {
     if (bufferPosition > 0 && bufferPosition >= BUFFER_SIZE - size) {

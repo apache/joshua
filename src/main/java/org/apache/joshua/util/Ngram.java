@@ -46,7 +46,13 @@ public class Ngram {
       }
   }
 
-  /** if symbolTbl!=null, then convert interger to String */
+  /**
+   * If symbolTbl!=null, then convert interger to String
+   * @param tbl todo
+   * @param startOrder todo
+   * @param endOrder todo
+   * @param wrds todo
+   */
   public static void getNgrams(Map<String, Integer> tbl, int startOrder, int endOrder,
       final List<Integer> wrds) {
 
@@ -64,7 +70,13 @@ public class Ngram {
       }
   }
 
-  /** if symbolTbl!=null, then convert string to integer */
+  /**
+   * If symbolTbl!=null, then convert string to integer
+   * @param tbl todo
+   * @param startOrder todo
+   * @param endOrder todo
+   * @param wrds todo
+   */
   public static void getNgrams(Map<String, Integer> tbl, int startOrder, int endOrder,
       final String[] wrds) {
 
