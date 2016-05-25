@@ -40,7 +40,6 @@ use v5.12;
 # Thus we undefine CDPATH to ensure this doesn't happen.
 delete $ENV{CDPATH};
 
-my $HADOOP = $ENV{HADOOP};
 my $MOSES = $ENV{MOSES};
 my $METEOR = $ENV{METEOR};
 my $THRAX = "$JOSHUA/thrax";
@@ -126,9 +125,6 @@ my $JOSHUA_MEM = "4g";
 # the amount of memory available for hadoop processes (passed to
 # Hadoop via -Dmapred.child.java.opts
 my $HADOOP_MEM = "4g";
-
-# The location of a custom core-site.xml file, if desired (optional).
-my $HADOOP_CONF = undef;
 
 # memory available to the parser
 my $PARSER_MEM = "2g";
@@ -291,8 +287,6 @@ my $retval = GetOptions(
   "first-step=s"     => \$FIRST_STEP,
   "last-step=s"      => \$LAST_STEP,
   "aligner-chunk-size=s" => \$ALIGNER_BLOCKSIZE,
-  "hadoop=s"          => \$HADOOP,
-  "hadoop-conf=s"          => \$HADOOP_CONF,
   "tmp=s"             => \$TMPDIR,
   "nbest=i"           => \$NBEST,
   "reordering-limit=i" => \$REORDERING_LIMIT,
@@ -504,7 +498,6 @@ $_TUNE_GRAMMAR_FILE = get_absolute_path($_TUNE_GRAMMAR_FILE);
 $_TEST_GRAMMAR_FILE = get_absolute_path($_TEST_GRAMMAR_FILE);
 $THRAX_CONF_FILE = get_absolute_path($THRAX_CONF_FILE);
 $ALIGNMENT = get_absolute_path($ALIGNMENT);
-$HADOOP_CONF = get_absolute_path($HADOOP_CONF);
 
 foreach my $corpus (@CORPORA) {
   foreach my $ext ($TARGET,$SOURCE) {
@@ -558,11 +551,6 @@ if ($FILTERING eq "fast") {
   $FILTERING = "-l";
 } else {
   print "* FATAL: --filtering must be one of 'fast' (default) or 'exact' or 'loose'\n";
-  exit 1;
-}
-
-if (defined $HADOOP_CONF && ! -e $HADOOP_CONF) {
-  print STDERR "* FATAL: Couldn't find \$HADOOP_CONF file '$HADOOP_CONF'\n";
   exit 1;
 }
 
@@ -1125,29 +1113,17 @@ if (! defined $GRAMMAR_FILE) {
                     $TRAIN{source}, $target_file, $ALIGNMENT,
                     "$DATA_DIRS{train}/thrax-input-file");
 
-    # Rollout the hadoop cluster if needed.  This causes $HADOOP to be defined (pointing to the
-    # unrolled directory).
-    start_hadoop_cluster() unless defined $HADOOP;
-
     # put the hadoop files in place
-    my $THRAXDIR;
     my $thrax_input;
-    if (! defined $HADOOP or $HADOOP eq "") {
-      $THRAXDIR = "thrax";
+    my $THRAXDIR = "pipeline-$SOURCE-$TARGET-$GRAMMAR_TYPE-$RUNDIR";
+    $THRAXDIR =~ s#/#_#g;
 
-      $thrax_input = "$DATA_DIRS{train}/thrax-input-file"
+    $cachepipe->cmd("thrax-prep",
+                    "hadoop fs -rm -r $THRAXDIR; hadoop fs -mkdir $THRAXDIR; hadoop fs -put $DATA_DIRS{train}/thrax-input-file $THRAXDIR/input-file",
+                    "$DATA_DIRS{train}/thrax-input-file", 
+                    "grammar.gz");
 
-    } else {
-      $THRAXDIR = "pipeline-$SOURCE-$TARGET-$GRAMMAR_TYPE-$RUNDIR";
-      $THRAXDIR =~ s#/#_#g;
-
-      $cachepipe->cmd("thrax-prep",
-                      "$HADOOP/bin/hadoop fs -rm -r $THRAXDIR; $HADOOP/bin/hadoop fs -mkdir $THRAXDIR; $HADOOP/bin/hadoop fs -put $DATA_DIRS{train}/thrax-input-file $THRAXDIR/input-file",
-                      "$DATA_DIRS{train}/thrax-input-file", 
-                      "grammar.gz");
-
-      $thrax_input = "$THRAXDIR/input-file";
-    }
+    $thrax_input = "$THRAXDIR/input-file";
 
     # copy the thrax config file
     my $thrax_file = "thrax-$GRAMMAR_TYPE.conf";
@@ -1156,24 +1132,11 @@ if (! defined $GRAMMAR_FILE) {
     system("mv $thrax_file.tmp $thrax_file");
 
     $cachepipe->cmd("thrax-run",
-                    "$HADOOP/bin/hadoop jar $THRAX/bin/thrax.jar -D mapreduce.task.timeout=0 -D mapreduce.map.java.opts='-Xmx$HADOOP_MEM' -D mapreduce.reduce.java.opts='-Xmx$HADOOP_MEM' -D hadoop.tmp.dir=$TMPDIR $thrax_file $THRAXDIR > thrax.log 2>&1; rm -f grammar grammar.gz; $HADOOP/bin/hadoop fs -getmerge $THRAXDIR/final/ grammar.gz", #; $HADOOP/bin/hadoop fs -rm -r $THRAXDIR",
+                    "hadoop jar $THRAX/bin/thrax.jar -D mapreduce.task.timeout=0 -D mapreduce.map.java.opts='-Xmx$HADOOP_MEM' -D mapreduce.reduce.java.opts='-Xmx$HADOOP_MEM' -D hadoop.tmp.dir=$TMPDIR $thrax_file $THRAXDIR > thrax.log 2>&1; rm -f grammar grammar.gz; hadoop fs -getmerge $THRAXDIR/final/ grammar.gz", #; hadoop fs -rm -r $THRAXDIR",
                     "$DATA_DIRS{train}/thrax-input-file",
                     $thrax_file,
                     "grammar.gz");
 #perl -pi -e 's/\.?0+\b//g' grammar; 
-
-    stop_hadoop_cluster() if $HADOOP eq "hadoop";
-
-    # cache the thrax-prep step, which depends on grammar.gz
-#    if ($HADOOP ne "hadoop") {
-#      $cachepipe->cmd("thrax-prep", "--cache-only");
-#    }
-
-    # clean up
-    # TODO: clean up real hadoop clusters too
-    # if ($HADOOP eq "hadoop") {
-    #   system("rm -rf $THRAXDIR hadoop hadoop-2.5.2");
-    # }
 
     $GRAMMAR_FILE = "grammar.gz";
   } else {
@@ -1972,42 +1935,6 @@ sub get_numrefs {
 		return 1;
   }
 }
-
-sub start_hadoop_cluster {
-  rollout_hadoop_cluster();
-
-  # start the cluster
-  # system("./hadoop/bin/start-all.sh");
-  # sleep(120);
-}
-
-sub rollout_hadoop_cluster {
-  # if it's not already unpacked, unpack it
-  if (! -d "hadoop") {
-
-    my $hadoop_tmp_dir = tempdir("hadoop-XXXX", DIR => $TMPDIR, CLEANUP => 0);
-		system("tar xzf $JOSHUA/lib/hadoop-2.5.2.tar.gz -C $hadoop_tmp_dir");
-		system("ln -sf $hadoop_tmp_dir/hadoop-2.5.2 hadoop");
-    if (defined $HADOOP_CONF) {
-      print STDERR "Copying HADOOP_CONF($HADOOP_CONF) to hadoop/conf/core-site.xml\n";
-      system("cp $HADOOP_CONF hadoop/conf/core-site.xml");
-    }
-  }
-  
-  $ENV{HADOOP} = $HADOOP = "hadoop";
-  $ENV{HADOOP_CONF_DIR} = "";
-}
-
-sub stop_hadoop_cluster {
-  if ($HADOOP ne "hadoop") {
-		system("hadoop/bin/stop-all.sh");
-  }
-}
-
-#sub teardown_hadoop_cluster {
-#  stop_hadoop_cluster();
-#  system("rm -f hadoop");
-#}
 
 sub is_lattice {
   my $file = shift;
