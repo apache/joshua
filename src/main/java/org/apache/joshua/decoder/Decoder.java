@@ -783,7 +783,7 @@ public class Decoder {
               : -1;
 
           joshuaConfiguration.search_algorithm = "stack";
-          grammar = new PhraseTable(path, owner, type, joshuaConfiguration, maxSourceLen);
+          grammar = new PhraseTable(path, owner, type, joshuaConfiguration);
         }
 
         this.grammars.add(grammar);
@@ -800,7 +800,7 @@ public class Decoder {
     }
     
     /* Add the grammar for custom entries */
-    this.customPhraseTable = new PhraseTable(null, "custom", "phrase", joshuaConfiguration, 0);
+    this.customPhraseTable = new PhraseTable(null, "custom", "phrase", joshuaConfiguration);
     this.grammars.add(this.customPhraseTable);
     
     /* Create an epsilon-deleting grammar */
