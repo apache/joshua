@@ -34,8 +34,6 @@ import joshua.util.io.LineReader;
  */
 public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iterator<R> {
 
-  protected static String fieldDelimiter;
-
   protected static String description;
 
   protected String fileName;

@@ -22,6 +22,8 @@ import java.io.IOException;
 
 import joshua.corpus.Vocabulary;
 import joshua.decoder.ff.tm.Rule;
+import joshua.util.Constants;
+import joshua.util.FormatUtils;
 import joshua.util.io.LineReader;
 
 /***
@@ -46,12 +48,12 @@ public class MosesFormatReader extends HieroFormatReader {
 
   public MosesFormatReader(String grammarFile) throws IOException {
     super(grammarFile);
-    Vocabulary.id("[X]");
+    Vocabulary.id(Constants.defaultNT);
   }
   
   public MosesFormatReader() {
     super();
-    Vocabulary.id("[X]");
+    Vocabulary.id(Constants.defaultNT);
   }
   
   /**
@@ -73,10 +75,10 @@ public class MosesFormatReader extends HieroFormatReader {
    */
   @Override
   public Rule parseLine(String line) {
-    String[] fields = line.split(fieldDelimiter);
+    String[] fields = line.split(Constants.fieldDelimiter);
     
-    StringBuffer hieroLine = new StringBuffer();
-    hieroLine.append("[X] ||| [X,1] " + fields[0] + " ||| [X,1] " + fields[1] + " |||");
+    String nt = FormatUtils.cleanNonTerminal(Constants.defaultNT);
+    StringBuffer hieroLine = new StringBuffer(Constants.defaultNT + " ||| [" + nt + ",1] " + fields[0] + " ||| [" + nt + ",1] " + fields[1] + " |||");
 
     String mosesFeatureString = fields[2];
     for (String value: mosesFeatureString.split(" ")) {
