@@ -78,7 +78,7 @@ public class ComputeNodeResult {
     // whatever costs we incur applying this rule to create a new hyperedge.
     float viterbiCost = 0.0f;
     LOG.debug("ComputeNodeResult():");
-    LOG.info("-> RULE {}", rule);
+    LOG.debug("-> RULE {}", rule);
 
     /*
      * Here we sum the accumulated cost of each of the tail nodes. The total cost of the new
@@ -88,8 +88,8 @@ public class ComputeNodeResult {
      */
     if (null != tailNodes) {
       for (HGNode item : tailNodes) {
-        LOG.info("-> item.bestedge: {}", item);
-        LOG.info("-> TAIL NODE {}", item);
+        LOG.debug("-> item.bestedge: {}", item);
+        LOG.debug("-> TAIL NODE {}", item);
         viterbiCost += item.bestHyperedge.getBestDerivationScore();
       }
     }
