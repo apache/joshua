@@ -41,7 +41,7 @@ public class HyperEdge {
    * this remembers the stateless + non_stateless logP assocated with the rule (excluding the
    * best-logP from ant nodes)
    * */
-  private Float transitionScore = null;
+  private float transitionScore;
 
   private Rule rule;
 
@@ -79,17 +79,13 @@ public class HyperEdge {
   }
 
   public float getTransitionLogP(boolean forceCompute) {
-    StringBuilder sb = new StringBuilder();
-    if (forceCompute || transitionScore == null) {
+    if (forceCompute) {
       float res = bestDerivationScore;
-      sb.append(String.format("Best derivation = %.5f", res));
       if (tailNodes != null) for (HGNode tailNode : tailNodes) {
         res += tailNode.bestHyperedge.bestDerivationScore;
-        sb.append(String.format(", tail = %.5f", tailNode.bestHyperedge.bestDerivationScore));
       }
       transitionScore = res;
     }
-    // System.err.println("HYPEREDGE SCORE = " + sb.toString());
     return transitionScore;
   }
 
@@ -100,9 +96,6 @@ public class HyperEdge {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(this.rule);
-//    if (getTailNodes() != null) for (HGNode tailNode : getTailNodes()) {
-//      sb.append(" tail=" + tailNode);
-//    }
     return sb.toString();
   }
 }

@@ -164,7 +164,7 @@ public class Vocabulary implements Externalizable {
       if (stringToId.containsKey(token)) {
         return stringToId.get(token);
       }
-      int id = idToString.size() * (nt(token) ? -1 : 1);
+      int id = idToString.size() * (FormatUtils.isNonterminal(token) ? -1 : 1);
 
       // register this (token,id) mapping with each language
       // model, so that they can map it to their own private
@@ -234,20 +234,6 @@ public class Vocabulary implements Externalizable {
 
   public static String getUnknownWord() {
     return UNKNOWN_WORD;
-  }
-
-  /**
-   * Returns true if the Vocabulary ID represents a nonterminal.
-   *
-   * @param id vocabularly ID to check
-   * @return true if the Vocabulary ID represents a nonterminal
-   */
-  public static boolean nt(int id) {
-    return (id < 0);
-  }
-
-  public static boolean nt(String word) {
-    return FormatUtils.isNonterminal(word);
   }
 
   public static int size() {

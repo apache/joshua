@@ -19,7 +19,7 @@
 package org.apache.joshua.decoder;
 
 import static org.apache.joshua.util.FormatUtils.cleanNonTerminal;
-import static org.apache.joshua.util.FormatUtils.markup;
+import static org.apache.joshua.util.FormatUtils.ensureNonTerminalBrackets;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -76,9 +76,8 @@ public class JoshuaConfiguration {
    */
   public String weights_file = "";
   // Default symbols. The symbol here should be enclosed in square brackets.
-  public String default_non_terminal = FormatUtils.markup("X");
-
-  public String goal_symbol = FormatUtils.markup("GOAL");
+  public String default_non_terminal = FormatUtils.ensureNonTerminalBrackets("X");
+  public String goal_symbol = FormatUtils.ensureNonTerminalBrackets("GOAL");
 
   /*
    * A list of OOV symbols in the form
@@ -447,8 +446,8 @@ public class JoshuaConfiguration {
                   while (str != null) {
                     String[] tokens = str.trim().split("\\s+");
 
-                    oovList.add(new OOVItem(FormatUtils.markup(tokens[0]),
-                        (float) Math.log(Float.parseFloat(tokens[1]))));
+                    oovList.add(new OOVItem(FormatUtils.ensureNonTerminalBrackets(tokens[0]),
+                            (float) Math.log(Float.parseFloat(tokens[1]))));
 
                     str = br.readLine();
                   }
@@ -469,7 +468,7 @@ public class JoshuaConfiguration {
               oovList = new ArrayList<OOVItem>();
 
               for (int i = 0; i < tokens.length; i += 2)
-                oovList.add(new OOVItem(FormatUtils.markup(tokens[i]),
+                oovList.add(new OOVItem(FormatUtils.ensureNonTerminalBrackets(tokens[i]),
                     (float) Math.log(Float.parseFloat(tokens[i + 1]))));
 
               Collections.sort(oovList);
@@ -483,11 +482,11 @@ public class JoshuaConfiguration {
             lattice_decoding = true;
 
           } else if (parameter.equals(normalize_key("default-non-terminal"))) {
-            default_non_terminal = markup(cleanNonTerminal(fds[1].trim()));
+            default_non_terminal = ensureNonTerminalBrackets(cleanNonTerminal(fds[1].trim()));
             LOG.debug("default_non_terminal: {}", default_non_terminal);
 
           } else if (parameter.equals(normalize_key("goal-symbol"))) {
-            goal_symbol = markup(cleanNonTerminal(fds[1].trim()));
+            goal_symbol = ensureNonTerminalBrackets(cleanNonTerminal(fds[1].trim()));
             LOG.debug("goalSymbol: {}", goal_symbol);
 
           } else if (parameter.equals(normalize_key("weights-file"))) {

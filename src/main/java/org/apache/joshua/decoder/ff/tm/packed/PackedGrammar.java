@@ -91,6 +91,7 @@ import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.RuleCollection;
 import org.apache.joshua.decoder.ff.tm.Trie;
 import org.apache.joshua.decoder.ff.tm.hash_based.ExtensionIterator;
+import org.apache.joshua.util.FormatUtils;
 import org.apache.joshua.util.encoding.EncoderConfiguration;
 import org.apache.joshua.util.encoding.FloatEncoder;
 import org.apache.joshua.util.io.LineReader;
@@ -116,15 +117,21 @@ public class PackedGrammar extends AbstractGrammar {
   // The grammar specification keyword (e.g., "thrax" or "moses")
   private String type;
 
+  // The version number of the earliest supported grammar packer
+  public static final int SUPPORTED_VERSION = 3;
+
   // A rule cache for commonly used tries to avoid excess object allocations
   // Testing shows there's up to ~95% hit rate when cache size is 5000 Trie nodes.
   private final Cache<Trie, List<Rule>> cached_rules;
 
+  private String grammarDir;
+
   public PackedGrammar(String grammar_dir, int span_limit, String owner, String type,
       JoshuaConfiguration joshuaConfiguration) throws IOException {
     super(joshuaConfiguration);
+
+    this.grammarDir = grammar_dir;
     this.spanLimit = span_limit;
-    this.type = type;
 
     // Read the vocabulary.
     vocabFile = new File(grammar_dir + File.separator + VOCABULARY_FILENAME);
@@ -570,7 +577,7 @@ public class PackedGrammar extends AbstractGrammar {
         System.arraycopy(parent_src, 0, src, 0, parent_src.length);
         src[src.length - 1] = symbol;
         arity = parent_arity;
-        if (Vocabulary.nt(symbol))
+        if (FormatUtils.isNonterminal(symbol))
           arity++;
       }
 
@@ -656,10 +663,7 @@ public class PackedGrammar extends AbstractGrammar {
 
         rules = new ArrayList<Rule>(num_rules);
         for (int i = 0; i < num_rules; i++) {
-          if (type.equals("moses") || type.equals("phrase"))
-            rules.add(new PackedPhrasePair(rule_position + 3 * i));
-          else
-            rules.add(new PackedRule(rule_position + 3 * i));
+          rules.add(new PackedRule(rule_position + 3 * i));
         }
 
         cached_rules.put(this, rules);
@@ -1047,11 +1051,30 @@ public class PackedGrammar extends AbstractGrammar {
     throw new RuntimeException("PackedGrammar.addRule(): I can't add rules");
   }
   
+  /** 
+   * Read the config file
+   * 
+   * TODO: this should be rewritten using typeconfig.
+   * 
+   * @param config
+   * @throws IOException
+   */
   private void readConfig(String config) throws IOException {
+    int version = 0;
+    
     for (String line: new LineReader(config)) {
       String[] tokens = line.split(" = ");
       if (tokens[0].equals("max-source-len"))
         this.maxSourcePhraseLength = Integer.parseInt(tokens[1]);
+      else if (tokens[0].equals("version")) {
+        version = Integer.parseInt(tokens[1]);
+      }
+    }
+    
+    if (version != 3) {
+      String message = String.format("The grammar at %s was packed with packer version %d, but the earliest supported version is %d",
+          this.grammarDir, version, SUPPORTED_VERSION);
+      throw new RuntimeException(message);
     }
   }
 }

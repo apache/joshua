@@ -54,7 +54,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
 
   private static final Logger LOG = LoggerFactory.getLogger(Rule.class);
   private int lhs; // tag of this rule
-  private int[] pFrench; // pointer to the RuleCollection, as all the rules under it share the same
+  private int[] source; // pointer to the RuleCollection, as all the rules under it share the same
                          // Source side
   protected int arity;
 
@@ -79,7 +79,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
 
   private float precomputableCost = Float.NEGATIVE_INFINITY;
 
-  private int[] english;
+  private int[] target;
 
   // The alignment string, e.g., 0-0 0-1 1-1 2-1
   private String alignmentString;
@@ -94,18 +94,18 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
    * Constructor used by other constructors below;
    * 
    * @param lhs Left-hand side of the rule.
-   * @param sourceRhs Source language right-hand side of the rule.
-   * @param targetRhs Target language right-hand side of the rule.
+   * @param source Source language right-hand side of the rule.
+   * @param target Target language right-hand side of the rule.
    * @param sparseFeatures Feature value scores for the rule.
    * @param arity Number of nonterminals in the source language right-hand side.
    * @param owner todo
    */
-  public Rule(int lhs, int[] sourceRhs, int[] targetRhs, String sparseFeatures, int arity, int owner) {
+  public Rule(int lhs, int[] source, int[] target, String sparseFeatures, int arity, int owner) {
     this.lhs = lhs;
-    this.pFrench = sourceRhs;
+    this.source = source;
     this.arity = arity;
     this.owner = owner;
-    this.english = targetRhs;
+    this.target = target;
     this.sparseFeatureStringSupplier = Suppliers.memoize(() -> { return sparseFeatures; });
     this.featuresSupplier = initializeFeatureSupplierFromString();
     this.alignmentSupplier = initializeAlignmentSupplier();
@@ -122,10 +122,10 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
    */
   public Rule(int lhs, int[] sourceRhs, int[] targetRhs, FeatureVector features, int arity, int owner) {
     this.lhs = lhs;
-    this.pFrench = sourceRhs;
+    this.source = sourceRhs;
     this.arity = arity;
     this.owner = owner;
-    this.english = targetRhs;
+    this.target = targetRhs;
     this.featuresSupplier = Suppliers.memoize(() -> { return features; });
     this.sparseFeatureStringSupplier = initializeSparseFeaturesStringSupplier();
     this.alignmentSupplier = initializeAlignmentSupplier();
@@ -214,11 +214,11 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   // ===============================================================
 
   public void setEnglish(int[] eng) {
-    this.english = eng;
+    this.target = eng;
   }
 
   public int[] getEnglish() {
-    return this.english;
+    return this.target;
   }
 
   /**
@@ -239,7 +239,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
     if (!Arrays.equals(getFrench(), other.getFrench())) {
       return false;
     }
-    if (!Arrays.equals(english, other.getEnglish())) {
+    if (!Arrays.equals(target, other.getEnglish())) {
       return false;
     }
     return true;
@@ -249,7 +249,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
     // I just made this up. If two rules are equal they'll have the
     // same hashcode. Maybe someone else can do a better job though?
     int frHash = Arrays.hashCode(getFrench());
-    int enHash = Arrays.hashCode(english);
+    int enHash = Arrays.hashCode(target);
     return frHash ^ enHash ^ getLHS();
   }
 
@@ -282,11 +282,11 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   }
 
   public void setFrench(int[] french) {
-    this.pFrench = french;
+    this.source = french;
   }
 
   public int[] getFrench() {
-    return this.pFrench;
+    return this.source;
   }
 
   /**

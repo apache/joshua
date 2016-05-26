@@ -21,7 +21,7 @@
 import static org.apache.joshua.util.FormatUtils.cleanNonTerminal;
 import static org.apache.joshua.util.FormatUtils.escapeSpecialSymbols;
 import static org.apache.joshua.util.FormatUtils.isNonterminal;
-import static org.apache.joshua.util.FormatUtils.markup;
+import static org.apache.joshua.util.FormatUtils.ensureNonTerminalBrackets;
 import static org.apache.joshua.util.FormatUtils.stripNonTerminalIndex;
 import static org.apache.joshua.util.FormatUtils.unescapeSpecialSymbols;
 import static org.junit.Assert.*;
@@ -58,11 +58,13 @@ public class FormatUtilsTest {
   
   @Test
   public void givenTokens_whenMarkup_thenCorrectMarkup() {
-    assertEquals(markup("X"), "[X]");
+    assertEquals(ensureNonTerminalBrackets("X"), "[X]");
+    /*
     assertEquals(markup("X", 1), "[X,1]");
     assertEquals(markup("X", 15), "[X,15]");
     assertEquals(markup("[X]", 1), "[X,1]");
     assertEquals(markup("[X,1]", 4), "[X,4]");
+    */
   }
   
   @Test

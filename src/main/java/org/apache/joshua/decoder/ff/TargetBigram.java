@@ -31,6 +31,7 @@ import org.apache.joshua.decoder.ff.state_maintenance.NgramDPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.util.FormatUtils;
 import org.apache.joshua.util.io.LineReader;
 
 /***
@@ -112,7 +113,7 @@ public class TargetBigram extends StatefulFF {
     for (int c = 0; c < enWords.length; c++) {
       int curID = enWords[c];
 
-      if (Vocabulary.nt(curID)) {
+      if (FormatUtils.isNonterminal(curID)) {
         int index = -(curID + 1);
         NgramDPState state = (NgramDPState) tailNodes.get(index).getDPState(stateIndex);
         int[] leftContext = state.getLeftLMStateWords();

@@ -38,8 +38,6 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
   private static final Logger LOG = LoggerFactory.getLogger(GrammarReader.class);
 
   protected static String fieldDelimiter;
-  protected static String nonTerminalRegEx;
-  protected static String nonTerminalCleanRegEx;
 
   protected static String description;
 
@@ -54,18 +52,9 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
     this.fileName = null;
   }
 
-  public GrammarReader(String fileName) {
+  public GrammarReader(String fileName) throws IOException {
     this.fileName = fileName;
-  }
-
-  public void initialize() {
-    try {
-      this.reader = new LineReader(fileName);
-    } catch (IOException e) {
-      throw new RuntimeException("Error opening translation model file: " + fileName + "\n"
-          + (null != e.getMessage() ? e.getMessage() : "No details available. Sorry."), e);
-    }
-
+    this.reader = new LineReader(fileName);
     LOG.info("Reading grammar from file {}...", fileName);
     numRulesRead = 0;
     advanceReader();
@@ -168,43 +157,4 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
   }
 
   protected abstract R parseLine(String line);
-
-  // TODO: keep these around or not?
-  public abstract String toWords(R rule);
-
-  public abstract String toWordsWithoutFeatureScores(R rule);
-
-  /**
-   * Removes square brackets (and index, if present) from nonterminal id 
-   * @param tokenID the int ID to clean
-   * @return cleaned ID
-   */
-  public static int cleanNonTerminal(int tokenID) {
-    // cleans NT of any markup, e.g., [X,1] may becomes [X], depending
-    return Vocabulary.id(cleanNonTerminal(Vocabulary.word(tokenID)));
-  }
-
-  /**
-   * Removes square brackets (and index, if present) from nonterminal id 
-   * @param token the string ID to clean
-   * @return cleaned token
-   */
-  public static String cleanNonTerminal(String token) {
-    // cleans NT of any markup, e.g., [X,1] may becomes [X], depending on nonTerminalCleanRegEx
-    return token.replaceAll(nonTerminalCleanRegEx, "");
-  }
-
-  public static boolean isNonTerminal(final String word) {
-    // checks if word matches NT regex
-    return word.matches(nonTerminalRegEx);
-  }
-
-  public String getNonTerminalRegEx() {
-    return nonTerminalRegEx;
-  }
-
-  public String getNonTerminalCleanRegEx() {
-    return nonTerminalCleanRegEx;
-  }
-
 }

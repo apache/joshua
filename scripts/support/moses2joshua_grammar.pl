@@ -1,7 +1,9 @@
 #!/usr/bin/env perl
 # Matt Post <post@cs.jhu.edu>
 
-# Converts a Moses grammars and phrase tables to a Joshua grammar.
+# Converts Moses grammars to a Joshua grammar. This script does not work for phrase tables;
+# Joshua can read Moses phrase tables directly, both via the grammar packer or the memory
+# based grammar loader.
 #
 # Usage: cat grammar.moses | moses2joshua_grammar.pl > grammar.joshua
 #
@@ -17,9 +19,10 @@
 #
 # (This doesn't apply to phrase tables, of course).
 #
-# (2) Phrase table values. Moses takes the log of each feature, whereas Joshua takes just
-#     negates the values when it reads them in. To make the conversion correct, this script
-#     computes the negative log of each of the feature values.
+# (2) Feautre values. The Moses decoder expects these features to be probabilities, whereas
+#     Joshua expects them to be negative logprobs (which it then negates when reading in;
+#     I know, this is crazy). To compute the conversion, this script computes the negative 
+#     log of each of the feature values.
 
 use strict;
 use warnings;
@@ -156,7 +159,7 @@ while (my $rule = <>) {
   print "$new_rule\n";
 
   if ($opts{m} and defined $tree) {
-    $tree =~ s/.*{{Tree\s+(.*)}}.*/$1/;
+    $tree =~ s/.*\{\{Tree\s+(.*)}}.*/$1/;
     # Remove brackets around substitution points
     $tree =~ s/\[([^\[\]\s]+)\]/$1/g;
     # Add quotes around terminals

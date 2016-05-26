@@ -22,6 +22,8 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+
+import org.apache.joshua.util.FormatUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -68,21 +70,21 @@ public class VocabularyTest {
   @Test
   public void givenVocabulary_whenCheckingStringInBracketsOrNegativeNumber_thenIsNonTerminal() {
     //non-terminals
-    assertTrue(Vocabulary.nt(NON_TERMINAL));
+    assertTrue(FormatUtils.isNonterminal(NON_TERMINAL));
     //terminals
-    assertFalse(Vocabulary.nt(WORD1));
-    assertFalse(Vocabulary.nt("[]"));
-    assertFalse(Vocabulary.nt("["));
-    assertFalse(Vocabulary.nt("]"));
-    assertFalse(Vocabulary.nt(""));
+    assertFalse(FormatUtils.isNonterminal(WORD1));
+    assertFalse(FormatUtils.isNonterminal("[]"));
+    assertFalse(FormatUtils.isNonterminal("["));
+    assertFalse(FormatUtils.isNonterminal("]"));
+    assertFalse(FormatUtils.isNonterminal(""));
     
     //negative numbers indicate non-terminals
-    assertTrue(Vocabulary.nt(-1));
-    assertTrue(Vocabulary.nt(-5));
+    assertTrue(FormatUtils.isNonterminal(-1));
+    assertTrue(FormatUtils.isNonterminal(-5));
     
     //positive numbers indicate terminals:
-    assertFalse(Vocabulary.nt(0));
-    assertFalse(Vocabulary.nt(5));
+    assertFalse(FormatUtils.isNonterminal(0));
+    assertFalse(FormatUtils.isNonterminal(5));
 
     
   }

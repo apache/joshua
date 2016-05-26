@@ -36,6 +36,7 @@ import org.apache.joshua.decoder.hypergraph.HyperGraph;
 import org.apache.joshua.decoder.hypergraph.KBestExtractor;
 import org.apache.joshua.util.FileUtility;
 import org.apache.joshua.util.io.LineReader;
+import org.apache.joshua.util.FormatUtils;
 
 /**
  * approximated BLEU (1) do not consider clipping effect (2) in the dynamic programming, do not
@@ -381,7 +382,7 @@ public class OracleExtractionHG extends SplitHg {
     // #### get left_state_sequence, right_state_sequence, total_hyp_len, num_ngram_match
     for (int c = 0; c < en_words.length; c++) {
       int c_id = en_words[c];
-      if (Vocabulary.nt(c_id)) {
+      if (FormatUtils.isNonterminal(c_id)) {
         int index = -(c_id + 1);
         DPStateOracle ant_state = (DPStateOracle) l_ant_virtual_item.get(index).dp_state;
         total_hyp_len += ant_state.best_len;

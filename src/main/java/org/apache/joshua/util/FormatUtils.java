@@ -48,6 +48,14 @@ public class FormatUtils {
   public static boolean isNonterminal(String token) {
     return (token.length() >=3 && token.charAt(0) == '[') && (token.charAt(token.length() - 1) == ']');
   }
+  
+  /**
+   * Determines whether the ID represents a nonterminal. This is a trivial check, since nonterminal
+   * IDs are simply negative ones.
+   */
+  public static boolean isNonterminal(int id) {
+    return id < 0;
+  }
 
   /**
    * Nonterminals are stored in the vocabulary in square brackets. This removes them when you 
@@ -81,9 +89,18 @@ public class FormatUtils {
    * @return the stripped non terminal string
    */
   public static String stripNonTerminalIndex(String nt) {
-    return markup(cleanNonTerminal(nt));
+    return ensureNonTerminalBrackets(cleanNonTerminal(nt));
   }
 
+  /**
+   * Nonterminals on source and target sides are represented as [X,1], where 1 is an integer
+   * that links the two sides. This function extracts the index, e.g.,
+   * 
+   * getNonterminalIndex("[X,7]") -> 7
+   * 
+   * @param the nonterminal index
+   * @return
+   */
   public static int getNonterminalIndex(String nt) {
     return Integer.parseInt(nt.substring(nt.indexOf(INDEX_SEPARATOR) + 1, nt.length() - 1));
   }
@@ -94,18 +111,11 @@ public class FormatUtils {
    * @param nt the nonterminal string
    * @return the nonterminal string surrounded in square brackets (if not already)
    */
-  public static String markup(String nt) {
+  public static String ensureNonTerminalBrackets(String nt) {
     if (isNonterminal(nt)) 
       return nt;
     else 
       return "[" + nt + "]";
-  }
-
-  public static String markup(String nt, int index) {
-    if (isNonterminal(nt)) {
-      return markup(cleanNonTerminal(nt), index);
-    }
-    return "[" + nt + INDEX_SEPARATOR + index + "]";
   }
   
   public static String escapeSpecialSymbols(String s) {

@@ -20,20 +20,21 @@ use File::Temp qw/tempfile/;
 use File::Basename qw/basename/;
 
 my %opts = (
+  a => 0,         # whether alignments are included in the grammar(s)
   g => '',        # comma-separated list of grammars to pack
   o => '',        # comma-separated list of grammar output directories
   m => '8g',      # amount of memory to give the packer
   T => '/tmp',    # location of temporary space
   v => 0,         # verbose
 );
-getopts("m:T:vg:o:", \%opts) || die usage();
+getopts("am:T:vg:o:", \%opts) || die usage();
 die usage() if (@ARGV);
 
 my $JOSHUA = $ENV{JOSHUA} or die "you must defined \$JOSHUA";
 my $CAT    = "$JOSHUA/scripts/training/scat";
 
 sub usage {
-  print "Usage: grammar-packer.pl [-m MEM] [-T /path/to/tmp] -g 'grammar [grammar2 ...]' -o 'grammar.packed [grammar2.packed ...]'\n";
+  print "Usage: grammar-packer.pl [-a] [-m MEM] [-T /path/to/tmp] -g 'grammar [grammar2 ...]' -o 'grammar.packed [grammar2.packed ...]'\n";
   exit 1;
 }
 
@@ -75,7 +76,7 @@ foreach my $grammar (@grammars) {
     }
   } else {
     # Moses phrase-based grammar -- prepend nonterminal symbol and -log() the weights
-    if (system("$CAT $grammar | $JOSHUA/scripts/support/moses_phrase_to_joshua.pl | sed 's/ ||| /\t/g' | LC_ALL=C sort -t'\t' -k2,2 -k3,3 --buffer-size=$opts{m} -T $opts{T} | sed 's/\t/ ||| /g' | gzip -9n > $sorted_grammar")) {
+    if (system("$CAT $grammar | sed 's/ ||| /\t/g' | LC_ALL=C sort -t'\t' -k1,1 -k2,2 --buffer-size=$opts{m} -T $opts{T} | sed 's/\t/ ||| /g' | gzip -9n > $sorted_grammar")) {
       print STDERR "* FATAL: Couldn't sort the grammar (not enough memory? short on tmp space?)\n";
       exit 2;
     }
@@ -88,7 +89,8 @@ foreach my $grammar (@grammars) {
 # Do the packing using the config.
 my $grammars = join(" ", @sorted_grammars);
 my $outputs  = join(" ", @outputs);
-my $cmd = "java -Xmx$opts{m} -cp $JOSHUA/lib/args4j-2.0.29.jar:$JOSHUA/class joshua.tools.GrammarPackerCli -g $grammars --outputs $outputs";
+my $alignments = $opts{a} ? "--ga" : "";
+my $cmd = "java -Xmx$opts{m} -cp $JOSHUA/lib/args4j-2.0.29.jar:$JOSHUA/lib/guava-19.0.jar:$JOSHUA/class joshua.tools.GrammarPackerCli -g $grammars --outputs $outputs $alignments";
 print STDERR "Packing with $cmd...\n" if $opts{v};
 
 my $retval = system($cmd);
