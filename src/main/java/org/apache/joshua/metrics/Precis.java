@@ -19,15 +19,16 @@
 package org.apache.joshua.metrics;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import org.apache.joshua.util.Algorithms;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // The metric re-uses most of the BLEU code
 public class Precis extends BLEU {
-  private static final Logger logger = Logger.getLogger(Precis.class.getName());
+  
+  private static final Logger LOG = LoggerFactory.getLogger(Precis.class);
 
   private static final double REF_CR = -1.0;
 
@@ -243,7 +244,7 @@ public class Precis extends BLEU {
     if (stats.length != suffStatsCount) {
       String msg = "Mismatch between stats.length and suffStatsCount (" + stats.length + " vs. "
           + suffStatsCount + ") in Precis.score(int[])";
-      logger.severe(msg);
+      LOG.error(msg);
       throw new RuntimeException(msg);
     }
 

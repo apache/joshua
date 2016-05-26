@@ -22,17 +22,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.StringArrayOptionHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GrammarPackerCli {
   
-  private static final Logger log = Logger.getLogger(GrammarPackerCli.class.getName());
-
+  private static final Logger LOG = LoggerFactory.getLogger(GrammarPackerCli.class);
+  
   // Input grammars to be packed (with a joint vocabulary)
   @Option(name = "--grammars", aliases = {"-g", "-i"}, handler = StringArrayOptionHandler.class, required = true, usage = "list of grammars to pack (jointly, i.e. they share the same vocabulary)")
   private List<String> grammars = new ArrayList<>();
@@ -110,7 +111,7 @@ public class GrammarPackerCli {
     // create Packer instances for each grammar
     final List<GrammarPacker> packers = new ArrayList<>(grammars.size());
     for (int i = 0; i < grammars.size(); i++) {
-      log.info("Starting GrammarPacker for " + grammars.get(i));
+      LOG.info("Starting GrammarPacker for {}",  grammars.get(i));
       final String alignment_filename = alignments_filenames.isEmpty() ? null : alignments_filenames.get(i);
       final String featuredump_filename = featuredump_filenames.isEmpty() ? null : featuredump_filenames.get(i);
       final GrammarPacker packer = new GrammarPacker(
@@ -126,14 +127,14 @@ public class GrammarPackerCli {
     
     // run all packers in sequence, accumulating vocabulary items
     for (final GrammarPacker packer : packers) {
-      log.info("Starting GrammarPacker for " + packer.getGrammar());
+      LOG.info("Starting GrammarPacker for {}", packer.getGrammar());
       packer.pack();
-      log.info("PackedGrammar located at " + packer.getOutputDirectory());
+      LOG.info("PackedGrammar located at {}", packer.getOutputDirectory());
     }
     
     // for each packed grammar, overwrite the internally serialized vocabulary with the current global one.
     for (final GrammarPacker packer : packers) {
-      log.info("Writing final common Vocabulary to " + packer.getOutputDirectory());
+      LOG.info("Writing final common Vocabulary to {}",  packer.getOutputDirectory());
       packer.writeVocabulary();
     }
   }
@@ -146,7 +147,7 @@ public class GrammarPackerCli {
       parser.parseArgument(args);
       cli.run();
     } catch (CmdLineException e) {
-      log.info(e.toString());
+      LOG.error(e.getMessage(), e);
       parser.printUsage(System.err);
       System.exit(1);
     }

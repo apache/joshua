@@ -25,8 +25,8 @@ import org.apache.joshua.decoder.ff.FeatureFunction;
 /**
  * Grammar is a class for wrapping a trie of TrieGrammar in order to store holistic metadata.
  * 
- * @author wren ng thornton <wren@users.sourceforge.net>
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author wren ng thornton wren@users.sourceforge.net
+ * @author Zhifei Li, zhifei.work@gmail.com
  */
 public interface Grammar {
 
@@ -45,7 +45,7 @@ public interface Grammar {
    * <p>
    * Cube-pruning requires that the grammar be sorted based on the latest feature functions.
    * 
-   * @param weights The model weights.
+   * @param models list of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    */
   void sortGrammar(List<FeatureFunction> models);
 
@@ -73,6 +73,7 @@ public interface Grammar {
    * @param pathLength Length of the input path in a source input lattice. If a source input phrase
    *          is used instead of a lattice, this value will likely be ignored by the underlying
    *          implementation, but would normally be defined as <code>endIndex-startIndex</code>
+   * @return true if there is a rule for this span
    */
   boolean hasRuleForSpan(int startIndex, int endIndex, int pathLength);
 
@@ -93,6 +94,12 @@ public interface Grammar {
   /**
    * This is used to construct a manual rule supported from outside the grammar, but the owner
    * should be the same as the grammar. Rule ID will the same as OOVRuleId, and no lattice cost
+   * @param lhs todo
+   * @param sourceWords todo
+   * @param targetWords todo
+   * @param scores todo
+   * @param arity todo
+   * @return the constructed {@link org.apache.joshua.decoder.ff.tm.Rule}
    */
   @Deprecated
   Rule constructManualRule(int lhs, int[] sourceWords, int[] targetWords, float[] scores, int arity);
@@ -100,7 +107,7 @@ public interface Grammar {
   /**
    * Dump the grammar to disk.
    * 
-   * @param file
+   * @param file the file path to write to
    */
   @Deprecated
   void writeGrammarOnDisk(String file);
@@ -115,26 +122,28 @@ public interface Grammar {
 
   /**
    * Return the grammar's owner.
+   * @return grammar owner
    */
   int getOwner();
 
   /**
-   * Return the maximum source phrase length (terminals + nonterminals).
+   * Return the maximum source phrase length (terminals + nonterminals)
+   * @return the maximum source phrase length
    */
   int getMaxSourcePhraseLength();
   
   /**
    * Add an OOV rule for the requested word for the grammar.
    * 
-   * @param word
-   * @param featureFunctions
+   * @param word input word to add rules to
+   * @param featureFunctions a {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    */
   void addOOVRules(int word, List<FeatureFunction> featureFunctions);
   
   /**
    * Add a rule to the grammar.
    *
-   * @param Rule the rule
+   * @param rule the {@link org.apache.joshua.decoder.ff.tm.Rule}
    */
   void addRule(Rule rule);
 }

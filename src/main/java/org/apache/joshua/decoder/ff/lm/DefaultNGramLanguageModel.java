@@ -19,25 +19,24 @@
 package org.apache.joshua.decoder.ff.lm;
 
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.joshua.corpus.Vocabulary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class provides a default implementation for the Equivalent LM State optimization (namely,
  * don't back off anywhere). It also provides some default implementations for more general
- * functions on the interface to fall back to more specific ones (e.g. from ArrayList<Integer> to
- * int[]) and a default implementation for sentenceLogProbability which enumerates the n-grams and
- * calls calls ngramLogProbability for each of them.
+ * functions on the interface to fall back to more specific ones (e.g. from {@link java.util.ArrayList}
+ * of {@link java.lang.Integer}'s to int[]) and a default implementation for sentenceLogProbability
+ * which enumerates the n-grams and calls calls ngramLogProbability for each of them.
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author Zhifei Li, zhifei.work@gmail.com
+ * @author wren ng thornton wren@users.sourceforge.net
  */
 public abstract class DefaultNGramLanguageModel implements NGramLanguageModel {
 
-  /** Logger for this class. */
-  private static final Logger logger = Logger.getLogger(DefaultNGramLanguageModel.class.getName());
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultNGramLanguageModel.class);
 
   protected final int ngramOrder;
   
@@ -88,10 +87,8 @@ public abstract class DefaultNGramLanguageModel implements NGramLanguageModel {
       // start_index=2. othercase, need to check)
       int[] ngram = Arrays.copyOfRange(sentence, 0, j);
       double logProb = ngramLogProbability(ngram, order);
-      if (logger.isLoggable(Level.FINE)) {
-        String words = Vocabulary.getWords(ngram);
-        logger.fine("\tlogp ( " + words + " )  =  " + logProb);
-      }
+
+      LOG.debug("\tlogp ({}) = {}", Vocabulary.getWords(ngram), logProb);
       probability += logProb;
     }
 
@@ -99,10 +96,7 @@ public abstract class DefaultNGramLanguageModel implements NGramLanguageModel {
     for (int i = 0; i <= sentenceLength - order; i++) {
       int[] ngram = Arrays.copyOfRange(sentence, i, i + order);
       double logProb = ngramLogProbability(ngram, order);
-      if (logger.isLoggable(Level.FINE)) {
-        String words = Vocabulary.getWords(ngram);
-        logger.fine("\tlogp ( " + words + " )  =  " + logProb);
-      }
+      LOG.debug("\tlogp ({})  = {} ", Vocabulary.getWords(ngram), logProb);
       probability += logProb;
     }
 

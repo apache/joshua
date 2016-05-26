@@ -31,7 +31,6 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamConstants;
 import java.io.OutputStream;
 import java.io.UTFDataFormatException;
-import java.util.logging.Logger;
 
 /**
  * A BinaryOut writes data to an output stream in raw binary form. Each data type is converted to
@@ -45,8 +44,6 @@ import java.util.logging.Logger;
  */
 public class BinaryOut implements DataOutput, ObjectOutput, Flushable, Closeable {
 
-  @SuppressWarnings("unused")
-  private static final Logger logger = Logger.getLogger(BinaryOut.class.getName());
 
   public final int BITS_PER_BYTE = 8;
 
@@ -97,8 +94,8 @@ public class BinaryOut implements DataOutput, ObjectOutput, Flushable, Closeable
    * If necessary, the current contents of the buffer will be written to the underlying output
    * stream.
    * 
-   * @param size
-   * @throws IOException
+   * @param size the size of the buffer
+   * @throws IOException if there is an error determining the current size
    */
   protected void prepareBuffer(int size) throws IOException {
     if (bufferPosition > 0 && bufferPosition >= BUFFER_SIZE - size) {

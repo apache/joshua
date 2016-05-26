@@ -19,7 +19,6 @@
 package org.apache.joshua.decoder.segment_file;
 
 import static org.apache.joshua.util.FormatUtils.addSentenceMarkers;
-import static org.apache.joshua.util.FormatUtils.escapeSpecialSymbols;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,17 +38,23 @@ import org.apache.joshua.lattice.Lattice;
 import org.apache.joshua.lattice.Node;
 import org.apache.joshua.util.ChartSpan;
 import org.apache.joshua.util.Regex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents lattice input. The lattice is contained on a single line and is represented
  * in PLF (Python Lattice Format), e.g.,
  * 
+ * <pre>
  * ((('ein',0.1,1),('dieses',0.2,1),('haus',0.4,2),),(('haus',0.8,1),),)
+ * </pre>
  * 
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 
 public class Sentence {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Sentence.class);
 
   /* The sentence number. */
   public int id = -1;
@@ -77,8 +82,9 @@ public class Sentence {
    * Constructor. Receives a string representing the input sentence. This string may be a
    * string-encoded lattice or a plain text string for decoding.
    * 
-   * @param inputString
-   * @param id
+   * @param inputString representing the input sentence
+   * @param id ID to associate with the input string
+   * @param joshuaConfiguration a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
   public Sentence(String inputString, int id, JoshuaConfiguration joshuaConfiguration) {
   
@@ -135,7 +141,7 @@ public class Sentence {
 
   /**
    * Returns the length of the sentence. For lattices, the length is the shortest path through the
-   * lattice. The length includes the <s> and </s> sentence markers. 
+   * lattice. The length includes the &lt;s&gt; and &lt;/s&gt; sentence markers. 
    * 
    * @return number of input tokens + 2 (for start and end of sentence markers)
    */
@@ -255,20 +261,19 @@ public class Sentence {
   }
 
   /**
-   * If the input sentence is too long (not counting the <s> and </s> tokens), it is truncated to
+   * If the input sentence is too long (not counting the &lt;s&gt; and &lt;/s&gt; tokens), it is truncated to
    * the maximum length, specified with the "maxlen" parameter.
    * 
    * Note that this code assumes the underlying representation is a sentence, and not a lattice. Its
    * behavior is undefined for lattices.
    * 
-   * @param length
+   * @param length int representing the length to truncate the sentence to
    */
   protected void adjustForLength(int length) {
     int size = this.getLattice().size() - 2; // subtract off the start- and end-of-sentence tokens
 
     if (size > length) {
-      Decoder.LOG(1, String.format("* WARNING: sentence %d too long (%d), truncating to length %d",
-          id(), size, length));
+      LOG.warn("sentence {} too long {}, truncating to length {}", id(), size, length);
 
       // Replace the input sentence (and target) -- use the raw string, not source()
       String[] tokens = source.split("\\s+");
@@ -292,6 +297,7 @@ public class Sentence {
 
   /**
    * Returns the raw source-side input string.
+   * @return the raw source-side input string
    */
   public String rawSource() {
     return source;
@@ -300,7 +306,7 @@ public class Sentence {
   /**
    * Returns the source-side string with annotations --- if any --- stripped off.
    * 
-   * @return
+   * @return  the source-side string with annotations --- if any --- stripped off
    */
   public String source() {
     StringBuilder str = new StringBuilder();
@@ -332,7 +338,7 @@ public class Sentence {
    * 
    * If the parameter parse=true is set, parsing will be triggered, otherwise constrained decoding.
    * 
-   * @return
+   * @return target side of sentence translation
    */
   public String target() {
     return target;
@@ -368,7 +374,7 @@ public class Sentence {
    * Returns the sequence of tokens comprising the sentence. This assumes you've done the checking
    * to makes sure the input string (the source side) isn't a PLF waiting to be parsed.
    * 
-   * @return
+   * @return a {@link java.util.List} of {@link org.apache.joshua.decoder.segment_file.Token}'s comprising the sentence
    */
   public List<Token> getTokens() {
     assert isLinearChain();
@@ -382,6 +388,7 @@ public class Sentence {
   /**
    * Returns the sequence of word IDs comprising the input sentence. Assumes this is not a general
    * lattice, but a linear chain.
+   * @return an int[] comprising all word ID's
    */
   public int[] getWordIDs() {
     List<Token> tokens = getTokens();
@@ -395,7 +402,7 @@ public class Sentence {
    * Returns the sequence of word ids comprising the sentence. Assumes this is a sentence and
    * not a lattice.
    *  
-   * @return
+   * @return the sequence of word ids comprising the sentence
    */
   public Lattice<String> stringLattice() {
     assert isLinearChain();

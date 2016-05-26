@@ -21,21 +21,21 @@ package org.apache.joshua.decoder.ff.tm;
 import java.util.Arrays; 
 import java.util.List; 
 import java.util.Map; 
-import java.util.logging.Logger; 
 
 import org.apache.joshua.corpus.SymbolTable; 
-import org.apache.joshua.decoder.ff.FeatureFunction; 
+import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * this class implements MonolingualRule 
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com> 
+ * @author Zhifei Li, zhifei.work@gmail.com
  * @version $LastChangedDate: 2010-02-10 09:59:38 -0600 (Wed, 10 Feb 2010) $ 
  */ 
 public class MonolingualRule extends Rule { 
 
-  private static final Logger logger = 
-      Logger.getLogger(MonolingualRule.class.getName()); 
+  private static final Logger LOG = LoggerFactory.getLogger(MonolingualRule.class);
 
   //=============================================================== 
   // Instance Fields 
@@ -90,9 +90,9 @@ public class MonolingualRule extends Rule {
    * @param featureScores Feature value scores for the rule. 
    * @param arity Number of nonterminals in the source language 
    *              right-hand side. 
-   * @param owner 
-   * @param latticeCost 
-   * @param ruleID 
+   * @param owner todo
+   * @param latticeCost todo
+   * @param ruleID todo
    */ 
   public MonolingualRule(int lhs, int[] sourceRhs, float[] featureScores, int arity, int owner, float latticeCost, int ruleID) { 
     this.lhs          = lhs; 
@@ -175,7 +175,7 @@ public class MonolingualRule extends Rule {
 
   public final float getEstCost() { 
     if (est_cost <= Double.NEGATIVE_INFINITY) { 
-      logger.warning("The est cost is neg infinity; must be bad rule; rule is:\n" + toString()); 
+      LOG.warn("The est cost is neg infinity; must be bad rule; rule is:\n {}", this);
     } 
     return est_cost; 
   } 

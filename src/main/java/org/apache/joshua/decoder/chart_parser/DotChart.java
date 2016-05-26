@@ -23,8 +23,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.ff.tm.Grammar;
@@ -36,6 +34,8 @@ import org.apache.joshua.lattice.Arc;
 import org.apache.joshua.lattice.Lattice;
 import org.apache.joshua.lattice.Node;
 import org.apache.joshua.util.ChartSpan;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The DotChart handles Earley-style implicit binarization of translation rules.
@@ -57,6 +57,13 @@ import org.apache.joshua.util.ChartSpan;
  * @author Kristy Hollingshead Seitz
  */
 class DotChart {
+
+  // ===============================================================
+  // Static fields
+  // ===============================================================
+
+  private static final Logger LOG = LoggerFactory.getLogger(DotChart.class);
+
 
   // ===============================================================
   // Package-protected instance fields
@@ -94,11 +101,6 @@ class DotChart {
   /* If enabled, rule terminals are treated as regular expressions. */
   private final boolean regexpMatching;
 
-  // ===============================================================
-  // Static fields
-  // ===============================================================
-
-  private static final Logger logger = Logger.getLogger(DotChart.class.getName());
 
   // ===============================================================
   // Constructors
@@ -169,8 +171,7 @@ class DotChart {
    * </ol>
    */
   void expandDotCell(int i, int j) {
-    if (logger.isLoggable(Level.FINEST))
-      logger.finest("Expanding dot cell (" + i + "," + j + ")");
+      LOG.debug("Expanding dot cell ({}, {})", i, j);
 
     /*
      * (1) If the dot is just to the left of a non-terminal variable, we look for theorems or axioms
@@ -352,15 +353,15 @@ class DotChart {
     dotcells.get(i, j).addDotNode(item);
     dotChart.nDotitemAdded++;
 
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest(String.format("Add a dotitem in cell (%d, %d), n_dotitem=%d, %s", i, j,
-          dotChart.nDotitemAdded, srcPath));
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Add a dotitem in cell ({}, {}), n_dotitem={}, {}", i, j,
+          dotChart.nDotitemAdded, srcPath);
 
       RuleCollection rules = tnode.getRuleCollection();
       if (rules != null) {
         for (Rule r : rules.getRules()) {
           // System.out.println("rule: "+r.toString());
-          logger.finest(r.toString());
+          LOG.debug("{}", r);
         }
       }
     }

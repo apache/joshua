@@ -36,6 +36,8 @@ import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
 import org.apache.joshua.decoder.ff.tm.format.PhraseFormatReader;
 import org.apache.joshua.decoder.ff.tm.format.SamtFormatReader;
 import org.apache.joshua.util.FormatUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements a memory-based bilingual BatchGrammar.
@@ -44,10 +46,12 @@ import org.apache.joshua.util.FormatUtils;
  * french sides so far (2) A HashMap of next-layer trie nodes, the next french word used as the key
  * in HashMap
  * 
- * @author Zhifei Li <zhifei.work@gmail.com>
- * @author Matt Post <post@cs.jhu.edu
+ * @author Zhifei Li zhifei.work@gmail.com
+ * @author Matt Post post@cs.jhu.edu
  */
 public class MemoryBasedBatchGrammar extends AbstractGrammar {
+
+  private static final Logger LOG = LoggerFactory.getLogger(MemoryBasedBatchGrammar.class);
 
   // ===============================================================
   // Instance Fields
@@ -118,8 +122,8 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
           addRule(rule);
         }
     } else {
-      Decoder.LOG(1, "Couldn't create a GrammarReader for file " + grammarFile + " with format "
-          + formatKeyword);
+      LOG.info("Couldn't create a GrammarReader for file {} with format {}",
+          grammarFile, formatKeyword);
     }
 
     this.printGrammar();
@@ -231,9 +235,8 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
   }
 
   protected void printGrammar() {
-    Decoder.LOG(1, String.format(
-        "MemoryBasedBatchGrammar: Read %d rules with %d distinct source sides from '%s'",
-        this.qtyRulesRead, this.qtyRuleBins, grammarFile));
+    LOG.info("MemoryBasedBatchGrammar: Read {} rules with {} distinct source sides from '{}'",
+        this.qtyRulesRead, this.qtyRuleBins, grammarFile);
   }
 
   /**
@@ -254,8 +257,8 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
   /***
    * Takes an input word and creates an OOV rule in the current grammar for that word.
    * 
-   * @param sourceWord
-   * @param featureFunctions
+   * @param sourceWord integer representation of word
+   * @param featureFunctions {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    */
   @Override
   public void addOOVRules(int sourceWord, List<FeatureFunction> featureFunctions) {
@@ -288,7 +291,7 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
   /**
    * Adds a default set of glue rules.
    * 
-   * @param featureFunctions
+   * @param featureFunctions an {@link java.util.ArrayList} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    */
   public void addGlueRules(ArrayList<FeatureFunction> featureFunctions) {
     HieroFormatReader reader = new HieroFormatReader();

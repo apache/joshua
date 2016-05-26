@@ -18,13 +18,16 @@
  */
 package org.apache.joshua.metrics;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class BLEU extends EvaluationMetric {
-  private static final Logger logger = Logger.getLogger(BLEU.class.getName());
+
+  private static final Logger LOG = LoggerFactory.getLogger(BLEU.class);
 
   // The maximum n-gram we care about
   private int maxGramLength;
@@ -48,7 +51,7 @@ public class BLEU extends EvaluationMetric {
     if (mxGrmLn >= 1) {
       setMaxGramLength(mxGrmLn);
     } else {
-      logger.severe("Maximum gram length must be positive");
+      LOG.error("Maximum gram length must be positive");
       throw new RuntimeException("Maximum gram length must be positive");
     }
 
@@ -59,9 +62,9 @@ public class BLEU extends EvaluationMetric {
       // } else if (methodStr.equals("average")) {
       // effLengthMethod = EffectiveLengthMethod.AVERAGE;
     } else {
-      logger.severe("Unknown effective length method string " + methodStr + ".");
+      LOG.error("Unknown effective length method string {}", methodStr);
       // System.out.println("Should be one of closest, shortest, or average.");
-      logger.severe("Should be one of closest or shortest.");
+      LOG.error("Should be one of closest or shortest.");
       throw new RuntimeException("Should be one of closest or shortest.");
     }
 
@@ -147,6 +150,9 @@ public class BLEU extends EvaluationMetric {
 
   /**
    * Computes the BLEU sufficient statistics on a hypothesis.
+   * @param cand_str todo
+   * @param i todo 
+   * @return int[] representing statistics on a hypothesis
    */
   public int[] suffStats(String cand_str, int i) {
     int[] stats = new int[suffStatsCount];
@@ -172,9 +178,9 @@ public class BLEU extends EvaluationMetric {
   /**
    * Computes the precision sufficient statistics, clipping counts.
    * 
-   * @param stats
-   * @param words
-   * @param i
+   * @param stats int[] representing statistics on a hypothesis.
+   * @param words String[] of input terms
+   * @param i todo
    */
   public void set_prec_suffStats(int[] stats, String[] words, int i) {
     HashMap<String, Integer>[] candCountsArray = getNgramCountsArray(words);
@@ -263,7 +269,7 @@ public class BLEU extends EvaluationMetric {
     if (stats.length != suffStatsCount) {
       String msg = "Mismatch between stats.length and suffStatsCount (" + stats.length + " vs. "
           + suffStatsCount + ") in BLEU.score(int[])";
-      logger.severe(msg);
+      LOG.error(msg);
       throw new RuntimeException(msg);
     }
 

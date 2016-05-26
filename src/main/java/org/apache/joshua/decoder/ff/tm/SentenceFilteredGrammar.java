@@ -26,15 +26,20 @@ import java.util.Map.Entry;
 import org.apache.joshua.decoder.ff.tm.hash_based.ExtensionIterator;
 import org.apache.joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements dynamic sentence-level filtering. This is accomplished with a parallel
  * trie, a subset of the original trie, that only contains trie paths that are reachable from
  * traversals of the current sentence.
  * 
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 public class SentenceFilteredGrammar extends MemoryBasedBatchGrammar {
+
+  private static final Logger LOG = LoggerFactory.getLogger(SentenceFilteredGrammar.class);
+
   private AbstractGrammar baseGrammar;
   private SentenceFilteredTrie filteredTrie;
   private int[] tokens;
@@ -44,8 +49,8 @@ public class SentenceFilteredGrammar extends MemoryBasedBatchGrammar {
    * Construct a new sentence-filtered grammar. The main work is done in the enclosed trie (obtained
    * from the base grammar, which contains the complete grammar).
    * 
-   * @param baseGrammar
-   * @param sentence
+   * @param baseGrammar a new {@link org.apache.joshua.decoder.ff.tm.AbstractGrammar} to populate
+   * @param sentence {@link org.apache.joshua.lattice.Lattice} input
    */
   SentenceFilteredGrammar(AbstractGrammar baseGrammar, Sentence sentence) {
     super(baseGrammar.joshuaConfiguration);
@@ -62,9 +67,8 @@ public class SentenceFilteredGrammar extends MemoryBasedBatchGrammar {
 
     float seconds = (System.currentTimeMillis() - startTime) / 1000.0f;
 
-    System.err.println(String.format(
-        "Sentence-level filtering of sentence %d (%d -> %d rules) in %.3f seconds", sentence.id(),
-        origCount, filteredCount, seconds));
+    LOG.debug("Sentence-level filtering of sentence {} ({} -> {} rules) in {} seconds",
+        sentence.id(), origCount, filteredCount, seconds);
   }
 
   @Override
@@ -90,8 +94,8 @@ public class SentenceFilteredGrammar extends MemoryBasedBatchGrammar {
   /**
    * A convenience function that counts the number of rules in a grammar's trie.
    * 
-   * @param node
-   * @return
+   * @param node the {@link org.apache.joshua.decoder.ff.tm.Trie} implementation for which to count rules
+   * @return the number of rules
    */
   public int getNumRules(Trie node) {
     int numRules = 0;
@@ -144,6 +148,7 @@ public class SentenceFilteredGrammar extends MemoryBasedBatchGrammar {
    * subsequent ones would have to consume just one word. We then just have to record in the
    * recursive call whether the last traversal was a nonterminal or not.
    * 
+   * @param unfilteredTrieRoot todo
    * @return the root of the filtered trie
    */
   private SentenceFilteredTrie filter(Trie unfilteredTrieRoot) {
@@ -246,6 +251,7 @@ public class SentenceFilteredGrammar extends MemoryBasedBatchGrammar {
    * source side of each rule collection against the input sentence. Failed matches are discarded,
    * and trie nodes extending from that position need not be explored.
    * 
+   * @param unfilteredTrie todo
    * @return the root of the filtered trie if any rules were retained, otherwise null
    */
   @SuppressWarnings("unused")
@@ -283,7 +289,7 @@ public class SentenceFilteredGrammar extends MemoryBasedBatchGrammar {
    * Implements a filtered trie, by sitting on top of a base trie and annotating nodes that match
    * the given input sentence.
    * 
-   * @author Matt Post <post@cs.jhu.edu>
+   * @author Matt Post post@cs.jhu.edu
    * 
    */
   public class SentenceFilteredTrie implements Trie {
@@ -297,8 +303,7 @@ public class SentenceFilteredGrammar extends MemoryBasedBatchGrammar {
     /**
      * Constructor.
      * 
-     * @param trieRoot
-     * @param source
+     * @param unfilteredTrieNode todo
      */
     public SentenceFilteredTrie(Trie unfilteredTrieNode) {
       this.unfilteredTrieNode = unfilteredTrieNode;

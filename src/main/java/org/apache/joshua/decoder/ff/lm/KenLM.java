@@ -21,6 +21,8 @@ package org.apache.joshua.decoder.ff.lm;
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.ff.lm.NGramLanguageModel;
 import org.apache.joshua.decoder.ff.state_maintenance.KenLMState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JNI wrapper for KenLM. This version of KenLM supports two use cases, implemented by the separate
@@ -29,22 +31,24 @@ import org.apache.joshua.decoder.ff.state_maintenance.KenLMState;
  * state by itself and just passes in the ngrams for scoring.
  * 
  * @author Kenneth Heafield
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 
 public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(KenLM.class);
 
   static {
     try {
       System.loadLibrary("ken");
     } catch (UnsatisfiedLinkError e) {
       //TODO: send these prints to LOG.err
-      System.err.println("* FATAL: Can't find libken.so (libken.dylib on OS X) in $JOSHUA/lib");
-      System.err.println("*        This probably means that the KenLM library didn't compile.");
-      System.err.println("*        Make sure that BOOST_ROOT is set to the root of your boost");
-      System.err.println("*        installation (it's not /opt/local/, the default), change to");
-      System.err.println("*        $JOSHUA, and type 'ant kenlm'. If problems persist, see the");
-      System.err.println("*        website (joshua-decoder.org).");
+      LOG.error("* FATAL: Can't find libken.so (libken.dylib on OS X) in $JOSHUA/lib");
+      LOG.error("*        This probably means that the KenLM library didn't compile.");
+      LOG.error("*        Make sure that BOOST_ROOT is set to the root of your boost");
+      LOG.error("*        installation (it's not /opt/local/, the default), change to");
+      LOG.error("*        $JOSHUA, and type 'ant kenlm'. If problems persist, see the");
+      LOG.error("*        website (joshua-decoder.org)."); //FIXME: update link to newer url
       throw new RuntimeException(e);
     }
   }
@@ -91,6 +95,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
   /**
    * Constructor if order is not known.
    * Order will be inferred from the model.
+   * @param file_name string path to an input file
    */
   public KenLM(String file_name) {
     pointer = construct(file_name);
@@ -116,6 +121,8 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
   /**
    * Query for n-gram probability using strings.
+   * @param words a string array of words
+   * @return float value denoting probability
    */
   public float prob(String[] words) {
     return probForString(pointer, words);
@@ -128,14 +135,15 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
   /**
    * This function is the bridge to the interface in kenlm/lm/left.hh, which has KenLM score the
-   * whole rule. It takes a list of words and states retrieved from tail nodes (nonterminals in the
+   * whole rule. It takes an array of words and states retrieved from tail nodes (nonterminals in the
    * rule). Nonterminals have a negative value so KenLM can distinguish them. The sentence number is
    * needed so KenLM knows which memory pool to use. When finished, it returns the updated KenLM
    * state and the LM probability incurred along this rule.
    * 
-   * @param words
-   * @param sentId
-   * @return
+   * @param words array of words
+   * @param poolPointer todo
+   * @return the updated {@link org.apache.joshua.decoder.ff.lm.KenLM.StateProbPair} e.g. 
+   * KenLM state and the LM probability incurred along this rule
    */
   public StateProbPair probRule(long[] words, long poolPointer) {
 
@@ -154,7 +162,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
    * Public facing function that estimates the cost of a rule, which value is used for sorting
    * rules during cube pruning.
    * 
-   * @param words
+   * @param words array of words
    * @return the estimated cost of the rule (the (partial) n-gram probabilities of all words in the rule)
    */
   public float estimateRule(long[] words) {
@@ -170,6 +178,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
   /**
    * The start symbol for a KenLM is the Vocabulary.START_SYM.
+   * @return "&lt;s&gt;"
    */
   public String getStartSymbol() {
     return Vocabulary.START_SYM;

@@ -35,11 +35,15 @@ import com.sun.net.httpserver.HttpHandler;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class handles a concurrent request for translations from a newly opened socket.
  */
 public class ServerThread extends Thread implements HttpHandler {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ServerThread.class);
   private static final Charset FILE_ENCODING = Charset.forName("UTF-8");
   
   private final JoshuaConfiguration joshuaConfiguration;
@@ -51,6 +55,7 @@ public class ServerThread extends Thread implements HttpHandler {
    * 
    * @param socket the socket representing the input/output streams
    * @param decoder the configured decoder that handles performing translations
+   * @param joshuaConfiguration a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
   public ServerThread(Socket socket, Decoder decoder, JoshuaConfiguration joshuaConfiguration) {
     this.joshuaConfiguration = joshuaConfiguration;
@@ -66,6 +71,7 @@ public class ServerThread extends Thread implements HttpHandler {
   @Override
   public void run() {
 
+    //TODO: use try-with-resources block
     try {
       BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), FILE_ENCODING));
 
@@ -73,16 +79,15 @@ public class ServerThread extends Thread implements HttpHandler {
 
       try {
         decoder.decodeAll(request, socket.getOutputStream());
-
       } catch (SocketException e) {
-        System.err.println("* WARNING: Socket interrupted");
+        LOG.error(" Socket interrupted", e);
         request.shutdown();
-        return;
+      } finally {
+        reader.close();
+        socket.close();
       }
-      reader.close();
-      socket.close();
     } catch (IOException e) {
-      return;
+      LOG.error(e.getMessage(), e);
     }
   }
   

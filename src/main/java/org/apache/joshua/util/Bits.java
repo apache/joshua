@@ -28,9 +28,9 @@ public class Bits {
   /**
    * Encodes two shorts in an int.
    * 
-   * @param high
-   * @param low
-   * @return
+   * @param high input high short to encode
+   * @param low input low short to encode
+   * @return encoded int
    */
   public static int encodeAsInt(short high, short low) {
 
@@ -79,9 +79,9 @@ public class Bits {
   /**
    * Encodes two integers in a long.
    * 
-   * @param high
-   * @param low
-   * @return
+   * @param high input high int to encode
+   * @param low input low int to encode
+   * @return encoded long
    */
   public static long encodeAsLong(int high, int low) {
 

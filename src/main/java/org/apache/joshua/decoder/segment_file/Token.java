@@ -28,6 +28,8 @@ import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.util.FormatUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Stores the identity of a word and its annotations in a sentence.
@@ -36,6 +38,9 @@ import org.apache.joshua.util.FormatUtils;
  * @author Matt Post
  */
 public class Token {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Token.class);
+
   // The token without the annotations
   private String token; 
   private int tokenID;
@@ -44,24 +49,30 @@ public class Token {
   private JoshuaConfiguration joshuaConfiguration;
 
   /**
-   * Constructor : Creates a Token object from a raw word
+   * <p>Constructor : Creates a Token object from a raw word
    * Extracts and assigns an annotation when available.
    * Any word can be marked with annotations, which are arbitrary semicolon-delimited
-   * key[=value] pairs (the value is optional) listed in brackets after a word, e.g.,
+   * key[=value] pairs (the value is optional) listed in brackets after a word, e.g.,</p>
+   * <pre>
+   *    Je[ref=Samuel;PRO] voudrais[FUT;COND]
+   * </pre>
    * 
-   *    Je[ref=Samuel;PRO] voudrais[FUT;COND] ...
+   * <p>This will create a dictionary annotation on the word of the following form for "Je"</p>
    * 
-   * This will create a dictionary annotation on the word of the following form for "Je"
+   * <pre>
+   *   ref -&gt; Samuel
+   *   PRO -&gt; PRO
+   * </pre>
    * 
-   *   ref -> Samuel
-   *   PRO -> PRO
-   *   
-   * and the following for "voudrais":
+   * <p>and the following for "voudrais":</p>
    * 
-   *   FUT  -> FUT
-   *   COND -> COND
+   * <pre>
+   *   FUT  -&gt; FUT
+   *   COND -&gt; COND
+   * </pre>
    * 
    * @param rawWord A word with annotation information (possibly)
+   * @param config a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    *  
    */
   public Token(String rawWord, JoshuaConfiguration config) {
@@ -104,7 +115,7 @@ public class Token {
       else
         annotations.put("lettercase",  "lower");
       
-      Decoder.LOG(2, String.format("TOKEN: %s -> %s (%s)", token, token.toLowerCase(), annotations.get("lettercase")));
+      LOG.info("TOKEN: {} -> {} ({})", token, token.toLowerCase(), annotations.get("lettercase"));
       token = token.toLowerCase(); 
     }
     
@@ -135,7 +146,8 @@ public class Token {
   /**
    * Returns the annotationID (vocab ID)
    * associated with this token
-   * @return int A type ID
+   * @param key A type ID
+   * @return the annotationID (vocab ID)
    */
   public String getAnnotation(String key) {
     if (annotations.containsKey(key)) {

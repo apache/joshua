@@ -90,8 +90,8 @@ public class Span implements Iterable<Integer>, Comparable<Span> {
 
   /**
    * Returns true if the other span does not intersect with this one.
-   * @param o
-   * @return
+   * @param o new {@link org.apache.joshua.corpus.Span} to check for intersection
+   * @return true if the other span does not intersect with this one
    */
   public boolean disjointFrom(Span o) {
     if (start < o.start) {

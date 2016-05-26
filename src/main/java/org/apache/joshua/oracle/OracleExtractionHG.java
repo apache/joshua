@@ -42,7 +42,7 @@ import org.apache.joshua.util.io.LineReader;
  * maintain different states for different hyp length (3) brief penalty is calculated based on the
  * avg ref length (4) using sentence-level BLEU, instead of doc-level BLEU
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com> (Johns Hopkins University)
+ * @author Zhifei Li, zhifei.work@gmail.com (Johns Hopkins University)
  */
 public class OracleExtractionHG extends SplitHg {
   static String BACKOFF_LEFT_LM_STATE_SYM = "<lzfbo>";
@@ -58,7 +58,7 @@ public class OracleExtractionHG extends SplitHg {
   protected int src_sent_len = 0;
   protected int ref_sent_len = 0;
   protected int g_lm_order = 4; // only used for decide whether to get the LM state by this class or
-                                // not in compute_state
+  // not in compute_state
   static protected boolean do_local_ngram_clip = false;
   static protected boolean maitain_length_state = false;
   static protected int g_bleu_order = 4;
@@ -76,8 +76,8 @@ public class OracleExtractionHG extends SplitHg {
   protected HashMap<String, Integer> tbl_ref_ngrams = new HashMap<String, Integer>();
 
   static boolean always_maintain_seperate_lm_state = true; // if true: the virtual item maintain its
-                                                           // own lm state regardless whether
-                                                           // lm_order>=g_bleu_order
+  // own lm state regardless whether
+  // lm_order>=g_bleu_order
 
   int lm_feat_id = 0; // the baseline LM feature id
 
@@ -88,7 +88,7 @@ public class OracleExtractionHG extends SplitHg {
    * It seems that the symbol table here should only need to represent monolingual terminals, plus
    * nonterminals.
    * 
-   * @param lm_feat_id_
+   * @param lm_feat_id_ a language model feature identifier
    */
   public OracleExtractionHG(int lm_feat_id_) {
     this.lm_feat_id = lm_feat_id_;
@@ -111,7 +111,7 @@ public class OracleExtractionHG extends SplitHg {
      */
     if (6 != args.length) {
       System.out
-          .println("Usage: java Decoder f_hypergraphs f_rule_tbl f_ref_files f_orc_out lm_order orc_extract_nbest");
+      .println("Usage: java Decoder f_hypergraphs f_rule_tbl f_ref_files f_orc_out lm_order orc_extract_nbest");
       System.out.println("num of args is " + args.length);
       for (int i = 0; i < args.length; i++) {
         System.out.println("arg is: " + args[i]);
@@ -123,12 +123,9 @@ public class OracleExtractionHG extends SplitHg {
     String f_ref_files = args[2].trim();
     String f_orc_out = args[3].trim();
     int lm_order = Integer.parseInt(args[4].trim());
-    boolean orc_extract_nbest = Boolean.valueOf(args[5].trim()); // oracle extraction from nbest or
-                                                                 // hg
+    boolean orc_extract_nbest = Boolean.valueOf(args[5].trim()); // oracle extraction from nbest or hg
 
-    // ??????????????????????????????????????
     int baseline_lm_feat_id = 0;
-    // ??????????????????????????????????????
 
     KBestExtractor kbest_extractor = null;
     int topN = 300;// TODO
@@ -280,7 +277,7 @@ public class OracleExtractionHG extends SplitHg {
     DPStateOracle dps = compute_state(parent_item, cur_dt, l_ant_virtual_item, tbl_ref_ngrams,
         do_local_ngram_clip, g_lm_order, avg_ref_len, bleu_score, tbl_suffix, tbl_prefix);
     VirtualDeduction t_dt = new VirtualDeduction(cur_dt, l_ant_virtual_item, -bleu_score[0]);// cost:
-                                                                                             // -best_bleu
+    // -best_bleu
     g_num_virtual_deductions++;
     add_deduction(parent_item, virtual_item_sigs, t_dt, dps, true);
   }
@@ -355,11 +352,11 @@ public class OracleExtractionHG extends SplitHg {
 
     // ################## deductions *not* under "goal item"
     HashMap<String, Integer> new_ngram_counts = new HashMap<String, Integer>();// new ngrams created
-                                                                               // due to the
-                                                                               // combination
+    // due to the
+    // combination
     HashMap<String, Integer> old_ngram_counts = new HashMap<String, Integer>();// the ngram that has
-                                                                               // already been
-                                                                               // computed
+    // already been
+    // computed
     int total_hyp_len = 0;
     int[] num_ngram_match = new int[g_bleu_order];
     int[] en_words = dt.getRule().getEnglish();
@@ -378,7 +375,7 @@ public class OracleExtractionHG extends SplitHg {
       left_state_sequence = new ArrayList<Integer>();
       right_state_sequence = new ArrayList<Integer>();
       correct_lm_order = g_bleu_order; // if lm_order is smaller than g_bleu_order, we will get the
-                                       // lm state by ourself
+      // lm state by ourself
     }
 
     // #### get left_state_sequence, right_state_sequence, total_hyp_len, num_ngram_match
@@ -438,7 +435,7 @@ public class OracleExtractionHG extends SplitHg {
           // BUG: Whoa, is that an actual hard-coded ID in there? :)
           if (final_count < 0) {
             throw new RuntimeException("negative count for ngram: " + Vocabulary.word(11844)
-                + "; new: " + new_ngram_counts.get(ngram) + "; old: " + old_ngram_counts.get(ngram));
+            + "; new: " + new_ngram_counts.get(ngram) + "; old: " + old_ngram_counts.get(ngram));
           }
         }
         if (final_count > 0) { // TODO: not correct/global ngram clip
@@ -625,7 +622,13 @@ public class OracleExtractionHG extends SplitHg {
     }
   }
 
-  /** accumulate ngram counts into tbl. */
+  /** 
+   * accumulate ngram counts into tbl. 
+   * @param tbl a {@link java.util.HashMap} which is used to store ngram counts
+   * @param order todo
+   * @param wrds an {@link java.util.ArrayList} containing {@link java.lang.Integer} word representations
+   * @param ignore_null_equiv_symbol set to true to skip some nGrams
+   */
   public void get_ngrams(HashMap<String, Integer> tbl, int order, ArrayList<Integer> wrds,
       boolean ignore_null_equiv_symbol) {
     for (int i = 0; i < wrds.size(); i++) {
@@ -686,9 +689,9 @@ public class OracleExtractionHG extends SplitHg {
         } else {
           // BUG: use joshua.util.Regex.spaces.split(...)
           num_ngram_match[ngram.split("\\s+").length - 1] += (Integer) hyp_ngram_tbl.get(ngram);// without
-                                                                                                // ngram
-                                                                                                // count
-                                                                                                // clipping
+          // ngram
+          // count
+          // clipping
         }
       }
     }
@@ -772,7 +775,7 @@ public class OracleExtractionHG extends SplitHg {
         }
       }
     }
-    
+
     @SuppressWarnings("unused")
     public boolean contain_ngram(ArrayList<Integer> wrds, int start_pos, int end_pos) {
       if (end_pos < start_pos)

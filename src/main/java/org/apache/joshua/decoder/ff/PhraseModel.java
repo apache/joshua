@@ -37,8 +37,8 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * queries the weights for the set of features that are active for this grammar, storing them in an
  * array.
  * 
- * @author Matt Post <post@cs.jhu.edu>
- * @author Zhifei Li <zhifei.work@gmail.com>
+ * @author Matt Post post@cs.jhu.edu
+ * @author Zhifei Li zhifei.work@gmail.com
  */
 
 public class PhraseModel extends StatelessFF {

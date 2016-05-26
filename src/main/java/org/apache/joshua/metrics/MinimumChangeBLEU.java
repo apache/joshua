@@ -19,14 +19,15 @@
 package org.apache.joshua.metrics;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import org.apache.joshua.util.Algorithms;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MinimumChangeBLEU extends BLEU {
-  private static final Logger logger = Logger.getLogger(MinimumChangeBLEU.class.getName());
+
+  private static final Logger LOG = LoggerFactory.getLogger(MinimumChangeBLEU.class);
 
   // we assume that the source for the paraphrasing run is
   // part of the set of references
@@ -173,7 +174,7 @@ public class MinimumChangeBLEU extends BLEU {
     if (stats.length != suffStatsCount) {
       String msg ="Mismatch between stats.length and " + "suffStatsCount (" + stats.length
           + " vs. " + suffStatsCount + ") in BLEU.score(int[])";
-      logger.severe(msg);
+      LOG.error(msg);
       throw new RuntimeException(msg);
     }
 

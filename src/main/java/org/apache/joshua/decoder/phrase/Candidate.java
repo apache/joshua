@@ -170,7 +170,7 @@ public class Candidate {
   }
   
   /**
-   * This returns the target side {@link Phrase}, which is a {@link Rule} object. This is just a
+   * This returns the target side {@link org.apache.joshua.corpus.Phrase}, which is a {@link org.apache.joshua.decoder.ff.tm.Rule} object. This is just a
    * convenience function that works by returning the phrase indexed in ranks[1].
    * 
    * @return the phrase at position ranks[1]
@@ -194,7 +194,7 @@ public class Candidate {
   /**
    * Returns the bit vector of this hypothesis. The bit vector is computed by ORing the coverage
    * vector of the tail node (hypothesis) and the source span of phrases in this candidate.
-   * @return
+   * @return the bit vector of this hypothesis
    */
   public Coverage getCoverage() {
     Coverage cov = new Coverage(getHypothesis().getCoverage());
@@ -203,9 +203,9 @@ public class Candidate {
   }
 
   /**
-   * Sets the result of a candidate (should just be moved to the constructor).
+   * Sets the result of a candidate (TODO should just be moved to the constructor).
    * 
-   * @param result
+   * @param result todo
    */
   public void setResult(ComputeNodeResult result) {
     this.result = result;
@@ -221,7 +221,7 @@ public class Candidate {
    * The Future Cost item should probably just be implemented as another kind of feature function,
    * but it would require some reworking of that interface, which isn't worth it. 
    * 
-   * @return
+   * @return the sum of two costs: the HypoState cost + the transition cost
    */
   public float score() {
     return getHypothesis().getScore() + future_delta + result.getTransitionCost();

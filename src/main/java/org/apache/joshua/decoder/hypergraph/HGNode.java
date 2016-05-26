@@ -28,8 +28,8 @@ import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 /**
  * this class implement Hypergraph node (i.e., HGNode); also known as Item in parsing.
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
- * @author Juri Ganitkevitch, <juri@cs.jhu.edu>
+ * @author Zhifei Li, zhifei.work@gmail.com
+ * @author Juri Ganitkevitch, juri@cs.jhu.edu
  */
 
 // TODO: handle the case that the Hypergraph only maintains the one-best tree
@@ -93,6 +93,8 @@ public class HGNode {
    * Adds the hyperedge to the list of incoming hyperedges (i.e., ways to form this node), creating
    * the list if necessary. We then update the cache of the best incoming hyperedge via a call to
    * the (obscurely named) semiringPlus().
+   * @param hyperEdge the {@link org.apache.joshua.decoder.hypergraph.HyperEdge} to add
+   * to the list of incoming hyperedges
    */
   public void addHyperedgeInNode(HyperEdge hyperEdge) {
     if (hyperEdge != null) {
@@ -106,6 +108,8 @@ public class HGNode {
 
   /**
    * Convenience function to add a list of hyperedges one at a time.
+   * @param hyperedges a {@link java.util.List} of {@link org.apache.joshua.decoder.hypergraph.HyperEdge}'s
+   * to add to the current HGNode.
    */
   public void addHyperedgesInNode(List<HyperEdge> hyperedges) {
     for (HyperEdge hyperEdge : hyperedges)
@@ -114,6 +118,7 @@ public class HGNode {
 
   /**
    * Updates the cache of the best incoming hyperedge.
+   * @param hyperEdge an incoming {{@link org.apache.joshua.decoder.hypergraph.HyperEdge}
    */
   public void semiringPlus(HyperEdge hyperEdge) {
     if (null == bestHyperedge || bestHyperedge.getBestDerivationScore() < hyperEdge.getBestDerivationScore()) {

@@ -23,12 +23,15 @@ import java.net.ServerSocket;
 
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TCP/IP server. Accepts newline-separated input sentences written to the socket, translates them
  * all, and writes the resulting translations back out to the socket.
  */
 public class TcpServer {
+  private static final Logger LOG = LoggerFactory.getLogger(TcpServer.class);
   private final JoshuaConfiguration joshuaConfiguration;
   private Decoder decoder;
   private int port;
@@ -41,15 +44,12 @@ public class TcpServer {
   
   /**
    * Listens on a port for new socket connections. Concurrently handles multiple socket connections.
-   * 
-   * @param args configuration options
-   * @throws IOException
    */
   public void start() {
 
     try {
       ServerSocket serverSocket = new ServerSocket(joshuaConfiguration.server_port);
-      Decoder.LOG(1, String.format("** TCP Server running and listening on port %d.", port));  
+      LOG.info("** TCP Server running and listening on port {}.", port);
 
       boolean listening = true;
       while (listening)

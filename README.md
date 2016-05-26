@@ -49,6 +49,18 @@ The basic method for invoking the decoder looks like this:
 
 Some example usage scenarios and scripts can be found in the [examples/](https://github.com/apache/incubator-joshua/tree/master/examples) directory.
 
+----
+### Maven Build
+
+### Create executable jar
+
+    mvn clean compile assembly:single
+
+### Run the jar 
+
+    java -jar target/joshua-6.0.6-SNAPSHOT-jar-with-dependencies.jar
+    
+
 ## Working with "language packs"
 
 Joshua includes a number of "language packs", which are pre-built models that

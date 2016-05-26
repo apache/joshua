@@ -26,7 +26,7 @@ import org.apache.joshua.decoder.ff.tm.RuleCollection;
 import org.apache.joshua.decoder.ff.tm.Trie;
 
 /**
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Zhifei Li, zhifei.work@gmail.com
  */
 public class MemoryBasedTrie implements Trie {
   MemoryBasedRuleBin ruleBin = null;

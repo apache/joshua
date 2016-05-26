@@ -12,7 +12,7 @@ import java.util.ArrayList;
 /**
  * The simplest concrete implementation of Phrase.
  * 
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate$
  */
 public class BasicPhrase extends AbstractPhrase {

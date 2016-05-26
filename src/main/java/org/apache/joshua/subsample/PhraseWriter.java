@@ -27,7 +27,7 @@ import java.io.IOException;
  * of this, to have zero-overhead while not duplicating code. Alas, Java's not that cool. The
  * "final" could help on JIT at least.
  * 
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate$
  */
 final public class PhraseWriter {

@@ -22,10 +22,13 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.Externalizable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +38,8 @@ import java.util.concurrent.locks.StampedLock;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.ff.lm.NGramLanguageModel;
 import org.apache.joshua.util.FormatUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Static singular vocabulary class.
@@ -43,8 +48,9 @@ import org.apache.joshua.util.FormatUtils;
  * @author Juri Ganitkevitch
  */
 
-public class Vocabulary {
+public class Vocabulary implements Externalizable {
 
+  private static final Logger LOG = LoggerFactory.getLogger(Vocabulary.class);
   private final static ArrayList<NGramLanguageModel> LMs = new ArrayList<>();
 
   private static List<String> idToString;
@@ -80,15 +86,15 @@ public class Vocabulary {
    * Reads a vocabulary from file. This deletes any additions to the vocabulary made prior to
    * reading the file.
    *
-   * @param file_name
+   * @param vocab_file path to a vocabulary file
    * @return Returns true if vocabulary was read without mismatches or collisions.
-   * @throws IOException
+   * @throws IOException of the file cannot be found or read properly
    */
   public static boolean read(final File vocab_file) throws IOException {
     DataInputStream vocab_stream =
         new DataInputStream(new BufferedInputStream(new FileInputStream(vocab_file)));
     int size = vocab_stream.readInt();
-    Decoder.LOG(1, String.format("Read %d entries from the vocabulary", size));
+    LOG.info("Read {} entries from the vocabulary", size);
     clear();
     for (int i = 0; i < size; i++) {
       int id = vocab_stream.readInt();
@@ -109,7 +115,7 @@ public class Vocabulary {
       DataOutputStream vocab_stream =
           new DataOutputStream(new BufferedOutputStream(new FileOutputStream(vocab_file)));
       vocab_stream.writeInt(idToString.size() - 1);
-      Decoder.LOG(1, String.format("Writing vocabulary: %d tokens", idToString.size() - 1));
+      LOG.info("Writing vocabulary: {} tokens", idToString.size() - 1);
       for (int i = 1; i < idToString.size(); i++) {
         vocab_stream.writeInt(i);
         vocab_stream.writeUTF(idToString.get(i));
@@ -125,9 +131,12 @@ public class Vocabulary {
    * Get the id of the token if it already exists, new id is created otherwise.
    *
    * TODO: currently locks for every call. Separate constant (frozen) ids from
-   * changing (e.g. OOV) ids. Constant ids could be immutable -> no locking.
+   * changing (e.g. OOV) ids. Constant ids could be immutable -&gt; no locking.
    * Alternatively: could we use ConcurrentHashMap to not have to lock if
    * actually contains it and only lock for modifications?
+   * 
+   * @param token a token to obtain an id for
+   * @return the token id
    */
   public static int id(String token) {
     // First attempt an optimistic read
@@ -185,7 +194,7 @@ public class Vocabulary {
   public static int[] addAll(String sentence) {
     return addAll(sentence.split("\\s+"));
   }
-  
+
   public static int[] addAll(String[] tokens) {
     int[] ids = new int[tokens.length];
     for (int i = 0; i < tokens.length; i++)
@@ -230,8 +239,8 @@ public class Vocabulary {
   /**
    * Returns true if the Vocabulary ID represents a nonterminal.
    *
-   * @param id
-   * @return
+   * @param id vocabularly ID to check
+   * @return true if the Vocabulary ID represents a nonterminal
    */
   public static boolean nt(int id) {
     return (id < 0);
@@ -273,6 +282,28 @@ public class Vocabulary {
 
   public static void unregisterLanguageModels() {
     LMs.clear();
+  }
+
+  @Override
+  public void writeExternal(ObjectOutput out) throws IOException {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void readExternal(ObjectInput in)
+      throws IOException, ClassNotFoundException {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if(getClass() == o.getClass()) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
 }

@@ -96,6 +96,7 @@ public class WordAlignmentExtractor implements WalkerFunction, DerivationVisitor
   /**
    * Final word alignment without sentence markers
    * or empty list if stack is empty.
+   * @return a final alignment list
    */
   public List<List<Integer>> getFinalWordAlignments() {
     if (stack.isEmpty()) {

@@ -37,8 +37,8 @@ import org.apache.joshua.decoder.Decoder;
  * This class provides an Iterator interface to a BufferedReader. This covers the most common
  * use-cases for reading from files without ugly code to check whether we got a line or not.
  * 
- * @author wren ng thornton <wren@users.sourceforge.net>
- * @author Matt Post <post@cs.jhu.edu>
+ * @author wren ng thornton wren@users.sourceforge.net
+ * @author Matt Post post@cs.jhu.edu
  */
 public class LineReader implements Reader<String> {
 
@@ -74,6 +74,7 @@ public class LineReader implements Reader<String> {
    * STDIN. GZIP'd files are tested for automatically.
    * 
    * @param filename the file to be opened ("-" for STDIN)
+   * @throws IOException if there is an error reading the input file
    */
   public LineReader(String filename) throws IOException {
     
@@ -110,6 +111,7 @@ public class LineReader implements Reader<String> {
 
   /**
    * Wraps an InputStream for iterating line by line. Stream encoding is assumed to be UTF-8.
+   * @param in an {@link java.io.InputStream} to wrap and iterate over line by line
    */
   public LineReader(InputStream in) {
     this.reader = new BufferedReader(new InputStreamReader(in, FILE_ENCODING));
@@ -130,6 +132,7 @@ public class LineReader implements Reader<String> {
    * iteration. The method is idempotent, and all calls after the first are no-ops (unless the
    * thread was interrupted or killed). For correctness, you <b>must</b> call this method before the
    * object falls out of scope.
+   * @throws IOException if there is an error closing the file handler
    */
   public void close() throws IOException {
 
@@ -322,6 +325,7 @@ public class LineReader implements Reader<String> {
    * remain after calling this method, we implicitly call close.
    * 
    * @return the number of lines read
+   * @throws IOException if there is an error reading lines
    */
   public int countLines() throws IOException {
     int lines = 0;
@@ -335,11 +339,10 @@ public class LineReader implements Reader<String> {
     return lines;
   }
 
-  // ===============================================================
-  // Main
-  // ===============================================================
-
-  /** Example usage code. */
+  /** 
+   * Example usage code.
+   * @param args an input file
+   */
   public static void main(String[] args) {
     if (1 != args.length) {
       System.out.println("Usage: java LineReader filename");

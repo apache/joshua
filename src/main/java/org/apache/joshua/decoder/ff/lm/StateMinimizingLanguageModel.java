@@ -37,8 +37,8 @@ import org.apache.joshua.decoder.segment_file.Sentence;
 /**
  * Wrapper for KenLM LMs with left-state minimization. We inherit from the regular
  * 
- * @author Matt Post <post@cs.jhu.edu>
- * @author Juri Ganitkevitch <juri@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
+ * @author Juri Ganitkevitch juri@cs.jhu.edu
  */
 public class StateMinimizingLanguageModel extends LanguageModelFF {
 
@@ -66,10 +66,6 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
 
   /**
    * Initializes the underlying language model.
-   * 
-   * @param config
-   * @param type
-   * @param path
    */
   @Override
   public void initializeLM() {
@@ -162,10 +158,10 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
 
   /**
    * Destroys the pool created to allocate state for this sentence. Called from the
-   * {@link joshua.decoder.Translation} class after outputting the sentence or k-best list. Hosting
+   * {@link org.apache.joshua.decoder.Translation} class after outputting the sentence or k-best list. Hosting
    * this map here in KenLMFF statically allows pools to be shared across KenLM instances.
    * 
-   * @param sentId
+   * @param sentId a key in the poolmap table to destroy
    */
   public void destroyPool(int sentId) {
     if (poolMap.containsKey(sentId))

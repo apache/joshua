@@ -34,6 +34,7 @@ public interface Corpus { // extends Externalizable {
   // ===============================================================
 
   /**
+   * @param position the position at which we want to obtain a word ID
    * @return the integer representation of the Word at the specified position in the corpus.
    */
   int getWordID(int position);
@@ -51,7 +52,7 @@ public interface Corpus { // extends Externalizable {
   /**
    * Gets the sentence index of each specified position.
    * 
-   * @param position Index into the corpus
+   * @param positions Index into the corpus
    * @return array of the sentence indices associated with the specified positions in the corpus.
    */
   int[] getSentenceIndices(int[] positions);
@@ -60,6 +61,7 @@ public interface Corpus { // extends Externalizable {
    * Gets the position in the corpus of the first word of the specified sentence. If the sentenceID
    * is outside of the bounds of the sentences, then it returns the last position in the corpus + 1.
    * 
+   * @param sentenceID a specific sentence to obtain a position for
    * @return the position in the corpus of the first word of the specified sentence. If the
    *         sentenceID is outside of the bounds of the sentences, then it returns the last position
    *         in the corpus + 1.
@@ -69,6 +71,7 @@ public interface Corpus { // extends Externalizable {
   /**
    * Gets the exclusive end position of a sentence in the corpus.
    * 
+   * @param sentenceID a specific sentence to obtain an end position for
    * @return the position in the corpus one past the last word of the specified sentence. If the
    *         sentenceID is outside of the bounds of the sentences, then it returns one past the last
    *         position in the corpus.
@@ -113,7 +116,7 @@ public interface Corpus { // extends Externalizable {
    * @param phrase the superphrase that the comparsion phrase is drawn from
    * @param phraseStart the point in the phrase where the comparison begins (inclusive)
    * @param phraseEnd the point in the phrase where the comparison ends (exclusive)
-   * @return an int that follows the conventions of java.util.Comparator.compareTo()
+   * @return an int that follows the conventions of {@link java.util.Comparator#compare(Object, Object)}
    */
   int comparePhrase(int corpusStart, Phrase phrase, int phraseStart, int phraseEnd);
 
@@ -122,9 +125,9 @@ public interface Corpus { // extends Externalizable {
    * Compares the phrase that starts at position start with the phrase passed in. Compares the
    * entire phrase.
    * 
-   * @param corpusStart
-   * @param phrase
-   * @return
+   * @param corpusStart position start
+   * @param phrase {@link org.apache.joshua.corpus.Phrase} to compare against
+   * @return an int that follows the conventions of {@link java.util.Comparator#compare(Object, Object)}
    */
   int comparePhrase(int corpusStart, Phrase phrase);
 
@@ -134,15 +137,15 @@ public interface Corpus { // extends Externalizable {
    * @param position1 the position in the corpus where the first suffix begins
    * @param position2 the position in the corpus where the second suffix begins
    * @param maxComparisonLength a cutoff point to stop the comparison
-   * @return an int that follows the conventions of java.util.Comparator.compareTo()
+   * @return an int that follows the conventions of {@link java.util.Comparator#compare(Object, Object)}
    */
   int compareSuffixes(int position1, int position2, int maxComparisonLength);
 
   /**
    * 
-   * @param startPosition
-   * @param endPosition
-   * @return
+   * @param startPosition start position for phrase
+   * @param endPosition end position for phrase
+   * @return the {@link org.apache.joshua.corpus.ContiguousPhrase}
    */
   ContiguousPhrase getPhrase(int startPosition, int endPosition);
 

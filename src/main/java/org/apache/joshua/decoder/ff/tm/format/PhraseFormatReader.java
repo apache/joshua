@@ -23,17 +23,17 @@ import org.apache.joshua.decoder.ff.tm.PhraseRule;
 import org.apache.joshua.util.io.LineReader;
 
 /***
- * This class reads in the Moses phrase table format, with support for the source and target side,
+ * <p>This class reads in the Moses phrase table format, with support for the source and target side,
  * list of features, and word alignments. It works by simply casting the phrase-based rules to
- * left-branching hierarchical rules and passing them on to its parent class, {@HieroFormatReader}.
+ * left-branching hierarchical rules and passing them on to its parent class, {@link org.apache.joshua.decoder.ff.tm.format.HieroFormatReader}.</p>
  * 
- * There is also a tool to convert the grammars directly, so that they can be suitably packed. Usage:
+ * <p>There is also a tool to convert the grammars directly, so that they can be suitably packed. Usage:</p>
  * 
  * <pre>
- *     cat PHRASE_TABLE | java -cp $JOSHUA/class joshua.decoder.ff.tm.format.PhraseFormatReader > grammar
+ *     cat PHRASE_TABLE | java -cp $JOSHUA/class org.apache.joshua.decoder.ff.tm.format.PhraseFormatReader &gt; grammar
  * </pre>
  * 
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  *
  */
 
@@ -116,7 +116,7 @@ public class PhraseFormatReader extends HieroFormatReader {
   /**
    * Converts a Moses phrase table to a Joshua grammar. 
    * 
-   * @param args
+   * @param args arguments required to do the conversion
    */
   public static void main(String[] args) {
     PhraseFormatReader reader = new PhraseFormatReader();

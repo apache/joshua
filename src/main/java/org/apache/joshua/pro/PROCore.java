@@ -50,12 +50,17 @@ import org.apache.joshua.metrics.EvaluationMetric;
 import org.apache.joshua.util.StreamGobbler;
 
 import EDU.oswego.cs.dl.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This code was originally written by Yuan Cao, who copied the MERT code to produce this file.
  */
 
 public class PROCore {
+
+  private static final Logger LOG = LoggerFactory.getLogger(PROCore.class);
+
   private final JoshuaConfiguration joshuaConfiguration;
   private TreeSet<Integer>[] indicesOfInterest_all;
 
@@ -1204,14 +1209,8 @@ public class PROCore {
 
         println("Number of features observed so far: " + numParams);
         println("", 1);
-
-      } catch (FileNotFoundException e) {
-        System.err.println("FileNotFoundException in PROCore.run_single_iteration(6): "
-            + e.getMessage());
-        System.exit(99901);
       } catch (IOException e) {
-        System.err.println("IOException in PROCore.run_single_iteration(6): " + e.getMessage());
-        System.exit(99902);
+        throw new RuntimeException(e);
       }
 
       // n-best list converges
@@ -1897,12 +1896,8 @@ public class PROCore {
        * inFile.close(); outFile.close();
        */
       return true;
-    } catch (FileNotFoundException e) {
-      System.err.println("FileNotFoundException in PROCore.copyFile(String,String): "
-          + e.getMessage());
-      return false;
     } catch (IOException e) {
-      System.err.println("IOException in PROCore.copyFile(String,String): " + e.getMessage());
+      LOG.error(e.getMessage(), e);
       return false;
     }
   }

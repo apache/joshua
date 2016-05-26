@@ -29,8 +29,13 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.joshua.util.io.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestSetFilter {
+
+  private static final Logger LOG = LoggerFactory.getLogger(TestSetFilter.class);
+
   private Filter filter = null;
 
   // for caching of accepted rules
@@ -96,7 +101,7 @@ public class TestSetFilter {
         count++;
       }
     } catch (FileNotFoundException e) {
-      System.err.printf("Could not open %s\n", e.getMessage());
+      LOG.error(e.getMessage(), e);
     }
 
     if (verbose)
@@ -106,6 +111,8 @@ public class TestSetFilter {
   /**
    * Top-level filter, responsible for calling the fast or exact version. Takes the source side 
    * of a rule and determines whether there is any sentence in the test set that can match it.
+   * @param sourceSide an input source sentence
+   * @return true if is any sentence in the test set can match the source input
    */
   public boolean inTestSet(String sourceSide) {
     if (!sourceSide.equals(lastSourceSide)) {

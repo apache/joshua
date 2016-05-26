@@ -23,6 +23,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.regex.Pattern;
 
 import org.apache.joshua.corpus.Vocabulary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for format issues.
@@ -31,14 +33,16 @@ import org.apache.joshua.corpus.Vocabulary;
  * @author Lane Schwartz
  */
 public class FormatUtils {
-  
+
+  private static final Logger LOG = LoggerFactory.getLogger(FormatUtils.class);
+
   private static final String INDEX_SEPARATOR = ",";
 
   /**
    * Determines whether the string is a nonterminal by checking that the first character is [
    * and the last character is ].
    * 
-   * @param token
+   * @param token input string
    * @return true if it's a nonterminal symbol, false otherwise
    */
   public static boolean isNonterminal(String token) {
@@ -49,8 +53,8 @@ public class FormatUtils {
    * Nonterminals are stored in the vocabulary in square brackets. This removes them when you 
    * just want the raw nonterminal word.
    * Supports indexed and non-indexed nonTerminals:
-   * [GOAL] -> GOAL
-   * [X,1] -> [X]
+   * [GOAL] -&gt; GOAL
+   * [X,1] -&gt; [X]
    * 
    * @param nt the nonterminal, e.g., "[GOAL]"
    * @return the cleaned nonterminal, e.g., "GOAL"
@@ -72,7 +76,9 @@ public class FormatUtils {
   }
 
   /**
-   * Removes the index from a nonTerminal: [X,1] -> [X].
+   * Removes the index from a nonTerminal: [X,1] -&gt; [X].
+   * @param nt an input non-terminal string
+   * @return the stripped non terminal string
    */
   public static String stripNonTerminalIndex(String nt) {
     return markup(cleanNonTerminal(nt));
@@ -117,6 +123,8 @@ public class FormatUtils {
   /**
    * wrap sentence with sentence start/stop markers 
    * as defined by Vocabulary; separated by a single whitespace.
+   * @param s an input sentence
+   * @return the wrapped sentence
    */
   public static String addSentenceMarkers(String s) {
     return Vocabulary.START_SYM + " " + s + " " + Vocabulary.STOP_SYM;
@@ -124,6 +132,8 @@ public class FormatUtils {
   
   /**
    * strip sentence markers (and whitespaces) from string
+   * @param s the sentence to strip of markers (and whitespaces)
+   * @return the stripped string
    */
   public static String removeSentenceMarkers(String s) {
     return s.replaceAll("<s> ", "").replace(" </s>", "");
@@ -134,7 +144,7 @@ public class FormatUtils {
    * <p>
    * The body of this method is taken from the Javadoc documentation for the Java Double class.
    * 
-   * @param string
+   * @param string an input string
    * @see java.lang.Double
    * @return <code>true</code> if the string represents a valid number, <code>false</code> otherwise
    */
@@ -193,12 +203,10 @@ public class FormatUtils {
       System.setErr(new PrintStream(System.err, true, "UTF8"));
       return true;
     } catch (UnsupportedEncodingException e1) {
-      System.err
-          .println("UTF8 is not a valid encoding; using system default encoding for System.out and System.err.");
+      LOG.warn("UTF8 is not a valid encoding; using system default encoding for System.out and System.err.");
       return false;
     } catch (SecurityException e2) {
-      System.err
-          .println("Security manager is configured to disallow changes to System.out or System.err; using system default encoding.");
+      LOG.warn("Security manager is configured to disallow changes to System.out or System.err; using system default encoding.");
       return false;
     }
   }
@@ -206,7 +214,7 @@ public class FormatUtils {
   /**
    * Determines if a string contains ALL CAPS
    * 
-   * @param token
+   * @param token an input token
    * @return true if the string is all in uppercase, false otherwise
    */
   public static boolean ISALLUPPERCASE(String token) {

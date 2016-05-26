@@ -24,6 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import org.apache.joshua.util.io.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author orluke
@@ -31,14 +33,17 @@ import org.apache.joshua.util.io.LineReader;
  */
 public class ArgsParser {
 
+  private static final Logger LOG = LoggerFactory.getLogger(ArgsParser.class);
+
   private String configFile = null;
 
   /**
    * Parse the arguments passed from the command line when the JoshuaDecoder application was
    * executed from the command line.
    * 
-   * @param args
-   * @throws IOException 
+   * @param args string array of input arguments
+   * @param joshuaConfiguration the {@link org.apache.joshua.decoder.JoshuaConfiguration}
+   * @throws IOException if there is an error wit the input arguments
    */
   public ArgsParser(String[] args, JoshuaConfiguration joshuaConfiguration) throws IOException {
 
@@ -59,8 +64,8 @@ public class ArgsParser {
           LineReader reader = new LineReader(String.format("%s/VERSION", System.getenv("JOSHUA")));
           reader.readLine();
           String version = reader.readLine().split("\\s+")[2];
-          System.out.println(String.format("The Joshua machine translator, version %s", version));
-          System.out.println("joshua-decoder.org");
+          System.out.println(String.format("The Apache Joshua machine translator, version %s", version));
+          System.out.println("joshua.incubator.apache.org");
           System.exit(0);
 
         } else if (args[i].equals("-license")) {
@@ -83,18 +88,17 @@ public class ArgsParser {
 
           setConfigFile(args[i + 1].trim());
           try {
-            Decoder.LOG(1, "Parameters read from configuration file:");
+            LOG.info("Parameters read from configuration file: {}", getConfigFile());
             joshuaConfiguration.readConfigFile(getConfigFile());
           } catch (IOException e) {
             throw new RuntimeException(e);
           }
-
           break;
         }
       }
 
       // Now process all the command-line args
-      Decoder.LOG(1, "Parameters overridden from the command line:");
+      LOG.info("Parameters overridden from the command line:");
       joshuaConfiguration.processCommandLineOptions(args);
     }
   }

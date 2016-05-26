@@ -31,8 +31,8 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * Stateless feature functions do not contribute any state. You need not implement this class to
  * create a stateless feature function, but it provides a few convenience functions.
  * 
- * @author Matt Post <post@cs.jhu.edu>
- * @author Juri Ganitkevich <juri@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
+ * @author Juri Ganitkevich juri@cs.jhu.edu
  */
 
 public abstract class StatelessFF extends FeatureFunction {

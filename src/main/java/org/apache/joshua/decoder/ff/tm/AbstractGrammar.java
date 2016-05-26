@@ -20,8 +20,6 @@ package org.apache.joshua.decoder.ff.tm;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
@@ -33,6 +31,8 @@ import org.apache.joshua.lattice.Lattice;
 import org.apache.joshua.lattice.Node;
 
 import cern.colt.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Partial implementation of the <code>Grammar</code> interface that provides logic for sorting a
@@ -44,13 +44,12 @@ import cern.colt.Arrays;
  * 
  * @author Zhifei Li
  * @author Lane Schwartz
- * @author Matt Post <post@cs.jhu.edu
+ * @author Matt Post post@cs.jhu.edu
  */
 public abstract class AbstractGrammar implements Grammar {
 
   /** Logger for this class. */
-  private static final Logger logger = Logger.getLogger(AbstractGrammar.class.getName());
-
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractGrammar.class);
   /**
    * Indicates whether the rules in this grammar have been sorted based on the latest feature
    * function values.
@@ -92,6 +91,7 @@ public abstract class AbstractGrammar implements Grammar {
    * Constructs an empty, unsorted grammar.
    * 
    * @see Grammar#isSorted()
+   * @param config a {@link org.apache.joshua.decoder.JoshuaConfiguration} object
    */
   public AbstractGrammar(JoshuaConfiguration config) {
     this.joshuaConfiguration = config;
@@ -110,6 +110,7 @@ public abstract class AbstractGrammar implements Grammar {
    * Cube-pruning requires that the grammar be sorted based on the latest feature functions. To
    * avoid synchronization, this method should be called before multiple threads are initialized for
    * parallel decoding
+   * @param models {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    */
   public void sortGrammar(List<FeatureFunction> models) {
     Trie root = getTrieRoot();
@@ -127,17 +128,17 @@ public abstract class AbstractGrammar implements Grammar {
   /**
    * Sets the flag indicating whether this grammar is sorted.
    * <p>
-   * This method is called by {@link #sortGrammar(ArrayList)} to indicate that the grammar has been
-   * sorted.
+   * This method is called by {@link org.apache.joshua.decoder.ff.tm.AbstractGrammar#sortGrammar(List)}
+   * to indicate that the grammar has been sorted.</p>
    * 
-   * Its scope is protected so that child classes that override <code>sortGrammar</code> will also
-   * be able to call this method to indicate that the grammar has been sorted.
+   * <p>Its scope is protected so that child classes that override <code>sortGrammar</code> will also
+   * be able to call this method to indicate that the grammar has been sorted.</p>
    * 
-   * @param sorted
+   * @param sorted set to true if the grammar is sorted
    */
   protected void setSorted(boolean sorted) {
     this.sorted = sorted;
-    logger.fine("This grammar is now sorted: " + this);
+    LOG.debug("This grammar is now sorted: {}",  this);
   }
 
   /**
@@ -154,13 +155,12 @@ public abstract class AbstractGrammar implements Grammar {
     if (node != null) {
       if (node.hasRules()) {
         RuleCollection rules = node.getRuleCollection();
-        if (logger.isLoggable(Level.FINE))
-          logger.fine("Sorting node " + Arrays.toString(rules.getSourceSide()));
+        LOG.debug("Sorting node {}", Arrays.toString(rules.getSourceSide()));
 
         /* This causes the rules at this trie node to be sorted */
         rules.getSortedRules(models);
 
-        if (logger.isLoggable(Level.FINEST)) {
+        if (LOG.isDebugEnabled()) {
           StringBuilder s = new StringBuilder();
           for (Rule r : rules.getSortedRules(models)) {
             s.append("\n\t" + r.getLHS() + " ||| " + Arrays.toString(r.getFrench()) + " ||| "
@@ -168,7 +168,7 @@ public abstract class AbstractGrammar implements Grammar {
                 + r.getEstimatedCost() + "  " + r.getClass().getName() + "@"
                 + Integer.toHexString(System.identityHashCode(r)));
           }
-          logger.finest(s.toString());
+          LOG.debug("{}", s);
         }
       }
 
@@ -176,8 +176,8 @@ public abstract class AbstractGrammar implements Grammar {
         for (Trie child : node.getExtensions()) {
           sort(child, models);
         }
-      } else if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Node has 0 children to extend: " + node);
+      } else {
+        LOG.debug("Node has 0 children to extend: {}", node);
       }
     }
   }
@@ -190,8 +190,10 @@ public abstract class AbstractGrammar implements Grammar {
    * Adds OOV rules for all words in the input lattice to the current grammar. Uses addOOVRule() so that
    * sub-grammars can define different types of OOV rules if needed (as is used in {@link PhraseTable}).
    * 
+   * @param grammar Grammar in the Trie
    * @param inputLattice the lattice representing the input sentence
    * @param featureFunctions a list of feature functions used for scoring
+   * @param onlyTrue determine if word is actual OOV.
    */
   public static void addOOVRules(Grammar grammar, Lattice<Token> inputLattice, 
       List<FeatureFunction> featureFunctions, boolean onlyTrue) {

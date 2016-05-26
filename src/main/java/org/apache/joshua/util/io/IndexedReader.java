@@ -26,7 +26,7 @@ import java.util.NoSuchElementException;
 /**
  * Wraps a reader with "line" index information.
  * 
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate: 2009-03-26 15:06:57 -0400 (Thu, 26 Mar 2009) $
  */
 public class IndexedReader<E> implements Reader<E> {
@@ -46,12 +46,10 @@ public class IndexedReader<E> implements Reader<E> {
     this.reader = reader;
   }
 
-
-  // ===============================================================
-  // Public (non-interface) methods
-  // ===============================================================
-
-  /** Return the number of elements delivered so far. */
+  /** 
+   * Return the number of elements delivered so far.
+   * @return integer representing the number of elements delivered so far
+   */
   public int index() {
     return this.lineNumber;
   }
@@ -59,6 +57,8 @@ public class IndexedReader<E> implements Reader<E> {
 
   /**
    * Wrap an IOException's message with the index when it occured.
+   * @param oldError the old {@link java.io.IOException} we wish to wrap
+   * @return the new wrapped {@link java.io.IOException}
    */
   public IOException wrapIOException(IOException oldError) {
     IOException newError =
@@ -72,7 +72,12 @@ public class IndexedReader<E> implements Reader<E> {
   // Reader
   // ===============================================================
 
-  /** Delegated to the underlying reader. */
+  /** 
+   * Delegated to the underlying reader.
+   * @return true if the reader is ready
+   * @throws IOException if there is an error determining readiness
+   */
+  @Override
   public boolean ready() throws IOException {
     try {
       return this.reader.ready();

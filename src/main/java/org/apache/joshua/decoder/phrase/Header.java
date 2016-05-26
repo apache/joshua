@@ -20,9 +20,15 @@ package org.apache.joshua.decoder.phrase;
 
 // PORT: done
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Comparator;
 
 public class Header implements Comparable<Header>, Comparator<Header> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Header.class);
+
   private float score;
   private int arity;
   private Note note;
@@ -47,7 +53,7 @@ public class Header implements Comparable<Header>, Comparator<Header> {
   
   public boolean Valid() {
     // C++: return base_;
-    System.err.println("Header::Valid(): " + (note != null));
+    LOG.debug("Header::Valid(): {}", (note != null));
     return note != null;
   }
   

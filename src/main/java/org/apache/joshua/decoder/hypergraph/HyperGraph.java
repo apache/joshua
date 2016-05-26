@@ -24,7 +24,6 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
@@ -32,6 +31,8 @@ import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.hypergraph.ForestWalker.TRAVERSAL;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * this class implement (1) HyperGraph-related data structures (Item and Hyper-edges)
@@ -39,9 +40,11 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * Note: to seed the kbest extraction, each deduction should have the best_cost properly set. We do
  * not require any list being sorted
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Zhifei Li, zhifei.work@gmail.com
  */
 public class HyperGraph {
+
+  private static final Logger LOG = LoggerFactory.getLogger(HyperGraph.class);
 
   // pointer to goal HGNode
   public HGNode goalNode = null;
@@ -49,8 +52,6 @@ public class HyperGraph {
   public int numNodes = -1;
   public int numEdges = -1;
   public Sentence sentence = null;
-
-  static final Logger logger = Logger.getLogger(HyperGraph.class.getName());
 
   public HyperGraph(HGNode goalNode, int numNodes, int numEdges, Sentence sentence) {
     this.goalNode = goalNode;
@@ -141,7 +142,8 @@ public class HyperGraph {
   /**
    * Dump the hypergraph to the specified file.
    * 
-   * @param fileName
+   * @param fileName local file path
+   * @param model {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    */
   public void dump(String fileName, List<FeatureFunction> model) {
     try ( PrintWriter out = new PrintWriter(fileName, "UTF-8") ) {
@@ -150,8 +152,8 @@ public class HyperGraph {
       out.println(String.format("%d %d", numNodes, numEdges));
       new ForestWalker(TRAVERSAL.POSTORDER).walk(this.goalNode, new HyperGraphDumper(out, model));
     } catch (IOException e) {
-      System.err.println("* Can't dump hypergraph to file '" + fileName + "'");
-      e.printStackTrace();
+      LOG.error("Can't dump hypergraph to file '{}'", fileName);
+      LOG.error(e.getMessage(), e);
     }
   }
 

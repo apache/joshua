@@ -32,7 +32,7 @@ package org.apache.joshua.decoder.phrase;
  * ensures that the coverage vector is consistent but the resulting hypergraph may not be projective,
  * which is different from the CKY algorithm, which does produce projective derivations. 
  * 
- * Lattice decoding is not yet supported (March 2015).
+ * TODO Lattice decoding is not yet supported (March 2015).
  */
 
 import java.util.ArrayList;
@@ -49,8 +49,12 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.hypergraph.HyperEdge;
 import org.apache.joshua.decoder.hypergraph.HyperGraph;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Stacks {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Stacks.class);
 
   // The list of stacks, grouped according to number of source words covered
   private List<Stack> stacks;
@@ -71,10 +75,10 @@ public class Stacks {
    * Entry point. Initialize everything. Create pass-through (OOV) phrase table and glue phrase
    * table (with start-of-sentence and end-of-sentence rules).
    * 
-   * @param sentence
-   * @param featureFunctions
-   * @param grammars
-   * @param config
+   * @param sentence input to {@link org.apache.joshua.lattice.Lattice}
+   * @param featureFunctions {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
+   * @param grammars an array of {@link org.apache.joshua.decoder.ff.tm.Grammar}'s
+   * @param config a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
   public Stacks(Sentence sentence, List<FeatureFunction> featureFunctions, Grammar[] grammars, 
       JoshuaConfiguration config) {
@@ -106,7 +110,7 @@ public class Stacks {
   /**
    * The main algorithm. Returns a hypergraph representing the search space.
    * 
-   * @return
+   * @return a {@link org.apache.joshua.decoder.hypergraph.HyperGraph} representing the search space
    */
   public HyperGraph search() {
     
@@ -135,10 +139,9 @@ public class Stacks {
           phrase_length++) {
         int from_stack = source_words - phrase_length;
         Stack tailStack = stacks.get(from_stack);
-        
-        if (Decoder.VERBOSE >= 3)
-          System.err.println(String.format("\n  WORDS %d MAX %d (STACK %d phrase_length %d)", source_words,
-              chart.MaxSourcePhraseLength(), from_stack, phrase_length));
+
+        LOG.debug("WORDS {} MAX {} (STACK {} phrase_length {})", source_words,
+            chart.MaxSourcePhraseLength(), from_stack, phrase_length);
         
         // Iterate over antecedents in this stack.
         for (Coverage coverage: tailStack.getCoverages()) {
@@ -167,8 +170,9 @@ public class Stacks {
             if (phrases == null)
               continue;
 
-            if (Decoder.VERBOSE >= 3)
-              System.err.println(String.format("  Applying %d target phrases over [%d,%d]", phrases.size(), begin, begin + phrase_length));
+
+            LOG.debug("Applying {} target phrases over [{}, {}]",
+                phrases.size(), begin, begin + phrase_length);
             
             // TODO: could also compute some number of features here (e.g., non-LM ones)
             // float score_delta = context.GetScorer().transition(ant, phrases, begin, begin + phrase_length);
@@ -199,8 +203,8 @@ public class Stacks {
       targetStack.search();
     }
     
-    Decoder.LOG(1, String.format("Input %d: Search took %.3f seconds", sentence.id(),
-        (System.currentTimeMillis() - startTime) / 1000.0f));
+    LOG.info("Input {}: Search took {} seconds", sentence.id(),
+        (System.currentTimeMillis() - startTime) / 1000.0f);
     
     return createGoalNode();
   }

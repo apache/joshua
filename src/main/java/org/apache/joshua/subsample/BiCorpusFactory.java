@@ -26,7 +26,7 @@ import java.io.IOException;
  * {@link AlignedSubsampler} in order to "override" methods of {@link Subsampler}, minimizing code
  * duplication.
  * 
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate$
  */
 public class BiCorpusFactory {
@@ -51,17 +51,32 @@ public class BiCorpusFactory {
   }
 
 
-  /** Generate unaligned BiCorpus by default. */
+  /** 
+   * Generate unaligned {@link org.apache.joshua.subsample.BiCorpus} by default.
+   * @param f todo
+   * @return an unaligned {@link org.apache.joshua.subsample.BiCorpus}
+   * @throws IOException if there is an error reading input file
+   */
   public BiCorpus fromFiles(String f) throws IOException {
     return this.unalignedFromFiles(f);
   }
 
-  /** Generate unaligned BiCorpus. */
+  /**
+   * Generate unaligned BiCorpus.
+   * @param f todo
+   * @return an unaligned {@link org.apache.joshua.subsample.BiCorpus}
+   * @throws IOException if there is an error reading input file
+   */
   public BiCorpus unalignedFromFiles(String f) throws IOException {
     return new BiCorpus(fpath + f + extf, epath + f + exte);
   }
 
-  /** Generate aligned BiCorpus. */
+  /**
+   * Generate aligned BiCorpus.
+   * @param f todo
+   * @return an aligned {@link org.apache.joshua.subsample.BiCorpus}
+   * @throws IOException if there is an error reading input file
+   */
   public BiCorpus alignedFromFiles(String f) throws IOException {
     return new BiCorpus(fpath + f + extf, epath + f + exte, apath + f + exta);
   }

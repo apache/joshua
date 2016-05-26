@@ -27,12 +27,16 @@ import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.RuleCollection;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents a bundle of phrase tables that have been read in,
  * reporting some stats about them. Probably could be done away with.
  */
 public class PhraseChart {
+
+  private static final Logger LOG = LoggerFactory.getLogger(PhraseChart.class);
 
   private int sentence_length;
   private int max_source_phrase_length;
@@ -49,8 +53,10 @@ public class PhraseChart {
    * applicable against the current input sentence. These phrases are extracted
    * from all available grammars.
    * 
-   * @param tables
-   * @param source
+   * @param tables input array of {@link org.apache.joshua.decoder.phrase.PhraseTable}'s
+   * @param features {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
+   * @param source input to {@link org.apache.joshua.lattice.Lattice}
+   * @param num_options number of translation options (typically set to 20)
    */
   public PhraseChart(PhraseTable[] tables, List<FeatureFunction> features, Sentence source,
       int num_options) {
@@ -92,18 +98,18 @@ public class PhraseChart {
         phrases.finish(features, Decoder.weights, num_options);
     }
 
-    Decoder.LOG(1, String.format("Input %d: Collecting options took %.3f seconds", source.id(),
-        (System.currentTimeMillis() - startTime) / 1000.0f));
+    LOG.info("Input {}: Collecting options took {} seconds", source.id(),
+        (System.currentTimeMillis() - startTime) / 1000.0f);
     
-    if (Decoder.VERBOSE(3)) {
+    if (LOG.isDebugEnabled()) {
       for (int i = 1; i < sentence_length - 1; i++) {
         for (int j = i + 1; j < sentence_length && j <= i + max_source_phrase_length; j++) {
           if (source.hasPath(i, j)) {
             TargetPhrases phrases = getRange(i, j);
             if (phrases != null) {
-              System.err.println(String.format("%s (%d-%d)", source.source(i,j), i, j));
+              LOG.debug("{} ({}-{})", source.source(i,j), i, j);
               for (Rule rule: phrases)
-                System.err.println(String.format("    %s :: est=%.3f", rule.getEnglishWords(), rule.getEstimatedCost()));
+                LOG.debug("    {} :: est={}", rule.getEnglishWords(), rule.getEstimatedCost());
             }
           }
         }
@@ -123,8 +129,8 @@ public class PhraseChart {
   /**
    * Maps two-dimensional span into a one-dimensional array.
    * 
-   * @param i
-   * @param j
+   * @param i beginning of span
+   * @param j end of span
    * @return offset into private list of TargetPhrases
    */
   private int offset(int i, int j) {
@@ -134,9 +140,9 @@ public class PhraseChart {
   /**
    * Returns phrases from all grammars that match the span.
    * 
-   * @param begin
-   * @param end
-   * @return
+   * @param begin beginning of span
+   * @param end end of span
+   * @return the {@link org.apache.joshua.decoder.phrase.TargetPhrases} at the specified position in this list.
    */
   public TargetPhrases getRange(int begin, int end) {
     int index = offset(begin, end);
@@ -156,9 +162,9 @@ public class PhraseChart {
   /**
    * Add a set of phrases from a grammar to the current span.
    * 
-   * @param begin
-   * @param end
-   * @param to
+   * @param begin beginning of span
+   * @param end end of span
+   * @param to a {@link org.apache.joshua.decoder.ff.tm.RuleCollection} to be used in scoring and sorting.
    */
   private void addToRange(int begin, int end, RuleCollection to) {
     if (to != null) {
@@ -183,8 +189,8 @@ public class PhraseChart {
         else
           entries.get(offset).addAll(rules);
       } catch (java.lang.IndexOutOfBoundsException e) {
-        System.err.println(String.format("Whoops! %s [%d-%d] too long (%d)", to, begin, end,
-            entries.size()));
+        LOG.error("Whoops! {} [{}-{}] too long ({})", to, begin, end, entries.size());
+        LOG.error(e.getMessage(), e);
       }
     }
   }

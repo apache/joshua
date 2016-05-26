@@ -26,10 +26,7 @@ import java.io.ObjectInput;
 import java.io.ObjectStreamConstants;
 import java.io.RandomAccessFile;
 
-public class BinaryIn<E extends Externalizable> extends RandomAccessFile
-    implements
-      DataInput,
-      ObjectInput {
+public class BinaryIn<E extends Externalizable> extends RandomAccessFile implements DataInput, ObjectInput {
 
   private final Class<E> type;
 
@@ -41,9 +38,7 @@ public class BinaryIn<E extends Externalizable> extends RandomAccessFile
   public int available() throws IOException {
     long pos = getFilePointer();
     long length = length();
-
     long bytesAvailable = length - pos;
-
     if (bytesAvailable > Integer.MAX_VALUE) {
       return Integer.MAX_VALUE;
     } else {
@@ -54,13 +49,9 @@ public class BinaryIn<E extends Externalizable> extends RandomAccessFile
   public E readObject() throws ClassNotFoundException, IOException {
 
     int b = peek();
-
     if (b == ObjectStreamConstants.TC_NULL) {
-
       return null;
-
     } else {
-
       E obj;
       try {
         obj = type.newInstance();
@@ -71,8 +62,6 @@ public class BinaryIn<E extends Externalizable> extends RandomAccessFile
       } catch (IllegalAccessException e) {
         throw new RuntimeException(e);
       }
-
-
     }
   }
 
@@ -92,8 +81,6 @@ public class BinaryIn<E extends Externalizable> extends RandomAccessFile
 
     return bytesSkipped;
   }
-
-
 
   private int peek() throws IOException {
     long pos = getFilePointer();

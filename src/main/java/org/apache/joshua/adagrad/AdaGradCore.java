@@ -50,21 +50,25 @@ import org.apache.joshua.metrics.EvaluationMetric;
 import org.apache.joshua.util.StreamGobbler;
 
 import EDU.oswego.cs.dl.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This code was originally written by Yuan Cao, who copied the MERT code to produce this file.
  */
 
 public class AdaGradCore {
-  private final JoshuaConfiguration joshuaConfiguration;
-  private TreeSet<Integer>[] indicesOfInterest_all;
 
-  private final static DecimalFormat f4 = new DecimalFormat("###0.0000");
-  private final Runtime myRuntime = Runtime.getRuntime();
-
+  private static final Logger LOG = LoggerFactory.getLogger(AdaGradCore.class);
   private final static double NegInf = (-1.0 / 0.0);
   private final static double PosInf = (+1.0 / 0.0);
   private final static double epsilon = 1.0 / 1000000;
+  private final static DecimalFormat f4 = new DecimalFormat("###0.0000");
+
+  private final JoshuaConfiguration joshuaConfiguration;
+  private final Runtime myRuntime = Runtime.getRuntime();
+
+  private TreeSet<Integer>[] indicesOfInterest_all;
 
   private int progress;
 
@@ -1928,12 +1932,8 @@ public class AdaGradCore {
        * inFile.close(); outFile.close();
        */
       return true;
-    } catch (FileNotFoundException e) {
-      System.err.println("FileNotFoundException in AdaGradCore.copyFile(String,String): "
-          + e.getMessage());
-      return false;
     } catch (IOException e) {
-      System.err.println("IOException in AdaGradCore.copyFile(String,String): " + e.getMessage());
+      LOG.error(e.getMessage(), e);
       return false;
     }
   }

@@ -55,6 +55,7 @@ public class Node<Label> {
 
   /**
    * Constructs a new node with the specified numeric identifier.
+   * @param id the new node identifier
    */
   public Node(int id) {
     this.id = id;

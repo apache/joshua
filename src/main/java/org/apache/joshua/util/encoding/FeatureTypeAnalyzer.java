@@ -28,14 +28,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.util.io.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FeatureTypeAnalyzer {
 
-  private static final Logger logger = Logger.getLogger(FeatureTypeAnalyzer.class.getName());
+  private static final Logger LOG = LoggerFactory.getLogger(FeatureTypeAnalyzer.class);
 
   private ArrayList<FeatureType> types;
 
@@ -119,11 +120,15 @@ public class FeatureTypeAnalyzer {
   // Inspects the collected histograms, inferring actual type of feature. Then replaces the
   // analyzer, if present, with the most compact applicable type.
   public void inferTypes(boolean labeled) {
-    for (FeatureType ft : types)
+    for (FeatureType ft : types) {
       ft.inferUncompressedType();
-    for (int id : featureToType.keySet())
-      logger.info("Type inferred: " + (labeled ? Vocabulary.word(id) : "Feature " + id) + " is "
-          + types.get(featureToType.get(id)).encoder.getKey());
+    }
+    if (LOG.isInfoEnabled()) {
+      for (int id : featureToType.keySet()) {
+        LOG.info("Type inferred: {} is {}", (labeled ? Vocabulary.word(id) : "Feature " + id),
+            types.get(featureToType.get(id)).encoder.getKey());
+      }
+    }
   }
 
   public void buildFeatureMap() {
@@ -158,7 +163,7 @@ public class FeatureTypeAnalyzer {
     DataOutputStream out_stream = new DataOutputStream(buf_stream);
 
     buildFeatureMap();
-    
+
     getIdEncoder().writeState(out_stream);
     out_stream.writeBoolean(labeled);
     out_stream.writeInt(types.size());
@@ -184,7 +189,7 @@ public class FeatureTypeAnalyzer {
     }
     return sb.toString();
   }
-  
+
   public boolean isLabeled() {
     return labeled;
   }

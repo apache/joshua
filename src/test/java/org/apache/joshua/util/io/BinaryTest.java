@@ -32,7 +32,6 @@ import org.testng.annotations.Test;
 
 public class BinaryTest {
 
-
   @Test
   public void externalizeVocabulary() throws IOException, ClassNotFoundException {
 
@@ -52,9 +51,11 @@ public class BinaryTest {
 
       File tempFile = File.createTempFile(BinaryTest.class.getName(), "vocab");
       FileOutputStream outputStream = new FileOutputStream(tempFile);
+      @SuppressWarnings({ "unused", "resource" })
       ObjectOutput out = new BinaryOut(outputStream, true);
       vocab.write(tempFile.toString());
 
+      @SuppressWarnings("resource")
       ObjectInput in = new BinaryIn(tempFile.getAbsolutePath(), Vocabulary.class);
       Object o = in.readObject();
       Assert.assertTrue(o instanceof Vocabulary);
@@ -62,12 +63,9 @@ public class BinaryTest {
       Vocabulary newVocab = (Vocabulary) o;
 
       Assert.assertNotNull(newVocab);
-      Assert.assertEquals(newVocab.size(), vocab.size());			
+      Assert.assertEquals(newVocab.size(), vocab.size());
 
-      Assert.assertEquals(newVocab, vocab);
-
-
-
+      Assert.assertTrue(newVocab.equals(vocab));
 
     } catch (SecurityException e) {
       Assert.fail("Operating system is unable to create a temp file required by this unit test: " + e);

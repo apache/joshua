@@ -74,7 +74,8 @@ public class Browser {
   static final Color[] dataSetColors = { Color.red, Color.orange, Color.blue, Color.green };
 
   /**
-   * @param args the paths to the source, reference, and n-best files
+   * @param argv the paths to the source, reference, and n-best files
+   * @throws IOException if there is an error reading from standard input
    */
   public static void main(String[] argv) throws IOException {
     String sourcePath = argv.length > 0 ? argv[0] : null;

@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
@@ -35,14 +34,16 @@ import org.apache.joshua.util.io.LineReader;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CreateGlueGrammar {
-  
-  
+
+
+  private static final Logger LOG = LoggerFactory.getLogger(CreateGlueGrammar.class);
+
   private final Set<String> nonTerminalSymbols = new HashSet<>();
-  private static final Logger log = Logger.getLogger(CreateGlueGrammar.class.getName());
-  
+
   @Option(name = "--grammar", aliases = {"-g"}, required = true, usage = "provide grammar to determine list of NonTerminal symbols.")
   private String grammarPath;
   
@@ -84,7 +85,7 @@ public class CreateGlueGrammar {
         int lhsStart = line.indexOf("[") + 1;
         int lhsEnd = line.indexOf("]");
         if (lhsStart < 1 || lhsEnd < 0) {
-          log.info(String.format("malformed rule: %s\n", line));
+          LOG.info("malformed rule: {}\n", line);
           continue;
         }
         final String lhs = line.substring(lhsStart, lhsEnd);
@@ -92,10 +93,8 @@ public class CreateGlueGrammar {
       }
     }
     
-    log.info(
-        String.format("%d nonTerminal symbols read: %s",
-        nonTerminalSymbols.size(),
-        nonTerminalSymbols.toString()));
+    LOG.info("{} nonTerminal symbols read: {}", nonTerminalSymbols.size(),
+        nonTerminalSymbols.toString());
 
     // write glue rules to stdout
     
@@ -119,7 +118,7 @@ public class CreateGlueGrammar {
       parser.parseArgument(args);
       glueCreator.run();
     } catch (CmdLineException e) {
-      log.info(e.toString());
+      LOG.error(e.getMessage(), e);
       parser.printUsage(System.err);
       System.exit(1);
     }

@@ -40,21 +40,25 @@ import org.apache.joshua.decoder.ff.state_maintenance.NgramDPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class performs the following:
  * <ol>
  * <li>Gets the additional LM score due to combinations of small items into larger ones by using
- * rules
- * <li>Gets the LM state
- * <li>Gets the left-side LM state estimation score
+ * rules</li>
+ * <li>Gets the LM state</li>
+ * <li>Gets the left-side LM state estimation score</li>
  * </ol>
  * 
- * @author Matt Post <post@cs.jhu.edu>
- * @author Juri Ganitkevitch <juri@cs.jhu.edu>
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Matt Post post@cs.jhu.edu
+ * @author Juri Ganitkevitch juri@cs.jhu.edu
+ * @author Zhifei Li, zhifei.work@gmail.com
  */
 public class LanguageModelFF extends StatefulFF {
+
+  private static final Logger LOG = LoggerFactory.getLogger(LanguageModelFF.class);
 
   public static int LM_INDEX = 0;
   private int startSymbolId;
@@ -65,13 +69,14 @@ public class LanguageModelFF extends StatefulFF {
    * <ol>
    * <li>We assume it is a backoff lm, and high-order ngram implies low-order ngram; absense of
    * low-order ngram implies high-order ngram</li>
-   * <li>For a ngram, existence of backoffweight => existence a probability Two ways of dealing with
+   * <li>For a ngram, existence of backoffweight =&gt; existence a probability Two ways of dealing with
    * low counts:
    * <ul>
    * <li>SRILM: don't multiply zeros in for unknown words</li>
    * <li>Pharaoh: cap at a minimum score exp(-10), including unknown words</li>
    * </ul>
    * </li>
+   * </ol>
    */
   protected NGramLanguageModel languageModel;
 
@@ -90,7 +95,7 @@ public class LanguageModelFF extends StatefulFF {
   /* Whether this is a class-based LM */
   private boolean isClassLM;
   private ClassMap classMap;
-  
+
   protected class ClassMap {
 
     private final int OOV_id = Vocabulary.getUnknownId();
@@ -120,7 +125,8 @@ public class LanguageModelFF extends StatefulFF {
         try {
           this.classMap.put(Vocabulary.id(lineComp[0]), Vocabulary.id(lineComp[1]));
         } catch (java.lang.ArrayIndexOutOfBoundsException e) {
-          System.err.println(String.format("* WARNING: bad vocab line #%d '%s'", lineno, line));
+          LOG.warn("bad vocab line #{} '{}'", lineno, line);
+          LOG.warn(e.getMessage(), e);
         }
       }
     }
@@ -133,7 +139,7 @@ public class LanguageModelFF extends StatefulFF {
     this.type = parsedArgs.get("lm_type");
     this.ngramOrder = Integer.parseInt(parsedArgs.get("lm_order")); 
     this.path = parsedArgs.get("lm_file");
-    
+
     if (parsedArgs.containsKey("class_map"))
       try {
         this.isClassLM = true;
@@ -145,14 +151,14 @@ public class LanguageModelFF extends StatefulFF {
 
     // The dense feature initialization hasn't happened yet, so we have to retrieve this as sparse
     this.weight = weights.getSparse(name);
-    
+
     initializeLM();
   }
-  
+
   @Override
   public ArrayList<String> reportDenseFeatures(int index) {
     denseFeatureIndex = index;
-    
+
     ArrayList<String> names = new ArrayList<String>();
     names.add(name);
     return names;
@@ -160,15 +166,11 @@ public class LanguageModelFF extends StatefulFF {
 
   /**
    * Initializes the underlying language model.
-   * 
-   * @param config
-   * @param type
-   * @param path
    */
   protected void initializeLM() {
     if (type.equals("kenlm")) {
       this.languageModel = new KenLM(ngramOrder, path);
-    
+
     } else if (type.equals("berkeleylm")) {
       this.languageModel = new LMGrammarBerkeley(ngramOrder, path);
 
@@ -180,14 +182,14 @@ public class LanguageModelFF extends StatefulFF {
 
     Vocabulary.registerLanguageModel(this.languageModel);
     Vocabulary.id(config.default_non_terminal);
-    
+
     startSymbolId = Vocabulary.id(Vocabulary.START_SYM);
   }
 
   public NGramLanguageModel getLM() {
     return this.languageModel;
   }
-  
+
   public String logString() {
     if (languageModel != null)
       return String.format("%s, order %d (weight %.3f)", name, languageModel.getOrder(), weight);
@@ -220,9 +222,9 @@ public class LanguageModelFF extends StatefulFF {
           newState = computeTransition(rule.getEnglish(), tailNodes, acc);
         }
       }
-    
+
     }
-    
+
     return newState;
   }
 
@@ -230,15 +232,19 @@ public class LanguageModelFF extends StatefulFF {
    * Input sentences can be tagged with information specific to the language model. This looks for
    * such annotations by following a word's alignments back to the source words, checking for
    * annotations, and replacing the surface word if such annotations are found.
-   * 
+   * @param rule the {@link org.apache.joshua.decoder.ff.tm.Rule} to use
+   * @param begin todo
+   * @param end todo
+   * @param sentence {@link org.apache.joshua.lattice.Lattice} input
+   * @return todo
    */
   protected int[] getTags(Rule rule, int begin, int end, Sentence sentence) {
     /* Very important to make a copy here, so the original rule is not modified */
     int[] tokens = Arrays.copyOf(rule.getEnglish(), rule.getEnglish().length);
     byte[] alignments = rule.getAlignment();
 
-//    System.err.println(String.format("getTags() %s", rule.getRuleString()));
-    
+    //    System.err.println(String.format("getTags() %s", rule.getRuleString()));
+
     /* For each target-side token, project it to each of its source-language alignments. If any of those
      * are annotated, take the first annotation and quit.
      */
@@ -249,8 +255,8 @@ public class LanguageModelFF extends StatefulFF {
             if (alignments[j] == i) {
               String annotation = sentence.getAnnotation((int)alignments[i] + begin, "class");
               if (annotation != null) {
-//                System.err.println(String.format("  word %d source %d abs %d annotation %d/%s", 
-//                    i, alignments[i], alignments[i] + begin, annotation, Vocabulary.word(annotation)));
+                //                System.err.println(String.format("  word %d source %d abs %d annotation %d/%s", 
+                //                    i, alignments[i], alignments[i] + begin, annotation, Vocabulary.word(annotation)));
                 tokens[i] = Vocabulary.id(annotation);
                 break;
               }
@@ -259,22 +265,23 @@ public class LanguageModelFF extends StatefulFF {
         }
       }
     }
-    
+
     return tokens;
   }
-  
+
   /** 
    * Sets the class map if this is a class LM 
-   * @param classMap
-   * @throws IOException 
+   * @param fileName a string path to a file
+   * @throws IOException if there is an error reading the input file
    */
   public void setClassMap(String fileName) throws IOException {
     this.classMap = new ClassMap(fileName);
   }
-  
-  
+
   /**
    * Replace each word in a rule with the target side classes.
+   * @param rule {@link org.apache.joshua.decoder.ff.tm.Rule} to use when obtaining tokens
+   * @return int[] of tokens
    */
   protected int[] getClasses(Rule rule) {
     if (this.classMap == null) {
@@ -371,7 +378,7 @@ public class LanguageModelFF extends StatefulFF {
     int ccount = 0;
     float transitionLogP = 0.0f;
     int[] left_context = null;
-    
+
     for (int c = 0; c < enWords.length; c++) {
       int curID = enWords[c];
 
@@ -392,7 +399,7 @@ public class LanguageModelFF extends StatefulFF {
           if (ccount == this.ngramOrder) {
             // Compute the current word probability, and remove it.
             float prob = this.languageModel.ngramLogProbability(current, this.ngramOrder);
-//            System.err.println(String.format("-> prob(%s) = %f", Vocabulary.getWords(current), prob));
+            //            System.err.println(String.format("-> prob(%s) = %f", Vocabulary.getWords(current), prob));
             transitionLogP += prob;
             System.arraycopy(current, 1, shadow, 0, this.ngramOrder - 1);
             int[] tmp = current;
@@ -411,7 +418,7 @@ public class LanguageModelFF extends StatefulFF {
         if (ccount == this.ngramOrder) {
           // Compute the current word probability, and remove it.s
           float prob = this.languageModel.ngramLogProbability(current, this.ngramOrder);
-//          System.err.println(String.format("-> prob(%s) = %f", Vocabulary.getWords(current), prob));
+          //          System.err.println(String.format("-> prob(%s) = %f", Vocabulary.getWords(current), prob));
           transitionLogP += prob;
           System.arraycopy(current, 1, shadow, 0, this.ngramOrder - 1);
           int[] tmp = current;
@@ -421,7 +428,7 @@ public class LanguageModelFF extends StatefulFF {
         }
       }
     }
-//    acc.add(name, transitionLogP);
+    //    acc.add(name, transitionLogP);
     acc.add(denseFeatureIndex, transitionLogP);
 
     if (left_context != null) {
@@ -443,8 +450,8 @@ public class LanguageModelFF extends StatefulFF {
    */
   private NgramDPState computeFinalTransition(NgramDPState state, Accumulator acc) {
 
-//    System.err.println(String.format("LanguageModel::computeFinalTransition()"));
-    
+    //    System.err.println(String.format("LanguageModel::computeFinalTransition()"));
+
     float res = 0.0f;
     LinkedList<Integer> currentNgram = new LinkedList<Integer>();
     int[] leftContext = state.getLeftLMStateWords();
@@ -464,14 +471,14 @@ public class LanguageModelFF extends StatefulFF {
     }
 
     // Tell the accumulator
-//    acc.add(name, res);
+    //    acc.add(name, res);
     acc.add(denseFeatureIndex, res);
 
     // State is the same
     return new NgramDPState(leftContext, rightContext);
   }
 
-  
+
   /**
    * Compatibility method for {@link #scoreChunkLogP(int[], boolean, boolean)}
    */
@@ -479,7 +486,7 @@ public class LanguageModelFF extends StatefulFF {
       boolean skipStart) {
     return scoreChunkLogP(Ints.toArray(words), considerIncompleteNgrams, skipStart);
   }
-  
+
   /**
    * This function is basically a wrapper for NGramLanguageModel::sentenceLogProbability(). It
    * computes the probability of a phrase ("chunk"), using lower-order n-grams for the first n-1
@@ -508,7 +515,7 @@ public class LanguageModelFF extends StatefulFF {
 
     return score;
   }
-  
+
   /**
    * Public method to set LM_INDEX back to 0.
    * Required if multiple instances of the JoshuaDecoder live in the same JVM.

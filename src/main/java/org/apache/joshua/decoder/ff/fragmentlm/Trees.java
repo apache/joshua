@@ -187,6 +187,9 @@ public class Trees {
      * preterminals onto one line of tags and words. Additional complexities are that conjunctions
      * (tag CC) are not collapsed in this way, and that the unlabeled outer brackets are collapsed
      * onto the same line as the next bracket down.
+     * 
+     * @param tree you wish to render and print
+     * @return a rendered String representation of the tree
      */
     public static  String render(Tree tree) {
       StringBuilder sb = new StringBuilder();

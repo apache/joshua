@@ -26,15 +26,15 @@ import java.io.InputStream;
 import java.util.Iterator; 
 import java.util.NoSuchElementException; 
 import java.util.Scanner; 
-import java.util.logging.Level; 
-import java.util.logging.Logger; 
 import java.util.regex.Matcher; 
 import java.util.regex.Pattern; 
 import java.util.zip.GZIPInputStream; 
 
 import org.apache.joshua.corpus.Vocabulary; 
 import org.apache.joshua.util.Regex; 
-import org.apache.joshua.util.io.LineReader; 
+import org.apache.joshua.util.io.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for reading ARPA language model files. 
@@ -43,9 +43,7 @@ import org.apache.joshua.util.io.LineReader;
  */ 
 public class ArpaFile implements Iterable<ArpaNgram> { 
 
-  /** Logger for this class. */ 
-  private static final Logger logger =  
-      Logger.getLogger(ArpaFile.class.getName()); 
+  private static final Logger LOG = LoggerFactory.getLogger(ArpaFile.class);
 
   /** Regular expression representing a blank line. */ 
   public static final Regex BLANK_LINE  = new Regex("^\\s*$"); 
@@ -111,12 +109,11 @@ public class ArpaFile implements Iterable<ArpaNgram> {
           String[] words = Regex.spaces.split(parts[1]); 
 
           for (String word : words) { 
-            if (logger.isLoggable(Level.FINE)) logger.fine("Adding to vocab: " + word); 
+            LOG.debug("Adding to vocab: {}", word);
             Vocabulary.addAll(word);
           } 
-
-        } else { 
-          logger.info(line); 
+        } else {
+          LOG.info(line);
         } 
 
       } 
@@ -156,7 +153,7 @@ public class ArpaFile implements Iterable<ArpaNgram> {
 
     //  } 
 
-    logger.info("Done constructing ArpaFile"); 
+    LOG.info("Done constructing ArpaFile");
 
   } 
 
@@ -180,13 +177,13 @@ public class ArpaFile implements Iterable<ArpaNgram> {
   @SuppressWarnings("unused") 
   public int size() { 
 
-    logger.fine("Counting n-grams in ARPA file"); 
+    LOG.debug("Counting n-grams in ARPA file");
     int count=0; 
 
     for (ArpaNgram ngram : this) { 
       count++; 
     } 
-    logger.fine("Done counting n-grams in ARPA file"); 
+    LOG.debug("Done counting n-grams in ARPA file");
 
     return count; 
   } 
@@ -194,7 +191,7 @@ public class ArpaFile implements Iterable<ArpaNgram> {
   public int getOrder() throws FileNotFoundException { 
 
     Pattern pattern = Pattern.compile("^ngram (\\d+)=\\d+$"); 
-    if (logger.isLoggable(Level.FINEST)) logger.finest("Pattern is " + pattern.toString()); 
+    LOG.debug("Pattern is {}", pattern);
     @SuppressWarnings("resource")
     final Scanner scanner = new Scanner(arpaFile); 
 
@@ -209,10 +206,10 @@ public class ArpaFile implements Iterable<ArpaNgram> {
       } else { 
         Matcher matcher = pattern.matcher(line); 
         if (matcher.matches()) { 
-          if (logger.isLoggable(Level.FINEST)) logger.finest("DOES   match: \'" + line + "\'"); 
+          LOG.debug("DOES  match: '{}'", line);
           order = Integer.valueOf(matcher.group(1)); 
-        } else if (logger.isLoggable(Level.FINEST)) { 
-          logger.finest("Doesn't match: \'" + line + "\'"); 
+        } else {
+          LOG.debug("Doesn't match: '{}'", line);
         } 
       } 
     } 
@@ -244,7 +241,7 @@ public class ArpaFile implements Iterable<ArpaNgram> {
       // Eat initial header lines 
       while (scanner.hasNextLine()) { 
         String line = scanner.nextLine(); 
-        logger.finest("Discarding line: " + line); 
+        LOG.debug("Discarding line: {}", line);
         if (NGRAM_HEADER.matches(line)) { 
           break; 
         } 
@@ -323,13 +320,9 @@ public class ArpaFile implements Iterable<ArpaNgram> {
         } 
 
       }; 
-    } catch (FileNotFoundException e) { 
-      logger.severe(e.toString()); 
-      return null; 
-    } catch (IOException e) { 
-      logger.severe(e.toString()); 
+    } catch (IOException e) {
+      LOG.error(e.getMessage(), e);
       return null; 
     } 
-
-  } 
+  }
 }

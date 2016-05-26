@@ -22,8 +22,14 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.joshua.corpus.Vocabulary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class VocabTest {
+
+  private static final Logger LOG = LoggerFactory.getLogger(VocabTest.class);
+
+  //FIXME: no main() in automated test case,
   public static void main(String args[]) {
 
     int numWords = 0;
@@ -44,7 +50,7 @@ public class VocabTest {
         id++;
       }
     } catch (IOException e) {
-      ;
+      LOG.error(e.getMessage(), e);
     }
 
     System.out.println("read " + numWords + " words");

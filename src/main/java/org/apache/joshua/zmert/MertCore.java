@@ -53,6 +53,8 @@ import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.metrics.EvaluationMetric;
 import org.apache.joshua.util.StreamGobbler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This code was originally written by Omar Zaidan.  In September of 2012, it was augmented to support
@@ -62,6 +64,9 @@ import org.apache.joshua.util.StreamGobbler;
  */
 
 public class MertCore {
+
+  private static final Logger LOG = LoggerFactory.getLogger(MertCore.class);
+
   private final JoshuaConfiguration joshuaConfiguration;
   private TreeSet<Integer>[] indicesOfInterest_all;
 
@@ -1264,13 +1269,8 @@ public class MertCore {
 
         println("", 1);
 
-      } catch (FileNotFoundException e) {
-        System.err.println("FileNotFoundException in MertCore.run_single_iteration(6): "
-            + e.getMessage());
-        System.exit(99901);
       } catch (IOException e) {
-        System.err.println("IOException in MertCore.run_single_iteration(6): " + e.getMessage());
-        System.exit(99902);
+        throw new RuntimeException(e);
       }
 
 
@@ -1303,9 +1303,7 @@ public class MertCore {
       try {
         blocker.acquire(initsPerIt);
       } catch (java.lang.InterruptedException e) {
-        System.err.println("InterruptedException in MertCore.run_single_iteration(): "
-            + e.getMessage());
-        System.exit(99906);
+        throw new RuntimeException(e);
       }
 
       // extract output from threadOutput[]
@@ -1947,12 +1945,8 @@ public class MertCore {
        * inFile.close(); outFile.close();
        */
       return true;
-    } catch (FileNotFoundException e) {
-      System.err.println("FileNotFoundException in MertCore.copyFile(String,String): "
-          + e.getMessage());
-      return false;
     } catch (IOException e) {
-      System.err.println("IOException in MertCore.copyFile(String,String): " + e.getMessage());
+      LOG.error(e.getMessage(), e);
       return false;
     }
   }
