@@ -34,7 +34,7 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * expects plain-text input, which can be plain sentences or PLF-encoded lattices. If
  * '-input-type json' is passed to the decoder, it will instead read JSON objects from the input
  * stream, with the following format:
- * 
+ * <pre>
  * {
  *   "data": {
  *     "translations": [
@@ -44,8 +44,8 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  *     ]
  *   }
  * }
- * 
- * @author Matt Post <post@cs.jhu.edu>
+ * </pre>
+ * @author Matt Post post@cs.jhu.edu
  * @author orluke
  */
 public class TranslationRequestStream {

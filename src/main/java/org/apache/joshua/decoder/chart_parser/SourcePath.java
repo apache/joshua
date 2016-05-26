@@ -24,7 +24,7 @@ import org.apache.joshua.lattice.Arc;
 /**
  * This class represents information about a path taken through the source lattice.
  * 
- * @note This implementation only tracks the source path cost which is assumed to be a scalar value.
+ * <p>This implementation only tracks the source path cost which is assumed to be a scalar value.
  *       If you need multiple values, or want to recover more detailed path statistics, you'll need
  *       to update this code.
  */

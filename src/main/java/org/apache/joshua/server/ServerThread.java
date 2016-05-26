@@ -55,6 +55,7 @@ public class ServerThread extends Thread implements HttpHandler {
    * 
    * @param socket the socket representing the input/output streams
    * @param decoder the configured decoder that handles performing translations
+   * @param joshuaConfiguration a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
   public ServerThread(Socket socket, Decoder decoder, JoshuaConfiguration joshuaConfiguration) {
     this.joshuaConfiguration = joshuaConfiguration;

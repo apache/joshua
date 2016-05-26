@@ -28,7 +28,7 @@ import org.apache.joshua.corpus.SymbolTable;
  * Normally, the feature score in the rule should be *cost* (i.e., 
  * -LogP), so that the feature weight should be positive 
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com> 
+ * @author Zhifei Li, zhifei.work@gmail.com
  * @version $LastChangedDate: 2010-01-20 19:46:54 -0600 (Wed, 20 Jan 2010) $ 
  */ 
 public class BilingualRule extends MonolingualRule { 
@@ -49,9 +49,9 @@ public class BilingualRule extends MonolingualRule {
    * @param featureScores Feature value scores for the rule. 
    * @param arity Number of nonterminals in the source language 
    *              right-hand side. 
-   * @param owner 
-   * @param latticeCost 
-   * @param ruleID 
+   * @param owner todo
+   * @param latticeCost todo
+   * @param ruleID todo
    */ 
   public BilingualRule(int lhs, int[] sourceRhs, int[] targetRhs, float[] featureScores, int arity, int owner, float latticeCost, int ruleID) { 
     super(lhs, sourceRhs, featureScores, arity, owner, latticeCost, ruleID); 

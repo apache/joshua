@@ -19,7 +19,7 @@
 package org.apache.joshua.decoder.hypergraph;
 
 /**
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Zhifei Li, zhifei.work@gmail.com
  * @version $LastChangedDate$
  */
 

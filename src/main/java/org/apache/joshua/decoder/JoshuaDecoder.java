@@ -40,9 +40,9 @@ import org.slf4j.LoggerFactory;
  * Implements decoder initialization, including interaction with <code>JoshuaConfiguration</code>
  * and <code>DecoderThread</code>.
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
- * @author wren ng thornton <wren@users.sourceforge.net>
- * @author Lane Schwartz <dowobeha@users.sourceforge.net>
+ * @author Zhifei Li, zhifei.work@gmail.com
+ * @author wren ng thornton wren@users.sourceforge.net
+ * @author Lane Schwartz dowobeha@users.sourceforge.net
  */
 public class JoshuaDecoder {
 

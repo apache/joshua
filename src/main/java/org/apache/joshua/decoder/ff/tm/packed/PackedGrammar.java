@@ -195,6 +195,7 @@ public class PackedGrammar extends AbstractGrammar {
   /**
    * Computes the MD5 checksum of the vocabulary file.
    * Can be used for comparing vocabularies across multiple packedGrammars.
+   * @return the computed checksum
    */
   public String computeVocabularyChecksum() {
     MessageDigest md;
@@ -804,7 +805,7 @@ public class PackedGrammar extends AbstractGrammar {
        * to then put a nonterminal on the source and target sides to treat the phrase pairs like
        * left-branching rules, which is how Joshua deals with phrase decoding. 
        * 
-       * @author Matt Post <post@cs.jhu.edu>
+       * @author Matt Post post@cs.jhu.edu
        *
        */
       public final class PackedPhrasePair extends PackedRule {
@@ -859,7 +860,7 @@ public class PackedGrammar extends AbstractGrammar {
         /**
          * Take the English phrase of the underlying rule and prepend an [X].
          * 
-         * @return
+         * @return the augmented phrase
          */
         @Override
         public int[] getEnglish() {
@@ -869,7 +870,7 @@ public class PackedGrammar extends AbstractGrammar {
         /**
          * Take the French phrase of the underlying rule and prepend an [X].
          * 
-         * @return
+         * @return the augmented French phrase
          */
         @Override
         public int[] getFrench() {
@@ -883,7 +884,7 @@ public class PackedGrammar extends AbstractGrammar {
         /**
          * Similarly the alignment array needs to be shifted over by one.
          * 
-         * @return
+         * @return the byte[] alignment
          */
         @Override
         public byte[] getAlignment() {

@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * Note: to seed the kbest extraction, each deduction should have the best_cost properly set. We do
  * not require any list being sorted
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Zhifei Li, zhifei.work@gmail.com
  */
 public class HyperGraph {
 
@@ -142,7 +142,8 @@ public class HyperGraph {
   /**
    * Dump the hypergraph to the specified file.
    * 
-   * @param fileName
+   * @param fileName local file path
+   * @param model {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    */
   public void dump(String fileName, List<FeatureFunction> model) {
     try ( PrintWriter out = new PrintWriter(fileName, "UTF-8") ) {

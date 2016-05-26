@@ -40,33 +40,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Feature function that reads in a list of language model fragments and matches them against the
+ * <p>Feature function that reads in a list of language model fragments and matches them against the
  * hypergraph. This allows for language model fragment "glue" features, which fire when LM fragments
  * (supplied as input) are assembled. These LM fragments are presumably useful in ensuring
- * grammaticality and can be independent of the translation model fragments.
+ * grammaticality and can be independent of the translation model fragments.</p>
  * 
- * Usage: in the Joshua Configuration file, put
+ * <p>Usage: in the Joshua Configuration file, put</p>
  * 
- * feature-function = FragmentLM -lm LM_FRAGMENTS_FILE -map RULE_FRAGMENTS_MAP_FILE
+ * <code>feature-function = FragmentLM -lm LM_FRAGMENTS_FILE -map RULE_FRAGMENTS_MAP_FILE</code>
  * 
- * LM_FRAGMENTS_FILE is a pointer to a file containing a list of fragments that it should look for.
- * The format of the file is one fragment per line in PTB format, e.g.:
+ * <p>LM_FRAGMENTS_FILE is a pointer to a file containing a list of fragments that it should look for.
+ * The format of the file is one fragment per line in PTB format, e.g.:</p>
  * 
- * (S NP (VP (VBD said) SBAR) (. .))
+ * <code>(S NP (VP (VBD said) SBAR) (. .))</code>
  * 
- * RULE_FRAGMENTS_MAP_FILE points to a file that maps fragments to the flattened SCFG rule format
+ * <p>RULE_FRAGMENTS_MAP_FILE points to a file that maps fragments to the flattened SCFG rule format
  * that Joshua uses. This mapping is necessary because Joshua's rules have been flattened, meaning
  * that their internal structure has been removed, yet this structure is needed for matching LM
- * fragments. The format of the file is
+ * fragments. The format of the file is</p>
  * 
- * FRAGMENT ||| RULE-TARGET-SIDE
+ * <code>FRAGMENT ||| RULE-TARGET-SIDE</code>
  * 
- * for example,
+ * <p>for example,</p>
  * 
- * (S (NP (DT the) (NN man)) VP .) ||| the man [VP,1] [.,2] (SBAR (IN that) (S (NP (PRP he)) (VP
- * (VBD was) (VB done)))) ||| that he was done (VP (VBD said) SBAR) ||| said SBAR
+ * <code>(S (NP (DT the) (NN man)) VP .) ||| the man [VP,1] [.,2] (SBAR (IN that) (S (NP (PRP he)) (VP
+ * (VBD was) (VB done)))) ||| that he was done (VP (VBD said) SBAR) ||| said SBAR</code>
  * 
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 public class FragmentLMFF extends StatefulFF {
 
@@ -108,9 +108,9 @@ public class FragmentLMFF extends StatefulFF {
   private String fragmentLMFile = "";
 
   /**
-   * @param weights
-   * @param name
-   * @param stateComputer
+   * @param weights a {@link org.apache.joshua.decoder.ff.FeatureVector} with weights
+   * @param args arguments passed to the feature function
+   * @param config the {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
   public FragmentLMFF(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, "FragmentLMFF", args, config);
@@ -141,7 +141,7 @@ public class FragmentLMFF extends StatefulFF {
   /**
    * Add the provided fragment to the language model, subject to some filtering.
    * 
-   * @param fragment
+   * @param fragment a {@link org.apache.joshua.decoder.ff.fragmentlm.Tree} fragment
    */
   public void addLMFragment(Tree fragment) {
     if (lmFragments == null)
@@ -171,6 +171,15 @@ public class FragmentLMFF extends StatefulFF {
    * that fire are any LM fragments that match the fragment associated with the current rule. LM
    * fragments may recurse over the tail nodes, following 1-best backpointers until the fragment
    * either matches or fails.
+   * 
+   * @param rule {@link org.apache.joshua.decoder.ff.tm.Rule} to be utilized within computation
+   * @param tailNodes {@link java.util.List} of {@link org.apache.joshua.decoder.hypergraph.HGNode} tail nodes
+   * @param i todo
+   * @param j todo
+   * @param sourcePath information about a path taken through the source {@link org.apache.joshua.lattice.Lattice}
+   * @param sentence {@link org.apache.joshua.lattice.Lattice} input
+   * @param acc {@link org.apache.joshua.decoder.ff.FeatureFunction.Accumulator} object permitting generalization of feature computation
+   * @return the new dynamic programming state (null for stateless features)
    */
   @Override
   public DPState compute(Rule rule, List<HGNode> tailNodes, int i, int j, SourcePath sourcePath, 
@@ -322,8 +331,8 @@ public class FragmentLMFF extends StatefulFF {
   /**
    * Maintains a state pointer used by KenLM to implement left-state minimization. 
    * 
-   * @author Matt Post <post@cs.jhu.edu>
-   * @author Juri Ganitkevitch <juri@cs.jhu.edu>
+   * @author Matt Post post@cs.jhu.edu
+   * @author Juri Ganitkevitch juri@cs.jhu.edu
    */
   public class FragmentState extends DPState {
 

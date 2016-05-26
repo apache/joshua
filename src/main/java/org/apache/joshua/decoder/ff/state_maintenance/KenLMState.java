@@ -21,8 +21,8 @@ package org.apache.joshua.decoder.ff.state_maintenance;
 /**
  * Maintains a state pointer used by KenLM to implement left-state minimization. 
  * 
- * @author Matt Post <post@cs.jhu.edu>
- * @author Juri Ganitkevitch <juri@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
+ * @author Juri Ganitkevitch juri@cs.jhu.edu
  */
 public class KenLMState extends DPState {
 

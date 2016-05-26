@@ -32,26 +32,27 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
- * This class defines Joshua's feature function interface, for both sparse and
+ * <p>This class defines Joshua's feature function interface, for both sparse and
  * dense features. It is immediately inherited by StatelessFF and StatefulFF,
  * which provide functionality common to stateless and stateful features,
  * respectively. Any feature implementation should extend those classes, and not
  * this one. The distinction between stateless and stateful features is somewhat
  * narrow: all features have the opportunity to return an instance of a
- * {@link DPState} object, and stateless ones just return null.
+ * {@link DPState} object, and stateless ones just return null.</p>
  * 
- * Features in Joshua work like templates. Each feature function defines any
+ * <p>Features in Joshua work like templates. Each feature function defines any
  * number of actual features, which are associated with weights. The task of the
  * feature function is to compute the features that are fired in different
  * circumstances and then return the inner product of those features with the
  * weight vector. Feature functions can also produce estimates of their future
- * cost (via {@link estimateCost()}); these values are not used in computing the
+ * cost (via {@link org.apache.joshua.decoder.ff.FeatureFunction#estimateCost(Rule, Sentence)}); 
+ * these values are not used in computing the
  * score, but are only used for sorting rules during cube pruning. The
  * individual features produced by each template should have globally unique
  * names; a good convention is to prefix each feature with the name of the
- * template that produced it.
+ * template that produced it.</p>
  * 
- * Joshua does not retain individual feature values while decoding, since this
+ * <p>Joshua does not retain individual feature values while decoding, since this
  * requires keeping a sparse feature vector along every hyperedge, which can be
  * expensive. Instead, it computes only the weighted cost of each edge. If the
  * individual feature values are requested, the feature functions are replayed
@@ -59,10 +60,10 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * a generic way by passing an {@link Accumulator} object to the compute()
  * function. During decoding, the accumulator simply sums weighted features in a
  * scalar. During k-best extraction, when individual feature values are needed,
- * a {@link FeatureAccumulator} is used to retain the individual values.
+ * a {@link FeatureAccumulator} is used to retain the individual values.</p>
  * 
- * @author Matt Post <post@cs.jhu.edu>
- * @author Juri Ganitkevich <juri@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
+ * @author Juri Ganitkevich juri@cs.jhu.edu
  */
 public abstract class FeatureFunction {
 
@@ -135,22 +136,23 @@ public abstract class FeatureFunction {
 
   /**
    * This is the main function for defining feature values. The implementor
-   * should compute all the features along the hyperedge, calling acc.put(name,
-   * value) for each feature. It then returns the newly-computed dynamic
+   * should compute all the features along the hyperedge, calling 
+   * {@link org.apache.joshua.decoder.ff.FeatureFunction.Accumulator#add(String, float)}
+   * for each feature. It then returns the newly-computed dynamic
    * programming state for this feature (for example, for the
-   * {@link LanguageModelFF} feature, this returns the new language model
+   * {@link org.apache.joshua.decoder.ff.lm.LanguageModelFF} feature, this returns the new language model
    * context). For stateless features, this value is null.
    * 
    * Note that the accumulator accumulates *unweighted* feature values. The
    * feature vector is multiplied times the weight vector later on.
    * 
-   * @param rule
-   * @param tailNodes
-   * @param i
-   * @param j
-   * @param sourcePath
-   * @param sentID
-   * @param acc
+   * @param rule {@link org.apache.joshua.decoder.ff.tm.Rule} to be utilized within computation
+   * @param tailNodes {@link java.util.List} of {@link org.apache.joshua.decoder.hypergraph.HGNode} tail nodes
+   * @param i todo
+   * @param j todo
+   * @param sourcePath information about a path taken through the source {@link org.apache.joshua.lattice.Lattice}
+   * @param sentence {@link org.apache.joshua.lattice.Lattice} input
+   * @param acc {@link org.apache.joshua.decoder.ff.FeatureFunction.Accumulator} object permitting generalization of feature computation
    * @return the new dynamic programming state (null for stateless features)
    */
   public abstract DPState compute(Rule rule, List<HGNode> tailNodes, int i, int j,
@@ -160,12 +162,12 @@ public abstract class FeatureFunction {
    * Feature functions must overrided this. StatefulFF and StatelessFF provide
    * reasonable defaults since most features do not fire on the goal node.
    * 
-   * @param tailNode
-   * @param i
-   * @param j
-   * @param sourcePath
-   * @param sentID
-   * @param acc
+   * @param tailNode single {@link org.apache.joshua.decoder.hypergraph.HGNode} representing tail node
+   * @param i todo
+   * @param j todo
+   * @param sourcePath information about a path taken through the source {@link org.apache.joshua.lattice.Lattice}
+   * @param sentence {@link org.apache.joshua.lattice.Lattice} input
+   * @param acc {@link org.apache.joshua.decoder.ff.FeatureFunction.Accumulator} object permitting generalization of feature computation
    * @return the DPState (null if none)
    */
   public abstract DPState computeFinal(HGNode tailNode, int i, int j, SourcePath sourcePath,
@@ -181,12 +183,12 @@ public abstract class FeatureFunction {
    * incorporate the feature weights. This function is used in the kbest
    * extraction code but could also be used in computing the cost.
    * 
-   * @param rule
-   * @param tailNodes
-   * @param i
-   * @param j
-   * @param sourcePath
-   * @param sentID
+   * @param rule {@link org.apache.joshua.decoder.ff.tm.Rule} to be utilized within computation
+   * @param tailNodes {@link java.util.List} of {@link org.apache.joshua.decoder.hypergraph.HGNode} tail nodes
+   * @param i todo
+   * @param j todo
+   * @param sourcePath information about a path taken through the source {@link org.apache.joshua.lattice.Lattice}
+   * @param sentence {@link org.apache.joshua.lattice.Lattice} input
    * @return an *unweighted* feature delta
    */
   public final FeatureVector computeFeatures(Rule rule, List<HGNode> tailNodes, int i, int j,
@@ -203,11 +205,11 @@ public abstract class FeatureFunction {
    * return the *weighted* cost of applying the feature. Provided for backward
    * compatibility.
    * 
-   * @param tailNode
-   * @param i
-   * @param j
-   * @param sourcePath
-   * @param sentID
+   * @param tailNode single {@link org.apache.joshua.decoder.hypergraph.HGNode} representing tail node
+   * @param i todo
+   * @param j todo
+   * @param sourcePath information about a path taken through the source {@link org.apache.joshua.lattice.Lattice}
+   * @param sentence {@link org.apache.joshua.lattice.Lattice} input
    * @return a *weighted* feature cost
    */
   public final float computeFinalCost(HGNode tailNode, int i, int j, SourcePath sourcePath,
@@ -222,12 +224,12 @@ public abstract class FeatureFunction {
    * Returns the *unweighted* feature delta for the final transition (e.g., for
    * the language model feature function). Provided for backward compatibility.
    * 
-   * @param tailNode
-   * @param i
-   * @param j
-   * @param sourcePath
-   * @param sentID
-   * @return
+   * @param tailNode single {@link org.apache.joshua.decoder.hypergraph.HGNode} representing tail node
+   * @param i todo
+   * @param j todo
+   * @param sourcePath information about a path taken through the source {@link org.apache.joshua.lattice.Lattice}
+   * @param sentence {@link org.apache.joshua.lattice.Lattice} input
+   * @return an *weighted* feature vector
    */
   public final FeatureVector computeFinalFeatures(HGNode tailNode, int i, int j,
       SourcePath sourcePath, Sentence sentence) {
@@ -247,6 +249,8 @@ public abstract class FeatureFunction {
    * sorting. Later, the real cost of this feature function is called via
    * compute();
    * 
+   * @param rule {@link org.apache.joshua.decoder.ff.tm.Rule} to be utilized within computation
+   * @param sentence {@link org.apache.joshua.lattice.Lattice} input
    * @return the *weighted* cost of applying the feature.
    */
   public abstract float estimateCost(Rule rule, Sentence sentence);
@@ -257,9 +261,9 @@ public abstract class FeatureFunction {
    * score but is used in pruning decisions. Stateless features return 0.0f by
    * default, but Stateful features might want to override this.
    * 
-   * @param rule
-   * @param state
-   * @param sentence
+   * @param rule {@link org.apache.joshua.decoder.ff.tm.Rule} to be utilized within computation
+   * @param state todo
+   * @param sentence {@link org.apache.joshua.lattice.Lattice} input
    * @return the *weighted* future cost estimate of applying this rule in
    *         context.
    */
@@ -271,7 +275,7 @@ public abstract class FeatureFunction {
    * Any key without a value is added with an empty string as value Multiple values for the same key
    * are not parsed. The first one is used.
    * 
-   * @param rawArgs A string with the raw arguments and their names
+   * @param args A string with the raw arguments and their names
    * @return A hash with the keys and the values of the string
    */
   public static HashMap<String, String> parseArgs(String[] args) {
@@ -306,7 +310,11 @@ public abstract class FeatureFunction {
   /**
    * It is used when initializing translation grammars (for 
    * pruning purpose, and to get stateless logP for each rule). 
-   * This is also required to sort the rules (required by Cube-pruning). 
+   * This is also required to sort the rules (required by Cube-pruning).
+   * 
+   * @param rule {@link org.apache.joshua.decoder.ff.tm.Rule} to be utilized within computation
+   * @param sentID associated ID
+   * @return double value representing LogP
    */ 
   public abstract double estimateLogP(Rule rule, int sentID);
   
@@ -318,7 +326,6 @@ public abstract class FeatureFunction {
    * sum (for decoding). FeatureAccumulator records the named feature values
    * (for k-best extraction).
    */
-
   public interface Accumulator {
     public void add(String name, float value);
     public void add(int id, float value);

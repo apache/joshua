@@ -44,7 +44,7 @@ public class CompareGrammars {
    * @param fieldDelimiter Regular expression to split each line
    * @param fieldNumber Field from each rule to extract
    * @return set containing all unique instances of the specified field
-   * @throws FileNotFoundException
+   * @throws FileNotFoundException if the input grammer file cannot be found
    */
   public static Set<String> getFields(File grammarFile, String fieldDelimiter, int fieldNumber)
       throws FileNotFoundException {
@@ -127,7 +127,7 @@ public class CompareGrammars {
    * Main method.
    * 
    * @param args names of the two grammars to be compared
-   * @throws FileNotFoundException
+   * @throws FileNotFoundException if any of the input grammer file cannot be found
    */
   public static void main(String[] args) throws FileNotFoundException {
 

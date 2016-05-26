@@ -45,8 +45,8 @@ import org.slf4j.LoggerFactory;
  * 
  * The DecoderFactory class is responsible for launching the threads.
  * 
- * @author Matt Post <post@cs.jhu.edu>
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Matt Post post@cs.jhu.edu
+ * @author Zhifei Li, zhifei.work@gmail.com
  */
 
 public class DecoderThread extends Thread {
@@ -93,6 +93,7 @@ public class DecoderThread extends Thread {
    * Translate a sentence.
    * 
    * @param sentence The sentence to be translated.
+   * @return the sentence {@link org.apache.joshua.decoder.Translation}
    */
   public Translation translate(Sentence sentence) {
 
@@ -107,7 +108,7 @@ public class DecoderThread extends Thread {
       LOG.info("Translation {}: Translation took 0 seconds", sentence.id());
       return new Translation(sentence, null, featureFunctions, joshuaConfiguration);
     }
-    
+
     long startTime = System.currentTimeMillis();
 
     int numGrammars = allGrammars.size();
@@ -115,7 +116,7 @@ public class DecoderThread extends Thread {
 
     for (int i = 0; i < allGrammars.size(); i++)
       grammars[i] = allGrammars.get(i);
-    
+
     if (joshuaConfiguration.segment_oovs)
       sentence.segmentOOVs(grammars);
 
@@ -129,7 +130,7 @@ public class DecoderThread extends Thread {
 
       if (joshuaConfiguration.search_algorithm.equals("stack")) {
         Stacks stacks = new Stacks(sentence, this.featureFunctions, grammars, joshuaConfiguration);
-        
+
         hypergraph = stacks.search();
       } else {
         /* Seeding: the chart only sees the grammars, not the factories */
@@ -137,10 +138,10 @@ public class DecoderThread extends Thread {
             joshuaConfiguration.goal_symbol, joshuaConfiguration);
 
         hypergraph = (joshuaConfiguration.use_dot_chart) 
-          ? chart.expand() 
-          : chart.expandSansDotChart();
+            ? chart.expand() 
+                : chart.expandSansDotChart();
       }
-      
+
     } catch (java.lang.OutOfMemoryError e) {
       LOG.error("Input {}: out of memory", sentence.id());
       hypergraph = null;
@@ -157,7 +158,7 @@ public class DecoderThread extends Thread {
     }
 
     /*****************************************************************************************/
-    
+
     /*
      * Synchronous parsing.
      * 

@@ -32,8 +32,8 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * This feature returns the scored path through the source lattice, which is recorded in a
  * SourcePath object.
  * 
- * @author Chris Dyer <redpony@umd.edu>
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Chris Dyer redpony@umd.edu
+ * @author Matt Post post@cs.jhu.edu
  */
 public final class SourcePathFF extends StatelessFF {
 

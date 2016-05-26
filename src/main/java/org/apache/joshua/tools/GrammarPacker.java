@@ -148,7 +148,7 @@ public class GrammarPacker {
   /**
    * Executes the packing.
    * 
-   * @throws IOException
+   * @throws IOException if there is an error reading the grammar
    */
   public void pack() throws IOException {
     LOG.info("Beginning exploration pass.");

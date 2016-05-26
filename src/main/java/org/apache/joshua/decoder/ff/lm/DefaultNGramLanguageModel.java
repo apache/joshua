@@ -27,12 +27,12 @@ import org.slf4j.LoggerFactory;
 /**
  * This class provides a default implementation for the Equivalent LM State optimization (namely,
  * don't back off anywhere). It also provides some default implementations for more general
- * functions on the interface to fall back to more specific ones (e.g. from ArrayList<Integer> to
- * int[]) and a default implementation for sentenceLogProbability which enumerates the n-grams and
- * calls calls ngramLogProbability for each of them.
+ * functions on the interface to fall back to more specific ones (e.g. from {@link java.util.ArrayList}
+ * of {@link java.lang.Integer}'s to int[]) and a default implementation for sentenceLogProbability
+ * which enumerates the n-grams and calls calls ngramLogProbability for each of them.
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author Zhifei Li, zhifei.work@gmail.com
+ * @author wren ng thornton wren@users.sourceforge.net
  */
 public abstract class DefaultNGramLanguageModel implements NGramLanguageModel {
 

@@ -25,7 +25,7 @@ import java.util.HashMap;
  * to use the functions here, one need to extend the class to provide a way to calculate the
  * transitionLogP based on feature set
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Zhifei Li, zhifei.work@gmail.com
  * @version $LastChangedDate$
  */
 

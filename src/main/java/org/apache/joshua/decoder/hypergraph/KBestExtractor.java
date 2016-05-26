@@ -47,49 +47,49 @@ import org.apache.joshua.util.FormatUtils;
 import cern.colt.Arrays;
 
 /**
- * This class implements lazy k-best extraction on a hyper-graph.
+ * <p>This class implements lazy k-best extraction on a hyper-graph.</p>
  * 
- * K-best extraction over hypergraphs is a little hairy, but is best understood in the following
+ * <p>K-best extraction over hypergraphs is a little hairy, but is best understood in the following
  * manner. Imagine a hypergraph, which is composed of nodes connected by hyperedges. A hyperedge has
  * exactly one parent node and 1 or more tail nodes, corresponding to the rank of the rule that gave
- * rise to the hyperedge. Each node has 1 or more incoming hyperedges.
+ * rise to the hyperedge. Each node has 1 or more incoming hyperedges.</p>
  * 
- * K-best extraction works in the following manner. A derivation is a set of nodes and hyperedges
+ * <p>K-best extraction works in the following manner. A derivation is a set of nodes and hyperedges
  * that leads from the root node down and exactly covers the source-side sentence. To define a
  * derivation, we start at the root node, choose one of its incoming hyperedges, and then recurse to
- * the tail (or antecedent) nodes of that hyperedge, where we continually make the same decision.
+ * the tail (or antecedent) nodes of that hyperedge, where we continually make the same decision.</p>
  * 
- * Each hypernode has its hyperedges sorted according to their model score. To get the best
+ * <p>Each hypernode has its hyperedges sorted according to their model score. To get the best
  * (Viterbi) derivation, we simply recursively follow the best hyperedge coming in to each
- * hypernode.
+ * hypernode.</p>
  * 
- * How do we get the second-best derivation? It is defined by changing exactly one of the decisions
+ * <p>How do we get the second-best derivation? It is defined by changing exactly one of the decisions
  * about which hyperedge to follow in the recursion. Somewhere, we take the second-best. Similarly,
  * the third-best derivation makes a single change from the second-best: either making another
  * (differnt) second-best choice somewhere along the 1-best derivation, or taking the third-best
- * choice at the same spot where the second-best derivation took the second-best choice. And so on.
+ * choice at the same spot where the second-best derivation took the second-best choice. And so on.</p>
  * 
- * This class uses two classes that encode the necessary meta-information. The first is the
+ * <p>This class uses two classes that encode the necessary meta-information. The first is the
  * DerivationState class. It roughly corresponds to a hyperedge, and records, for each of that
  * hyperedge's tail nodes, which-best to take. So for a hyperedge with three tail nodes, the 1-best
  * derivation will be (1,1,1), the second-best will be one of (2,1,1), (1,2,1), or (1,1,2), the
- * third best will be one of
+ * third best will be one of</p>
  * 
- * (3,1,1), (2,2,1), (1,1,3)
+ * <code>(3,1,1), (2,2,1), (1,1,3)</code>
  * 
- * and so on.
+ * <p>and so on.</p>
  * 
- * The configuration parameter `output-format` controls what exactly is extracted from the forest.
+ * <p>The configuration parameter `output-format` controls what exactly is extracted from the forest.
  * See documentation for that below. Note that Joshua does not store individual feature values while 
  * decoding, but only the cost of each edge (in the form of a float). Therefore, if you request
  * the features values (`%f` in `output-format`), the feature functions must be replayed, which
- * is expensive.
+ * is expensive.</p>
  * 
- * The configuration parameter `top-n` controls how many items are returned. If this is set to 0,
- * k-best extraction should be turned off entirely.
+ * <p>The configuration parameter `top-n` controls how many items are returned. If this is set to 0,
+ * k-best extraction should be turned off entirely.</p>
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Zhifei Li, zhifei.work@gmail.com
+ * @author Matt Post post@cs.jhu.edu
  */
 public class KBestExtractor {
   private final JoshuaConfiguration joshuaConfiguration;
@@ -162,7 +162,12 @@ public class KBestExtractor {
    * Compute the string that is output from the decoder, using the "output-format" config file
    * parameter as a template.
    * 
-   * You may need to reset_state() before you call this function for the first time.
+   * You may need to {@link org.apache.joshua.decoder.hypergraph.KBestExtractor#resetState()} 
+   * before you call this function for the first time.
+   * 
+   * @param node todo
+   * @param k todo
+   * @return todo
    */
   public String getKthHyp(HGNode node, int k) {
 
@@ -228,9 +233,9 @@ public class KBestExtractor {
    * If requested, projects source-side lettercase to target, and appends the alignment from
    * to the source-side sentence in ||s.
    * 
-   * @param hypothesis
-   * @param state
-   * @return
+   * @param hypothesis todo
+   * @param state todo
+   * @return source-side lettercase to target, and appends the alignment from to the source-side sentence in ||s
    */
   private String maybeProjectCase(String hypothesis, DerivationState state) {
     String output = hypothesis;
@@ -260,6 +265,9 @@ public class KBestExtractor {
 
   /**
    * Convenience function for k-best extraction that prints to STDOUT.
+   * @param hg the {@link org.apache.joshua.decoder.hypergraph.HyperGraph} from which to extract
+   * @param topN the number of k
+   * @throws IOException if there is an error writing the extraction
    */
   public void lazyKBestExtractOnHG(HyperGraph hg, int topN) throws IOException {
     lazyKBestExtractOnHG(hg, topN, new BufferedWriter(new OutputStreamWriter(System.out)));
@@ -279,7 +287,7 @@ public class KBestExtractor {
    * @param hg the hypergraph to extract from
    * @param topN how many to extract
    * @param out object to write to
-   * @throws IOException
+   * @throws IOException if there is an error writing the extraction
    */
   public void lazyKBestExtractOnHG(HyperGraph hg, int topN, BufferedWriter out) throws IOException {
 
@@ -308,11 +316,13 @@ public class KBestExtractor {
   }
 
   /**
-   * Returns the VirtualNode corresponding to an HGNode. If no such VirtualNode exists, it is
-   * created.
+   * Returns the {@link org.apache.joshua.decoder.hypergraph.KBestExtractor.VirtualNode} 
+   * corresponding to an {@link org.apache.joshua.decoder.hypergraph.HGNode}. 
+   * If no such VirtualNode exists, it is created.
    * 
-   * @param hgnode
-   * @return the corresponding VirtualNode
+   * @param hgnode from which we wish to create a 
+   *    {@link org.apache.joshua.decoder.hypergraph.KBestExtractor.VirtualNode}
+   * @return the corresponding {@link org.apache.joshua.decoder.hypergraph.KBestExtractor.VirtualNode}
    */
   private VirtualNode getVirtualNode(HGNode hgnode) {
     VirtualNode virtualNode = virtualNodesTable.get(hgnode);
@@ -330,7 +340,6 @@ public class KBestExtractor {
    * k-best derivations from that point on, retaining the derivations computed so far and a priority 
    * queue of candidates.
    */
-
   private class VirtualNode {
 
     // The node being annotated.
@@ -357,7 +366,7 @@ public class KBestExtractor {
     /**
      * This returns a DerivationState corresponding to the kth-best derivation rooted at this node.
      * 
-     * @param kbestExtractor
+     * @param kbestExtractor todo
      * @param k (indexed from one)
      * @return the k-th best (1-indexed) hypothesis, or null if there are no more.
      */
@@ -651,7 +660,7 @@ public class KBestExtractor {
      * assumption that the total number of words in the hypothesis scales linearly with the input
      * sentence span.
      * 
-     * @return
+     * @return float representing {@link org.apache.joshua.decoder.BLEU} score
      */
     public float computeBLEU() {
       if (stats == null) {
@@ -678,7 +687,7 @@ public class KBestExtractor {
      * Returns the model cost. This is obtained by subtracting off the incorporated BLEU score (if
      * used).
      * 
-     * @return
+     * @return float representing model cost
      */
     public float getModelCost() {
       return this.cost;
@@ -687,7 +696,7 @@ public class KBestExtractor {
     /**
      * Returns the model cost plus the BLEU score.
      * 
-     * @return
+     * @return float representing model cost plus the BLEU score
      */
     public float getCost() {
       return cost - weights.getSparse("BLEU") * bleu;
@@ -725,6 +734,7 @@ public class KBestExtractor {
     /**
      * DerivationState objects are unique to each VirtualNode, so the unique identifying information
      * only need contain the edge position and the ranks.
+     * @return hashof the edge position and ranks
      */
     public int hashCode() {
       int hash = edgePos;
@@ -738,6 +748,8 @@ public class KBestExtractor {
 
     /**
      * Visits every state in the derivation in a depth-first order.
+     * @param visitor todo
+     * @return todo
      */
     private DerivationVisitor visit(DerivationVisitor visitor) {
       return visit(visitor, 0, 0);
@@ -808,9 +820,9 @@ public class KBestExtractor {
      * function looks up the VirtualNode corresponding to the HGNode pointed to by the edge's
      * {tailNodeIndex}th tail node.
      * 
-     * @param edge
-     * @param tailNodeIndex
-     * @return
+     * @param edge todo
+     * @param tailNodeIndex todo
+     * @return todo
      */
     public DerivationState getChildDerivationState(HyperEdge edge, int tailNodeIndex) {
       HGNode child = edge.getTailNodes().get(tailNodeIndex);
@@ -840,7 +852,7 @@ public class KBestExtractor {
    * way to do different things to the tree (e.g., extract its words, assemble a derivation, and so
    * on) without having to rewrite the node-visiting code.
    * 
-   * @author Matt Post <post@cs.jhu.edu>
+   * @author Matt Post post@cs.jhu.edu
    */
   public interface DerivationVisitor {
     /**
@@ -953,7 +965,7 @@ public class KBestExtractor {
    * Assembles an informative version of the derivation. Each rule is printed as it is encountered.
    * Don't try to parse this output; make something that writes out JSON or something, instead.
    * 
-   * @author Matt Post <post@cs.jhu.edu
+   * @author Matt Post post@cs.jhu.edu
    */
   public class DerivationExtractor implements DerivationVisitor {
 

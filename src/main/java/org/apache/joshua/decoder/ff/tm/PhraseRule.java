@@ -22,17 +22,17 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 
 /***
- * A class for reading in rules from a Moses phrase table. Most of the conversion work is done
- * in {@link joshua.decoder.ff.tm.format.PhraseFormatReader}. This includes prepending every
+ * <p>A class for reading in rules from a Moses phrase table. Most of the conversion work is done
+ * in {@link org.apache.joshua.decoder.ff.tm.format.PhraseFormatReader}. This includes prepending every
  * rule with a nonterminal, so that the phrase-based decoder can assume the same hypergraph
  * format as the hierarchical decoder (by pretending to be a strictly left-branching grammar and
  * dispensing with the notion of coverage spans). However, prepending the nonterminals means all
  * the alignments are off by 1. We do not want to fix those when reading in due to the expense,
- * so instead we use this rule which adjust the alignments on the fly.
+ * so instead we use this rule which adjust the alignments on the fly.</p>
  * 
- * Also, we only convert the Moses dense features on the fly, via this class.
+ * <p>Also, we only convert the Moses dense features on the fly, via this class.</p>
  * 
- * TODO: this class should also be responsible for prepending the nonterminals.
+ * <p>TODO: this class should also be responsible for prepending the nonterminals.</p>
  * 
  * @author Matt Post
  *

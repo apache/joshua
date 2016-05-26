@@ -20,13 +20,13 @@ package org.apache.joshua.util;
 
 /**
  * CKY-based decoding makes extensive use of charts, which maintain information about spans (i, j)
- * over the length-n input sentence, 0 <= i <= j <= n. These charts are used for many things; for
+ * over the length-n input sentence, 0 &lt;= i &lt;= j &lt;= n. These charts are used for many things; for
  * example, lattices use a chart to denote whether there is a path between nodes i and j, and what
- * their costs is, and the decoder uses charts to record the partial application of rules (
- * {@link DotChart}) and the existence of proved items ({@link PhraseChart}).
+ * their costs is, and the decoder uses charts to record the partial application of rules (DotChart}) 
+ * and the existence of proved items ({@link org.apache.joshua.decoder.phrase.PhraseChart}).
  * 
  * The dummy way to implement a chart is to initialize a two-dimensional array; however, this wastes
- * a lot of space, because the constraint (i <= j) means that only half of this space can ever be
+ * a lot of space, because the constraint (i &lt;= j) means that only half of this space can ever be
  * used. This is especially a problem for lattices, where the sentence length (n) is the number of
  * nodes in the lattice!
  * 
@@ -34,7 +34,7 @@ package org.apache.joshua.util;
  * spans under a given maximum length. This class implements that in a generic way, introducing
  * large savings in both space and time.
  * 
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 public class ChartSpan<Type> {
   Object[] chart;
@@ -64,17 +64,14 @@ public class ChartSpan<Type> {
   /**
    * This computes the offset into the one-dimensional array for a given span.
    * 
-   * @param i
-   * @param j
+   * @param i source node in span
+   * @param j target node in span
    * @return the offset
-   * @throws InvalidSpanException
    */
   private int offset(int i, int j) {
     if (i < 0 || j > max || i > j) {
       throw new RuntimeException(String.format("Invalid span (%d,%d | %d)", i, j, max));
     }
-
-    // System.err.println(String.format("ChartSpan::offset(%d,%d) = %d / %d", i, j, i * (max + 1) - i * (i + 1) / 2 + j, max * (max + 1) - max * (max + 1) / 2 + max));
     
     return i * (max + 1) - i * (i + 1) / 2 + j;
   }
@@ -82,7 +79,7 @@ public class ChartSpan<Type> {
   /**
    * Convenience function for setting the values along the diagonal.
    * 
-   * @param value
+   * @param value input Type for which to set values
    */
   public void setDiagonal(Type value) {
     for (int i = 0; i <= max; i++)

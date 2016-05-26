@@ -116,6 +116,7 @@ public class BloomFilterLanguageModel extends DefaultNGramLanguageModel implemen
    * 
    * @param order the order of the language model
    * @param filename path to the file where the language model is stored
+   * @throws IOException if the bloom filter language model cannot be rebuilt from the input file
    */
   public BloomFilterLanguageModel(int order, String filename) throws IOException {
     super(order);

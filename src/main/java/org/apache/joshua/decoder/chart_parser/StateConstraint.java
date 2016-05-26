@@ -29,7 +29,7 @@ import org.apache.joshua.decoder.ff.state_maintenance.NgramDPState;
  * original motivation was to be used as a means of doing forced decoding, which is accomplished by
  * forcing all n-gram states that are created to match the target string.
  * 
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  * 
  */
 public class StateConstraint {
@@ -43,7 +43,7 @@ public class StateConstraint {
    * Determines if all of the states passed in are legal in light of the input that was passed
    * earlier. Currently only defined for n-gram states.
    * 
-   * @param dpStates
+   * @param dpStates {@link java.util.Collection} of {@link org.apache.joshua.decoder.ff.state_maintenance.DPState}'s
    * @return whether the states are legal in light of the target side sentence
    */
   public boolean isLegal(Collection<DPState> dpStates) {

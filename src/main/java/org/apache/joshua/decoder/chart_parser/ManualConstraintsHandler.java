@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Zhifei Li, zhifei.work@gmail.com
  */
 
 public class ManualConstraintsHandler {
@@ -138,6 +138,11 @@ public class ManualConstraintsHandler {
   /**
    * if there are any LHS or RHS constraints for a span, then all the applicable grammar rules in
    * that span will have to pass the filter.
+   * 
+   * @param i LHS of span, used for genrating the span signature
+   * @param j RHS of span, used for genrating the span signature
+   * @param rulesIn {@link java.util.List} of {@link org.apache.joshua.decoder.ff.tm.Rule}'s
+   * @return filtered {@link java.util.List} of {@link org.apache.joshua.decoder.ff.tm.Rule}'s
    */
   public List<Rule> filterRules(int i, int j, List<Rule> rulesIn) {
     if (null == this.constraintSpansForFiltering) return rulesIn;
@@ -162,6 +167,9 @@ public class ManualConstraintsHandler {
 
   /**
    * should we filter out the gRule based on the manually provided constraint cRule
+   * @param cRule constraint rule
+   * @param gRule rule which may be filtered
+   * @return true if this gRule should survive
    */
   public boolean shouldSurvive(ConstraintRule cRule, Rule gRule) {
 
@@ -186,6 +194,9 @@ public class ManualConstraintsHandler {
   /**
    * if a span is *within* the coverage of a *hard* rule constraint, then this span will be only
    * allowed to use the mannual rules
+   * @param startSpan beginning node (int) for span
+   * @param endSpan end node (int) for span
+   * @return true if this span containers a rule constraint
    */
   public boolean containHardRuleConstraint(int startSpan, int endSpan) {
     if (null != this.spansWithHardRuleConstraint) {

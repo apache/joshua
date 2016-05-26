@@ -37,28 +37,29 @@ import org.apache.joshua.decoder.ff.tm.Trie;
 import org.apache.joshua.decoder.ff.tm.hash_based.ExtensionIterator;
 
 /**
- * SliceAggregatingTrie collapses multiple tries
- * with the same source root (i.e. tries from multiple packed slices).
+ * <p>SliceAggregatingTrie collapses multiple tries
+ * with the same source root (i.e. tries from multiple packed slices).</p>
  * 
- * Consider the example below.
+ * <p>Consider the example below.
  * Without SliceAggregatingTries, the following grammar rules could have only
- * partitioned by splitting rule lists when the first word of SOURCE changes. (">" markers).
+ * partitioned by splitting rule lists when the first word of SOURCE changes. ("&gt;" markers).</p>
  * 
- * Using a SliceAggregatingTrie allows splitting at changes of second SOURCE words (">>" marker).
+ * <p>Using a SliceAggregatingTrie allows splitting at changes of second SOURCE words ("&gt;&gt;" marker).</p>
  * 
+ * <pre>
  * EXAMPLE: (LHS ||| SOURCE ||| TARGET)
  * [X] ||| - ||| -
- * >
+ * &gt;
  * [X] ||| [X] ||| [X]
- * >>
+ * &gt;&gt;
  * [X] ||| [X] a ||| [X] A
  * [X] ||| [X] a ||| [X] A
- * >>
+ * &gt;&gt;
  * [X] ||| [X] b ||| [X] B
- * >
+ * &gt;
  * [X] ||| u ||| u
- * 
- * A SliceAggregatingTrie node behaves just like a regular Trie node but subsumes a list of extensions/children.
+ * </pre>
+ * <p>A SliceAggregatingTrie node behaves just like a regular Trie node but subsumes a list of extensions/children.
  * This class hides the complexity of having multiple tries with the same root
  * from nodes one level up.
  * Similar to PackedRoot, it maintains a lookup table of children's
@@ -70,7 +71,7 @@ import org.apache.joshua.decoder.ff.tm.hash_based.ExtensionIterator;
  * must be found in exactly one of the subtries.
  * (!) This assumption relies on the sort order of the packed grammar.
  * If the grammar was incorrectly sorted and then packed, construction
- * of SliceAggregatingTrie nodes fails. 
+ * of SliceAggregatingTrie nodes fails.</p>
  * 
  * @author fhieber
  */

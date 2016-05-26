@@ -32,7 +32,7 @@ package org.apache.joshua.decoder.phrase;
  * ensures that the coverage vector is consistent but the resulting hypergraph may not be projective,
  * which is different from the CKY algorithm, which does produce projective derivations. 
  * 
- * Lattice decoding is not yet supported (March 2015).
+ * TODO Lattice decoding is not yet supported (March 2015).
  */
 
 import java.util.ArrayList;
@@ -75,10 +75,10 @@ public class Stacks {
    * Entry point. Initialize everything. Create pass-through (OOV) phrase table and glue phrase
    * table (with start-of-sentence and end-of-sentence rules).
    * 
-   * @param sentence
-   * @param featureFunctions
-   * @param grammars
-   * @param config
+   * @param sentence input to {@link org.apache.joshua.lattice.Lattice}
+   * @param featureFunctions {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
+   * @param grammars an array of {@link org.apache.joshua.decoder.ff.tm.Grammar}'s
+   * @param config a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
   public Stacks(Sentence sentence, List<FeatureFunction> featureFunctions, Grammar[] grammars, 
       JoshuaConfiguration config) {
@@ -110,7 +110,7 @@ public class Stacks {
   /**
    * The main algorithm. Returns a hypergraph representing the search space.
    * 
-   * @return
+   * @return a {@link org.apache.joshua.decoder.hypergraph.HyperGraph} representing the search space
    */
   public HyperGraph search() {
     

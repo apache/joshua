@@ -31,36 +31,15 @@ import java.util.List;
  */
 public class ContiguousPhrase extends AbstractPhrase {
 
-  // ===============================================================
-  // Constants
-  // ===============================================================
-
-  // ===============================================================
-  // Member variables
-  // ===============================================================
-
   protected int startIndex;
   protected int endIndex;
   protected Corpus corpusArray;
-
-  // ===============================================================
-  // Constructor(s)
-  // ===============================================================
 
   public ContiguousPhrase(int startIndex, int endIndex, Corpus corpusArray) {
     this.startIndex = startIndex;
     this.endIndex = endIndex;
     this.corpusArray = corpusArray;
   }
-
-
-  // ===============================================================
-  // Public
-  // ===============================================================
-
-  // ===========================================================
-  // Accessor methods (set/get)
-  // ===========================================================
 
   /**
    * This method copies the phrase into an array of ints. This method should be avoided if possible.
@@ -75,22 +54,14 @@ public class ContiguousPhrase extends AbstractPhrase {
     return words;
   }
 
-
   public int getWordID(int position) {
     return corpusArray.getWordID(startIndex + position);
     // return corpusArray.corpus[startIndex+position];
   }
 
-
   public int size() {
     return endIndex - startIndex;
   }
-
-
-  // ===========================================================
-  // Methods
-  // ===========================================================
-
 
   /**
    * Gets all possible subphrases of this phrase, up to and including the phrase itself. For
@@ -114,7 +85,6 @@ public class ContiguousPhrase extends AbstractPhrase {
     return getSubPhrases(size());
   }
 
-
   /**
    * Returns a list of subphrases only of length <code>maxLength</code> or smaller.
    * 
@@ -134,7 +104,6 @@ public class ContiguousPhrase extends AbstractPhrase {
     return phrases;
   }
 
-
   /**
    * creates a new phrase object from the indexes provided.
    * <P>
@@ -148,36 +117,9 @@ public class ContiguousPhrase extends AbstractPhrase {
     return new ContiguousPhrase(startIndex + start, startIndex + end, corpusArray);
   }
 
-
-  // ===============================================================
-  // Protected
-  // ===============================================================
-
-  // ===============================================================
-  // Methods
-  // ===============================================================
-
-
-  // ===============================================================
-  // Private
-  // ===============================================================
-
-  // ===============================================================
-  // Methods
-  // ===============================================================
-
-
-  // ===============================================================
-  // Static
-  // ===============================================================
-
-
-  // ===============================================================
-  // Main
-  // ===============================================================
-
   /**
    * Main contains test code
+   * @param args String array of arguments used to run this class.
    */
   public static void main(String[] args) {
 

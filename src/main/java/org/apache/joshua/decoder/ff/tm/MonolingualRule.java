@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * this class implements MonolingualRule 
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com> 
+ * @author Zhifei Li, zhifei.work@gmail.com
  * @version $LastChangedDate: 2010-02-10 09:59:38 -0600 (Wed, 10 Feb 2010) $ 
  */ 
 public class MonolingualRule extends Rule { 
@@ -90,9 +90,9 @@ public class MonolingualRule extends Rule {
    * @param featureScores Feature value scores for the rule. 
    * @param arity Number of nonterminals in the source language 
    *              right-hand side. 
-   * @param owner 
-   * @param latticeCost 
-   * @param ruleID 
+   * @param owner todo
+   * @param latticeCost todo
+   * @param ruleID todo
    */ 
   public MonolingualRule(int lhs, int[] sourceRhs, float[] featureScores, int arity, int owner, float latticeCost, int ruleID) { 
     this.lhs          = lhs; 

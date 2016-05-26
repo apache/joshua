@@ -280,16 +280,13 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
         // TODO: bothersome no-backwards-arrays method.
       }
     }
-
     return labels;
   }
-
 
   @Override
   public int[] getTerminals() {
     return getTerminals(0, terminals.size());
   }
-
 
   @Override
   public int[] getTerminals(int from, int to) {
@@ -299,39 +296,31 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
     return span;
   }
 
-
   public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
     // TODO Auto-generated method stub
-
   }
-
 
   public void writeExternal(ObjectOutput out) throws IOException {
     // TODO Auto-generated method stub
-
   }
-
 
   /**
    * Reads Penn Treebank format file
+   * @param file_name the string path of the Penn Treebank file
+   * @throws IOException if the file does not exist
    */
   public void readExternalText(String file_name) throws IOException {
     LineReader reader = new LineReader(file_name);
-
     initialize();
-
     for (String line : reader) {
       if (line.trim().equals("")) continue;
       appendFromPennFormat(line);
     }
   }
 
-
   public void writeExternalText(String file_name) throws IOException {
     // TODO Auto-generated method stub
-
   }
-
 
   @Override
   public String toString() {

@@ -25,15 +25,15 @@ import java.util.Iterator;
 /**
  * An interface for trie-like data structures.
  * 
- * @author wren ng thornton <wren@users.sourceforge.net>
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author wren ng thornton wren@users.sourceforge.net
+ * @author Zhifei Li, zhifei.work@gmail.com
  */
 public interface Trie {
 
   /**
    * Traverse one ply further down the trie. If there is no match, the result is null.
    * 
-   * @param wordID
+   * @param wordID input word ID
    * @return Child node of this trie
    */
   Trie match(int wordID);
@@ -53,30 +53,30 @@ public interface Trie {
    * null.
    * 
    * @return A list of extended <code>Trie</code> nodes if this node has extensions,
-   *         <code>null<code>
+   *         <code>null</code>
    *         otherwise
    */
   Collection<? extends Trie> getExtensions();
 
 
   /**
-   * If the trie node has extensions, get a list of their labels.
+   * If the trie node has extensions, get a {@link java.util.HashMap} of their labels.
    * 
-   * @return
+   * @return a {@link java.util.HashMap} pf node extensions
    */
   HashMap<Integer,? extends Trie> getChildren();
 
   /**
    * Returns an iterator over the trie node's extensions with terminal labels.
    * 
-   * @return
+   * @return the {@link java.util.Iterator} created over the trie node's extensions with terminal labels
    */
   Iterator<Integer> getTerminalExtensionIterator();
   
   /**
    * Returns an iterator over the trie node's extensions with nonterminal labels.
    * 
-   * @return
+   * @return the {@link java.util.Iterator} created over the trie node's extensions with terminal labels
    */
   Iterator<Integer> getNonterminalExtensionIterator();
   
@@ -100,6 +100,8 @@ public interface Trie {
    * true.</li>
    * <li>The collection must be sorted (at least as used by TMGrammar)</li>
    * </ol>
+   * @return a {@link org.apache.joshua.decoder.ff.tm.RuleCollection} representing the rules 
+   * at the current node/state
    */
   RuleCollection getRuleCollection();
 

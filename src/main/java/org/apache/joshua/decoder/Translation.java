@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * sentence and id and contains the decoded hypergraph. Translation objects are returned by
  * DecoderThread instances to the InputHandler, where they are assembled in order for output.
  * 
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 
 public class Translation {
@@ -57,17 +57,17 @@ public class Translation {
   private String output = null;
 
   private StructuredTranslation structuredTranslation = null;
-  
+
   public Translation(Sentence source, HyperGraph hypergraph, 
       List<FeatureFunction> featureFunctions, JoshuaConfiguration joshuaConfiguration) {
     this.source = source;
-    
+
     if (joshuaConfiguration.use_structured_output) {
-      
+
       structuredTranslation = new StructuredTranslation(
           source, hypergraph, featureFunctions);
       this.output = structuredTranslation.getTranslationString();
-      
+
     } else {
 
       StringWriter sw = new StringWriter();
@@ -84,14 +84,14 @@ public class Translation {
           // We must put this weight as zero, otherwise we get an error when we try to retrieve it
           // without checking
           Decoder.weights.increment("BLEU", 0);
-          
+
           if (joshuaConfiguration.topN == 0) {
-            
+
             /* construct Viterbi output */
             final String best = getViterbiString(hypergraph);
-            
+
             LOG.info("Translation {}: {} {}", source.id(), hypergraph.goalNode.getScore(), best);
-            
+
             /*
              * Setting topN to 0 turns off k-best extraction, in which case we need to parse through
              * the output-string, with the understanding that we can only substitute variables for the
@@ -102,21 +102,21 @@ public class Translation {
                 .replace("%S", DeNormalize.processSingleLine(best))
                 .replace("%c", String.format("%.3f", hypergraph.goalNode.getScore()))
                 .replace("%i", String.format("%d", source.id()));
-            
+
             if (joshuaConfiguration.outputFormat.contains("%a")) {
               translation = translation.replace("%a", getViterbiWordAlignments(hypergraph));
             }
-            
+
             if (joshuaConfiguration.outputFormat.contains("%f")) {
               final FeatureVector features = getViterbiFeatures(hypergraph, featureFunctions, source);
               translation = translation.replace("%f", joshuaConfiguration.moses ? features.mosesString() : features.toString());
             }
-            
+
             out.write(translation);
             out.newLine();
-            
+
           } else {
-            
+
             final KBestExtractor kBestExtractor = new KBestExtractor(
                 source, featureFunctions, Decoder.weights, false, joshuaConfiguration);
             kBestExtractor.lazyKBestExtractOnHG(hypergraph, joshuaConfiguration.topN, out);
@@ -134,31 +134,31 @@ public class Translation {
           LOG.info("Input {}: {}-best extraction took {} seconds", id(),
               joshuaConfiguration.topN, seconds);
 
-      } else {
-        
-        // Failed translations and blank lines get empty formatted outputs
-        // @formatter:off
-        String outputString = joshuaConfiguration.outputFormat
-            .replace("%s", source.source())
-            .replace("%e", "")
-            .replace("%S", "")
-            .replace("%t", "()")
-            .replace("%i", Integer.toString(source.id()))
-            .replace("%f", "")
-            .replace("%c", "0.000");
-        // @formatter:on
+        } else {
 
-        out.write(outputString);
-        out.newLine();
-      }
+          // Failed translations and blank lines get empty formatted outputs
+          // @formatter:off
+          String outputString = joshuaConfiguration.outputFormat
+              .replace("%s", source.source())
+              .replace("%e", "")
+              .replace("%S", "")
+              .replace("%t", "()")
+              .replace("%i", Integer.toString(source.id()))
+              .replace("%f", "")
+              .replace("%c", "0.000");
+          // @formatter:on
+
+          out.write(outputString);
+          out.newLine();
+        }
 
         out.flush();
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
-      
+
       this.output = sw.toString();
-      
+
     }
 
     /*
@@ -171,7 +171,7 @@ public class Translation {
         break;
       }
     }
-    
+
   }
 
   public Sentence getSourceSentence() {
@@ -186,12 +186,12 @@ public class Translation {
   public String toString() {
     return output;
   }
-  
+
   /**
    * Returns the StructuredTranslation object
    * if JoshuaConfiguration.construct_structured_output == True.
    * @throws RuntimeException if StructuredTranslation object not set.
-   * @return
+   * @return {@link org.apache.joshua.decoder.StructuredTranslation} object
    */
   public StructuredTranslation getStructuredTranslation() {
     if (structuredTranslation == null) {
@@ -199,5 +199,5 @@ public class Translation {
     }
     return structuredTranslation;
   }
-  
+
 }

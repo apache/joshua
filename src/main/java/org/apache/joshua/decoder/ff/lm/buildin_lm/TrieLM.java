@@ -90,8 +90,8 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
   /**
    * Constructs a language model object from the specified ARPA file.
    * 
-   * @param arpaFile
-   * @throws FileNotFoundException 
+   * @param arpaFile input ARPA file
+   * @throws FileNotFoundException if the input file cannot be located
    */
   public TrieLM(ArpaFile arpaFile) throws FileNotFoundException {
     super(arpaFile.getVocab().size(), arpaFile.getOrder());

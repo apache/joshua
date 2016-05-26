@@ -12,10 +12,8 @@ package org.apache.joshua.subsample;
  * two-dimensional bit vector, though for our purposes we could just keep the original string around
  * (which would save lots of time parsing and reconstructing the string).
  * 
- * @see joshua.corpus.alignment.Alignments
- * 
  * @author UMD (Jimmy Lin, Chris Dyer, et al.)
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate$
  */
 public class Alignment {

@@ -44,9 +44,6 @@ public class TcpServer {
   
   /**
    * Listens on a port for new socket connections. Concurrently handles multiple socket connections.
-   * 
-   * @param args configuration options
-   * @throws IOException
    */
   public void start() {
 

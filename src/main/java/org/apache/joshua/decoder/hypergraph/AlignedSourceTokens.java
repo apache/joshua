@@ -24,13 +24,17 @@ import java.util.ListIterator;
 /**
  * Class that represents a one to (possibly) many alignment from target to
  * source. Extends from a LinkedList. Instances of this class are updated by the
- * WordAlignmentExtractor.substitute() method. The <shiftBy> method shifts the
+ * WordAlignmentExtractor.substitute() method. 
+ * The {@link org.apache.joshua.decoder.hypergraph.AlignedSourceTokens#shiftBy(int, int)} 
+ * method shifts the
  * elements in the list by a scalar to reflect substitutions of non terminals in
  * the rule. if indexes are final, i.e. the point instance has been substituted
- * into a parent WordAlignmentState once, <isFinal> is set to true. This is
+ * into a parent WordAlignmentState once, 
+ * {@link org.apache.joshua.decoder.hypergraph.AlignedSourceTokens#isFinal} is set to true. 
+ * This is
  * necessary since the final source index of a point is known once we have
  * substituted in a complete WordAlignmentState into its parent. If the index in
- * the list is a non terminal, <isNonTerminal> = true
+ * the list is a non terminal, {@link org.apache.joshua.decoder.hypergraph.AlignedSourceTokens#isNonTerminal} = true
  */
 class AlignedSourceTokens extends LinkedList<Integer> {
 

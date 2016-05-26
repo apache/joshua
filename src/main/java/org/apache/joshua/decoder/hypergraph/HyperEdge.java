@@ -26,8 +26,8 @@ import org.apache.joshua.decoder.ff.tm.Rule;
 /**
  * this class implement Hyperedge
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Zhifei Li, zhifei.work@gmail.com
+ * @author Matt Post post@cs.jhu.edu
  */
 
 public class HyperEdge {

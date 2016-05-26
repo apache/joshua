@@ -47,12 +47,13 @@ public class PhraseTable implements Grammar {
    * Chain to the super with a number of defaults. For example, we only use a single nonterminal,
    * and there is no span limit.
    * 
-   * @param grammarFile
-   * @param owner
-   * @param config
-   * @throws IOException
+   * @param grammarFile file path parent directory
+   * @param owner used to set phrase owners
+   * @param type the grammar specification keyword (e.g., "thrax" or "moses")
+   * @param config a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
+   * @throws IOException if there is an error reading the grammar file
    */
-  public PhraseTable(String grammarFile, String owner, String type, JoshuaConfiguration config, int maxSource) 
+  public PhraseTable(String grammarFile, String owner, String type, JoshuaConfiguration config) 
       throws IOException {
     this.config = config;
     int spanLimit = 0;
@@ -81,7 +82,7 @@ public class PhraseTable implements Grammar {
    * since the grammar includes the nonterminal. For {@link PackedGrammar}s, the value was either
    * in the packed config file (Joshua 6.0.2+) or was passed in via the TM config line.
    * 
-   * @return
+   * @return the longest source phrase read.
    */
   @Override
   public int getMaxSourcePhraseLength() {

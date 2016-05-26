@@ -23,8 +23,8 @@ import java.util.Arrays;
 import org.apache.joshua.corpus.Vocabulary;
 
 /**
- * @author Zhifei Li, <zhifei.work@gmail.com>
- * @author Juri Ganitkevitch, <juri@cs.jhu.edu>
+ * @author Zhifei Li, zhifei.work@gmail.com
+ * @author Juri Ganitkevitch, juri@cs.jhu.edu
  */
 public class NgramDPState extends DPState {
 

@@ -65,7 +65,7 @@ public class ListUtil {
    * S1,...,Sn
    * 
    * @param list A list of Strings
-   * @return
+   * @return todo
    */
   public static String stringListStringWithoutBrackets(List<String> list) {
     return stringListStringWithoutBracketsWithSpecifiedSeparator(list, " ");
