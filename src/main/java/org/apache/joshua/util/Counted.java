@@ -78,8 +78,7 @@ public class Counted<E> implements Comparable<Counted<E>> {
   /**
    * Gets a comparator that compares two counted objects based on the reverse of the natural order
    * of the counts associated with each object.
-   * 
-   * @param <E>
+   * @param <E> todo
    * @return A comparator that compares two counted objects based on the reverse of the natural
    *         order of the counts associated with each object
    */

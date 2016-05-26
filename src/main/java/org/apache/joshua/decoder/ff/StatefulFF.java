@@ -35,8 +35,8 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * state-contributing objects in each HGNode. State can no longer be shared among different feature
  * functions.
  * 
- * @author Matt Post <post@cs.jhu.edu>
- * @author Juri Ganitkevich <juri@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
+ * @author Juri Ganitkevich juri@cs.jhu.edu
  */
 public abstract class StatefulFF extends FeatureFunction {
 

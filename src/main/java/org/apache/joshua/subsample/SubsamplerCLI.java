@@ -28,7 +28,7 @@ import org.apache.commons.cli.ParseException;
  * one-use nature of subclasses of <code>SubsampleCLI</code>, they generally should be implemented
  * as anonymous local classes.
  * 
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate$
  */
 @SuppressWarnings("static-access")
@@ -69,6 +69,7 @@ public class SubsamplerCLI {
   /**
    * Return all Options. The HelpFormatter will print them in sorted order, so it doesn't matter
    * when we add them. Subclasses should override this method by adding more options.
+   * @return all of the {@link org.apache.commons.cli.Options}
    */
   public Options getCliOptions() {
     return new Options().addOption(ot).addOption(otest).addOption(of).addOption(oe)
@@ -76,7 +77,9 @@ public class SubsamplerCLI {
   }
 
   /**
-   * This method should be overridden to return the class used in runSubsampler.
+   * This method should be overridden to return the class used in 
+   * {@link org.apache.joshua.subsample.SubsamplerCLI#runSubsampler(String[], int, int, float)}.
+   * @return the {@link org.apache.joshua.subsample.Subsampler} implementation
    */
   public String getClassName() {
     return Subsampler.class.getName();
@@ -85,6 +88,11 @@ public class SubsamplerCLI {
   /**
    * Callback to run the subsampler. This function needs access to the variables holding each
    * Option, thus all this closure nonsense.
+   * @param testFiles a String array of test files
+   * @param maxN todo
+   * @param targetCount todo
+   * @param ratio todo
+   * @throws IOException if there is an issue whilst reading input files
    */
   public void runSubsampler(String[] testFiles, int maxN, int targetCount, float ratio)
       throws IOException {
@@ -95,6 +103,7 @@ public class SubsamplerCLI {
   /**
    * Non-static version of main so that we can define anonymous local classes to override or extend
    * the above.
+   * @param args a String array of input options
    */
   public void runMain(String[] args) {
     Options o = this.getCliOptions();

@@ -25,8 +25,7 @@ import org.apache.joshua.decoder.ff.tm.Rule;
 /**
  * This class implements reading files in the format defined by David Chiang for Hiero. 
  * 
- * @author Unknown
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 
 public class HieroFormatReader extends GrammarReader<Rule> {

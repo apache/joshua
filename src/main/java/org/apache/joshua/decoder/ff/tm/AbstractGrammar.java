@@ -44,7 +44,7 @@ import cern.colt.Arrays;
  * 
  * @author Zhifei Li
  * @author Lane Schwartz
- * @author Matt Post <post@cs.jhu.edu
+ * @author Matt Post post@cs.jhu.edu
  */
 public abstract class AbstractGrammar implements Grammar {
 
@@ -92,6 +92,7 @@ public abstract class AbstractGrammar implements Grammar {
    * Constructs an empty, unsorted grammar.
    * 
    * @see Grammar#isSorted()
+   * @param config a {@link org.apache.joshua.decoder.JoshuaConfiguration} object
    */
   public AbstractGrammar(JoshuaConfiguration config) {
     this.joshuaConfiguration = config;
@@ -110,6 +111,7 @@ public abstract class AbstractGrammar implements Grammar {
    * Cube-pruning requires that the grammar be sorted based on the latest feature functions. To
    * avoid synchronization, this method should be called before multiple threads are initialized for
    * parallel decoding
+   * @param models {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    */
   public void sortGrammar(List<FeatureFunction> models) {
     Trie root = getTrieRoot();
@@ -127,13 +129,13 @@ public abstract class AbstractGrammar implements Grammar {
   /**
    * Sets the flag indicating whether this grammar is sorted.
    * <p>
-   * This method is called by {@link #sortGrammar(ArrayList)} to indicate that the grammar has been
-   * sorted.
+   * This method is called by {@link org.apache.joshua.decoder.ff.tm.AbstractGrammar#sortGrammar(List)}
+   * to indicate that the grammar has been sorted.</p>
    * 
-   * Its scope is protected so that child classes that override <code>sortGrammar</code> will also
-   * be able to call this method to indicate that the grammar has been sorted.
+   * <p>Its scope is protected so that child classes that override <code>sortGrammar</code> will also
+   * be able to call this method to indicate that the grammar has been sorted.</p>
    * 
-   * @param sorted
+   * @param sorted set to true if the grammar is sorted
    */
   protected void setSorted(boolean sorted) {
     this.sorted = sorted;
@@ -190,8 +192,10 @@ public abstract class AbstractGrammar implements Grammar {
    * Adds OOV rules for all words in the input lattice to the current grammar. Uses addOOVRule() so that
    * sub-grammars can define different types of OOV rules if needed (as is used in {@link PhraseTable}).
    * 
+   * @param grammar Grammar in the Trie
    * @param inputLattice the lattice representing the input sentence
    * @param featureFunctions a list of feature functions used for scoring
+   * @param onlyTrue determine if word is actual OOV.
    */
   public static void addOOVRules(Grammar grammar, Lattice<Token> inputLattice, 
       List<FeatureFunction> featureFunctions, boolean onlyTrue) {

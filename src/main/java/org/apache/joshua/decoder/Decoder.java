@@ -28,7 +28,6 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -80,10 +79,10 @@ import org.apache.joshua.util.io.LineReader;
  * Translations object). Translations itself is an iterator whose next() call blocks until the next
  * translation is available.
  *
- * @author Matt Post <post@cs.jhu.edu>
- * @author Zhifei Li, <zhifei.work@gmail.com>
- * @author wren ng thornton <wren@users.sourceforge.net>
- * @author Lane Schwartz <dowobeha@users.sourceforge.net>
+ * @author Matt Post post@cs.jhu.edu
+ * @author Zhifei Li, zhifei.work@gmail.com
+ * @author wren ng thornton wren@users.sourceforge.net
+ * @author Lane Schwartz dowobeha@users.sourceforge.net
  */
 public class Decoder {
 
@@ -117,7 +116,8 @@ public class Decoder {
   /**
    * Constructor method that creates a new decoder using the specified configuration file.
    *
-   * @param configFile Name of configuration file.
+   * @param joshuaConfiguration a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
+   * @param configFile name of configuration file.
    */
   public Decoder(JoshuaConfiguration joshuaConfiguration, String configFile) {
     this(joshuaConfiguration);
@@ -128,6 +128,7 @@ public class Decoder {
    * Factory method that creates a new decoder using the specified configuration file.
    *
    * @param configFile Name of configuration file.
+   * @return a configured {@link org.apache.joshua.decoder.Decoder}
    */
   public static Decoder createDecoder(String configFile) {
     JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
@@ -154,6 +155,8 @@ public class Decoder {
    * <p>
    * This method is called by unit tests or any outside packages (e.g., MERT) relying on the
    * decoder.
+   * @param joshuaConfiguration a {@link org.apache.joshua.decoder.JoshuaConfiguration} object
+   * @return an uninitialized decoder for use in testing
    */
   static public Decoder getUninitalizedDecoder(JoshuaConfiguration joshuaConfiguration) {
     return new Decoder(joshuaConfiguration);
@@ -436,9 +439,9 @@ public class Decoder {
    * (possibly boundless) set of input sentences. Each request launches its own thread to read the
    * sentences of the request.
    *
-   * @param request
-   * @return an iterable set of Translation objects
-   * @throws IOException
+   * @param request the populated {@link org.apache.joshua.decoder.io.TranslationRequestStream}
+   * @param out an appropriate {@link java.io.OutputStream} to write results to
+   * @throws IOException if there is an error with the input stream or writing the output
    */
   public void decodeAll(TranslationRequestStream request, OutputStream out) throws IOException {
     Translations translations = new Translations(request);
@@ -496,8 +499,8 @@ public class Decoder {
   /**
    * We can also just decode a single sentence.
    *
-   * @param sentence
-   * @return The translated sentence
+   * @param sentence {@link org.apache.joshua.lattice.Lattice} input
+   * @return the sentence {@link org.apache.joshua.decoder.Translation}
    */
   public Translation decode(Sentence sentence) {
     // Get a thread.
@@ -777,7 +780,7 @@ public class Decoder {
               : -1;
 
           joshuaConfiguration.search_algorithm = "stack";
-          grammar = new PhraseTable(path, owner, type, joshuaConfiguration, maxSourceLen);
+          grammar = new PhraseTable(path, owner, type, joshuaConfiguration);
         }
 
         this.grammars.add(grammar);
@@ -794,7 +797,7 @@ public class Decoder {
     }
     
     /* Add the grammar for custom entries */
-    this.customPhraseTable = new PhraseTable(null, "custom", "phrase", joshuaConfiguration, 0);
+    this.customPhraseTable = new PhraseTable(null, "custom", "phrase", joshuaConfiguration);
     this.grammars.add(this.customPhraseTable);
     
     /* Create an epsilon-deleting grammar */

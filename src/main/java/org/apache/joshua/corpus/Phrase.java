@@ -93,6 +93,9 @@ public interface Phrase extends Comparable<Phrase> {
    * complete Phrase List.
    * 
    * @see ArrayList#subList(int, int)
+   * @param start start position to begin new phrase
+   * @param end end position to end new phrase
+   * @return a new {@link org.apache.joshua.corpus.Phrase} object from the indexes provided.
    */
   Phrase subPhrase(int start, int end);
 

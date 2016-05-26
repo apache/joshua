@@ -27,7 +27,7 @@ import org.apache.joshua.corpus.Phrase;
  * Papineni.
  * 
  * @author UMD (Jimmy Lin, Chris Dyer, et al.)
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate$
  */
 public class Subsampler {
@@ -81,6 +81,7 @@ public class Subsampler {
    * @param fpath path to source F files
    * @param epath path to source E files
    * @param output basename for output files (will append extensions)
+   * @throws IOException if there is an issue reading one of the input files
    */
   public void subsample(String filelist, float targetFtoERatio, String extf, String exte,
       String fpath, String epath, String output) throws IOException {
@@ -92,7 +93,13 @@ public class Subsampler {
   }
 
   /**
-   * The main wrapper for the subsample worker. Closes the PhraseWriter before exiting.
+   * The main wrapper for the subsample worker. Closes the 
+   * {@link org.apache.joshua.subsample.PhraseWriter} before exiting.
+   * @param filelist list of source files to subsample from
+   * @param targetFtoERatio goal for ratio of output F length to output E length
+   * @param out a {@link org.apache.joshua.subsample.PhraseWriter} to flush data to
+   * @param bcFactory used to generate a sentence-aligned {@link org.apache.joshua.subsample.BiCorpus}
+   * @throws IOException if there is an issue reading one of the input files
    */
   protected void subsample(String filelist, float targetFtoERatio, PhraseWriter out,
       BiCorpusFactory bcFactory) throws IOException {

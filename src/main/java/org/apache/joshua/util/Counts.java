@@ -31,8 +31,6 @@ import java.util.Map.Entry;
  * 
  * @author Lane Schwartz
  * @author Chris Callison-Burch
- * @param <A>
- * @param <B>
  */
 public class Counts<A, B> implements Iterable<Pair<A, B>> {
 
@@ -78,8 +76,8 @@ public class Counts<A, B> implements Iterable<Pair<A, B>> {
   /**
    * Increments the co-occurrence count of the provided objects.
    * 
-   * @param a
-   * @param b
+   * @param a input object A
+   * @param b input object B
    */
   public void incrementCount(A a, B b) {
     // increment the count and handle the adding of objects to the map if they aren't already there
@@ -127,8 +125,8 @@ public class Counts<A, B> implements Iterable<Pair<A, B>> {
   /**
    * Gets the co-occurrence count for the two elements.
    * 
-   * @param a
-   * @param b
+   * @param a input object A
+   * @param b input object B
    * @return the co-occurrence count for the two elements
    */
   public int getCount(A a, B b) {
@@ -161,8 +159,8 @@ public class Counts<A, B> implements Iterable<Pair<A, B>> {
    * <p>
    * This value is the relative frequency estimate.
    * 
-   * @param a
-   * @param b
+   * @param a object A
+   * @param b object B
    * @return the probability of a given b.
    */
   public float getProbability(A a, B b) {
@@ -202,8 +200,8 @@ public class Counts<A, B> implements Iterable<Pair<A, B>> {
    * <p>
    * This value is the relative frequency estimate in the reverse direction.
    * 
-   * @param b
-   * @param a
+   * @param b object B
+   * @param a object A
    * @return the probability of b given a.
    */
   public float getReverseProbability(B b, A a) {

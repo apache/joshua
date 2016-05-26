@@ -39,8 +39,7 @@ public class TerminalIterator implements Iterator<Integer> {
   /**
    * Constructs an iterator for the terminals in the given list of words.
    * 
-   * @param vocab
-   * @param words
+   * @param words array of words
    */
   public TerminalIterator(int[] words) {
     this.words = words;
@@ -75,7 +74,7 @@ public class TerminalIterator implements Iterator<Integer> {
   /**
    * Unsupported operation, guaranteed to throw an UnsupportedOperationException.
    * 
-   * @throws UnsupportedOperationException
+   * @throws UnsupportedOperationException operation not supported yet!
    */
   public void remove() {
     throw new UnsupportedOperationException();

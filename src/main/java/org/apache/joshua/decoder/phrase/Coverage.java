@@ -29,7 +29,7 @@ import org.apache.joshua.corpus.Span;
  */
 
 public class Coverage {
-  
+
   // The index of the first uncovered word
   private int firstZero;
 
@@ -45,12 +45,12 @@ public class Coverage {
     firstZero = 0;
     bits = new BitSet(INITIAL_LENGTH);
   }
-  
+
   public Coverage(int firstZero) {
     this.firstZero = firstZero;
     bits = new BitSet(INITIAL_LENGTH);
   }
-  
+
   /**
    * Pretty-prints the coverage vector, making a guess about the length
    */
@@ -69,8 +69,7 @@ public class Coverage {
   /**
    * Initialize a coverage vector from another Coverage vector, creating a separate object.
    * 
-   * @param firstZero
-   * @param bits
+   * @param other an existing coverage vector from which to create a new coverage vector
    */
   public Coverage(Coverage other) {
     this.firstZero = other.firstZero;
@@ -81,14 +80,14 @@ public class Coverage {
    * Turns on all bits from position start to position (end - 1), that is, in the range [start .. end).
    * This is done relative to the current coverage vector, of course, which may not start at 0.
    * 
-   * @param begin
-   * @param end
+   * @param begin bits at start position
+   * @param end bits at end position (end - 1)
    */
   public void set(int begin, int end) {
     assert compatible(begin, end);
 
-//    StringBuffer sb = new StringBuffer();
-//    sb.append(String.format("SET(%d,%d) %s", begin, end, this));
+    //    StringBuffer sb = new StringBuffer();
+    //    sb.append(String.format("SET(%d,%d) %s", begin, end, this));
 
     if (begin == firstZero) {
       // A concatenation. 
@@ -106,12 +105,13 @@ public class Coverage {
       bits.or(pattern(begin, end));
     }
 
-//    sb.append(String.format(" -> %s", this));
-//    System.err.println(sb);
+    //    sb.append(String.format(" -> %s", this));
+    //    System.err.println(sb);
   }
-  
+
   /**
    * Convenience function.
+   * @param span todo
    */
   public final void set(Span span) {
     set(span.start, span.end);
@@ -134,7 +134,7 @@ public class Coverage {
     }
     return false;
   }
-  
+
   /**
    * Returns the source sentence index of the first uncovered word.
    * 
@@ -155,7 +155,7 @@ public class Coverage {
    * Find the left bound of the gap in which the phrase [begin, ...) sits.                         
    * 
    * @param begin the start index of the phrase being applied.
-   * @return
+   * @return todo
    */
   public int leftOpening(int begin) {
     for (int i = begin - firstZero; i > 0; --i) {
@@ -173,12 +173,16 @@ public class Coverage {
   /**
    * LeftOpen() and RightOpen() find the larger gap in which a new source phrase pair sits.
    * When using a phrase pair covering (begin, end), the pair
-   * 
+   * <pre>
    *     (LeftOpen(begin), RightOpen(end, sentence_length))  
+   * </pre>
    *     
    * provides this gap.                                           
    * 
    * Finds the right bound of the enclosing gap, or the end of sentence, whichever is less.
+   * @param end end of phrase pair
+   * @param sentenceLength length of sentence
+   * @return todo
    */
   public int rightOpening(int end, int sentenceLength) {
     for (int i = end - firstZero; i < Math.min(64, sentenceLength - firstZero); i++) {
@@ -188,7 +192,7 @@ public class Coverage {
     }
     return sentenceLength;
   }
-  
+
   /**
    * Creates a bit vector with the same offset as the current coverage vector, flipping on
    * bits begin..end.
@@ -198,7 +202,7 @@ public class Coverage {
    * @return a bit vector (relative) with positions [begin..end) on
    */
   public BitSet pattern(int begin, int end) {
-//    System.err.println(String.format("pattern(%d,%d) %d %s %s", begin, end, firstZero, begin >= firstZero, toString()));
+    //    System.err.println(String.format("pattern(%d,%d) %d %s %s", begin, end, firstZero, begin >= firstZero, toString()));
     assert begin >= firstZero;
     BitSet pattern = new BitSet(INITIAL_LENGTH);
     pattern.set(begin - firstZero, end - firstZero);
@@ -208,12 +212,12 @@ public class Coverage {
   /**
    * Returns the underlying coverage bits.
    * 
-   * @return
+   * @return {@link java.util.BitSet} vector of bits
    */
   public BitSet getCoverage() {
     return bits;
   }
-  
+
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof Coverage) {

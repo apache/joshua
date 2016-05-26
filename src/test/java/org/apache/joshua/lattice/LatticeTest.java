@@ -51,12 +51,12 @@ public class LatticeTest {
 
     Lattice<String> graph = new Lattice<String>(nodes, new JoshuaConfiguration());
 
-    Assert.assertEquals(graph.getShortestPath(0, 1), 1.0);
-    Assert.assertEquals(graph.getShortestPath(0, 2), 1.0);
-    Assert.assertEquals(graph.getShortestPath(1, 2), 1.0);
-    Assert.assertEquals(graph.getShortestPath(0, 3), 2.0);
-    Assert.assertEquals(graph.getShortestPath(1, 3), 2.0);
-    Assert.assertEquals(graph.getShortestPath(2, 3), 1.0);
+    Assert.assertEquals(graph.getShortestPath(0, 1), 1);
+    Assert.assertEquals(graph.getShortestPath(0, 2), 1);
+    Assert.assertEquals(graph.getShortestPath(1, 2), 1);
+    Assert.assertEquals(graph.getShortestPath(0, 3), 2);
+    Assert.assertEquals(graph.getShortestPath(1, 3), 2);
+    Assert.assertEquals(graph.getShortestPath(2, 3), 1);
   }
 
   @Test
@@ -127,71 +127,66 @@ public class LatticeTest {
     Assert.assertEquals(node5.size(), 1);
     Assert.assertEquals(node6.size(), 0);
 
-
     // Node 0 outgoing arcs
 
     Arc<String> arcA_0_5 = node0.getOutgoingArcs().get(0);
     Assert.assertEquals(arcA_0_5.getLabel(), "A");
-    Assert.assertEquals(arcA_0_5.getHead(), node0);
-    Assert.assertEquals(arcA_0_5.getTail(), node5);
-    Assert.assertEquals(arcA_0_5.getCost(), 1.0);
+    Assert.assertEquals(arcA_0_5.getHead(), node5);
+    Assert.assertEquals(arcA_0_5.getTail(), node0);
+
+    Assert.assertEquals(arcA_0_5.getCost(), (float) 1.0);
 
     Arc<String> arcB_0_2 = node0.getOutgoingArcs().get(1);
     Assert.assertEquals(arcB_0_2.getLabel(), "B");
-    Assert.assertEquals(arcB_0_2.getHead(), node0);
-    Assert.assertEquals(arcB_0_2.getTail(), node2);
-    Assert.assertEquals(arcB_0_2.getCost(), 1.0);		
+    Assert.assertEquals(arcB_0_2.getHead(), node2);
+    Assert.assertEquals(arcB_0_2.getTail(), node0);
+    Assert.assertEquals(arcB_0_2.getCost(), (float) 1.0);
 
     Arc<String> arcC_0_3 = node0.getOutgoingArcs().get(2);
     Assert.assertEquals(arcC_0_3.getLabel(), "C");
-    Assert.assertEquals(arcC_0_3.getHead(), node0);
-    Assert.assertEquals(arcC_0_3.getTail(), node3);
-    Assert.assertEquals(arcC_0_3.getCost(), 1.0);	
+    Assert.assertEquals(arcC_0_3.getHead(), node3);
+    Assert.assertEquals(arcC_0_3.getTail(), node0);
+    Assert.assertEquals(arcC_0_3.getCost(), (float) 1.0);	
 
     Arc<String> arcD_0_1 = node0.getOutgoingArcs().get(3);
     Assert.assertEquals(arcD_0_1.getLabel(), "D");
-    Assert.assertEquals(arcD_0_1.getHead(), node0);
-    Assert.assertEquals(arcD_0_1.getTail(), node1);
-    Assert.assertEquals(arcD_0_1.getCost(), 1.0);
-
+    Assert.assertEquals(arcD_0_1.getHead(), node1);
+    Assert.assertEquals(arcD_0_1.getTail(), node0);
+    Assert.assertEquals(arcD_0_1.getCost(), (float) 1.0);
 
     // Node 1 outgoing arcs
     Arc<String> arcE_1_5 = node1.getOutgoingArcs().get(0);
     Assert.assertEquals(arcE_1_5.getLabel(), "E");
-    Assert.assertEquals(arcE_1_5.getHead(), node1);
-    Assert.assertEquals(arcE_1_5.getTail(), node5);
-    Assert.assertEquals(arcE_1_5.getCost(), 1.0);
-
+    Assert.assertEquals(arcE_1_5.getHead(), node5);
+    Assert.assertEquals(arcE_1_5.getTail(), node1);
+    Assert.assertEquals(arcE_1_5.getCost(), (float) 1.0);
 
     // Node 2 outgoing arcs
     Arc<String> arcC_2_5 = node2.getOutgoingArcs().get(0);
     Assert.assertEquals(arcC_2_5.getLabel(), "C");
-    Assert.assertEquals(arcC_2_5.getHead(), node2);
-    Assert.assertEquals(arcC_2_5.getTail(), node5);
-    Assert.assertEquals(arcC_2_5.getCost(), 1.0);
-
+    Assert.assertEquals(arcC_2_5.getHead(), node5);
+    Assert.assertEquals(arcC_2_5.getTail(), node2);
+    Assert.assertEquals(arcC_2_5.getCost(), (float) 1.0);
 
     // Node 3 outgoing arcs
     Arc<String> arcD_3_4 = node3.getOutgoingArcs().get(0);
     Assert.assertEquals(arcD_3_4.getLabel(), "D");
-    Assert.assertEquals(arcD_3_4.getHead(), node3);
-    Assert.assertEquals(arcD_3_4.getTail(), node4);
-    Assert.assertEquals(arcD_3_4.getCost(), 1.0);
-
+    Assert.assertEquals(arcD_3_4.getHead(), node4);
+    Assert.assertEquals(arcD_3_4.getTail(), node3);
+    Assert.assertEquals(arcD_3_4.getCost(), (float) 1.0);
 
     // Node 4 outgoing arcs
     Arc<String> arcE_4_5 = node4.getOutgoingArcs().get(0);
     Assert.assertEquals(arcE_4_5.getLabel(), "E");
-    Assert.assertEquals(arcE_4_5.getHead(), node4);
-    Assert.assertEquals(arcE_4_5.getTail(), node5);
-    Assert.assertEquals(arcE_1_5.getCost(), 1.0);
-
+    Assert.assertEquals(arcE_4_5.getHead(), node5);
+    Assert.assertEquals(arcE_4_5.getTail(), node4);
+    Assert.assertEquals(arcE_1_5.getCost(), (float) 1.0);
 
     // Node 5 outgoing arcs
     Arc<String> arcX_5_6 = node5.getOutgoingArcs().get(0);
     Assert.assertEquals(arcX_5_6.getLabel(), "X");
-    Assert.assertEquals(arcX_5_6.getHead(), node5);
-    Assert.assertEquals(arcX_5_6.getTail(), node6);
-    Assert.assertEquals(arcX_5_6.getCost(), 1.0);
+    Assert.assertEquals(arcX_5_6.getHead(), node6);
+    Assert.assertEquals(arcX_5_6.getTail(), node5);
+    Assert.assertEquals(arcX_5_6.getCost(), (float) 1.0);
   }
 }

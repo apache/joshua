@@ -43,8 +43,8 @@ import org.apache.joshua.util.io.LineReader;
  * When adding new features to Joshua, any new configurable parameters should be added to this
  * class.
  *
- * @author Zhifei Li, <zhifei.work@gmail.com>
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Zhifei Li, zhifei.work@gmail.com
+ * @author Matt Post post@cs.jhu.edu
  */
 public class JoshuaConfiguration {
 
@@ -325,6 +325,8 @@ public class JoshuaConfiguration {
    * To process command-line options, we write them to a file that looks like the config file, and
    * then call readConfigFile() on it. It would be more general to define a class that sits on a
    * stream and knows how to chop it up, but this was quicker to implement.
+   * 
+   * @param options string array of command line options
    */
   public void processCommandLineOptions(String[] options) {
     try {
@@ -696,8 +698,13 @@ public class JoshuaConfiguration {
    * equivalence classes on external use of parameter names, permitting arbitrary_under_scores and
    * camelCasing in paramter names without forcing the user to memorize them all. Here are some
    * examples of equivalent ways to refer to parameter names:
-   *
+   * <pre>
    * {pop-limit, poplimit, PopLimit, popLimit, pop_lim_it} {lmfile, lm-file, LM-FILE, lm_file}
+   * </pre>
+   * 
+   * @param text the string to be normalized
+   * @return normalized key
+   * 
    */
   public static String normalize_key(String text) {
     return text.replaceAll("[-_]", "").toLowerCase();

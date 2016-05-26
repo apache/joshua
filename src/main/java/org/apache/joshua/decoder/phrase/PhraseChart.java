@@ -49,8 +49,10 @@ public class PhraseChart {
    * applicable against the current input sentence. These phrases are extracted
    * from all available grammars.
    * 
-   * @param tables
-   * @param source
+   * @param tables input array of {@link org.apache.joshua.decoder.phrase.PhraseTable}'s
+   * @param features {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
+   * @param source input to {@link org.apache.joshua.lattice.Lattice}
+   * @param num_options number of translation options (typically set to 20)
    */
   public PhraseChart(PhraseTable[] tables, List<FeatureFunction> features, Sentence source,
       int num_options) {
@@ -123,8 +125,8 @@ public class PhraseChart {
   /**
    * Maps two-dimensional span into a one-dimensional array.
    * 
-   * @param i
-   * @param j
+   * @param i beginning of span
+   * @param j end of span
    * @return offset into private list of TargetPhrases
    */
   private int offset(int i, int j) {
@@ -134,9 +136,9 @@ public class PhraseChart {
   /**
    * Returns phrases from all grammars that match the span.
    * 
-   * @param begin
-   * @param end
-   * @return
+   * @param begin beginning of span
+   * @param end end of span
+   * @return the {@link org.apache.joshua.decoder.phrase.TargetPhrases} at the specified position in this list.
    */
   public TargetPhrases getRange(int begin, int end) {
     int index = offset(begin, end);
@@ -156,9 +158,9 @@ public class PhraseChart {
   /**
    * Add a set of phrases from a grammar to the current span.
    * 
-   * @param begin
-   * @param end
-   * @param to
+   * @param begin beginning of span
+   * @param end end of span
+   * @param to a {@link org.apache.joshua.decoder.ff.tm.RuleCollection} to be used in scoring and sorting.
    */
   private void addToRange(int begin, int end, RuleCollection to) {
     if (to != null) {

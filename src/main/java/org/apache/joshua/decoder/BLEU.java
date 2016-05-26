@@ -20,7 +20,6 @@ package org.apache.joshua.decoder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,7 +34,7 @@ import org.apache.joshua.util.Regex;
 /**
  * this class implements: (1) sentence-level bleu, with smoothing
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
+ * @author Zhifei Li, zhifei.work@gmail.com
  */
 public class BLEU {
   // do_ngram_clip: consider global n-gram clip
@@ -47,11 +46,12 @@ public class BLEU {
   // ====================multiple references
   /**
    * 
-   * @param refSents
-   * @param hypSent
+   * @param refSents todo
+   * @param hypSent todo
    * @param doNgramClip Should usually be true
    * @param bleuOrder Should usually be 4
    * @param useShortestRef Probably use false
+   * @return todo
    */
   public static float computeSentenceBleu(String[] refSents, String hypSent, boolean doNgramClip,
       int bleuOrder, boolean useShortestRef) {
@@ -92,6 +92,9 @@ public class BLEU {
 
   /**
    * words in the ngrams are using integer symbol ID
+   * @param refSents todo
+   * @param bleuOrder todo
+   * @return todo
    * */
   public static HashMap<String, Integer> constructMaxRefCountTable(String[] refSents, int bleuOrder) {
 
@@ -111,6 +114,8 @@ public class BLEU {
 
   /**
    * compute max_ref_count for each ngram in the reference sentences
+   * @param listRefNgramTbl todo
+   * @return todo
    * */
   public static HashMap<String, Integer> computeMaxRefCountTbl(
       List<HashMap<String, Integer>> listRefNgramTbl) {
@@ -195,10 +200,7 @@ public class BLEU {
           numNgramMatch[Regex.spaces.split(ngram).length - 1] += Support.findMin(
               refNgramTbl.get(ngram), entry.getValue()); // ngram clip
         } else {
-          numNgramMatch[Regex.spaces.split(ngram).length - 1] += entry.getValue();// without
-                                                                                        // ngram
-                                                                                        // count
-                                                                                        // clipping
+          numNgramMatch[Regex.spaces.split(ngram).length - 1] += entry.getValue();// without ngram count clipping
         }
       }
     }
@@ -256,6 +258,11 @@ public class BLEU {
 
   /**
    * speed consideration: assume hypNgramTable has a smaller size than referenceNgramTable does
+   * @param linearCorpusGainThetas todo
+   * @param hypLength todo
+   * @param hypNgramTable todo
+   * @param referenceNgramTable todo
+   * @return todo
    */
   public static float computeLinearCorpusGain(float[] linearCorpusGainThetas, int hypLength,
       Map<String, Integer> hypNgramTable, Map<String, Integer> referenceNgramTable) {
@@ -331,8 +338,10 @@ public class BLEU {
     return res;
   }
 
+  public static final int maxOrder = 4;
+
   /**
-   * Computes BLEU statistics incurred by a rule. This is (a) all ngram (n <= 4) for terminal rules
+   * Computes BLEU statistics incurred by a rule. This is (a) all ngram (n &lt;= 4) for terminal rules
    * and (b) all ngrams overlying boundary points between terminals in the rule and ngram state from
    * tail nodes.
    * 
@@ -346,13 +355,11 @@ public class BLEU {
    * 
    * Of these, all but the first have a boundary point to consider.
    * 
-   * @param rule the rule being applied
-   * @param spanWidth the width of the span in the input sentence
+   * @param edge todo
+   * @param spanPct todo
    * @param references the reference to compute statistics against
-   * @return
+   * @return todo
    */
-  public static final int maxOrder = 4;
-
   public static Stats compute(HyperEdge edge, float spanPct, References references) {
     Stats stats = new Stats();
     // TODO: this should not be the span width, but the real ref scaled to the span percentage

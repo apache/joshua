@@ -25,7 +25,9 @@ public final class Algorithms {
    * 
    * The code is based on the example by Michael Gilleland found at
    * http://www.merriampark.com/ld.htm.
-   * 
+   * @param candidate todo
+   * @param source todo
+   * @return the minimum edit distance.
    */
   public static final int levenshtein(String[] candidate, String[] source) {
     // First check to see whether either of the arrays

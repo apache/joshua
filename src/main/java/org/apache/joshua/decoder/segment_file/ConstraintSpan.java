@@ -38,29 +38,32 @@ import javax.swing.text.Segment;
  * <p>
  * The {@link Segment}, {@link ConstraintSpan}, and {@link ConstraintRule} interfaces are for
  * defining an interchange format between a SegmentFileParser and the Chart class. These interfaces
- * <emph>should not</emph> be used internally by the Chart. The objects returned by a
+ * <b>should not</b> be used internally by the Chart. The objects returned by a
  * SegmentFileParser will not be optimal for use during decoding. The Chart should convert each of
  * these objects into its own internal representation during construction. That is the contract
  * described by these interfaces.
  * 
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  */
 public interface ConstraintSpan {
 
   /**
    * Return the starting index of the span covered by this constraint.
+   * @return the starting index of the span covered by this constraint
    */
   int start();
 
   /**
    * Return the ending index of the span covered by this constraint. Clients may assume
    * <code>this.end() &gt;= 1 + this.start()</code>.
+   * @return the ending index of the span covered by this constraint
    */
   int end();
 
   /**
    * Return whether this is a hard constraint which should override the grammar. This value only
    * really matters for sets of <code>RULE</code> type constraints.
+   * @return true if a hard constraint exists which should override the grammar
    */
   boolean isHard();
 
@@ -71,6 +74,7 @@ public interface ConstraintSpan {
    * {@link java.util.Iterator} instead in order to reduce the coupling between this class and
    * Chart. See the note above about the fact that this interface should not be used internally by
    * the Chart class because it will not be performant.
+   * @return a {@link java.util.List} of {@link org.apache.joshua.decoder.segment_file.ConstraintRule}'s
    */
   List<ConstraintRule> rules();
 }

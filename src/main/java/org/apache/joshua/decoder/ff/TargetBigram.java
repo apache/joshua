@@ -180,7 +180,7 @@ public class TargetBigram extends StatefulFF {
   }
 
   /**
-   * There is nothing to be done here, since <s> and </s> are included in rules that are part
+   * There is nothing to be done here, since &lt;s&gt; and &lt;/s&gt; are included in rules that are part
    * of the grammar. We simply return the DP state of the tail node.
    */
   @Override

@@ -25,7 +25,7 @@ import java.util.NoSuchElementException;
 /**
  * This class provides a null-object Iterator. That is, an iterator over an empty collection.
  * 
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate: 2009-03-26 15:06:57 -0400 (Thu, 26 Mar 2009) $
  */
 public class NullIterator<E> implements Iterable<E>, Iterator<E> {

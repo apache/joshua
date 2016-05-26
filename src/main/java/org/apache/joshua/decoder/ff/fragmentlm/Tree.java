@@ -38,7 +38,7 @@ import org.apache.joshua.util.io.LineReader;
  * enclosed in double-quotes when read in.
  * 
  * @author Dan Klein
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 public class Tree implements Serializable {
 
@@ -111,7 +111,7 @@ public class Tree implements Serializable {
   /**
    * Computes the depth-one rule rooted at this node. If the node has no children, null is returned.
    * 
-   * @return
+   * @return string representation of the rule
    */
   public String getRule() {
     if (isLeaf()) {
@@ -237,6 +237,8 @@ public class Tree implements Serializable {
    * A tree is lexicalized if it has terminal nodes among the leaves of its frontier. For normal
    * trees this is always true since they bottom out in terminals, but for fragments, this may or
    * may not be true.
+   * 
+   * @return true if the tree is lexicalized
    */
   public boolean isLexicalized() {
     if (this.numLexicalItems < 0) {
@@ -313,7 +315,7 @@ public class Tree implements Serializable {
    * Removes the quotes around terminals. Note that the resulting tree could not be read back
    * in by this class, since unquoted leaves are interpreted as nonterminals.
    * 
-   * @return
+   * @return unquoted string
    */
   public String unquotedString() {
     return toString().replaceAll("\"", "");
@@ -450,8 +452,8 @@ public class Tree implements Serializable {
    * models. The arguments have to be passed in to preserve Java generics, even though this is only
    * ever used with String versions.
    * 
-   * @param sos presumably "<s>"
-   * @param eos presumably "</s>"
+   * @param sos presumably "&lt;s&gt;"
+   * @param eos presumably "&lt;/s&gt;"
    */
   public void insertSentenceMarkers(String sos, String eos) {
     insertSentenceMarker(sos, 0);
@@ -465,8 +467,8 @@ public class Tree implements Serializable {
 
   /**
    * 
-   * @param symbol
-   * @param pos
+   * @param symbol the marker to insert
+   * @param pos the position at which to insert
    */
   private void insertSentenceMarker(String symbol, int pos) {
 
@@ -487,6 +489,9 @@ public class Tree implements Serializable {
 
   /**
    * This is a convenience function for producing a fragment from its string representation.
+   * 
+   * @param ptbStr input string from which to produce a fragment
+   * @return the fragment
    */
   public static Tree fromString(String ptbStr) {
     PennTreeReader reader = new PennTreeReader(new StringReader(ptbStr));
@@ -530,14 +535,13 @@ public class Tree implements Serializable {
    * recursively visit the derivation state objects, following the route through the hypergraph
    * defined by them.
    * 
-   * This function is like the other buildTree() function, but that one simply follows the best
-   * incoming hyperedge for each node.
+   * This function is like Tree#buildTree(DerivationState, int),
+   * but that one simply follows the best incoming hyperedge for each node.
    * 
-   * @param rule
-   * @param tailNodes
-   * @param derivation - should not be null
-   * @param maxDepth
-   * @return
+   * @param rule for which corresponding internal fragment can be used to initialize the tree
+   * @param derivationStates array of state objects
+   * @param maxDepth of route through the hypergraph
+   * @return the Tree 
    */
   public static Tree buildTree(Rule rule, DerivationState[] derivationStates, int maxDepth) {
     Tree tree = getFragmentFromYield(rule.getEnglishWords());
@@ -602,19 +606,14 @@ public class Tree implements Serializable {
   }
   
   /**
-   * Builds a tree from the kth-best derivation state. This is done by initializing the tree with
+   * <p>Builds a tree from the kth-best derivation state. This is done by initializing the tree with
    * the internal fragment corresponding to the rule; this will be the top of the tree. We then
    * recursively visit the derivation state objects, following the route through the hypergraph
-   * defined by them.
+   * defined by them.</p>
    * 
-   * This function is like the other buildTree() function, but that one simply follows the best
-   * incoming hyperedge for each node.
-   * 
-   * @param rule
-   * @param tailNodes
-   * @param derivation
-   * @param maxDepth
-   * @return
+   * @param derivationState array of state objects
+   * @param maxDepth of route through the hypergraph
+   * @return the Tree
    */
   public static Tree buildTree(DerivationState derivationState, int maxDepth) {
     Rule rule = derivationState.edge.getRule();
@@ -675,9 +674,10 @@ public class Tree implements Serializable {
    * This could be implemented by using the other buildTree() function and using the 1-best
    * DerivationState.
    * 
-   * @param rule
-   * @param tailNodes
-   * @return
+   * @param rule {@link org.apache.joshua.decoder.ff.tm.Rule} to be used whilst building the tree
+   * @param tailNodes {@link java.util.List} of {@link org.apache.joshua.decoder.hypergraph.HGNode}'s
+   * @param maxDepth to go in the tree
+   * @return shallow clone of the Tree object
    */
   public static Tree buildTree(Rule rule, List<HGNode> tailNodes, int maxDepth) {
     Tree tree = getFragmentFromYield(rule.getEnglishWords());

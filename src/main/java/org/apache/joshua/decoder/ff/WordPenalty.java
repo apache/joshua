@@ -31,8 +31,8 @@ import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
  * 
- * @author Zhifei Li <zhifei.work@gmail.com>
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Zhifei Li zhifei.work@gmail.com
+ * @author Matt Post post@cs.jhu.edu
  */
 public final class WordPenalty extends StatelessFF {
 

@@ -42,16 +42,11 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * Note that not all features need to be negative log probs, but you should be aware that they
  * will be negated, so if you want a positive count, it should come in as negative.
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
- */
-
-
-/**
  * Normally, the feature score in the rule should be *cost* (i.e., -LogP), so that the feature
  * weight should be positive
  * 
- * @author Zhifei Li, <zhifei.work@gmail.com>
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Zhifei Li, zhifei.work@gmail.com
+ * @author Matt Post post@cs.jhu.edu
  */
 public class Rule implements Comparator<Rule>, Comparable<Rule> {
 
@@ -100,7 +95,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
    * @param targetRhs Target language right-hand side of the rule.
    * @param sparseFeatures Feature value scores for the rule.
    * @param arity Number of nonterminals in the source language right-hand side.
-   * @param owner
+   * @param owner todo
    */
   public Rule(int lhs, int[] sourceRhs, int[] targetRhs, String sparseFeatures, int arity, int owner) {
     this.lhs = lhs;
@@ -114,7 +109,13 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   }
   
   /**
-   * Constructor used by PackedGrammar's sortRules().
+   * Constructor used by PackedGrammar's sortRules()
+   * @param lhs todo
+   * @param sourceRhs todo
+   * @param targetRhs todo
+   * @param features todo
+   * @param arity todo
+   * @param owner todo
    */
   public Rule(int lhs, int[] sourceRhs, int[] targetRhs, FeatureVector features, int arity, int owner) {
     this.lhs = lhs;
@@ -130,6 +131,11 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   /**
    * Constructor used for SamtFormatReader and GrammarBuilderWalkerFunction's getRuleWithSpans()
    * Owner set to -1
+   * @param lhs todo
+   * @param sourceRhs todo
+   * @param targetRhs todo
+   * @param sparseFeatures todo
+   * @param arity todo
    */
   public Rule(int lhs, int[] sourceRhs, int[] targetRhs, String sparseFeatures, int arity) {
     this(lhs, sourceRhs, targetRhs, sparseFeatures, arity, -1);
@@ -137,6 +143,12 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
 
   /**
    * Constructor used for addOOVRules(), HieroFormatReader and PhraseRule.
+   * @param lhs todo
+   * @param sourceRhs todo
+   * @param targetRhs todo
+   * @param sparseFeatures todo
+   * @param arity todo
+   * @param alignment todo
    */
   public Rule(int lhs, int[] sourceRhs, int[] targetRhs, String sparseFeatures, int arity, String alignment) {
     this(lhs, sourceRhs, targetRhs, sparseFeatures, arity);
@@ -283,6 +295,8 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
    * This function returns the dense (phrasal) features discovered when the rule was loaded. Dense
    * features are the list of unlabeled features that preceded labeled ones. They can also be
    * specified as labeled features of the form "tm_OWNER_INDEX", but the former format is preferred.
+   * 
+   * @return the {@link org.apache.joshua.decoder.ff.FeatureVector} for this rule
    */
   public FeatureVector getFeatureVector() {
     return featuresSupplier.get();
@@ -389,7 +403,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   /**
    * Returns a version of the rule suitable for reading in from a text file.
    * 
-   * @return
+   * @return string version of the rule
    */
   public String textFormat() {
     StringBuffer sb = new StringBuffer();
@@ -425,6 +439,8 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   /**
    * Returns an alignment as a sequence of integers. The integers at positions i and i+1 are paired,
    * with position i indexing the source and i+1 the target.
+   * 
+   * @return a byte[] from the {@link com.google.common.base.Supplier}
    */
   public byte[] getAlignment() {
     return this.alignmentSupplier.get();
@@ -468,7 +484,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   /**
    * Return the French (source) nonterminals as list of Strings
    * 
-   * @return
+   * @return a list of strings
    */
   public int[] getForeignNonTerminals() {
     int[] nts = new int[getArity()];
@@ -481,6 +497,8 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   
   /**
    * Returns an array of size getArity() containing the source indeces of non terminals.
+   * 
+   * @return an array of size getArity() containing the source indeces of non terminals
    */
   public int[] getNonTerminalSourcePositions() {
     int[] nonTerminalPositions = new int[getArity()];
@@ -495,6 +513,8 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   /**
    * Parses the Alignment byte[] into a Map from target to (possibly a list of) source positions.
    * Used by the WordAlignmentExtractor.
+   * 
+   * @return a {@link java.util.Map} of alignments
    */
   public Map<Integer, List<Integer>> getAlignmentMap() {
     byte[] alignmentArray = getAlignment();
@@ -515,7 +535,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   /**
    * Return the English (target) nonterminals as list of Strings
    * 
-   * @return
+   * @return list of strings
    */
   public int[] getEnglishNonTerminals() {
     int[] nts = new int[getArity()];
@@ -570,8 +590,8 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   /**
    * Matches the string representation of the rule's source side against a sentence
    * 
-   * @param sentence
-   * @return
+   * @param sentence {@link org.apache.joshua.lattice.Lattice} input
+   * @return true if there is a match
    */
   public boolean matches(Sentence sentence) {
     boolean match = getPattern().matcher(sentence.fullSource()).find();

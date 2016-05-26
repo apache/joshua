@@ -39,10 +39,9 @@ public class LabelPhrases {
    * Main method.
    * 
    * @param args names of the two grammars to be compared
-   * @throws IOException
-   * @throws NumberFormatException
+   * @throws IOException if there is an error reading the input grammars
    */
-  public static void main(String[] args) throws NumberFormatException, IOException {
+  public static void main(String[] args) throws IOException {
 
     if (args.length < 1 || args[0].equals("-h")) {
       System.err.println("Usage: " + LabelPhrases.class.toString());

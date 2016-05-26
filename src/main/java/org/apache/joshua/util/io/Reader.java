@@ -24,17 +24,28 @@ import java.util.Iterator;
 /**
  * Common interface for Reader type objects.
  * 
- * @author wren ng thornton <wren@users.sourceforge.net>
+ * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate: 2009-03-26 15:06:57 -0400 (Thu, 26 Mar 2009) $
  */
 public interface Reader<E> extends Iterable<E>, Iterator<E> {
 
-  /** Close the reader, freeing all resources. */
+  /** 
+   * Close the reader, freeing all resources.
+   * @throws IOException if there is an error closing the reader instance
+   */
   void close() throws IOException;
 
-  /** Determine if the reader is ready to read a line. */
+  /** 
+   * Determine if the reader is ready to read a line.
+   * @return true if it is ready
+   * @throws IOException if there is an error whilst determining if the reader if ready
+   */
   boolean ready() throws IOException;
 
-  /** Read a "line" and return an object representing it. */
+  /** 
+   * Read a "line" and return an object representing it.
+   * @return an object representing a single line
+   * @throws IOException if there is an error reading lines
+   */
   E readLine() throws IOException;
 }

@@ -97,7 +97,7 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
    * For correct behavior <code>close</code> must be called on every GrammarReader, however this
    * code attempts to avoid resource leaks.
    * 
-   * @see joshua.util.io.LineReader
+   * @see org.apache.joshua.util.io.LineReader
    */
   @Override
   protected void finalize() throws Throwable {
@@ -173,7 +173,7 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
 
   /**
    * Removes square brackets (and index, if present) from nonterminal id 
-   * @param tokenID
+   * @param tokenID the int ID to clean
    * @return cleaned ID
    */
   public static int cleanNonTerminal(int tokenID) {
@@ -183,7 +183,7 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
 
   /**
    * Removes square brackets (and index, if present) from nonterminal id 
-   * @param token
+   * @param token the string ID to clean
    * @return cleaned token
    */
   public static String cleanNonTerminal(String token) {
