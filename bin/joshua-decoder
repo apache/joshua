@@ -44,7 +44,7 @@ JOSHUA=$(dirname $0)/..
 
 exec java -Xmx${mem} \
 	-Dfile.encoding=utf8 \
-	-Djava.util.logging.config.file=${JOSHUA}/logging.properties \
+	-Dlog4j.configuration=$JOSHUA/logging.properties \
 	-Djava.library.path=$JOSHUA/lib \
 	-cp $JOSHUA/target/joshua-*-jar-with-dependencies.jar \
 	org.apache.joshua.decoder.JoshuaDecoder "$@"
