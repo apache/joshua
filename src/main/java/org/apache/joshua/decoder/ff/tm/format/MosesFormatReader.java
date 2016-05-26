@@ -35,7 +35,7 @@ import org.apache.joshua.util.io.LineReader;
  * There is also a tool to convert the grammars directly, so that they can be suitably packed. Usage:
  * 
  * <pre>
- *     cat PHRASE_TABLE | java -cp $JOSHUA/class joshua.decoder.ff.tm.format.MosesFormatReader > grammar
+ *     cat PHRASE_TABLE | java -cp $JOSHUA/target/classes org.apache.joshua.decoder.ff.tm.format.MosesFormatReader > grammar
  * </pre>
  * 
  * @author Matt Post <post@cs.jhu.edu>

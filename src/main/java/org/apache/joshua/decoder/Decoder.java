@@ -956,7 +956,7 @@ public class Decoder {
   private Class<?> getClass(String featureName) {
     Class<?> clas = null;
 
-    String[] packages = { "joshua.decoder.ff", "joshua.decoder.ff.lm", "joshua.decoder.ff.phrase" };
+    String[] packages = { "org.apache.joshua.decoder.ff", "org.apache.joshua.decoder.ff.lm", "org.apache.joshua.decoder.ff.phrase" };
     for (String path : packages) {
       try {
         clas = Class.forName(String.format("%s.%s", path, featureName));
