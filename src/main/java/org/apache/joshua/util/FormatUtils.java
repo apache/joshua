@@ -52,6 +52,9 @@ public class FormatUtils {
   /**
    * Determines whether the ID represents a nonterminal. This is a trivial check, since nonterminal
    * IDs are simply negative ones.
+   * 
+   * @param id the vocabulary ID
+   * @return true if a nonterminal ID, false otherwise
    */
   public static boolean isNonterminal(int id) {
     return id < 0;
@@ -96,10 +99,10 @@ public class FormatUtils {
    * Nonterminals on source and target sides are represented as [X,1], where 1 is an integer
    * that links the two sides. This function extracts the index, e.g.,
    * 
-   * getNonterminalIndex("[X,7]") -> 7
+   * getNonterminalIndex("[X,7]") produces 7
    * 
-   * @param the nonterminal index
-   * @return
+   * @param nt the nonterminal string
+   * @return the index
    */
   public static int getNonterminalIndex(String nt) {
     return Integer.parseInt(nt.substring(nt.indexOf(INDEX_SEPARATOR) + 1, nt.length() - 1));

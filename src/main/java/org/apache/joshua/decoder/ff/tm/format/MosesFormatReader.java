@@ -29,16 +29,16 @@ import org.apache.joshua.util.io.LineReader;
  * list of features, and word alignments. It works by
  * 
  * - casting the phrase-based rules to left-branching hierarchical rules and passing them on \
- *   to its parent class, {@HieroFormatReader}.
+ *   to its parent class, {@link HieroFormatReader}.
  * - converting the probabilities to -log probabilities
  * 
  * There is also a tool to convert the grammars directly, so that they can be suitably packed. Usage:
  * 
  * <pre>
- *     cat PHRASE_TABLE | java -cp $JOSHUA/target/classes org.apache.joshua.decoder.ff.tm.format.MosesFormatReader > grammar
+ *     cat PHRASE_TABLE | java -cp $JOSHUA/target/classes org.apache.joshua.decoder.ff.tm.format.MosesFormatReader
  * </pre>
  * 
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  *
  */
 
@@ -94,7 +94,7 @@ public class MosesFormatReader extends HieroFormatReader {
   /**
    * Converts a Moses phrase table to a Joshua grammar. 
    * 
-   * @param args
+   * @param args the command-line arguments
    */
   public static void main(String[] args) {
     MosesFormatReader reader = new MosesFormatReader();
