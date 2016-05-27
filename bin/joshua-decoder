@@ -33,7 +33,6 @@ mem=4g
 
 if [[ $1 == "-m" ]]; then
     mem=$2
-
     shift
     shift
 fi
@@ -41,10 +40,11 @@ fi
 set -u
 
 JOSHUA=$(dirname $0)/..
+JAR_PATH=$(find "$JOSHUA"/target/joshua-*-jar-with-dependencies.jar)
+RES_OVERRIDE_PATH="$JOSHUA"/src/main/resources/
 
 exec java -Xmx${mem} \
 	-Dfile.encoding=utf8 \
-	-Dlog4j.configuration=$JOSHUA/src/main/resources/log4j.properties \
 	-Djava.library.path=$JOSHUA/lib \
-	-cp $JOSHUA/target/joshua-*-jar-with-dependencies.jar \
+	-cp "$RES_OVERRIDE_PATH:$JAR_PATH" \
 	org.apache.joshua.decoder.JoshuaDecoder "$@"
