@@ -77,8 +77,11 @@ public class ComputeNodeResult {
     // The total Viterbi cost of this edge. This is the Viterbi cost of the tail nodes, plus
     // whatever costs we incur applying this rule to create a new hyperedge.
     float viterbiCost = 0.0f;
-    LOG.debug("ComputeNodeResult():");
-    LOG.debug("-> RULE {}", rule);
+    
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("ComputeNodeResult():");
+      LOG.debug("-> RULE {}", rule);
+    }
 
     /*
      * Here we sum the accumulated cost of each of the tail nodes. The total cost of the new
@@ -88,8 +91,10 @@ public class ComputeNodeResult {
      */
     if (null != tailNodes) {
       for (HGNode item : tailNodes) {
-        LOG.debug("-> item.bestedge: {}", item);
-        LOG.debug("-> TAIL NODE {}", item);
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("-> item.bestedge: {}", item);
+          LOG.debug("-> TAIL NODE {}", item);
+        }
         viterbiCost += item.bestHyperedge.getBestDerivationScore();
       }
     }
@@ -113,9 +118,11 @@ public class ComputeNodeResult {
       transitionCost += acc.getScore();
 
 
-      LOG.debug("FEATURE {} = {} * {} = {}", feature.getName(),
-          acc.getScore() / Decoder.weights.getSparse(feature.getName()),
-          Decoder.weights.getSparse(feature.getName()), acc.getScore());
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("FEATURE {} = {} * {} = {}", feature.getName(),
+            acc.getScore() / Decoder.weights.getSparse(feature.getName()),
+            Decoder.weights.getSparse(feature.getName()), acc.getScore());
+      }
 
       if (feature.isStateful()) {
         futureCostEstimate += feature.estimateFutureCost(rule, newState, sentence);
@@ -123,7 +130,8 @@ public class ComputeNodeResult {
       }
     }
     viterbiCost += transitionCost;
-    LOG.debug("-> COST = {}", transitionCost);
+    if (LOG.isDebugEnabled())
+      LOG.debug("-> COST = {}", transitionCost);
     // Set the final results.
     this.pruningCostEstimate = viterbiCost + futureCostEstimate;
     this.viterbiCost = viterbiCost;

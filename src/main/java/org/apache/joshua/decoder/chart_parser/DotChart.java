@@ -171,6 +171,7 @@ class DotChart {
    * </ol>
    */
   void expandDotCell(int i, int j) {
+    if (LOG.isDebugEnabled())
       LOG.debug("Expanding dot cell ({}, {})", i, j);
 
     /*

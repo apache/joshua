@@ -563,7 +563,8 @@ public class Chart {
     for (int width = 1; width <= sourceLength; width++) {
       for (int i = 0; i <= sourceLength - width; i++) {
         int j = i + width;
-        LOG.debug("Processing span ({}, {})", i, j);
+        if (LOG.isDebugEnabled())
+          LOG.debug("Processing span ({}, {})", i, j);
 
         /* Skips spans for which no path exists (possible in lattices). */
         if (inputLattice.distance(i, j) == Float.POSITIVE_INFINITY) {
@@ -575,7 +576,8 @@ public class Chart {
          * rules over (i,j-1) that need the terminal at (j-1,j) and looking at
          * all split points k to expand nonterminals.
          */
-        LOG.debug("Expanding cell");
+        if (LOG.isDebugEnabled())
+          LOG.debug("Expanding cell");
         for (int k = 0; k < this.grammars.length; k++) {
           /**
            * Each dotChart can act individually (without consulting other
@@ -589,17 +591,20 @@ public class Chart {
          * 2. The regular CKY part: add completed items onto the chart via cube
          * pruning.
          */
-        LOG.debug("Adding complete items into chart");
+        if (LOG.isDebugEnabled())
+          LOG.debug("Adding complete items into chart");
         completeSpan(i, j);
 
         /* 3. Process unary rules. */
-        LOG.debug("Adding unary items into chart");
+        if (LOG.isDebugEnabled())
+          LOG.debug("Adding unary items into chart");
         addUnaryNodes(this.grammars, i, j);
 
         // (4)=== in dot_cell(i,j), add dot-nodes that start from the /complete/
         // superIterms in
         // chart_cell(i,j)
-        LOG.debug("Initializing new dot-items that start from complete items in this cell");
+        if (LOG.isDebugEnabled())
+          LOG.debug("Initializing new dot-items that start from complete items in this cell");
         for (int k = 0; k < this.grammars.length; k++) {
           if (this.grammars[k].hasRuleForSpan(i, j, inputLattice.distance(i, j))) {
             this.dotcharts[k].startDotItems(i, j);
@@ -629,7 +634,8 @@ public class Chart {
       return null;
     }
 
-    LOG.debug("Finished expand");
+    if (LOG.isDebugEnabled())
+      LOG.debug("Finished expand");
     return new HyperGraph(this.goalBin.getSortedNodes().get(0), -1, -1, this.sentence);
   }
 
@@ -655,8 +661,9 @@ public class Chart {
   // ===============================================================
 
   private void logStatistics() {
-    LOG.debug("Input {}: Chart: added {} merged {} dot-items added: {}",
-        this.sentence.id(), this.nAdded, this.nMerged, this.nDotitemAdded);
+    if (LOG.isDebugEnabled())
+      LOG.debug("Input {}: Chart: added {} merged {} dot-items added: {}",
+          this.sentence.id(), this.nAdded, this.nMerged, this.nDotitemAdded);
   }
 
   /**
@@ -680,7 +687,8 @@ public class Chart {
     ArrayList<HGNode> queue = new ArrayList<HGNode>(chartBin.getSortedNodes());
     HashSet<Integer> seen_lhs = new HashSet<Integer>();
 
-    LOG.debug("Adding unary to [{}, {}]", i, j);
+    if (LOG.isDebugEnabled())
+      LOG.debug("Adding unary to [{}, {}]", i, j);
 
     while (queue.size() > 0) {
       HGNode node = queue.remove(0);
@@ -709,7 +717,8 @@ public class Chart {
             HGNode resNode = chartBin.addHyperEdgeInCell(states, rule, i, j, antecedents,
                 new SourcePath(), true);
 
-            LOG.debug("{}", rule);
+            if (LOG.isDebugEnabled())
+              LOG.debug("{}", rule);
             if (null != resNode && !seen_lhs.contains(resNode.lhs)) {
               queue.add(resNode);
               qtyAdditionsToQueue++;
