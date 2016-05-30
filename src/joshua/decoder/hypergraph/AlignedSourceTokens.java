@@ -42,8 +42,7 @@ class AlignedSourceTokens extends LinkedList<Integer> {
   /** whether the word this Point corresponds to has no alignment in source */
   private boolean isNull = false;
 
-  AlignedSourceTokens() {
-  }
+  AlignedSourceTokens() {}
 
   void setFinal() {
     isFinal = true;
@@ -62,9 +61,7 @@ class AlignedSourceTokens extends LinkedList<Integer> {
    * returns true if element was added.
    */
   public boolean add(Integer x) {
-    if (isNull || isNonTerminal)
-      return false;
-    return super.add(x);
+    return isNull ? false : super.add(x);
   }
 
   public boolean isNonTerminal() {
@@ -85,9 +82,9 @@ class AlignedSourceTokens extends LinkedList<Integer> {
    */
   void shiftBy(int start, int shift) {
     if (!isFinal && !isNull) {
-      ListIterator<Integer> it = this.listIterator();
+      final ListIterator<Integer> it = this.listIterator();
       while (it.hasNext()) {
-        int x = it.next();
+        final int x = it.next();
         if (x > start) {
           it.set(x + shift);
         }
