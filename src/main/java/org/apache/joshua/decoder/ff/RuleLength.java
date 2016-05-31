@@ -32,6 +32,8 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * source side, its target side, and a feature that pairs them.
  */
 public abstract class RuleLength extends StatelessFF {
+  
+  private static final int VALUE = 1;
 
   public RuleLength(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, "RuleLength", args, config);
@@ -40,12 +42,11 @@ public abstract class RuleLength extends StatelessFF {
   @Override
   public DPState compute(Rule rule, List<HGNode> tailNodes, int i, int j, SourcePath sourcePath,
       Sentence sentence, Accumulator acc) {
-    int sourceLen = rule.getFrench().length;
-    int targetLen = rule.getEnglish().length;
-    acc.add(String.format("%s_sourceLength%d", name, sourceLen), 1);
-    acc.add(String.format("%s_targetLength%d", name, targetLen), 1);
-    acc.add(String.format("%s_pairLength%d-%d", name, sourceLen, targetLen), 1);
-
+    int sourceLength = rule.getFrench().length;
+    int targetLength = rule.getEnglish().length;
+    acc.add(name + "_source" + sourceLength, VALUE);
+    acc.add(name + "_target" + sourceLength, VALUE);
+    acc.add(name + "_sourceTarget" + sourceLength + "-" + targetLength, VALUE);
     return null;
   }
 }

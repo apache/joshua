@@ -37,12 +37,15 @@ import org.apache.joshua.decoder.segment_file.Sentence;
 public final class WordPenalty extends StatelessFF {
 
   private float OMEGA = -(float) Math.log10(Math.E); // -0.435
+  private final boolean isCky;
 
   public WordPenalty(final FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, "WordPenalty", args, config);
 
     if (parsedArgs.containsKey("value"))
       OMEGA = Float.parseFloat(parsedArgs.get("value"));
+    
+    isCky = config.search_algorithm.equals("cky");
   }
 
   @Override
@@ -52,10 +55,9 @@ public final class WordPenalty extends StatelessFF {
     if (rule != null) {
       // TODO: this is an inefficient way to do this. Find a better way to not apply this rule
       // to start and stop glue rules when phrase-based decoding.
-      if (config.search_algorithm.equals("cky") 
-          || (rule != Hypothesis.BEGIN_RULE && rule != Hypothesis.END_RULE))
-        // acc.add(name, OMEGA * (rule.getEnglish().length - rule.getArity()));
+      if (isCky || (rule != Hypothesis.BEGIN_RULE && rule != Hypothesis.END_RULE)) {
         acc.add(denseFeatureIndex, OMEGA * (rule.getEnglish().length - rule.getArity()));
+      }
     }
       
     return null;
@@ -64,7 +66,7 @@ public final class WordPenalty extends StatelessFF {
   @Override
   public ArrayList<String> reportDenseFeatures(int index) {
     denseFeatureIndex = index;
-    ArrayList<String> names = new ArrayList<String>();
+    ArrayList<String> names = new ArrayList<>(1);
     names.add(name);
     return names;
   }

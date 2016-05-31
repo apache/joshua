@@ -907,7 +907,7 @@ public class Decoder {
    * Feature functions are instantiated with a line of the form
    *
    * <pre>
-   *   feature_function = FEATURE OPTIONS
+   *   FEATURE OPTIONS
    * </pre>
    *
    * Weights for features are listed separately.
@@ -918,28 +918,27 @@ public class Decoder {
   private void initializeFeatureFunctions() throws IOException {
 
     for (String featureLine : joshuaConfiguration.features) {
-      // feature-function = NAME args
+      // line starts with NAME, followed by args
       // 1. create new class named NAME, pass it config, weights, and the args
-
-      // Get rid of the leading crap.
-      featureLine = featureLine.replaceFirst("^feature_function\\s*=\\s*", "");
 
       String fields[] = featureLine.split("\\s+");
       String featureName = fields[0];
+      
       try {
+        
         Class<?> clas = getClass(featureName);
         Constructor<?> constructor = clas.getConstructor(FeatureVector.class,
             String[].class, JoshuaConfiguration.class);
-        this.featureFunctions.add((FeatureFunction) constructor.newInstance(weights, fields, joshuaConfiguration));
+        FeatureFunction feature = (FeatureFunction) constructor.newInstance(weights, fields, joshuaConfiguration);
+        this.featureFunctions.add(feature);
+        
       } catch (Exception e) {
-        e.printStackTrace();
-        throw new RuntimeException("* FATAL: could not find a feature '" + featureName + "'");
+        throw new RuntimeException(String.format("Unable to instantiate feature function '%s'!", featureLine), e); 
       }
     }
 
     for (FeatureFunction feature : featureFunctions) {
       LOG.info("FEATURE: {}", feature.logString());
-
     }
 
     weights.registerDenseFeatures(featureFunctions);

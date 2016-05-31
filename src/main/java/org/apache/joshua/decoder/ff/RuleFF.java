@@ -18,6 +18,8 @@
  */
 package org.apache.joshua.decoder.ff;
 
+import static com.google.common.cache.CacheBuilder.newBuilder;
+
 import java.util.List;
 
 import org.apache.joshua.corpus.Vocabulary;
@@ -28,62 +30,95 @@ import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
 
+import com.google.common.cache.Cache;
+
 /**
- *  This feature just counts rules that are used. You can restrict it with a number of flags:
- * 
- *   -owner OWNER
- *    Only count rules owned by OWNER
- *   -target|-source
- *    Only count the target or source side (plus the LHS)
- *
- * TODO: add an option to separately provide a list of rule counts, restrict to counts above a threshold. 
+ *  This feature fires for rule ids.
+ *  Firing can be restricted to rules from a certain owner, and rule ids
+ *  can be generated from source side and/or target side. 
  */
 public class RuleFF extends StatelessFF {
 
   private enum Sides { SOURCE, TARGET, BOTH };
   
-  private int owner = 0;
-  private Sides sides = Sides.BOTH;
+  private static final String NAME = "RuleFF";
+  // value to fire for features
+  private static final int VALUE = 1;
+  // whether this feature is restricted to a certain grammar/owner
+  private final boolean ownerRestriction;
+  // the grammar/owner this feature is restricted to fire
+  private final int owner;
+  // what part of the rule should be extracted;
+  private final Sides sides;
+  // Strings separating words and rule sides 
+  private static final String SEPARATOR = "~";
+  private static final String SIDES_SEPARATOR = "->";
+  
+  private final Cache<Rule, String> featureCache;
   
   public RuleFF(FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, "RuleFF", args, config);
+    super(weights, NAME, args, config);
     
-    owner = Vocabulary.id(parsedArgs.get("owner"));
-    if (parsedArgs.containsKey("source"))
-      sides = Sides.SOURCE;
-    else if (parsedArgs.containsKey("target"))
-      sides = Sides.TARGET;
+    ownerRestriction = (parsedArgs.containsKey("owner")) ? true : false;
+    owner = ownerRestriction ? Vocabulary.id(parsedArgs.get("owner")) : 0;
+    
+    if (parsedArgs.containsKey("sides")) {
+      final String sideValue = parsedArgs.get("sides");
+      if (sideValue.equalsIgnoreCase("source")) {
+        sides = Sides.SOURCE;
+      } else if (sideValue.equalsIgnoreCase("target")) {
+        sides = Sides.TARGET;
+      } else if (sideValue.equalsIgnoreCase("both")){
+        sides = Sides.BOTH;
+      } else {
+        throw new RuntimeException("Unknown side value.");
+      }
+    } else {
+      sides = Sides.BOTH;
+    }
+    
+    // initialize cache
+    if (parsedArgs.containsKey("cacheSize")) {
+      featureCache = newBuilder().maximumSize(Integer.parseInt(parsedArgs.get("cacheSize"))).build();
+    } else {
+      featureCache = newBuilder().maximumSize(config.cachedRuleSize).build();
+    }
   }
 
   @Override
   public DPState compute(Rule rule, List<HGNode> tailNodes, int i, int j, SourcePath sourcePath,
       Sentence sentence, Accumulator acc) {
-
-    if (owner > 0 && rule.getOwner() == owner) {
-      String ruleString = getRuleString(rule);
-      acc.add(ruleString, 1);
+    
+    if (ownerRestriction && rule.getOwner() != owner) {
+      return null;
     }
 
+    String featureName = featureCache.getIfPresent(rule);
+    if (featureName == null) {
+      featureName = getRuleString(rule);
+      featureCache.put(rule, featureName);
+    }
+    acc.add(featureName, VALUE);
+    
     return null;
   }
-
-  private String getRuleString(Rule rule) {
-    String ruleString = "";
-    switch(sides) {
-    case BOTH:
-      ruleString = String.format("%s  %s  %s", Vocabulary.word(rule.getLHS()), rule.getFrenchWords(),
-          rule.getEnglishWords());
-      break;
-
-    case SOURCE:
-      ruleString = String.format("%s  %s", Vocabulary.word(rule.getLHS()), rule.getFrenchWords());
-      break;
-
-    case TARGET:
-      ruleString = String.format("%s  %s", Vocabulary.word(rule.getLHS()), rule.getEnglishWords());
-      break;
+  
+  /**
+   * Obtains the feature id for the given rule.
+   * @param rule
+   * @return String representing the feature name.s
+   */
+  private String getRuleString(final Rule rule) {
+    final StringBuilder sb = new StringBuilder(Vocabulary.word(rule.getLHS()))
+      .append(SIDES_SEPARATOR);
+    if (sides == Sides.SOURCE || sides == Sides.BOTH) {
+      sb.append(Vocabulary.getWords(rule.getFrench(), SEPARATOR));
     }
-    return ruleString.replaceAll("[ =]", "~");
+    sb.append(SIDES_SEPARATOR);
+    if (sides == Sides.TARGET || sides == Sides.BOTH) {
+      sb.append(Vocabulary.getWords(rule.getEnglish(), SEPARATOR));
+    }
+    return sb.toString();
   }
 
   @Override

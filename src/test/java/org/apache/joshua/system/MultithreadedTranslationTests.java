@@ -65,7 +65,7 @@ public class MultithreadedTranslationTests {
     joshuaConfig.tms.add("thrax -owner glue -maxspan -1 -path resources/grammar.glue");
     joshuaConfig.goal_symbol = "[GOAL]";
     joshuaConfig.default_non_terminal = "[X]";
-    joshuaConfig.features.add("feature_function = OOVPenalty");
+    joshuaConfig.features.add("OOVPenalty");
     joshuaConfig.weights.add("tm_pt_0 1");
     joshuaConfig.weights.add("tm_pt_1 1");
     joshuaConfig.weights.add("tm_pt_2 1");
