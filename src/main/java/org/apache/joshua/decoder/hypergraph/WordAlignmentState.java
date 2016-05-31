@@ -52,6 +52,9 @@ public class WordAlignmentState {
   /**
    * construct AlignmentState object from a virgin Rule and its source span.
    * Determines if state is complete (if no NT present)
+   * 
+   * @param rule the input Rule
+   * @param start the start index
    */
   public WordAlignmentState(final Rule rule, final int start) {
     trgPoints = new LinkedList<AlignedSourceTokens>();
@@ -153,6 +156,8 @@ public class WordAlignmentState {
    * nonterminal slot. Also shifts the indeces in this instance by the span/width of the
    * child that is to be substituted.
    * Substitution order is determined by the source-first traversal through the hypergraph.
+   * 
+   * @param child The child
    */
   public void substituteIn(WordAlignmentState child) {
     // find the index of the NonTerminal where we substitute the child targetPoints into.

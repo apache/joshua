@@ -45,12 +45,8 @@ import org.slf4j.LoggerFactory;
  * sentence and id and contains the decoded hypergraph. Translation objects are returned by
  * DecoderThread instances to the InputHandler, where they are assembled in order for output.
  * 
-<<<<<<< HEAD:src/main/java/org/apache/joshua/decoder/Translation.java
  * @author Matt Post post@cs.jhu.edu
-=======
- * @author Matt Post <post@cs.jhu.edu>
- * @author Felix Hieber <fhieber@amazon.com>
->>>>>>> origin/master:src/joshua/decoder/Translation.java
+ * @author Felix Hieber fhieber@amazon.com
  */
 
 public class Translation {

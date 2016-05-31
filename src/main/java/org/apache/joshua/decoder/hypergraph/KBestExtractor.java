@@ -162,6 +162,10 @@ public class KBestExtractor {
   
   /**
    * Returns the k-th Structured Translation.
+   * 
+   * @param node The node to extract from
+   * @param k The (1-indexed) index of the item wanted
+   * @return a StructuredTranslation object
    */
   public StructuredTranslation getKthStructuredTranslation(HGNode node, int k) {
     StructuredTranslation result = null;
@@ -179,7 +183,6 @@ public class KBestExtractor {
    * 
    * @param hg the hypergraph to extract from
    * @param topN how many to extract
-   * @param out object to write to
    * @return list of StructuredTranslation objects, empty if there is no HyperGraph goal node.
    */
   public List<StructuredTranslation> KbestExtractOnHG(HyperGraph hg, int topN) {

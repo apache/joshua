@@ -43,6 +43,10 @@ public class StructuredTranslationFactory {
   
   /**
    * Returns a StructuredTranslation instance from the Viterbi derivation.
+   * 
+   * @param sourceSentence
+   * @param hypergraph
+   * @param featureFunctions
    * @return A StructuredTranslation object representing the Viterbi derivation.
    */
   public static StructuredTranslation fromViterbiDerivation(
@@ -63,8 +67,8 @@ public class StructuredTranslationFactory {
   
   /**
    * Returns a StructuredTranslation from an empty decoder output
-   * @param sourceSentence
-   * @return
+   * @param sourceSentence the source sentence
+   * @return a StructuredTranslation object
    */
   public static StructuredTranslation fromEmptyOutput(final Sentence sourceSentence) {
         return new StructuredTranslation(

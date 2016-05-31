@@ -21,7 +21,7 @@ package org.apache.joshua.util;
 /***
  * One day, all constants should be moved here (many are in Vocabulary).
  * 
- * @author Matt Post <post@cs.jhu.edu>
+ * @author Matt Post post@cs.jhu.edu
  */
 
 public final class Constants {
