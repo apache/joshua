@@ -1,11 +1,13 @@
 // Copyright 2015 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 package joshua.corpus;
 
-import static org.junit.Assert.*;
+import static joshua.util.FormatUtils.isNonterminal;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Before;
@@ -53,21 +55,21 @@ public class VocabularyTest {
   @Test
   public void givenVocabulary_whenCheckingStringInBracketsOrNegativeNumber_thenIsNonTerminal() {
     //non-terminals
-    assertTrue(Vocabulary.nt(NON_TERMINAL));
+    assertTrue(isNonterminal(NON_TERMINAL));
     //terminals
-    assertFalse(Vocabulary.nt(WORD1));
-    assertFalse(Vocabulary.nt("[]"));
-    assertFalse(Vocabulary.nt("["));
-    assertFalse(Vocabulary.nt("]"));
-    assertFalse(Vocabulary.nt(""));
+    assertFalse(isNonterminal(WORD1));
+    assertFalse(isNonterminal("[]"));
+    assertFalse(isNonterminal("["));
+    assertFalse(isNonterminal("]"));
+    assertFalse(isNonterminal(""));
     
     //negative numbers indicate non-terminals
-    assertTrue(Vocabulary.nt(-1));
-    assertTrue(Vocabulary.nt(-5));
+    assertTrue(isNonterminal(-1));
+    assertTrue(isNonterminal(-5));
     
     //positive numbers indicate terminals:
-    assertFalse(Vocabulary.nt(0));
-    assertFalse(Vocabulary.nt(5));
+    assertFalse(isNonterminal(0));
+    assertFalse(isNonterminal(5));
 
     
   }

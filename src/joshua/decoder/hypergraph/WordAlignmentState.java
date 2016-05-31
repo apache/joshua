@@ -18,6 +18,8 @@
  */
 package joshua.decoder.hypergraph;
 
+import static java.lang.Integer.MAX_VALUE;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,8 +42,8 @@ public class WordAlignmentState {
    * rule. The values of the elements correspond to the aligned source token on
    * the source side of the rule.
    */
-  private LinkedList<AlignedSourceTokens> trgPoints;
-  private int srcStart;
+  private List<AlignedSourceTokens> trgPoints;
+  private final int srcStart;
   /** number of NTs we need to substitute. */
   private int numNT;
   /** grows with substitutions of child rules. Reaches original Rule span if substitutions are complete */
@@ -51,17 +53,17 @@ public class WordAlignmentState {
    * construct AlignmentState object from a virgin Rule and its source span.
    * Determines if state is complete (if no NT present)
    */
-  WordAlignmentState(Rule rule, int start) {
+  public WordAlignmentState(final Rule rule, final int start) {
     trgPoints = new LinkedList<AlignedSourceTokens>();
     srcLength = rule.getFrench().length;
     numNT = rule.getArity();
     srcStart = start;
-    Map<Integer, List<Integer>> alignmentMap = rule.getAlignmentMap();
-    int[] nonTermPositions = rule.getNonTerminalSourcePositions();
-    int[] trg = rule.getEnglish();
+    final Map<Integer, List<Integer>> alignmentMap = rule.getAlignmentMap();
+    final int[] nonTerminalSourcePositions = rule.getNonTerminalSourcePositions();
+    final int[] trg = rule.getEnglish();
     // for each target index, create a TargetAlignmentPoint
     for (int trgIndex = 0; trgIndex < trg.length; trgIndex++) {
-      AlignedSourceTokens trgPoint = new AlignedSourceTokens();
+      final AlignedSourceTokens trgPoint = new AlignedSourceTokens();
 
       if (trg[trgIndex] >= 0) { // this is a terminal symbol, check for alignment
         if (alignmentMap.containsKey(trgIndex)) {
@@ -72,9 +74,10 @@ public class WordAlignmentState {
         } else { // this target word is NULL-aligned
           trgPoint.setNull();
         }
-      } else { // this is a nonterminal ([X]) [actually its the (negative) index of the NT in the source
-        trgPoint.setNonTerminal();
-        trgPoint.add(srcStart + nonTermPositions[Math.abs(trg[trgIndex]) - 1]);
+      } else { // this is a nonterminal ([X]) [actually its the (negative) index of the NT in the source]
+        trgPoint.setNonTerminal(); // mark as non-terminal
+        final int absoluteNonTerminalSourcePosition = srcStart + nonTerminalSourcePositions[Math.abs(trg[trgIndex]) - 1];
+        trgPoint.add(absoluteNonTerminalSourcePosition);
       }
       trgPoints.add(trgPoint);
     }
@@ -93,17 +96,18 @@ public class WordAlignmentState {
    * trg. Sorted by trg indexes. Disregards the sentence markers.
    */
   public String toFinalString() {
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder();
     int t = 0;
     for (AlignedSourceTokens pt : trgPoints) {
-      for (int s : pt)
-        sb.append(String.format(" %d-%d", s-1, t-1)); // disregard sentence
-                                                      // markers
+      for (int s : pt) {
+        sb.append(String.format(" %d-%d", s-1, t-1)); // disregard sentence markers
+      }
       t++;
     }
-    String result = sb.toString();
-    if (!result.isEmpty())
+    final String result = sb.toString();
+    if (!result.isEmpty()) {
       return result.substring(1);
+    }
     return result;
   }
   
@@ -113,18 +117,19 @@ public class WordAlignmentState {
    * First and last item in trgPoints is skipped.
    */
   public List<List<Integer>> toFinalList() {
-    assert (isComplete() == true);
-    List<List<Integer>> alignment = new ArrayList<List<Integer>> ();
-    if (trgPoints.isEmpty())
+    final List<List<Integer>> alignment = new ArrayList<List<Integer>>(trgPoints.size());
+    if (trgPoints.isEmpty()) {
       return alignment;
-    ListIterator<AlignedSourceTokens> it = trgPoints.listIterator();
+    }
+    final ListIterator<AlignedSourceTokens> it = trgPoints.listIterator();
     it.next(); // skip first item (sentence marker)
     while (it.hasNext()) {
-      AlignedSourceTokens alignedSourceTokens = it.next();
+      final AlignedSourceTokens alignedSourceTokens = it.next();
       if (it.hasNext()) { // if not last element in trgPoints
-        List<Integer> newAlignedSourceTokens = new ArrayList<Integer>();
-        for (Integer sourceIndex : alignedSourceTokens)
+        final List<Integer> newAlignedSourceTokens = new ArrayList<Integer>();
+        for (Integer sourceIndex : alignedSourceTokens) {
           newAlignedSourceTokens.add(sourceIndex - 1); // shift by one to disregard sentence marker
+        }
         alignment.add(newAlignedSourceTokens);
       }
     }
@@ -134,38 +139,46 @@ public class WordAlignmentState {
   /**
    * String representation for debugging.
    */
+  @Override
   public String toString() {
     return String.format("%s , len=%d start=%d, isComplete=%s",
         trgPoints.toString(), srcLength, srcStart, this.isComplete());
   }
 
   /**
-   * substitutes a child WorldAlignmentState into this instance at the first
-   * NT it finds. Also shifts the indeces in this instance by the span/width of the
+   * Substitutes a child WorldAlignmentState into this instance at the next
+   * nonterminal slot. Also shifts the indeces in this instance by the span/width of the
    * child that is to be substituted.
    * Substitution order is determined by the source-first traversal through the hypergraph.
    */
-  void substituteIn(WordAlignmentState child) {
-    // update existing indexes by length of child (has no effect on NULL and
-    // NonTerminal points)
-    for (AlignedSourceTokens trgPoint : trgPoints)
+  public void substituteIn(WordAlignmentState child) {
+    // find the index of the NonTerminal where we substitute the child targetPoints into.
+    // The correct NT is the first one on the SOURCE side.
+    // Also shift all trgPoints by the child length.
+    int substitutionIndex = 0;
+    int sourcePosition = MAX_VALUE;
+    for (final ListIterator<AlignedSourceTokens> trgPointsIterator = trgPoints.listIterator(); trgPointsIterator.hasNext();) {
+      final AlignedSourceTokens trgPoint = trgPointsIterator.next();
       trgPoint.shiftBy(child.srcStart, child.srcLength - 1);
-
-    // now substitute in the child at first NT, modifying the list
-    ListIterator<AlignedSourceTokens> it = trgPoints.listIterator();
-    while (it.hasNext()) {
-      AlignedSourceTokens trgPoint = it.next();
-      if (trgPoint.isNonTerminal()) { // found first NT
-        it.remove(); // remove NT symbol
-        for (AlignedSourceTokens childElement : child.trgPoints) {
-          childElement.setFinal(); // child source indexes are final, do not change them anymore
-          it.add(childElement);
-        }
-        this.srcLength += child.srcLength - 1; // -1 (NT)
-        this.numNT--;
-        break;
+      if (trgPoint.isNonTerminal() && trgPoint.get(0) < sourcePosition) {
+        sourcePosition = trgPoint.get(0);
+        substitutionIndex = trgPointsIterator.previousIndex();
       }
     }
+    
+    // point and remove NT element determined from above
+    final ListIterator<AlignedSourceTokens> insertionIterator = trgPoints.listIterator(substitutionIndex);
+    insertionIterator.next();
+    insertionIterator.remove();
+    
+    // insert child target points and set them to final.
+    for (AlignedSourceTokens childElement : child.trgPoints) {
+      childElement.setFinal();
+      insertionIterator.add(childElement);
+    }
+    
+    // update length and number of non terminal slots
+    this.srcLength += child.srcLength - 1; // -1 (NT)
+    this.numNT--;
   }
-
 }

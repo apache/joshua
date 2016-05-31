@@ -20,10 +20,10 @@
 
 import static joshua.corpus.Vocabulary.registerLanguageModel;
 import static joshua.corpus.Vocabulary.unregisterLanguageModels;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import joshua.corpus.Vocabulary;
-import joshua.decoder.Decoder;
-import joshua.decoder.JoshuaConfiguration;
 import joshua.decoder.ff.lm.KenLM;
 
 import org.junit.After;
