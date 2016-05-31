@@ -22,8 +22,6 @@ import static org.apache.joshua.corpus.Vocabulary.registerLanguageModel;
 import static org.apache.joshua.corpus.Vocabulary.unregisterLanguageModels;
 import static org.junit.Assert.*;
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.ff.lm.KenLM;
 
 import org.junit.After;

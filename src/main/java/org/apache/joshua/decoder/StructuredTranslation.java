@@ -18,26 +18,18 @@
  */
 package org.apache.joshua.decoder;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiFeatures;
-import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiString;
-import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiWordAlignmentList;
-import static org.apache.joshua.util.FormatUtils.removeSentenceMarkers;
-
 import java.util.List;
 import java.util.Map;
 
-import org.apache.joshua.decoder.ff.FeatureFunction;
-import org.apache.joshua.decoder.hypergraph.HyperGraph;
 import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
- * <p>structuredTranslation provides a more structured access to translation
- * results than the Translation class.
- * Members of instances of this class can be used upstream.</p>
- * TODO:
- * Enable K-Best extraction.
+ * A StructuredTranslation instance provides a more structured access to
+ * translation results than the string-based Translation class.
+ * This is useful if the decoder is encapsulated in a larger project, instead
+ * of simply writing to a file or stdout.
+ * StructuredTranslation encodes all relevant information about a derivation,
+ * namely output string, tokens, score, features, and word alignment.
  * 
  * @author fhieber
  */
@@ -51,38 +43,22 @@ public class StructuredTranslation {
   private final Map<String,Float> translationFeatures;
   private final float extractionTime;
   
-  public StructuredTranslation(final Sentence sourceSentence,
-      final HyperGraph hypergraph,
-      final List<FeatureFunction> featureFunctions) {
-    
-      final long startTime = System.currentTimeMillis();
-      
-      this.sourceSentence = sourceSentence;
-      this.translationString = removeSentenceMarkers(getViterbiString(hypergraph));
-      this.translationTokens = extractTranslationTokens();
-      this.translationScore = extractTranslationScore(hypergraph);
-      this.translationFeatures = getViterbiFeatures(hypergraph, featureFunctions, sourceSentence).getMap();
-      this.translationWordAlignments = getViterbiWordAlignmentList(hypergraph);
-      this.extractionTime = (System.currentTimeMillis() - startTime) / 1000.0f;
+  public StructuredTranslation(
+      final Sentence sourceSentence,
+      final String translationString,
+      final List<String> translationTokens,
+      final float translationScore,
+      final List<List<Integer>> translationWordAlignments,
+      final Map<String,Float> translationFeatures,
+      final float extractionTime) {
+    this.sourceSentence = sourceSentence;
+    this.translationString = translationString;
+    this.translationTokens = translationTokens;
+    this.translationScore = translationScore;
+    this.translationWordAlignments = translationWordAlignments;
+    this.translationFeatures = translationFeatures;
+    this.extractionTime = extractionTime;
   }
-  
-  private float extractTranslationScore(final HyperGraph hypergraph) {
-    if (hypergraph == null) {
-      return 0;
-    } else {
-      return hypergraph.goalNode.getScore();
-    }
-  }
-  
-  private List<String> extractTranslationTokens() {
-    if (translationString.isEmpty()) {
-      return emptyList();
-    } else {
-      return asList(translationString.split("\\s+"));
-    }
-  }
-  
-  // Getters to use upstream
   
   public Sentence getSourceSentence() {
     return sourceSentence;

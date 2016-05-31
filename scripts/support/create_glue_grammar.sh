@@ -23,4 +23,4 @@ if [[ -z "$1" ]]; then
   exit
 fi
 
-java -Xmx2g -cp $JOSHUA/lib/args4j-2.0.29.jar:$JOSHUA/class joshua.decoder.ff.tm.CreateGlueGrammar -g $1
+java -Xmx2g -cp $JOSHUA/target/joshua-*-jar-with-dependencies.jar org.apache.joshua.decoder.ff.tm.CreateGlueGrammar -g $1

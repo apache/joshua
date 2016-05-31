@@ -22,10 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
-import java.util.Scanner;
-
-import org.apache.joshua.corpus.Corpus;
-import org.apache.joshua.corpus.Vocabulary;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;

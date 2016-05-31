@@ -18,21 +18,7 @@
  */
 package org.apache.joshua.corpus;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Date;
 import java.util.logging.Logger;
-
-//import org.apache.joshua.corpus.CorpusArray; 
-import org.apache.joshua.corpus.Phrase; 
-//import org.apache.joshua.corpus.mm.MemoryMappedCorpusArray; 
-//import org.apache.joshua.corpus.suffix_array.SuffixArrayFactory; 
-import org.apache.joshua.corpus.Vocabulary; 
-//import org.apache.joshua.util.FormatUtil; 
-
-import org.testng.Assert;
-import org.testng.annotations.Test;
 
 public class CorpusArrayTest {
 

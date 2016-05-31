@@ -18,11 +18,14 @@
  */
  package org.apache.joshua.decoder.kbest_extraction;
 
+import static com.google.common.base.Charsets.UTF_8;
+import static java.nio.file.Files.readAllBytes;
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Translation;
@@ -31,11 +34,6 @@ import org.apache.joshua.decoder.segment_file.Sentence;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import static com.google.common.base.Charsets.UTF_8;
-import static java.nio.file.Files.readAllBytes;
-import static org.apache.joshua.decoder.ff.FeatureVector.DENSE_FEATURE_NAMES;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Reimplements the kbest extraction regression test

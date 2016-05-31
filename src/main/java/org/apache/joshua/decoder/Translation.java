@@ -21,7 +21,9 @@ package org.apache.joshua.decoder;
 import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiFeatures;
 import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiString;
 import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiWordAlignments;
+import static org.apache.joshua.decoder.StructuredTranslationFactory.fromViterbiDerivation;
 import static org.apache.joshua.util.FormatUtils.removeSentenceMarkers;
+import static java.util.Arrays.asList;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -43,7 +45,12 @@ import org.slf4j.LoggerFactory;
  * sentence and id and contains the decoded hypergraph. Translation objects are returned by
  * DecoderThread instances to the InputHandler, where they are assembled in order for output.
  * 
+<<<<<<< HEAD:src/main/java/org/apache/joshua/decoder/Translation.java
  * @author Matt Post post@cs.jhu.edu
+=======
+ * @author Matt Post <post@cs.jhu.edu>
+ * @author Felix Hieber <fhieber@amazon.com>
+>>>>>>> origin/master:src/joshua/decoder/Translation.java
  */
 
 public class Translation {
@@ -56,17 +63,45 @@ public class Translation {
    */
   private String output = null;
 
-  private StructuredTranslation structuredTranslation = null;
-
+  /**
+   * Stores the list of StructuredTranslations.
+   * If joshuaConfig.topN == 0, will only contain the Viterbi translation.
+   * Else it will use KBestExtractor to populate this list.
+   */
+  private List<StructuredTranslation> structuredTranslations = null;
+  
   public Translation(Sentence source, HyperGraph hypergraph, 
       List<FeatureFunction> featureFunctions, JoshuaConfiguration joshuaConfiguration) {
     this.source = source;
-
+    
+    /**
+     * Structured output from Joshua provides a way to programmatically access translation results
+     * from downstream applications, instead of writing results as strings to an output buffer.
+     */
     if (joshuaConfiguration.use_structured_output) {
-
-      structuredTranslation = new StructuredTranslation(
-          source, hypergraph, featureFunctions);
-      this.output = structuredTranslation.getTranslationString();
+      
+      if (joshuaConfiguration.topN == 0) {
+        /*
+         * Obtain Viterbi StructuredTranslation
+         */
+        StructuredTranslation translation = fromViterbiDerivation(source, hypergraph, featureFunctions);
+        this.output = translation.getTranslationString();
+        structuredTranslations = asList(translation);
+        
+      } else {
+        /*
+         * Get K-Best list of StructuredTranslations
+         */
+        final KBestExtractor kBestExtractor = new KBestExtractor(source, featureFunctions, Decoder.weights, false, joshuaConfiguration);
+        structuredTranslations = kBestExtractor.KbestExtractOnHG(hypergraph, joshuaConfiguration.topN);
+        if (structuredTranslations.isEmpty()) {
+            structuredTranslations = asList(StructuredTranslationFactory.fromEmptyOutput(source));
+            this.output = "";
+        } else {
+            this.output = structuredTranslations.get(0).getTranslationString();
+        }
+        // TODO: We omit the BLEU rescoring for now since it is not clear whether it works at all and what the desired output is below.
+      }
 
     } else {
 
@@ -74,7 +109,9 @@ public class Translation {
       BufferedWriter out = new BufferedWriter(sw);
 
       try {
+        
         if (hypergraph != null) {
+          
           if (!joshuaConfiguration.hypergraphFilePattern.equals("")) {
             hypergraph.dump(String.format(joshuaConfiguration.hypergraphFilePattern, source.id()), featureFunctions);
           }
@@ -135,24 +172,15 @@ public class Translation {
               joshuaConfiguration.topN, seconds);
 
         } else {
-
+          
           // Failed translations and blank lines get empty formatted outputs
-          // @formatter:off
-          String outputString = joshuaConfiguration.outputFormat
-              .replace("%s", source.source())
-              .replace("%e", "")
-              .replace("%S", "")
-              .replace("%t", "()")
-              .replace("%i", Integer.toString(source.id()))
-              .replace("%f", "")
-              .replace("%c", "0.000");
-          // @formatter:on
-
-          out.write(outputString);
+          out.write(getFailedTranslationOutput(source, joshuaConfiguration));
           out.newLine();
+          
         }
 
         out.flush();
+        
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
@@ -160,17 +188,9 @@ public class Translation {
       this.output = sw.toString();
 
     }
-
-    /*
-     * KenLM hack. If using KenLMFF, we need to tell KenLM to delete the pool used to create chart
-     * objects for this sentence.
-     */
-    for (FeatureFunction feature : featureFunctions) {
-      if (feature instanceof StateMinimizingLanguageModel) {
-        ((StateMinimizingLanguageModel) feature).destroyPool(getSourceSentence().id());
-        break;
-      }
-    }
+    
+    // remove state from StateMinimizingLanguageModel instances in features.
+    destroyKenLMStates(featureFunctions);
 
   }
 
@@ -186,18 +206,43 @@ public class Translation {
   public String toString() {
     return output;
   }
-
+  
+  private String getFailedTranslationOutput(final Sentence source, final JoshuaConfiguration joshuaConfiguration) {
+    return joshuaConfiguration.outputFormat
+        .replace("%s", source.source())
+        .replace("%e", "")
+        .replace("%S", "")
+        .replace("%t", "()")
+        .replace("%i", Integer.toString(source.id()))
+        .replace("%f", "")
+        .replace("%c", "0.000");
+  }
+  
   /**
-   * Returns the StructuredTranslation object
-   * if JoshuaConfiguration.construct_structured_output == True.
-   * @throws RuntimeException if StructuredTranslation object not set.
-   * @return {@link org.apache.joshua.decoder.StructuredTranslation} object
+   * Returns the StructuredTranslations
+   * if JoshuaConfiguration.use_structured_output == True.
+   * @throws RuntimeException if JoshuaConfiguration.use_structured_output == False.
+   * @return List of StructuredTranslations.
    */
-  public StructuredTranslation getStructuredTranslation() {
-    if (structuredTranslation == null) {
-      throw new RuntimeException("No StructuredTranslation object created. You should set JoshuaConfigration.construct_structured_output = true");
+  public List<StructuredTranslation> getStructuredTranslations() {
+    if (structuredTranslations == null) {
+      throw new RuntimeException(
+          "No StructuredTranslation objects created. You should set JoshuaConfigration.use_structured_output = true");
     }
-    return structuredTranslation;
+    return structuredTranslations;
+  }
+  
+  /**
+   * KenLM hack. If using KenLMFF, we need to tell KenLM to delete the pool used to create chart
+   * objects for this sentence.
+   */
+  private void destroyKenLMStates(final List<FeatureFunction> featureFunctions) {
+    for (FeatureFunction feature : featureFunctions) {
+      if (feature instanceof StateMinimizingLanguageModel) {
+        ((StateMinimizingLanguageModel) feature).destroyPool(getSourceSentence().id());
+        break;
+      }
+    }
   }
 
 }

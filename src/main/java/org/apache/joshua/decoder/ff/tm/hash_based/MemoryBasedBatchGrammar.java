@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.JoshuaConfiguration.OOVItem;
 import org.apache.joshua.decoder.ff.FeatureFunction;

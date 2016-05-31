@@ -1,4 +1,4 @@
-/*
+            /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,11 +20,13 @@ package org.apache.joshua.decoder.hypergraph;
 
 import static org.apache.joshua.util.FormatUtils.unescapeSpecialSymbols;
 import static org.apache.joshua.util.FormatUtils.removeSentenceMarkers;
+import static java.util.Collections.emptyList;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,8 +45,8 @@ import org.apache.joshua.decoder.io.DeNormalize;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.apache.joshua.decoder.segment_file.Token;
 import org.apache.joshua.util.FormatUtils;
-
-import cern.colt.Arrays;
+import org.apache.joshua.decoder.StructuredTranslation;
+import org.apache.joshua.decoder.StructuredTranslationFactory;
 
 /**
  * <p>This class implements lazy k-best extraction on a hyper-graph.</p>
@@ -154,8 +156,46 @@ public class KBestExtractor {
    * @return the derivation object
    */
   public DerivationState getKthDerivation(HGNode node, int k) {
-    VirtualNode virtualNode = getVirtualNode(node);
+    final VirtualNode virtualNode = getVirtualNode(node);
     return virtualNode.lazyKBestExtractOnNode(this, k);
+  }
+  
+  /**
+   * Returns the k-th Structured Translation.
+   */
+  public StructuredTranslation getKthStructuredTranslation(HGNode node, int k) {
+    StructuredTranslation result = null;
+    final DerivationState derivationState = getKthDerivation(node, k);
+    if (derivationState != null) {
+      result = StructuredTranslationFactory.fromKBestDerivation(sentence, derivationState);
+    }
+    return result;
+  }
+  
+  /**
+   * This is an entry point for extracting k-best hypotheses as StructuredTranslation objects.
+   * It computes all of them and returning a list of StructuredTranslation objects.
+   * These objects hold all translation information (string, tokens, features, alignments, score).
+   * 
+   * @param hg the hypergraph to extract from
+   * @param topN how many to extract
+   * @param out object to write to
+   * @return list of StructuredTranslation objects, empty if there is no HyperGraph goal node.
+   */
+  public List<StructuredTranslation> KbestExtractOnHG(HyperGraph hg, int topN) {
+    resetState();
+    if (hg == null || hg.goalNode == null) {
+      return emptyList();
+    }
+    final List<StructuredTranslation> kbest = new ArrayList<>(topN);
+    for (int k = 1; k <= topN; k++) {
+      StructuredTranslation translation = getKthStructuredTranslation(hg.goalNode, k);
+      if (translation == null) {
+        break;
+      }
+      kbest.add(translation);
+    }
+    return kbest;
   }
   
   /**
@@ -172,11 +212,7 @@ public class KBestExtractor {
   public String getKthHyp(HGNode node, int k) {
 
     String outputString = null;
-    
-    // Determine the k-best hypotheses at each HGNode
-    VirtualNode virtualNode = getVirtualNode(node);
-    DerivationState derivationState = virtualNode.lazyKBestExtractOnNode(this, k);
-//    DerivationState derivationState = getKthDerivation(node, k);
+    DerivationState derivationState = getKthDerivation(node, k);
     if (derivationState != null) {
       // ==== read the kbest from each hgnode and convert to output format
       String hypothesis = maybeProjectCase(
@@ -219,7 +255,7 @@ public class KBestExtractor {
       
       /* %a causes output of word level alignments between input and output hypothesis */
       if (outputFormat.contains("%a")) {
-        outputString = outputString.replace("%a",  derivationState.getWordAlignmentString());
+        outputString = outputString.replace("%a",  derivationState.getWordAlignment());
       }
       
     }
@@ -242,7 +278,7 @@ public class KBestExtractor {
 
     if (joshuaConfiguration.project_case) {
       String[] tokens = hypothesis.split("\\s+");
-      List<List<Integer>> points = state.getWordAlignment();
+      List<List<Integer>> points = state.getWordAlignmentList();
       for (int i = 0; i < points.size(); i++) {
         List<Integer> target = points.get(i);
         for (int source: target) {
@@ -776,42 +812,36 @@ public class KBestExtractor {
 
       return visitor;
     }
-
-    private String getWordAlignmentString() {
+    
+    public String getWordAlignment() {
       return visit(new WordAlignmentExtractor()).toString();
     }
     
-    private List<List<Integer>> getWordAlignment() {
-      WordAlignmentExtractor extractor = new WordAlignmentExtractor();
-      visit(extractor);
-      return extractor.getFinalWordAlignments();
+    public List<List<Integer>> getWordAlignmentList() {
+      final WordAlignmentExtractor visitor = new WordAlignmentExtractor();
+      visit(visitor);
+      return visitor.getFinalWordAlignments();
     }
 
-    private String getTree() {
+    public String getTree() {
       return visit(new TreeExtractor()).toString();
     }
     
-    private String getHypothesis() {
+    public String getHypothesis() {
       return getHypothesis(defaultSide);
     }
 
-    /**
-     * For stack decoding we keep using the old string-based
-     * HypothesisExtractor.
-     * For Hiero, we use a faster, int-based hypothesis extraction
-     * that is correct also for Side.SOURCE cases.
-     */
     private String getHypothesis(final Side side) {
       return visit(new OutputStringExtractor(side.equals(Side.SOURCE))).toString();
     }
 
-    private FeatureVector getFeatures() {
+    public FeatureVector getFeatures() {
       final FeatureVectorExtractor extractor = new FeatureVectorExtractor(featureFunctions, sentence);
       visit(extractor);
       return extractor.getFeatures();
     }
 
-    private String getDerivation() {
+    public String getDerivation() {
       return visit(new DerivationExtractor()).toString();
     }
 

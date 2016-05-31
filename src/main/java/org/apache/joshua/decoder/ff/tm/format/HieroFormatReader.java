@@ -23,6 +23,7 @@ import java.io.IOException;
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.ff.tm.GrammarReader;
 import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.util.Constants;
 import org.apache.joshua.util.FormatUtils;
 
 /**
@@ -34,7 +35,6 @@ import org.apache.joshua.util.FormatUtils;
 public class HieroFormatReader extends GrammarReader<Rule> {
 
   static {
-    fieldDelimiter = "\\s\\|{3}\\s";
     description = "Original Hiero format";
   }
 
@@ -48,7 +48,7 @@ public class HieroFormatReader extends GrammarReader<Rule> {
 
   @Override
   public Rule parseLine(String line) {
-    String[] fields = line.split(fieldDelimiter);
+    String[] fields = line.split(Constants.fieldDelimiter);
     if (fields.length < 3) {
       throw new RuntimeException(String.format("Rule '%s' does not have four fields", line));
     }
@@ -62,6 +62,9 @@ public class HieroFormatReader extends GrammarReader<Rule> {
     String[] sourceWords = fields[1].split("\\s+");
     int[] sourceIDs = new int[sourceWords.length];
     for (int i = 0; i < sourceWords.length; i++) {
+      /* NOTE: This redundantly creates vocab items for terms like [X,1]. This might actually
+       * be necessary, so don't try to turn this into an if/else.
+       */
       sourceIDs[i] = Vocabulary.id(sourceWords[i]);
       if (FormatUtils.isNonterminal(sourceWords[i])) {
         sourceIDs[i] = Vocabulary.id(FormatUtils.stripNonTerminalIndex(sourceWords[i]));
@@ -96,11 +99,7 @@ public class HieroFormatReader extends GrammarReader<Rule> {
 
     return new Rule(lhs, sourceIDs, targetIDs, sparse_features, arity, alignment);
   }
-
-  public static String getFieldDelimiter() {
-    return fieldDelimiter;
-  }
-
+  
   public static boolean isNonTerminal(final String word) {
     return FormatUtils.isNonterminal(word);
   }

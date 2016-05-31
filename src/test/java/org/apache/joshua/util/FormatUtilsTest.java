@@ -59,12 +59,6 @@ public class FormatUtilsTest {
   @Test
   public void givenTokens_whenMarkup_thenCorrectMarkup() {
     assertEquals(ensureNonTerminalBrackets("X"), "[X]");
-    /*
-    assertEquals(markup("X", 1), "[X,1]");
-    assertEquals(markup("X", 15), "[X,15]");
-    assertEquals(markup("[X]", 1), "[X,1]");
-    assertEquals(markup("[X,1]", 4), "[X,4]");
-    */
   }
   
   @Test

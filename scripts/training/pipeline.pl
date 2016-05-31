@@ -1377,7 +1377,7 @@ if ($DO_FILTER_TM and defined $GRAMMAR_FILE and ! $DOING_LATTICES and ! defined 
 if ($OPTIMIZER_RUN == 1 and defined $TUNE_GRAMMAR and $GRAMMAR_TYPE ne "phrase" and $GRAMMAR_TYPE ne "moses") {
   if (! defined $GLUE_GRAMMAR_FILE) {
     $cachepipe->cmd("glue-tune",
-                    "java -Xmx2g -cp $JOSHUA/lib/args4j-2.0.29.jar:$JOSHUA/class joshua.decoder.ff.tm.CreateGlueGrammar -g $TUNE_GRAMMAR > $DATA_DIRS{tune}/grammar.glue",
+                    "$JOSHUA/scripts/support/create_glue_grammar.sh $TUNE_GRAMMAR > $DATA_DIRS{tune}/grammar.glue",
                     get_file_from_grammar($TUNE_GRAMMAR),
                     "$DATA_DIRS{tune}/grammar.glue");
     $GLUE_GRAMMAR_FILE = "$DATA_DIRS{tune}/grammar.glue";
@@ -1594,7 +1594,7 @@ if ($DO_FILTER_TM and defined $GRAMMAR_FILE and ! $DOING_LATTICES and ! defined 
 if ($OPTIMIZER_RUN == 1 and defined $TEST_GRAMMAR and $GRAMMAR_TYPE ne "phrase" and $GRAMMAR_TYPE ne "moses") {
   if (! defined $GLUE_GRAMMAR_FILE) {
     $cachepipe->cmd("glue-test",
-                    "java -Xmx2g -cp $JOSHUA/lib/args4j-2.0.29.jar:$JOSHUA/class joshua.decoder.ff.tm.CreateGlueGrammar -g $TEST_GRAMMAR > $DATA_DIRS{test}/grammar.glue",
+                    "$JOSHUA/scripts/support/create_glue_grammar.sh $TEST_GRAMMAR > $DATA_DIRS{test}/grammar.glue",
                     get_file_from_grammar($TEST_GRAMMAR),
                     "$DATA_DIRS{test}/grammar.glue");
     $GLUE_GRAMMAR_FILE = "$DATA_DIRS{test}/grammar.glue";

@@ -63,8 +63,8 @@ public class StructuredOutputTest {
     joshuaConfig.use_unique_nbest = false;
     joshuaConfig.include_align_index = false;
     joshuaConfig.topN = 0;
-    joshuaConfig.tms.add("thrax pt 20 resources/wa_grammar");
-    joshuaConfig.tms.add("thrax glue -1 resources/grammar.glue");
+    joshuaConfig.tms.add("thrax -owner pt -maxspan 20 -path resources/wa_grammar");
+    joshuaConfig.tms.add("thrax -owner glue -maxspan -1 -path resources/grammar.glue");
     joshuaConfig.goal_symbol = "[GOAL]";
     joshuaConfig.default_non_terminal = "[X]";
     joshuaConfig.features.add("feature_function = OOVPenalty");
@@ -106,17 +106,13 @@ public class StructuredOutputTest {
     // test structured output
     joshuaConfig.use_structured_output = true; // set structured output creation to true
     translation = decode(input);
-    Assert
-        .assertEquals(expectedTranslation, translation.getStructuredTranslation().getTranslationString());
+    Assert.assertEquals(expectedTranslation, translation.getStructuredTranslations().get(0).getTranslationString());
     Assert.assertEquals(Arrays.asList(expectedTranslation.split("\\s+")),
-        translation.getStructuredTranslation().getTranslationTokens());
-    Assert.assertEquals(expectedScore, translation.getStructuredTranslation().getTranslationScore(),
+        translation.getStructuredTranslations().get(0).getTranslationTokens());
+    Assert.assertEquals(expectedScore, translation.getStructuredTranslations().get(0).getTranslationScore(),
         0.00001);
-    Assert.assertEquals(expectedWordAlignment, translation.getStructuredTranslation()
-        .getTranslationWordAlignments().get(0));
-    Assert.assertEquals(translation.getStructuredTranslation().getTranslationWordAlignments().size(), translation.
-        getStructuredTranslation().getTranslationTokens().size());
-
+    Assert.assertEquals(expectedWordAlignment, translation.getStructuredTranslations().get(0).getTranslationWordAlignments());
+    Assert.assertEquals(translation.getStructuredTranslations().get(0).getTranslationWordAlignments().size(), translation
+        .getStructuredTranslations().get(0).getTranslationTokens().size());
   }
-
 }

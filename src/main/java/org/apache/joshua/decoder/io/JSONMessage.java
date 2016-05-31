@@ -90,7 +90,7 @@ public class JSONMessage {
     JSONMessage message = new JSONMessage();
     String[] results = translation.toString().split("\\n");
     if (results.length > 0) {
-      JSONMessage.TranslationItem item = message.addTranslation(translation.getStructuredTranslation().getTranslationString());
+      JSONMessage.TranslationItem item = message.addTranslation(translation.getStructuredTranslations().get(0).getTranslationString());
 
       for (String result: results) {
         String[] tokens = result.split(" \\|\\|\\| ");

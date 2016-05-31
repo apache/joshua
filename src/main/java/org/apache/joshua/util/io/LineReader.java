@@ -29,7 +29,6 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipException;
 
 import org.apache.joshua.decoder.Decoder;
 
@@ -90,10 +89,10 @@ public class LineReader implements Reader<String> {
     } else {
       totalBytes = new File(filename).length();
       rawStream = new ProgressInputStream(new FileInputStream(filename), totalBytes);
-      
+
       try {
         stream = new GZIPInputStream(rawStream);
-      } catch (ZipException e) {
+      } catch (Exception e) {
         // GZIP ate a byte, so reset
         rawStream.close();
         stream = rawStream = new ProgressInputStream(new FileInputStream(filename), totalBytes);

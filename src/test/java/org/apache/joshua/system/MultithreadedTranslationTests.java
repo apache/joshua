@@ -33,6 +33,7 @@ import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.MetaDataException;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
 import org.apache.joshua.decoder.segment_file.Sentence;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -110,7 +111,7 @@ public class MultithreadedTranslationTests {
     // GIVEN
 
     int inputLines = 10000;
-    //joshuaConfig.construct_structured_output = true; // Enabled alignments.
+    joshuaConfig.use_structured_output = true; // Enabled alignments.
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < inputLines; i++) {
       sb.append(INPUT + "\n");
@@ -123,7 +124,6 @@ public class MultithreadedTranslationTests {
         .getBytes(Charset.forName("UTF-8"))))), joshuaConfig);
     
     ByteArrayOutputStream output = new ByteArrayOutputStream();
-
 
     // WHEN
     // Translate all spans in parallel.

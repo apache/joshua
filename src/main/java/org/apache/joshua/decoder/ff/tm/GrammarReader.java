@@ -21,7 +21,6 @@ package org.apache.joshua.decoder.ff.tm;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.util.io.LineReader;
 import org.slf4j.Logger;
@@ -38,7 +37,6 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
   private static final Logger LOG = LoggerFactory.getLogger(GrammarReader.class);
 
   protected static String fieldDelimiter;
-
   protected static String description;
 
   protected String fileName;

@@ -20,7 +20,6 @@ package org.apache.joshua.decoder.ff.lm.bloomfilter_lm;
 
 import java.io.Externalizable;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
