@@ -42,11 +42,11 @@ import org.apache.joshua.decoder.chart_parser.SourcePath;
  * @author Matt Post post@cs.jhu.edu
  */
 public class OOVPenalty extends StatelessFF {
-  private int ownerID = -1;
+  private final int ownerID;
   
   /* The default value returned for OOVs. Can be overridden with -oov-list */
-  private float defaultValue = -100f;
-  private HashMap<Integer,Float> oovWeights = null;
+  private final float defaultValue = -100f;
+  private final HashMap<Integer,Float> oovWeights;
 
   public OOVPenalty(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, "OOVPenalty", args, config);
@@ -54,16 +54,18 @@ public class OOVPenalty extends StatelessFF {
     ownerID = Vocabulary.id("oov");
     oovWeights = new HashMap<Integer,Float>();
     
-    if (config.oovList != null)
-      for (OOVItem item: config.oovList) 
+    if (config.oovList != null) {
+      for (OOVItem item: config.oovList) { 
         oovWeights.put(Vocabulary.id(item.label), item.weight);
+      }
+    }
   }
   
   @Override
   public ArrayList<String> reportDenseFeatures(int index) {
     denseFeatureIndex = index;
     
-    ArrayList<String> names = new ArrayList<String>();
+    ArrayList<String> names = new ArrayList<>(1);
     names.add(name);
     return names;
   }
@@ -78,7 +80,6 @@ public class OOVPenalty extends StatelessFF {
       Sentence sentence, Accumulator acc) {
     
     if (rule != null && this.ownerID == rule.getOwner()) {
-//      acc.add(name, getValue(rule.getLHS()));
       acc.add(denseFeatureIndex, getValue(rule.getLHS()));
     }
 

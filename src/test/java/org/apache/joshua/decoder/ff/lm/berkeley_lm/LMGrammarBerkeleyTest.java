@@ -66,7 +66,7 @@ public class LMGrammarBerkeleyTest {
   public void verifyLM() {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.processCommandLineOptions(OPTIONS);
-    joshuaConfig.features.add("feature_function = LanguageModel -lm_type berkeleylm -lm_order 2 -lm_file " + lmFile);
+    joshuaConfig.features.add("LanguageModel -lm_type berkeleylm -lm_order 2 -lm_file " + lmFile);
     decoder = new Decoder(joshuaConfig, null);
     String translation = decode(INPUT).toString();
     assertEquals(lmFile, "tm_glue_0=2.000 lm_0=-7.153\n", translation);

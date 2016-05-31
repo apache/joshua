@@ -392,21 +392,21 @@ public class JoshuaConfiguration {
              * 
              * LMs are now loaded as general feature functions, so we transform that to either
              * 
-             *   feature-function = LanguageModel -lm_order 5 -lm_type berkeleylm -lm_file lm.gz
+             *   LanguageModel -lm_order 5 -lm_type berkeleylm -lm_file lm.gz
              * 
              * If the line were state minimizing:
              * 
              *   lm = kenlm 5 true false 100 lm.gz
              *              
-             * feature-function = StateMinimizingLanguageModel -lm_order 5 -lm_file lm.gz
+             * StateMinimizingLanguageModel -lm_order 5 -lm_file lm.gz
              */
 
             String[] tokens = fds[1].split("\\s+");
             if (tokens[2].equals("true"))
-              features.add(String.format("feature_function = StateMinimizingLanguageModel -lm_type kenlm -lm_order %s -lm_file %s",
+              features.add(String.format("StateMinimizingLanguageModel -lm_type kenlm -lm_order %s -lm_file %s",
                   tokens[1], tokens[5]));
             else
-              features.add(String.format("feature_function = LanguageModel -lm_type %s -lm_order %s -lm_file %s",
+              features.add(String.format("LanguageModel -lm_type %s -lm_order %s -lm_file %s",
                   tokens[0], tokens[1], tokens[5]));
 
           } else if (parameter.equals(normalize_key("tm"))) {
@@ -580,7 +580,7 @@ public class JoshuaConfiguration {
 
           } else if (parameter.equals(normalize_key("feature-function"))) {
             // add the feature to the list of features for later processing
-            features.add("feature_function = " + fds[1]);
+            features.add(fds[1]);
 
           } else if (parameter.equals(normalize_key("maxlen"))) {
             // add the feature to the list of features for later processing

@@ -26,6 +26,8 @@ import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.util.FormatUtils;
+import org.apache.joshua.corpus.Vocabulary;
 
 /*
  * Implements the RuleShape feature for source, target, and paired source+target sides.
@@ -36,38 +38,63 @@ public class RuleShape extends StatelessFF {
     super(weights, "RuleShape", args, config);
   }
 
-  private int gettype(int id) {
-    if (id < 0)
-      return -1;
-    return 1;
+  private enum WordType {
+    N("N"), T("x"), P("+");
+    private final String string;
+    private boolean repeats;
+
+    private WordType(final String string) {
+      this.string = string;
+      this.repeats = false;
+    }
+    
+    private void setRepeats() {
+      repeats = true;
+    }
+
+    @Override
+    public String toString() {
+      if (repeats) {
+        return this.string + "+";
+      }
+      return this.string;
+    }
+  }
+
+  private WordType getWordType(int id) {
+    if (FormatUtils.isNonterminal(id)) {
+      return WordType.N;
+    } else {
+      return WordType.T;
+    }
   }
   
-  private String pattern(int[] ids) {
-    StringBuilder pattern = new StringBuilder();
-    int curtype = gettype(ids[0]);
-    int curcount = 1;
+  /**
+   * Returns a String describing the rule pattern.
+   */
+  private String getRulePattern(int[] ids) {
+    final StringBuilder pattern = new StringBuilder();
+    WordType currentType = getWordType(ids[0]);
     for (int i = 1; i < ids.length; i++) {
-      if (gettype(ids[i]) != curtype) {
-        pattern.append(String.format("%s%s_", curtype < 0 ? "N" : "x", curcount > 1 ? "+" : ""));
-        curtype = gettype(ids[i]);
-        curcount = 1;
+      if (getWordType(ids[i]) != currentType) {
+        pattern.append(currentType.toString());
+        currentType = getWordType(ids[i]);
       } else {
-        curcount++;
+        currentType.setRepeats();
       }
     }
-    pattern.append(String.format("%s%s_", curtype < 0 ? "N" : "x", curcount > 1 ? "+" : ""));
+    pattern.append(currentType.toString());
     return pattern.toString();
   }
   
   @Override
   public DPState compute(Rule rule, List<HGNode> tailNodes, int i_, int j, SourcePath sourcePath,
       Sentence sentence, Accumulator acc) {
-    String sourceShape = pattern(rule.getFrench());
-    String targetShape = pattern(rule.getEnglish());
-    acc.add(String.format("%s_source_%s", name, sourceShape), 1);
-    acc.add(String.format("%s_target_%s", name, targetShape), 1);
-    acc.add(String.format("%s_both_%s__%s", name, sourceShape, targetShape), 1);
-
+    final String sourceShape = getRulePattern(rule.getFrench());
+    final String targetShape = getRulePattern(rule.getEnglish());
+    acc.add(name + "_source_" + sourceShape, 1);
+    acc.add(name + "_target_" + sourceShape, 1);
+    acc.add(name + "_sourceTarget_" + sourceShape + "_" + targetShape, 1);
     return null;
   }
 
