@@ -20,10 +20,10 @@ set -u
 # Ensures that the decoder trims inputs when and only when it should
 
 (
-echo as kingfishers draw fire | joshua -maxlen 2
-echo dragonflies draw flame | joshua -maxlen 1 -lattice-decoding
-echo "(((as tumbled over rim in roundy wells stones ring" | joshua -maxlen 8
-echo "(((like each tucked string tells" | joshua -maxlen 3 -lattice-decoding
+echo as kingfishers draw fire | $JOSHUA/bin/joshua -maxlen 2
+echo dragonflies draw flame | $JOSHUA/bin/joshua -maxlen 1 -lattice-decoding
+echo "(((as tumbled over rim in roundy wells stones ring" | $JOSHUA/bin/joshua -maxlen 8
+echo "(((like each tucked string tells" | $JOSHUA/bin/joshua -maxlen 3 -lattice-decoding
 ) > output 2> log
 
 diff -u output output.gold > diff
