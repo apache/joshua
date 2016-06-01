@@ -103,16 +103,4 @@ public class OOVPenalty extends StatelessFF {
   private float getValue(int lhs) {
     return oovWeights.containsKey(lhs) ? oovWeights.get(lhs) : defaultValue;
   }
-
-  @Override
-  public double estimateLogP(Rule rule, int sentID) {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public double getWeight() {
-    // TODO Auto-generated method stub
-    return 0;
-  }
 }

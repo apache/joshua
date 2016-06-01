@@ -362,17 +362,4 @@ public class FragmentLMFF extends StatefulFF {
       return String.format("[FragmentState %s]", tree);
     }
   }
-
-  @Override
-  public double estimateLogP(Rule rule, int sentID) {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public double getWeight() {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
 }

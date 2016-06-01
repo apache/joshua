@@ -308,19 +308,6 @@ public abstract class FeatureFunction {
   }
 
   /**
-   * It is used when initializing translation grammars (for 
-   * pruning purpose, and to get stateless logP for each rule). 
-   * This is also required to sort the rules (required by Cube-pruning).
-   * 
-   * @param rule {@link org.apache.joshua.decoder.ff.tm.Rule} to be utilized within computation
-   * @param sentID associated ID
-   * @return double value representing LogP
-   */ 
-  public abstract double estimateLogP(Rule rule, int sentID);
-  
-  public abstract double  getWeight(); 
-
-  /**
    * Accumulator objects allow us to generalize feature computation.
    * ScoreAccumulator takes (feature,value) pairs and simple stores the weighted
    * sum (for decoding). FeatureAccumulator records the named feature values

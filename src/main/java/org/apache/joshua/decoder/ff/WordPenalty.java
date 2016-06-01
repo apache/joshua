@@ -77,16 +77,4 @@ public final class WordPenalty extends StatelessFF {
       return weights.getDense(denseFeatureIndex) * OMEGA * (rule.getEnglish().length - rule.getArity());
     return 0.0f;
   }
-
-  @Override
-  public double estimateLogP(Rule rule, int sentID) {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public double getWeight() {
-    // TODO Auto-generated method stub
-    return 0;
-  }
 }

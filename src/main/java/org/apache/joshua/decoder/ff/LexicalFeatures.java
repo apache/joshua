@@ -1,17 +1,18 @@
-package joshua.decoder.ff;
+package org.apache.joshua.decoder.ff;
 
 import static com.google.common.cache.CacheBuilder.newBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import joshua.corpus.Vocabulary;
-import joshua.decoder.JoshuaConfiguration;
-import joshua.decoder.chart_parser.SourcePath;
-import joshua.decoder.ff.state_maintenance.DPState;
-import joshua.decoder.ff.tm.Rule;
-import joshua.decoder.hypergraph.HGNode;
-import joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.chart_parser.SourcePath;
+import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.util.FormatUtils;
 
 import com.google.common.cache.Cache;
 
@@ -111,7 +112,7 @@ public class LexicalFeatures extends StatelessFF {
     // deletions: unaligned source words
     if (useDeletions) {
       for (int i = 0; i < sourceAligned.length; i++) {
-        if (!sourceAligned[i] && !Vocabulary.nt(sourceWords[i])) {
+        if (!sourceAligned[i] && ! FormatUtils.isNonterminal(sourceWords[i])) {
           result.add("D:" + Vocabulary.word(sourceWords[i]));
         }
       }
@@ -120,7 +121,7 @@ public class LexicalFeatures extends StatelessFF {
     // insertions: unaligned target words
     if (useInsertions) {
       for (int i = 0; i < targetAligned.length; i++) {
-        if (useInsertions && !targetAligned[i] && !Vocabulary.nt(targetWords[i])) {
+        if (useInsertions && !targetAligned[i] && ! FormatUtils.isNonterminal(targetWords[i])) {
           result.add("I:" + Vocabulary.word(targetWords[i]));
         }
       }

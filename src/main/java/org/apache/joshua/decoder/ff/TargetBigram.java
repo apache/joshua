@@ -213,16 +213,4 @@ public class TargetBigram extends StatefulFF {
 
     return sb.substring(0, sb.length() - 1);
   }
-
-  @Override
-  public double estimateLogP(Rule rule, int sentID) {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public double getWeight() {
-    // TODO Auto-generated method stub
-    return 0;
-  }
 }

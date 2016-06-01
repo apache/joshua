@@ -69,16 +69,4 @@ public class ArityPhrasePenalty extends StatelessFF {
     
     return null;
   }
-
-  @Override
-  public double estimateLogP(Rule rule, int sentID) {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public double getWeight() {
-    // TODO Auto-generated method stub
-    return 0;
-  }
 }
