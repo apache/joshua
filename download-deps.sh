@@ -6,3 +6,9 @@ git clone https://github.com/kpu/kenlm.git ext/kenlm
 
 git clone https://github.com/joshua-decoder/berkeleylm.git ext/berkeleylm
 (cd ext/berkeleylm; ant)
+
+git clone https://github.com/joshua-decoder/giza-pp.git ext/giza-pp
+(make -j4 -C ext/giza-pp all install)
+
+git clone https://github.com/joshua-decoder/symal.git ext/symal
+(make -C ext/symal all)
