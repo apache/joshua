@@ -44,6 +44,10 @@ Then, compile Joshua by typing:
     cd $JOSHUA
     mvn clean compile assembly:single
 
+You also need to download and compile KenLM and Thrax:
+
+    bash ./download-deps.sh
+
 The basic method for invoking the decoder looks like this:
 
     cat SOURCE | $JOSHUA/bin/joshua-decoder -m MEM -c CONFIG OPTIONS > OUTPUT
