@@ -135,7 +135,7 @@ public class PhraseTable implements Grammar {
         
 //    String ruleString = String.format("[X] ||| [X,1] %s ||| [X,1] %s", 
 //        Vocabulary.word(sourceWord), Vocabulary.word(targetWord));
-//    BilingualRule oovRule = new HieroFormatReader().parseLine(ruleString);
+//    Rule oovRule = new HieroFormatReader().parseLine(ruleString);
 //    oovRule.setOwner(Vocabulary.id("oov"));
 //    addRule(oovRule);
 //    oovRule.estimateRuleCost(featureFunctions);

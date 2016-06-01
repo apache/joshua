@@ -44,9 +44,9 @@ public class StructuredTranslationFactory {
   /**
    * Returns a StructuredTranslation instance from the Viterbi derivation.
    * 
-   * @param sourceSentence
-   * @param hypergraph
-   * @param featureFunctions
+   * @param sourceSentence the source sentence
+   * @param hypergraph the hypergraph object
+   * @param featureFunctions the list of active feature functions
    * @return A StructuredTranslation object representing the Viterbi derivation.
    */
   public static StructuredTranslation fromViterbiDerivation(

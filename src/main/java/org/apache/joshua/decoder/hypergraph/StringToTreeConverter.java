@@ -47,7 +47,7 @@ public class StringToTreeConverter {
             // initHyperedge, double estTotalLogP)
             // public HyperEdge(Rule rule, double bestDerivationLogP, Double transitionLogP,
             // List<HGNode> antNodes, SourcePath srcPath)
-            // public BilingualRule(int lhs, int[] sourceRhs, int[] targetRhs, float[]
+            // public Rule(int lhs, int[] sourceRhs, int[] targetRhs, float[]
             // featureScores, int arity, int owner, float latticeCost, int ruleID)
 
 

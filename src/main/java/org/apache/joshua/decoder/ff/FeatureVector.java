@@ -77,7 +77,7 @@ public class FeatureVector {
    * **IMPORTANT** The feature values are inverted, for historical reasons, which leads to a lot
    * of confusion. They have to be inverted here and when the score is actually computed. They 
    * are inverted here (which is used to build the feature vector representation of a rule's dense
-   * features) and in {@link org.apache.joshua.decoder.ff.tm.BilingualRule#estimateRuleCost(java.util.List)}
+   * features) and in {@link org.apache.joshua.decoder.ff.tm.Rule#estimateRuleCost(java.util.List)}
    * , where the rule's precomputable (weighted) score is cached.
    * 
    * @param featureString, the string of labeled and unlabeled features (probably straight from the
