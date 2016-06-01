@@ -25,10 +25,11 @@ Joshua 6.X includes the following new features:
 
 ## Quick start
 
-Joshua must be run with a Java JDK 1.8 minimum. Anything older than that will not run.
+Joshua must be run with a Java JDK 1.8 minimum. 
 
 To run the decoder in any form requires setting a few basic environment
-variables: `$JAVA_HOME`, `$JOSHUA`, and potentially `$MOSES`.
+variables: `$JAVA_HOME`, `$JOSHUA`, and, for certain portions of the model-training
+pipeline, potentially `$MOSES`.
 
     export JAVA_HOME=/path/to/java  # maybe /usr/java/home
     export JOSHUA=/path/to/joshua
@@ -41,7 +42,7 @@ You might also find it helpful to set these:
 Then, compile Joshua by typing:
 
     cd $JOSHUA
-    ant 
+    mvn clean compile assembly:single
 
 The basic method for invoking the decoder looks like this:
 
@@ -49,17 +50,12 @@ The basic method for invoking the decoder looks like this:
 
 Some example usage scenarios and scripts can be found in the [examples/](https://github.com/apache/incubator-joshua/tree/master/examples) directory.
 
-----
-### Maven Build
+## Development With Eclipse
 
-### Create executable jar
+If you are hoping to work on the decoder, we suggest you use Eclipse. You can get started
+with this by typing
 
-    mvn clean compile assembly:single
-
-### Run the jar 
-
-    java -jar target/joshua-6.0.6-SNAPSHOT-jar-with-dependencies.jar
-    
+    mvn eclipse:eclipse
 
 ## Working with "language packs"
 
