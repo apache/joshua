@@ -1,5 +1,20 @@
 #!/usr/bin/env perl
 
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # This script implements the Joshua pipeline.  It can run a complete
 # pipeline --- from raw training corpora to bleu scores on a test set
 # --- and it allows jumping into arbitrary points of the pipeline. 
@@ -1362,7 +1377,7 @@ if ($DO_FILTER_TM and defined $GRAMMAR_FILE and ! $DOING_LATTICES and ! defined 
 if ($OPTIMIZER_RUN == 1 and defined $TUNE_GRAMMAR and $GRAMMAR_TYPE ne "phrase" and $GRAMMAR_TYPE ne "moses") {
   if (! defined $GLUE_GRAMMAR_FILE) {
     $cachepipe->cmd("glue-tune",
-                    "java -Xmx2g -cp $JOSHUA/lib/args4j-2.0.29.jar:$JOSHUA/class joshua.decoder.ff.tm.CreateGlueGrammar -g $TUNE_GRAMMAR > $DATA_DIRS{tune}/grammar.glue",
+                    "$JOSHUA/scripts/support/create_glue_grammar.sh $TUNE_GRAMMAR > $DATA_DIRS{tune}/grammar.glue",
                     get_file_from_grammar($TUNE_GRAMMAR),
                     "$DATA_DIRS{tune}/grammar.glue");
     $GLUE_GRAMMAR_FILE = "$DATA_DIRS{tune}/grammar.glue";
@@ -1579,7 +1594,7 @@ if ($DO_FILTER_TM and defined $GRAMMAR_FILE and ! $DOING_LATTICES and ! defined 
 if ($OPTIMIZER_RUN == 1 and defined $TEST_GRAMMAR and $GRAMMAR_TYPE ne "phrase" and $GRAMMAR_TYPE ne "moses") {
   if (! defined $GLUE_GRAMMAR_FILE) {
     $cachepipe->cmd("glue-test",
-                    "java -Xmx2g -cp $JOSHUA/lib/args4j-2.0.29.jar:$JOSHUA/class joshua.decoder.ff.tm.CreateGlueGrammar -g $TEST_GRAMMAR > $DATA_DIRS{test}/grammar.glue",
+                    "$JOSHUA/scripts/support/create_glue_grammar.sh $TEST_GRAMMAR > $DATA_DIRS{test}/grammar.glue",
                     get_file_from_grammar($TEST_GRAMMAR),
                     "$DATA_DIRS{test}/grammar.glue");
     $GLUE_GRAMMAR_FILE = "$DATA_DIRS{test}/grammar.glue";

@@ -1,4 +1,20 @@
 #!/bin/bash
+
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 #
 # Joshua decoder invocation script.
 # 
@@ -17,7 +33,6 @@ mem=4g
 
 if [[ $1 == "-m" ]]; then
     mem=$2
-
     shift
     shift
 fi
@@ -25,10 +40,11 @@ fi
 set -u
 
 JOSHUA=$(dirname $0)/..
+JAR_PATH=$(find "$JOSHUA"/target/joshua-*-jar-with-dependencies.jar)
+RES_OVERRIDE_PATH="$JOSHUA"/src/main/resources/
 
 exec java -Xmx${mem} \
- 	-cp $JOSHUA/class:$JOSHUA/ext/berkeleylm/jar/berkeleylm.jar:$JOSHUA/lib/gson-2.5.jar:$JOSHUA/lib/guava-19.0.jar \
 	-Dfile.encoding=utf8 \
-	-Djava.util.logging.config.file=${JOSHUA}/logging.properties \
 	-Djava.library.path=$JOSHUA/lib \
-	joshua.decoder.JoshuaDecoder "$@"
+	-cp "$RES_OVERRIDE_PATH:$JAR_PATH" \
+	org.apache.joshua.decoder.JoshuaDecoder "$@"

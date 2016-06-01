@@ -90,7 +90,7 @@ foreach my $grammar (@grammars) {
 my $grammars = join(" ", @sorted_grammars);
 my $outputs  = join(" ", @outputs);
 my $alignments = $opts{a} ? "--ga" : "";
-my $cmd = "java -Xmx$opts{m} -cp $JOSHUA/lib/args4j-2.0.29.jar:$JOSHUA/lib/guava-19.0.jar:$JOSHUA/class joshua.tools.GrammarPackerCli -g $grammars --outputs $outputs $alignments";
+my $cmd = "java -Xmx$opts{m} -cp $JOSHUA/target/joshua-*-jar-with-dependencies.jar org.apache.joshua.tools.GrammarPackerCli -g $grammars --outputs $outputs $alignments";
 print STDERR "Packing with $cmd...\n" if $opts{v};
 
 my $retval = system($cmd);
