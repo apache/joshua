@@ -87,6 +87,14 @@ public class ServerThread extends Thread implements HttpHandler {
         
         OutputStream out = socket.getOutputStream();
         
+        for (;;) {
+          Translation translation = translations.next();
+          if (translation == null)
+            break;
+          
+          out.write(translation.toString().getBytes());
+        }
+        
       } catch (SocketException e) {
         LOG.error(" Socket interrupted", e);
         request.shutdown();
