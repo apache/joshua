@@ -39,7 +39,7 @@ for file in $tests; do
   fi
   dir=$(dirname $file | sed 's/^\.\///')
   name=$(basename $file)
-  echo -n "Running test '$name' in test/$dir..."
+  echo -n "Running test '$name' in $dir..."
   pushd $dir > /dev/null
   bash $name
   if [[ $? -eq 0 ]]; then
