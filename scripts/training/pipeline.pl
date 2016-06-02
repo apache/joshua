@@ -227,7 +227,7 @@ my $PARSED_CORPUS = undef;
 my $NER_TAGGER = undef;
 
 # Allows the user to set a temp dir for various tasks
-my $TMPDIR = "/tmp";
+my $TMPDIR = $ENV{TMP} || "/tmp";
 
 # Enable forest rescoring
 my $LM_STATE_MINIMIZATION = 1;
