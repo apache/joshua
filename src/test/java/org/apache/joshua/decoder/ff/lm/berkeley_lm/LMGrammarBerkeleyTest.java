@@ -27,6 +27,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import org.apache.joshua.decoder.Decoder;
@@ -42,26 +43,26 @@ public class LMGrammarBerkeleyTest {
 
   private static final String INPUT = "the chat-rooms";
   private static final String[] OPTIONS = "-v 0 -output-format %f".split(" ");
-  
+
   private JoshuaConfiguration joshuaConfig;
   private Decoder decoder;
-  
+
   @Parameters
   public static List<String> lmFiles() {
-    return Arrays.asList("resources/berkeley_lm/lm", 
-        "resources/berkeley_lm/lm.gz", 
-        "resources/berkeley_lm/lm.berkeleylm", 
+    return Arrays.asList("resources/berkeley_lm/lm",
+        "resources/berkeley_lm/lm.gz",
+        "resources/berkeley_lm/lm.berkeleylm",
         "resources/berkeley_lm/lm.berkeleylm.gz");
   }
-  
+
   @After
   public void tearDown() throws Exception {
     decoder.cleanUp();
   }
-  
-  //TODO @Parameters
+
+  @Parameter
   public String lmFile;
-  
+
   @Test
   public void verifyLM() {
     joshuaConfig = new JoshuaConfiguration();
@@ -71,7 +72,7 @@ public class LMGrammarBerkeleyTest {
     String translation = decode(INPUT).toString();
     assertEquals(lmFile, "tm_glue_0=2.000 lm_0=-7.153\n", translation);
   }
-  
+
   private Translation decode(String input) {
     final Sentence sentence = new Sentence(input, 0, joshuaConfig);
     return decoder.decode(sentence);

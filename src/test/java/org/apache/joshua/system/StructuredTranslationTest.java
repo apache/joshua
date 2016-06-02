@@ -42,7 +42,7 @@ import org.junit.Test;
  * drop and generate additional words and simulate reordering of rules, so that
  * proper extraction of word alignments and other information from the decoder
  * can be tested.
- * 
+ *
  * @author fhieber
  */
 public class StructuredTranslationTest {
@@ -70,6 +70,7 @@ public class StructuredTranslationTest {
     EXPECTED_FEATURES.put("tm_pt_4", -3.0f);
     EXPECTED_FEATURES.put("tm_pt_5", -3.0f);
     EXPECTED_FEATURES.put("OOV", 7.0f);
+    EXPECTED_FEATURES.put("OOVPenalty", 0.0f);
   }
 
   @Before
@@ -109,30 +110,30 @@ public class StructuredTranslationTest {
     Sentence sentence = new Sentence(input, 0, joshuaConfig);
     return decoder.decode(sentence);
   }
-  
+
   @Test
   public void givenInput_whenRegularOutputFormat_thenExpectedOutput() {
     // GIVEN
     joshuaConfig.use_structured_output = false;
     joshuaConfig.outputFormat = "%s | %a ";
-    
+
     // WHEN
     final String translation = decode(INPUT).toString().trim();
-    
+
     // THEN
     assertEquals(EXPECTED_TRANSLATION + " | " + EXPECTED_WORD_ALIGNMENT_STRING, translation);
   }
-  
+
   @Test
   public void givenInput_whenRegularOutputFormatWithTopN1_thenExpectedOutput() {
     // GIVEN
     joshuaConfig.use_structured_output = false;
     joshuaConfig.outputFormat = "%s | %e | %a | %c";
     joshuaConfig.topN = 1;
-    
+
     // WHEN
     final String translation = decode(INPUT).toString().trim();
-    
+
     // THEN
     assertEquals(EXPECTED_TRANSLATION + " | " + INPUT + " | " + EXPECTED_WORD_ALIGNMENT_STRING + String.format(" | %.3f", EXPECTED_SCORE),
         translation);
@@ -143,7 +144,7 @@ public class StructuredTranslationTest {
     // GIVEN
     joshuaConfig.use_structured_output = true;
     joshuaConfig.topN = 0;
-    
+
     // WHEN
     final Translation translation = decode(INPUT);
     final StructuredTranslation structuredTranslation = translation.getStructuredTranslations().get(0);
@@ -152,7 +153,7 @@ public class StructuredTranslationTest {
     final float translationScore = structuredTranslation.getTranslationScore();
     final List<List<Integer>> wordAlignment = structuredTranslation.getTranslationWordAlignments();
     final Map<String,Float> translationFeatures = structuredTranslation.getTranslationFeatures();
-    
+
     // THEN
     assertTrue(translation.getStructuredTranslations().size() == 1);
     assertEquals(EXPECTED_TRANSLATION, translationString);
@@ -162,13 +163,13 @@ public class StructuredTranslationTest {
     assertEquals(wordAlignment.size(), translatedTokens.size());
     assertEquals(EXPECTED_FEATURES.entrySet(), translationFeatures.entrySet());
   }
-  
+
   @Test
   public void givenInput_whenStructuredOutputFormatWithTopN1_thenExpectedOutput() {
     // GIVEN
     joshuaConfig.use_structured_output = true;
     joshuaConfig.topN = 1;
-    
+
     // WHEN
     final Translation translation = decode(INPUT);
     final List<StructuredTranslation> structuredTranslations = translation.getStructuredTranslations();
@@ -178,7 +179,7 @@ public class StructuredTranslationTest {
     final float translationScore = structuredTranslation.getTranslationScore();
     final List<List<Integer>> wordAlignment = structuredTranslation.getTranslationWordAlignments();
     final Map<String,Float> translationFeatures = structuredTranslation.getTranslationFeatures();
-    
+
     // THEN
     assertTrue(structuredTranslations.size() == 1);
     assertEquals(EXPECTED_TRANSLATION, translationString);
@@ -188,19 +189,19 @@ public class StructuredTranslationTest {
     assertEquals(wordAlignment.size(), translatedTokens.size());
     assertEquals(EXPECTED_FEATURES.entrySet(), translationFeatures.entrySet());
   }
-  
+
   @Test
   public void givenInput_whenStructuredOutputFormatWithKBest_thenExpectedOutput() {
     // GIVEN
     joshuaConfig.use_structured_output = true;
     joshuaConfig.topN = 100;
-    
+
     // WHEN
     final Translation translation = decode(INPUT);
     final List<StructuredTranslation> structuredTranslations = translation.getStructuredTranslations();
     final StructuredTranslation viterbiTranslation = structuredTranslations.get(0);
     final StructuredTranslation lastKBest = structuredTranslations.get(structuredTranslations.size() - 1);
-    
+
     // THEN
     assertEquals(structuredTranslations.size(), EXPECTED_NBEST_LIST_SIZE);
     assertTrue(structuredTranslations.size() > 1);
@@ -212,14 +213,14 @@ public class StructuredTranslationTest {
     // last entry in KBEST is all input words untranslated, should have 8 OOVs.
     assertEquals(INPUT, lastKBest.getTranslationString());
     assertEquals(-800.0, lastKBest.getTranslationFeatures().get("OOVPenalty"), 0.0001);
-    
+
   }
-  
+
   @Test
   public void givenEmptyInput_whenStructuredOutputFormat_thenEmptyOutput() {
     // GIVEN
     joshuaConfig.use_structured_output = true;
-    
+
     // WHEN
     final Translation translation = decode("");
     final StructuredTranslation structuredTranslation = translation.getStructuredTranslations().get(0);
@@ -227,20 +228,20 @@ public class StructuredTranslationTest {
     final List<String> translatedTokens = structuredTranslation.getTranslationTokens();
     final float translationScore = structuredTranslation.getTranslationScore();
     final List<List<Integer>> wordAlignment = structuredTranslation.getTranslationWordAlignments();
-    
+
     // THEN
     assertEquals("", translationString);
     assertTrue(translatedTokens.isEmpty());
     assertEquals(0, translationScore, 0.00001);
     assertTrue(wordAlignment.isEmpty());
   }
-  
+
   @Test
   public void givenOOVInput_whenStructuredOutputFormat_thenOOVOutput() {
     // GIVEN
     joshuaConfig.use_structured_output = true;
     final String input = "gabarbl";
-    
+
     // WHEN
     final Translation translation = decode(input);
     final StructuredTranslation structuredTranslation = translation.getStructuredTranslations().get(0);
@@ -248,23 +249,24 @@ public class StructuredTranslationTest {
     final List<String> translatedTokens = structuredTranslation.getTranslationTokens();
     final float translationScore = structuredTranslation.getTranslationScore();
     final List<List<Integer>> wordAlignment = structuredTranslation.getTranslationWordAlignments();
-    
+
     // THEN
     assertEquals(input, translationString);
     assertTrue(translatedTokens.contains(input));
     assertEquals(-99.0, translationScore, 0.00001);
     assertTrue(wordAlignment.contains(asList(0)));
   }
-  
+
   @Test
   public void givenEmptyInput_whenRegularOutputFormat_thenNewlineOutput() {
     // GIVEN
     joshuaConfig.use_structured_output = false;
-    
+    joshuaConfig.outputFormat = "%s";
+
     // WHEN
     final Translation translation = decode("");
     final String translationString = translation.toString();
-    
+
     // THEN
     assertEquals("\n", translationString);
   }

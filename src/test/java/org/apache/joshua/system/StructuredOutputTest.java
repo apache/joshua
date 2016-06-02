@@ -36,7 +36,7 @@ import org.junit.Assert;
  * a bunch of capital letters to lowercase letters. Rules in the test grammar
  * drop and generate additional words and simulate reordering of rules, so that
  * proper extraction of word alignments can be tested.
- * 
+ *
  * @author fhieber
  */
 public class StructuredOutputTest {
@@ -67,7 +67,7 @@ public class StructuredOutputTest {
     joshuaConfig.tms.add("thrax -owner glue -maxspan -1 -path resources/grammar.glue");
     joshuaConfig.goal_symbol = "[GOAL]";
     joshuaConfig.default_non_terminal = "[X]";
-    joshuaConfig.features.add("feature_function = OOVPenalty");
+    joshuaConfig.features.add("OOVPenalty");
     joshuaConfig.weights.add("tm_pt_0 1");
     joshuaConfig.weights.add("tm_pt_1 1");
     joshuaConfig.weights.add("tm_pt_2 1");

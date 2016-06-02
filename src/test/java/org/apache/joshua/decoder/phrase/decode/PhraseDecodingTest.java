@@ -33,40 +33,42 @@ import org.apache.joshua.decoder.segment_file.Sentence;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  * Reimplements the constrained phrase decoding test
  */
+@Ignore("re-enable as soon as kenlm native library support will be in place")
 public class PhraseDecodingTest {
-  
+
   private static final String CONFIG = "resources/phrase_decoder/config";
   private static final String INPUT = "una estrategia republicana para obstaculizar la reelección de Obama";
   private static final Path GOLD_PATH = Paths.get("resources/phrase_decoder/output.gold");
-  
+
   private JoshuaConfiguration joshuaConfig = null;
   private Decoder decoder = null;
-  
+
   @Before
   public void setUp() throws Exception {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.readConfigFile(CONFIG);
     decoder = new Decoder(joshuaConfig, "");
   }
-  
+
   @After
   public void tearDown() throws Exception {
     decoder.cleanUp();
     decoder = null;
   }
-  
+
   @Test
   public void givenInput_whenPhraseDecoding_thenOutputIsAsExpected() throws IOException {
     final String translation = decode(INPUT).toString();
     final String gold = new String(readAllBytes(GOLD_PATH), UTF_8);
     assertEquals(gold, translation);
   }
-  
+
   private Translation decode(String input) {
     final Sentence sentence = new Sentence(input, 0, joshuaConfig);
     return decoder.decode(sentence);
