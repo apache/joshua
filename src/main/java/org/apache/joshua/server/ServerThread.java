@@ -87,11 +87,7 @@ public class ServerThread extends Thread implements HttpHandler {
         
         OutputStream out = socket.getOutputStream();
         
-        for (;;) {
-          Translation translation = translations.next();
-          if (translation == null)
-            break;
-          
+        for (Translation translation: translations) {
           out.write(translation.toString().getBytes());
         }
         

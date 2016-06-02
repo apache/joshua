@@ -18,6 +18,7 @@
  */
 package org.apache.joshua.decoder;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
 
@@ -32,7 +33,7 @@ import org.apache.joshua.decoder.io.TranslationRequestStream;
  * 
  * @author Matt Post post@cs.jhu.edu
  */
-public class Translations {
+public class Translations implements Iterator<Translation>, Iterable<Translation> {
 
   /* The source sentences to be translated. */
   private TranslationRequestStream request = null;
@@ -47,6 +48,8 @@ public class Translations {
   private LinkedList<Translation> translations = null;
 
   private boolean spent = false;
+
+  private Translation nextTranslation;
 
   public Translations(TranslationRequestStream request) {
     this.request = request;
@@ -101,15 +104,32 @@ public class Translations {
    * 
    * @return first element from the list of {@link org.apache.joshua.decoder.Translation}'s
    */
+  @Override
   public Translation next() {
+    synchronized(this) {
+      if (this.hasNext()) {
+        Translation t = this.nextTranslation;
+        this.nextTranslation = null;
+        return t;
+      }
+      
+      return null;
+    }
+  }
+   
+  @Override
+  public boolean hasNext() {
     synchronized (this) {
 
+      if (nextTranslation != null)
+        return true;
+      
       /*
        * If there are no more input sentences, and we've already distributed what we then know is
        * the last one, we're done.
        */
       if (spent && currentID == request.size())
-        return null;
+        return false;
 
       /*
        * Otherwise, there is another sentence. If it's not available already, we need to wait for
@@ -126,7 +146,13 @@ public class Translations {
 
       /* We now have the sentence and can return it. */
       currentID++;
-      return translations.poll();
+      this.nextTranslation = translations.poll();
+      return this.nextTranslation != null;
     }
+  }
+
+  @Override
+  public Iterator<Translation> iterator() {
+    return this;
   }
 }

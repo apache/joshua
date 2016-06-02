@@ -55,7 +55,6 @@ public class JoshuaDecoder {
     JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
     ArgsParser userArgs = new ArgsParser(args,joshuaConfiguration);
 
-
     long startTime = System.currentTimeMillis();
 
     /* Step-0: some sanity checking */
@@ -107,10 +106,7 @@ public class JoshuaDecoder {
     if (joshuaConfiguration.n_best_file != null)
       nbest_out = new FileWriter(joshuaConfiguration.n_best_file);
 
-    for (;;) {
-      Translation translation = translations.next();
-      if (translation == null)
-        break;
+    for (Translation translation: translations) {
 
       /**
        * We need to munge the feature value outputs in order to be compatible with Moses tuners.
