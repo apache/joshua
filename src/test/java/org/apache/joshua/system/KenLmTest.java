@@ -26,6 +26,7 @@ import org.apache.joshua.decoder.ff.lm.KenLM;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -34,6 +35,7 @@ import org.junit.Test;
  * If run in Eclipse, add -Djava.library.path=build/lib to JVM arguments
  * of the run configuration.
  */
+@Ignore("re-enable as soon as kenlm native library support will be in place")
 public class KenLmTest {
 
   private static final String LANGUAGE_MODEL_PATH = "resources/kenlm/oilers.kenlm";
