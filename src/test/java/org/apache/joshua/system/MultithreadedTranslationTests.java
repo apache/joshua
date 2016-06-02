@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.MetaDataException;
+import org.apache.joshua.decoder.Translation;
+import org.apache.joshua.decoder.Translations;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
 import org.apache.joshua.decoder.segment_file.Sentence;
 
@@ -107,7 +109,7 @@ public class MultithreadedTranslationTests {
   // data structures.
 
   @Test
-  public void givenPackedGrammar_whenNTranslationsCalledConcurrently_thenReturnNResults() {
+  public void givenPackedGrammar_whenNTranslationsCalledConcurrently_thenReturnNResults() throws IOException {
     // GIVEN
 
     int inputLines = 10000;
@@ -127,23 +129,15 @@ public class MultithreadedTranslationTests {
 
     // WHEN
     // Translate all spans in parallel.
-    try {
-      this.decoder.decodeAll(req, output);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    ArrayList<Sentence> translationResults = new ArrayList<Sentence>();
+    Translations translations = this.decoder.decodeAll(req);
+
+    ArrayList<Translation> translationResults = new ArrayList<Translation>();
 
 
     final long translationStartTime = System.nanoTime();
-    Sentence t;
     try {
-      while ((t = req.next()) != null) {
+      for (Translation t: translations)
         translationResults.add(t);
-      }
-    } catch (MetaDataException e) {
-      e.printStackTrace();
     } finally {
       if (output != null) {
         try {
