@@ -34,6 +34,11 @@ import com.sun.net.httpserver.HttpHandler;
 
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.Translation;
+import org.apache.joshua.decoder.Translations;
+import org.apache.joshua.decoder.JoshuaConfiguration.INPUT_TYPE;
+import org.apache.joshua.decoder.JoshuaConfiguration.SERVER_TYPE;
+import org.apache.joshua.decoder.io.JSONMessage;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +83,10 @@ public class ServerThread extends Thread implements HttpHandler {
       TranslationRequestStream request = new TranslationRequestStream(reader, joshuaConfiguration);
 
       try {
-        decoder.decodeAll(request, socket.getOutputStream());
+        Translations translations = decoder.decodeAll(request);
+        
+        OutputStream out = socket.getOutputStream();
+        
       } catch (SocketException e) {
         LOG.error(" Socket interrupted", e);
         request.shutdown();
@@ -137,7 +145,20 @@ public class ServerThread extends Thread implements HttpHandler {
     BufferedReader reader = new BufferedReader(new StringReader(query));
     TranslationRequestStream request = new TranslationRequestStream(reader, joshuaConfiguration);
     
-    decoder.decodeAll(request, new HttpWriter(client));
+    Translations translations = decoder.decodeAll(request);
+    OutputStream out = new HttpWriter(client);
+    
+    for (;;) {
+      Translation translation = translations.next();
+      if (translation == null)
+        break;
+      
+      if (joshuaConfiguration.input_type == INPUT_TYPE.json || joshuaConfiguration.server_type == SERVER_TYPE.HTTP) {
+        JSONMessage message = JSONMessage.buildMessage(translation);
+        out.write(message.toString().getBytes());
+      }
+    }
+    out.close();
     reader.close();
   }
 }

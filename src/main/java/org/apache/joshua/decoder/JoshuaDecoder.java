@@ -24,7 +24,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.net.InetSocketAddress;
 
 import com.sun.net.httpserver.HttpServer;
@@ -101,10 +100,44 @@ public class JoshuaDecoder {
 
     BufferedReader reader = new BufferedReader(new InputStreamReader(input));
     TranslationRequestStream fileRequest = new TranslationRequestStream(reader, joshuaConfiguration);
-    decoder.decodeAll(fileRequest, new PrintStream(System.out));
+    Translations translations = decoder.decodeAll(fileRequest);
     
+    // Create the n-best output stream
+    FileWriter nbest_out = null;
     if (joshuaConfiguration.n_best_file != null)
-      out.close();
+      nbest_out = new FileWriter(joshuaConfiguration.n_best_file);
+
+    for (;;) {
+      Translation translation = translations.next();
+      if (translation == null)
+        break;
+
+      /**
+       * We need to munge the feature value outputs in order to be compatible with Moses tuners.
+       * Whereas Joshua writes to STDOUT whatever is specified in the `output-format` parameter,
+       * Moses expects the simple translation on STDOUT and the n-best list in a file with a fixed
+       * format.
+       */
+      if (joshuaConfiguration.moses) {
+        String text = translation.toString().replaceAll("=", "= ");
+        // Write the complete formatted string to STDOUT
+        if (joshuaConfiguration.n_best_file != null)
+          nbest_out.write(text);
+
+        // Extract just the translation and output that to STDOUT
+        text = text.substring(0,  text.indexOf('\n'));
+        String[] fields = text.split(" \\|\\|\\| ");
+        text = fields[1];
+
+        System.out.println(text);
+
+      } else {
+        System.out.print(translation.toString());
+      }
+    }
+
+    if (joshuaConfiguration.n_best_file != null)
+      nbest_out.close();
 
     LOG.info("Decoding completed.");
     LOG.info("Memory used {} MB", ((Runtime.getRuntime().totalMemory()

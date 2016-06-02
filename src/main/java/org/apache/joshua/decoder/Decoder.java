@@ -186,15 +186,9 @@ public class Decoder {
     /* Where to put translated sentences. */
     private final Translations response;
 
-    /* Sometimes we need to communicate with the client even when we didn't get a new sentence
-     * (e.g., metadata)
-     */
-    private OutputStream out;
-
-    RequestParallelizer(TranslationRequestStream request, Translations response, OutputStream out) {
+    RequestParallelizer(TranslationRequestStream request, Translations response) {
       this.request = request;
       this.response = response;
-      this.out = out;
     }
 
     @Override
@@ -209,15 +203,9 @@ public class Decoder {
         Sentence sentence = null;
         try {
           sentence = request.next();
+        } catch (MetaDataException e) {
 
-        } catch (MetaDataException meta) {
-          try {
-            handleMetadata(meta);
-          } catch (IOException e) {
-            e.printStackTrace();
-          }
-
-          continue;
+          e.printStackTrace();
         }
 
         if (sentence == null) {
@@ -238,113 +226,113 @@ public class Decoder {
      * @param meta
      * @throws IOException
      */
-    private void handleMetadata(MetaDataException meta) throws IOException {
-      if (meta.type().equals("set_weight")) {
-        // Change a decoder weight
-        String[] tokens = meta.tokens();
-        if (tokens.length != 3) {
-          LOG.error("weight change requires three tokens");
-        } else {
-          float old_weight = Decoder.weights.getWeight(tokens[1]);
-          Decoder.weights.set(tokens[1], Float.parseFloat(tokens[2]));
-          LOG.error("@set_weight: {} {} -> {}", tokens[1], old_weight,
-              Decoder.weights.getWeight(tokens[1]));
-        }
-
-        // TODO: return a JSON object with this weight or all weights
-        out.write("".getBytes());
-
-      } else if (meta.type().equals("get_weight")) {
-        // TODO: add to JSON object, send back
-
-        String[] tokens = meta.tokens();
-
-        LOG.error("{} = {}", tokens[1], Decoder.weights.getWeight(tokens[1]));
-
-        out.write("".getBytes());
-
-      } else if (meta.type().equals("add_rule")) {
-        String tokens[] = meta.tokens(" \\|\\|\\| ");
-
-        if (tokens.length != 2) {
-          LOG.error("* INVALID RULE '{}'", meta);
-          out.write("bad rule".getBytes());
-          return;
-        }
-
-        Rule rule = new HieroFormatReader().parseLine(
-            String.format("[X] ||| [X,1] %s ||| [X,1] %s ||| custom=1", tokens[0], tokens[1]));
-        Decoder.this.customPhraseTable.addRule(rule);
-        rule.estimateRuleCost(featureFunctions);
-        LOG.info("Added custom rule {}", formatRule(rule));
-
-        String response = String.format("Added rule %s", formatRule(rule));
-        out.write(response.getBytes());
-
-      } else if (meta.type().equals("list_rules")) {
-
-        JSONMessage message = new JSONMessage();
-
-        // Walk the the grammar trie
-        ArrayList<Trie> nodes = new ArrayList<Trie>();
-        nodes.add(customPhraseTable.getTrieRoot());
-
-        while (nodes.size() > 0) {
-          Trie trie = nodes.remove(0);
-
-          if (trie == null)
-            continue;
-
-          if (trie.hasRules()) {
-            for (Rule rule: trie.getRuleCollection().getRules()) {
-              message.addRule(formatRule(rule));
-            }
-          }
-
-          if (trie.getExtensions() != null)
-            nodes.addAll(trie.getExtensions());
-        }
-
-        out.write(message.toString().getBytes());
-
-      } else if (meta.type().equals("remove_rule")) {
-        // Remove a rule from a custom grammar, if present
-        String[] tokens = meta.tokenString().split(" \\|\\|\\| ");
-        if (tokens.length != 2) {
-          out.write(String.format("Invalid delete request: '%s'", meta.tokenString()).getBytes());
-          return;
-        }
-
-        // Search for the rule in the trie
-        int nt_i = Vocabulary.id(joshuaConfiguration.default_non_terminal);
-        Trie trie = customPhraseTable.getTrieRoot().match(nt_i);
-
-        for (String word: tokens[0].split("\\s+")) {
-          int id = Vocabulary.id(word);
-          Trie nextTrie = trie.match(id);
-          if (nextTrie != null)
-            trie = nextTrie;
-        }
-
-        if (trie.hasRules()) {
-          Rule matched = null;
-          for (Rule rule: trie.getRuleCollection().getRules()) {
-            String target = rule.getEnglishWords();
-            target = target.substring(target.indexOf(' ') + 1);
-
-            if (tokens[1].equals(target)) {
-              matched = rule;
-              break;
-            }
-          }
-          trie.getRuleCollection().getRules().remove(matched);
-          out.write(String.format("Removed rule %s", formatRule(matched)).getBytes());
-          return;
-        }
-
-        out.write(String.format("No such rule %s", meta.tokenString()).getBytes());
-      }
-    }
+//    private void handleMetadata(MetaDataException meta) throws IOException {
+//      if (meta.type().equals("set_weight")) {
+//        // Change a decoder weight
+//        String[] tokens = meta.tokens();
+//        if (tokens.length != 3) {
+//          LOG.error("weight change requires three tokens");
+//        } else {
+//          float old_weight = Decoder.weights.getWeight(tokens[1]);
+//          Decoder.weights.set(tokens[1], Float.parseFloat(tokens[2]));
+//          LOG.error("@set_weight: {} {} -> {}", tokens[1], old_weight,
+//              Decoder.weights.getWeight(tokens[1]));
+//        }
+//
+//        // TODO: return a JSON object with this weight or all weights
+//        out.write("".getBytes());
+//
+//      } else if (meta.type().equals("get_weight")) {
+//        // TODO: add to JSON object, send back
+//
+//        String[] tokens = meta.tokens();
+//
+//        LOG.error("{} = {}", tokens[1], Decoder.weights.getWeight(tokens[1]));
+//
+//        out.write("".getBytes());
+//
+//      } else if (meta.type().equals("add_rule")) {
+//        String tokens[] = meta.tokens(" \\|\\|\\| ");
+//
+//        if (tokens.length != 2) {
+//          LOG.error("* INVALID RULE '{}'", meta);
+//          out.write("bad rule".getBytes());
+//          return;
+//        }
+//
+//        Rule rule = new HieroFormatReader().parseLine(
+//            String.format("[X] ||| [X,1] %s ||| [X,1] %s ||| custom=1", tokens[0], tokens[1]));
+//        Decoder.this.customPhraseTable.addRule(rule);
+//        rule.estimateRuleCost(featureFunctions);
+//        LOG.info("Added custom rule {}", formatRule(rule));
+//
+//        String response = String.format("Added rule %s", formatRule(rule));
+//        out.write(response.getBytes());
+//
+//      } else if (meta.type().equals("list_rules")) {
+//
+//        JSONMessage message = new JSONMessage();
+//
+//        // Walk the the grammar trie
+//        ArrayList<Trie> nodes = new ArrayList<Trie>();
+//        nodes.add(customPhraseTable.getTrieRoot());
+//
+//        while (nodes.size() > 0) {
+//          Trie trie = nodes.remove(0);
+//
+//          if (trie == null)
+//            continue;
+//
+//          if (trie.hasRules()) {
+//            for (Rule rule: trie.getRuleCollection().getRules()) {
+//              message.addRule(formatRule(rule));
+//            }
+//          }
+//
+//          if (trie.getExtensions() != null)
+//            nodes.addAll(trie.getExtensions());
+//        }
+//
+//        out.write(message.toString().getBytes());
+//
+//      } else if (meta.type().equals("remove_rule")) {
+//        // Remove a rule from a custom grammar, if present
+//        String[] tokens = meta.tokenString().split(" \\|\\|\\| ");
+//        if (tokens.length != 2) {
+//          out.write(String.format("Invalid delete request: '%s'", meta.tokenString()).getBytes());
+//          return;
+//        }
+//
+//        // Search for the rule in the trie
+//        int nt_i = Vocabulary.id(joshuaConfiguration.default_non_terminal);
+//        Trie trie = customPhraseTable.getTrieRoot().match(nt_i);
+//
+//        for (String word: tokens[0].split("\\s+")) {
+//          int id = Vocabulary.id(word);
+//          Trie nextTrie = trie.match(id);
+//          if (nextTrie != null)
+//            trie = nextTrie;
+//        }
+//
+//        if (trie.hasRules()) {
+//          Rule matched = null;
+//          for (Rule rule: trie.getRuleCollection().getRules()) {
+//            String target = rule.getEnglishWords();
+//            target = target.substring(target.indexOf(' ') + 1);
+//
+//            if (tokens[1].equals(target)) {
+//              matched = rule;
+//              break;
+//            }
+//          }
+//          trie.getRuleCollection().getRules().remove(matched);
+//          out.write(String.format("Removed rule %s", formatRule(matched)).getBytes());
+//          return;
+//        }
+//
+//        out.write(String.format("No such rule %s", meta.tokenString()).getBytes());
+//      }
+//    }
 
     /**
      * Strips the nonterminals from the lefthand side of the rule.
@@ -446,56 +434,13 @@ public class Decoder {
    * @param out an appropriate {@link java.io.OutputStream} to write results to
    * @throws IOException if there is an error with the input stream or writing the output
    */
-  public void decodeAll(TranslationRequestStream request, OutputStream out) throws IOException {
+  public Translations decodeAll(TranslationRequestStream request) throws IOException {
     Translations translations = new Translations(request);
 
     /* Start a thread to handle requests on the input stream */
-    new RequestParallelizer(request, translations, out).start();
+    new RequestParallelizer(request, translations).start();
 
-    // Create the n-best output stream
-    FileWriter nbest_out = null;
-    if (joshuaConfiguration.n_best_file != null)
-      nbest_out = new FileWriter(joshuaConfiguration.n_best_file);
-
-    for (;;) {
-      Translation translation = translations.next();
-      if (translation == null)
-        break;
-
-      if (joshuaConfiguration.input_type == INPUT_TYPE.json || joshuaConfiguration.server_type == SERVER_TYPE.HTTP) {
-        JSONMessage message = JSONMessage.buildMessage(translation);
-        out.write(message.toString().getBytes());
-
-      } else {
-        /**
-         * We need to munge the feature value outputs in order to be compatible with Moses tuners.
-         * Whereas Joshua writes to STDOUT whatever is specified in the `output-format` parameter,
-         * Moses expects the simple translation on STDOUT and the n-best list in a file with a fixed
-         * format.
-         */
-        String text;
-        if (joshuaConfiguration.moses) {
-          text = translation.toString().replaceAll("=", "= ");
-          // Write the complete formatted string to STDOUT
-          if (joshuaConfiguration.n_best_file != null)
-            nbest_out.write(text);
-
-          // Extract just the translation and output that to STDOUT
-          text = text.substring(0,  text.indexOf('\n'));
-          String[] fields = text.split(" \\|\\|\\| ");
-          text = fields[1] + "\n";
-
-        } else {
-          text = translation.toString();
-        }
-
-        out.write(text.getBytes());
-      }
-      out.flush();
-    }
-
-    if (joshuaConfiguration.n_best_file != null)
-      nbest_out.close();
+    return translations;
   }
 
 
