@@ -89,8 +89,10 @@ public class JSONMessage {
   public static JSONMessage buildMessage(Translation translation) {
     JSONMessage message = new JSONMessage();
     String[] results = translation.toString().split("\\n");
+    
     if (results.length > 0) {
-      JSONMessage.TranslationItem item = message.addTranslation(translation.getStructuredTranslations().get(0).getTranslationString());
+      String rawTranslation = results[0].split(" \\|\\|\\| ")[1];
+      JSONMessage.TranslationItem item = message.addTranslation(rawTranslation);
 
       for (String result: results) {
         String[] tokens = result.split(" \\|\\|\\| ");
@@ -104,6 +106,6 @@ public class JSONMessage {
   
   public String toString() {
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    return gson.toJson(this);
+    return gson.toJson(this) + "\n";
   }
 }
