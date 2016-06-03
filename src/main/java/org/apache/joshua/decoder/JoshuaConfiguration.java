@@ -35,6 +35,8 @@ import org.apache.joshua.decoder.ff.fragmentlm.Tree;
 import org.apache.joshua.util.FormatUtils;
 import org.apache.joshua.util.Regex;
 import org.apache.joshua.util.io.LineReader;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -425,7 +427,19 @@ public class JoshuaConfiguration {
             tms.add(tmLine);
 
           } else if (parameter.equals("v")) {
+            
             Decoder.VERBOSE = Integer.parseInt(fds[1]);
+            switch (Decoder.VERBOSE) {
+            case 0:
+              LogManager.getRootLogger().setLevel(Level.OFF);
+              break;
+            case 1:
+              LogManager.getRootLogger().setLevel(Level.INFO);
+              break;
+            case 2:
+              LogManager.getRootLogger().setLevel(Level.DEBUG);
+              break;
+            }
 
           } else if (parameter.equals(normalize_key("parse"))) {
             parse = Boolean.parseBoolean(fds[1]);
