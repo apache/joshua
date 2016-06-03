@@ -111,18 +111,6 @@ public class SentenceFilteredGrammar extends MemoryBasedBatchGrammar {
     return numRules;
   }
 
-  @Override
-  public Rule constructManualRule(int lhs, int[] sourceWords, int[] targetWords, float[] scores,
-      int aritity) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public boolean isRegexpGrammar() {
-    return false;
-  }
-
   /**
    * What is the algorithm?
    * 

@@ -170,22 +170,6 @@ public class PhraseTable implements Grammar {
   }
 
   @Override
-  public Rule constructManualRule(int lhs, int[] sourceWords, int[] targetWords, float[] scores,
-      int arity) {
-    return backend.constructManualRule(lhs,  sourceWords, targetWords, scores, arity);
-  }
-
-  @Override
-  public void writeGrammarOnDisk(String file) {
-    backend.writeGrammarOnDisk(file);
-  }
-
-  @Override
-  public boolean isRegexpGrammar() {
-    return backend.isRegexpGrammar();
-  }
-
-  @Override
   public int getOwner() {
     return backend.getOwner();
   }

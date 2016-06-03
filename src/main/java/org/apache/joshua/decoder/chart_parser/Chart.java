@@ -96,7 +96,6 @@ public class Chart {
 
   private Sentence sentence = null;
 //  private SyntaxTree parseTree;
-//  private ManualConstraintsHandler manualConstraintsHandler;
   private StateConstraint stateConstraint;
 
 
@@ -148,13 +147,9 @@ public class Chart {
     // each grammar will have a dot chart
     this.dotcharts = new DotChart[this.grammars.length];
     for (int i = 0; i < this.grammars.length; i++)
-      this.dotcharts[i] = new DotChart(this.inputLattice, this.grammars[i], this,
-          this.grammars[i].isRegexpGrammar());
+      this.dotcharts[i] = new DotChart(this.inputLattice, this.grammars[i], this);
 
     // Begin to do initialization work
-
-//    manualConstraintsHandler = new ManualConstraintsHandler(this, grammars[grammars.length - 1],
-//        sentence.constraints());
 
     stateConstraint = null;
     if (sentence.target() != null)

@@ -58,7 +58,6 @@ import static java.util.Collections.sort;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.BufferUnderflowException;
@@ -81,7 +80,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
@@ -113,9 +111,6 @@ public class PackedGrammar extends AbstractGrammar {
   private ArrayList<PackedSlice> slices;
 
   private final File vocabFile; // store path to vocabulary file
-
-  // The grammar specification keyword (e.g., "thrax" or "moses")
-  private String type;
 
   // The version number of the earliest supported grammar packer
   public static final int SUPPORTED_VERSION = 3;
@@ -195,10 +190,6 @@ public class PackedGrammar extends AbstractGrammar {
     return encoding.getNumDenseFeatures();
   }
 
-  public Rule constructManualRule(int lhs, int[] src, int[] tgt, float[] scores, int arity) {
-    return null;
-  }
-  
   /**
    * Computes the MD5 checksum of the vocabulary file.
    * Can be used for comparing vocabularies across multiple packedGrammars.
@@ -1034,11 +1025,6 @@ public class PackedGrammar extends AbstractGrammar {
         }
       }
     }
-  }
-
-  @Override
-  public boolean isRegexpGrammar() {
-    return false;
   }
 
   @Override

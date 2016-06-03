@@ -98,10 +98,6 @@ class DotChart {
   /* Represents the input sentence being translated. */
   private final Lattice<Token> input;
 
-  /* If enabled, rule terminals are treated as regular expressions. */
-  private final boolean regexpMatching;
-
-
   // ===============================================================
   // Constructors
   // ===============================================================
@@ -118,18 +114,13 @@ class DotChart {
    * @param grammar A translation grammar.
    * @param chart A CKY+ style chart in which completed span entries are stored.
    */
-
-
-
-  public DotChart(Lattice<Token> input, Grammar grammar, Chart chart, boolean regExpMatching) {
+  public DotChart(Lattice<Token> input, Grammar grammar, Chart chart) {
 
     this.dotChart = chart;
     this.pGrammar = grammar;
     this.input = input;
     this.sentLen = input.size();
-
     this.dotcells = new ChartSpan<DotCell>(sentLen, null);
-    this.regexpMatching = regExpMatching;
 
     seed();
   }
@@ -211,20 +202,10 @@ class DotChart {
 
           List<Trie> child_tnodes = null;
 
-          if (this.regexpMatching) {
-            child_tnodes = matchAll(dotNode, last_word);
-          } else {
-            Trie child_node = dotNode.trieNode.match(last_word);
-            child_tnodes = Arrays.asList(child_node);
-          }
-
-          if (!(child_tnodes == null || child_tnodes.isEmpty())) {
-            for (Trie child_tnode : child_tnodes) {
-              if (null != child_tnode) {
-                addDotItem(child_tnode, i, j - 1 + arc_len, dotNode.antSuperNodes, null,
-                    dotNode.srcPath.extend(arc));
-              }
-            }
+          Trie child_node = dotNode.trieNode.match(last_word);
+          if (null != child_node) {
+            addDotItem(child_node, i, j - 1 + arc_len, dotNode.antSuperNodes, null,
+                dotNode.srcPath.extend(arc));
           }
         }
       }

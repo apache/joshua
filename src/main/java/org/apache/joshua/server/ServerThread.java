@@ -152,11 +152,7 @@ public class ServerThread extends Thread implements HttpHandler {
     Translations translations = decoder.decodeAll(request);
     OutputStream out = new HttpWriter(client);
     
-    for (;;) {
-      Translation translation = translations.next();
-      if (translation == null)
-        break;
-      
+    for (Translation translation: translations) {
       if (joshuaConfiguration.input_type == INPUT_TYPE.json || joshuaConfiguration.server_type == SERVER_TYPE.HTTP) {
         JSONMessage message = JSONMessage.buildMessage(translation);
         out.write(message.toString().getBytes());

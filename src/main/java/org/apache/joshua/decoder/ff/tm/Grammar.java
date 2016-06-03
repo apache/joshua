@@ -92,35 +92,6 @@ public interface Grammar {
   int getNumDenseFeatures();
 
   /**
-   * This is used to construct a manual rule supported from outside the grammar, but the owner
-   * should be the same as the grammar. Rule ID will the same as OOVRuleId, and no lattice cost
-   * @param lhs todo
-   * @param sourceWords todo
-   * @param targetWords todo
-   * @param scores todo
-   * @param arity todo
-   * @return the constructed {@link org.apache.joshua.decoder.ff.tm.Rule}
-   */
-  @Deprecated
-  Rule constructManualRule(int lhs, int[] sourceWords, int[] targetWords, float[] scores, int arity);
-
-  /**
-   * Dump the grammar to disk.
-   * 
-   * @param file the file path to write to
-   */
-  @Deprecated
-  void writeGrammarOnDisk(String file);
-
-  /**
-   * This returns true if the grammar contains rules that are regular expressions, possibly matching
-   * many different inputs.
-   * 
-   * @return true if the grammar's rules may contain regular expressions.
-   */
-  boolean isRegexpGrammar();
-
-  /**
    * Return the grammar's owner.
    * @return grammar owner
    */

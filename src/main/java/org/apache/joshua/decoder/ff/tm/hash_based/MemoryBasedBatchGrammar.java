@@ -71,9 +71,6 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
 
   private GrammarReader<Rule> modelReader;
 
-  /* Whether the grammar's rules contain regular expressions. */
-  private boolean isRegexpGrammar = false;
-
   // ===============================================================
   // Static Fields
   // ===============================================================
@@ -109,7 +106,6 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
     Vocabulary.id(defaultLHSSymbol);
     this.spanLimit = spanLimit;
     this.grammarFile = grammarFile;
-    this.setRegexpGrammar(formatKeyword.equals("regexp"));
 
     // ==== loading grammar
     this.modelReader = createReader(formatKeyword, grammarFile);
@@ -129,7 +125,7 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
   protected GrammarReader<Rule> createReader(String format, String grammarFile) throws IOException {
 
     if (grammarFile != null) {
-      if ("hiero".equals(format) || "thrax".equals(format) || "regexp".equals(format)) {
+      if ("hiero".equals(format) || "thrax".equals(format)) {
         return new HieroFormatReader(grammarFile);
       } else if ("moses".equals(format)) {
         return new MosesFormatReader(grammarFile);
@@ -151,12 +147,6 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
   @Override
   public int getNumRules() {
     return this.qtyRulesRead;
-  }
-
-  @Override
-  public Rule constructManualRule(int lhs, int[] sourceWords, int[] targetWords,
-      float[] denseScores, int arity) {
-    return null;
   }
 
   /**
@@ -232,21 +222,6 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
   protected void printGrammar() {
     LOG.info("MemoryBasedBatchGrammar: Read {} rules with {} distinct source sides from '{}'",
         this.qtyRulesRead, this.qtyRuleBins, grammarFile);
-  }
-
-  /**
-   * This returns true if the grammar contains rules that are regular expressions, possibly matching
-   * many different inputs.
-   * 
-   * @return true if the grammar's rules may contain regular expressions.
-   */
-  @Override
-  public boolean isRegexpGrammar() {
-    return this.isRegexpGrammar;
-  }
-
-  public void setRegexpGrammar(boolean value) {
-    this.isRegexpGrammar = value;
   }
 
   /***

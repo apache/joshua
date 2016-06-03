@@ -30,11 +30,9 @@ import java.util.ArrayList;
 
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
-import org.apache.joshua.decoder.MetaDataException;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.Translations;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
-import org.apache.joshua.decoder.segment_file.Sentence;
 
 import org.junit.After;
 import org.junit.Before;
