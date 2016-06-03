@@ -26,7 +26,6 @@ import com.google.gson.stream.JsonReader;
 
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.JoshuaConfiguration.INPUT_TYPE;
-import org.apache.joshua.decoder.MetaDataException;
 import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
@@ -71,7 +70,7 @@ public class TranslationRequestStream {
   }
 
   private interface StreamHandler {
-    Sentence next() throws IOException, MetaDataException;
+    Sentence next() throws IOException;
   }
   
   private class JSONStreamHandler implements StreamHandler {
@@ -93,7 +92,7 @@ public class TranslationRequestStream {
     }
     
     @Override
-    public Sentence next() throws IOException, MetaDataException {
+    public Sentence next() throws IOException {
       line = null;
 
       if (reader.hasNext()) {
@@ -105,9 +104,6 @@ public class TranslationRequestStream {
 
       if (line == null)
         return null;
-
-      if (line.startsWith("@"))
-        throw new MetaDataException(line);
 
       return new Sentence(line, -1, joshuaConfiguration);
     }
@@ -122,14 +118,11 @@ public class TranslationRequestStream {
     }
     
     @Override
-    public Sentence next() throws IOException, MetaDataException {
+    public Sentence next() throws IOException {
       
       String line = reader.readLine();
 
       if (line != null) {
-        if (line.startsWith("@"))
-          throw new MetaDataException(line);
-
         return new Sentence(line, sentenceNo, joshuaConfiguration);
       }
       
@@ -145,7 +138,7 @@ public class TranslationRequestStream {
    * Returns the next sentence item, then sets it to null, so that hasNext() will know to produce a
    * new one.
    */
-  public synchronized Sentence next() throws MetaDataException {
+  public synchronized Sentence next() {
     nextSentence = null;
     
     if (isShutDown)

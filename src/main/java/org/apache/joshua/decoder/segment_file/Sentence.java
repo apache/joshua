@@ -30,8 +30,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;	
+import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.MetaData;
 import org.apache.joshua.decoder.ff.tm.Grammar;
 import org.apache.joshua.lattice.Arc;
 import org.apache.joshua.lattice.Lattice;
@@ -78,6 +78,8 @@ public class Sentence {
   
   private JoshuaConfiguration config = null;
 
+  private MetaData metaData;
+
   /**
    * Constructor. Receives a string representing the input sentence. This string may be a
    * string-encoded lattice or a plain text string for decoding.
@@ -92,8 +94,9 @@ public class Sentence {
     
     config = joshuaConfiguration;
     
+    this.metaData = null;
     this.constraints = new LinkedList<ConstraintSpan>();
-  
+
     // Check if the sentence has SGML markings denoting the
     // sentence ID; if so, override the id passed in to the
     // constructor
@@ -102,8 +105,17 @@ public class Sentence {
       source = SEG_END.matcher(start.replaceFirst("")).replaceFirst("");
       String idstr = start.group(1);
       this.id = Integer.parseInt(idstr);
+
     } else {
+      if (hasRawMetaData(inputString)) {
+        /* Found some metadata */
+        metaData = new MetaData(inputString.substring(0,  inputString.indexOf('|', 1)));
+
+        inputString = inputString.substring(inputString.indexOf('|', 1) + 1).trim();
+      }
+      
       if (inputString.indexOf(" ||| ") != -1) {
+        /* Target-side given; used for parsing and forced decoding */
         String[] pieces = inputString.split("\\s?\\|{3}\\s?");
         source = pieces[0];
         target = pieces[1];
@@ -113,10 +125,13 @@ public class Sentence {
           references = new String[pieces.length - 2];
           System.arraycopy(pieces, 2, references, 0, pieces.length - 2);
         }
+        this.id = id;
+
       } else {
+        /* Regular ol' input sentence */
         source = inputString;
+        this.id = id;
       }
-      this.id = id;
     }
     
     // Only trim strings
@@ -124,6 +139,25 @@ public class Sentence {
       adjustForLength(joshuaConfiguration.maxlen);
   }
   
+  /**
+   * Look for metadata in the input sentence. Metadata is any line starting with a literal '|',
+   * up to the next occurrence of a '|'
+   * 
+   * @param inputString
+   * @return whether metadata was found
+   */
+  private boolean hasRawMetaData(String inputString) {
+    return inputString.startsWith("| ") && inputString.indexOf(" |") > 0;
+  }
+  
+  public boolean hasMetaData() {
+    return this.metaData != null;
+  }
+  
+  public MetaData getMetaData() {
+    return this.metaData;
+  }
+
   /**
    * Indicates whether the underlying lattice is a linear chain, i.e., a sentence.
    * 
