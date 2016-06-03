@@ -23,21 +23,26 @@ package org.apache.joshua.decoder;
  * decoder.
  */
 
-public class MetaDataException extends Exception {
-  private String type = null;
-  private String tokenString = null;
+public class MetaData {
+  String type;
+  String tokenString;
   
-  public MetaDataException(String message) {
+  public MetaData(String message) {
+    message = message.substring(1, message.length() - 1).trim();
+    
     int firstSpace = message.indexOf(' ');
     if (firstSpace != -1) {
-      this.type = message.substring(1, firstSpace);
+      this.type = message.substring(0, firstSpace);
       this.tokenString = message.substring(firstSpace + 1);
     } else if (message.length() > 0) {
       this.type = message.substring(1);
       this.tokenString = "";
+    } else {
+      type = "";
+      tokenString = "";
     }
   }
-
+  
   public String type() {
     return this.type;
   }
@@ -49,7 +54,7 @@ public class MetaDataException extends Exception {
   public String[] tokens(String regex) {
     return this.tokenString.split(regex);
   }
-  
+    
   public String[] tokens() {
     return this.tokens("\\s+");
   }

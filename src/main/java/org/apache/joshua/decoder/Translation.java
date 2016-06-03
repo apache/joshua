@@ -241,4 +241,19 @@ public class Translation {
     }
   }
 
+  /**
+   * Returns metadata found on the source sentence.
+   * 
+   * (This just goes to demonstrate that a Translation object should just be an additional
+   * set of annotations on an input sentence)
+   *
+   * @return metadata annotations from the source sentence
+   */
+  public MetaData getMetaData() {
+    return source.getMetaData();
+  }
+  
+  public boolean hasMetaData() {
+    return source.hasMetaData();
+  }
 }
