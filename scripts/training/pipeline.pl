@@ -1154,6 +1154,11 @@ if (! defined $GRAMMAR_FILE) {
 #perl -pi -e 's/\.?0+\b//g' grammar; 
 
     $GRAMMAR_FILE = "grammar.gz";
+
+    # Convert phrase model to hiero format (Thrax should do this!)
+    if ($GRAMMAR_TYPE eq "phrase") {
+        system("mv grammar.gz grammar.tmp.gz; gzip -cd grammar.tmp.gz | $SCRIPTDIR/support/phrase2hiero.pl | gzip -9n > grammar.gz; rm -rf grammar.tmp.gz");
+     }
   } else {
 
     print STDERR "* FATAL: There was no way to build a grammar, and none was passed in\n";
