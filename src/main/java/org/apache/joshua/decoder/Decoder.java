@@ -23,9 +23,7 @@ import static org.apache.joshua.decoder.ff.FeatureVector.DENSE_FEATURE_NAMES;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,8 +36,6 @@ import com.google.common.base.Strings;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.ff.FeatureVector;
-import org.apache.joshua.decoder.JoshuaConfiguration.INPUT_TYPE;
-import org.apache.joshua.decoder.JoshuaConfiguration.SERVER_TYPE;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.PhraseModel;
 import org.apache.joshua.decoder.ff.StatefulFF;
@@ -422,8 +418,8 @@ public class Decoder {
    * sentences of the request.
    *
    * @param request the populated {@link org.apache.joshua.decoder.io.TranslationRequestStream}
-   * @param out an appropriate {@link java.io.OutputStream} to write results to
    * @throws IOException if there is an error with the input stream or writing the output
+   * @return an iterable, asynchronously-filled list of Translations
    */
   public Translations decodeAll(TranslationRequestStream request) throws IOException {
     Translations translations = new Translations(request);
