@@ -32,4 +32,7 @@ fi
 numrefs=$(ls $refs* | wc -l)
 verbose=0
 
-java -cp $JOSHUA/class -Dfile.encoding=utf8 -Djava.library.path=lib -Xmx256m -Xms256m -Djava.util.logging.config.file=logging.properties joshua.util.JoshuaEval -cand $output -format $format -ref $refs -rps $numrefs -m BLEU 4 closest -v 0
+java -cp $JOSHUA/target/joshua-*-jar-with-dependencies.jar \
+    -Dfile.encoding=utf8 -Djava.library.path=$JOSHUA/lib \
+    -Xmx256m -Xms256m \
+    org.apache.joshua.util.JoshuaEval -cand $output -format $format -ref $refs -rps $numrefs -m BLEU 4 closest -v 0
