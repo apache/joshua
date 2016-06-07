@@ -58,7 +58,7 @@ public class MIRA {
         ++iteration;
         Runtime rt = Runtime.getRuntime();
         Process p =
-            rt.exec("java -Xmx" + maxMem + "m -cp " + cp + " joshua.mira.MIRACore " + configFileName
+            rt.exec("java -Xmx" + maxMem + "m -cp " + cp + " org.apache.joshua.mira.MIRACore " + configFileName
                 + " " + stateFileName + " " + iteration);
         /*
          * BufferedReader br_i = new BufferedReader(new InputStreamReader(p.getInputStream()));

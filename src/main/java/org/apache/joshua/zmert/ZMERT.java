@@ -58,7 +58,7 @@ public class ZMERT {
         ++iteration;
         Runtime rt = Runtime.getRuntime();
         Process p =
-            rt.exec("java -Xmx" + maxMem + "m -cp " + cp + " joshua.zmert.MertCore "
+            rt.exec("java -Xmx" + maxMem + "m -cp " + cp + " org.apache.joshua.zmert.MertCore "
                 + configFileName + " " + stateFileName + " " + iteration);
         BufferedReader br_i = new BufferedReader(new InputStreamReader(p.getInputStream()));
         BufferedReader br_e = new BufferedReader(new InputStreamReader(p.getErrorStream()));

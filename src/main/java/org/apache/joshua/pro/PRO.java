@@ -58,7 +58,7 @@ public class PRO {
         ++iteration;
         Runtime rt = Runtime.getRuntime();
         Process p =
-            rt.exec("java -Xmx" + maxMem + "m -cp " + cp + " joshua.pro.PROCore " + configFileName
+            rt.exec("java -Xmx" + maxMem + "m -cp " + cp + " org.apache.joshua.pro.PROCore " + configFileName
                 + " " + stateFileName + " " + iteration);
         /*
          * BufferedReader br_i = new BufferedReader(new InputStreamReader(p.getInputStream()));
