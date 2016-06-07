@@ -7,6 +7,9 @@ git clone https://github.com/kpu/kenlm.git ext/kenlm
 git clone https://github.com/joshua-decoder/berkeleylm.git ext/berkeleylm
 (cd ext/berkeleylm; ant)
 
+git clone https://github.com/joshua-decoder/thrax.git
+(cd thrax; ant)
+
 git clone https://github.com/joshua-decoder/giza-pp.git ext/giza-pp
 (make -j4 -C ext/giza-pp all install)
 
