@@ -417,7 +417,7 @@ def run_zmert(tunedir, source, target, command, config, output, opts):
                   opts.metric, opts.iterations or 10)
 
     tuner_mem = '4g'
-    call("java -d64 -Xmx%s -cp %s/class joshua.zmert.ZMERT -maxMem 4000 %s/mert.config > %s/mert.log 2>&1" % (tuner_mem, JOSHUA, tunedir, tunedir), shell=True)
+    call("java -d64 -Xmx%s -cp %s/class org.apache.joshua.zmert.ZMERT -maxMem 4000 %s/mert.config > %s/mert.log 2>&1" % (tuner_mem, JOSHUA, tunedir, tunedir), shell=True)
 
     safe_symlink(os.path.join(os.path.dirname(config),'joshua.config.ZMERT.final'),
                  os.path.join(tunedir, 'joshua.config.final'))
@@ -431,7 +431,7 @@ def run_pro(tunedir, source, target, command, config, output, opts):
                   opts.metric, opts.iterations or 30)
 
     tuner_mem = '4g'
-    call("java -d64 -Xmx%s -cp %s/class joshua.pro.PRO %s/pro.config > %s/pro.log 2>&1" % (tuner_mem, JOSHUA, tunedir, tunedir), shell=True)
+    call("java -d64 -Xmx%s -cp %s/class org.apache.joshua.pro.PRO %s/pro.config > %s/pro.log 2>&1" % (tuner_mem, JOSHUA, tunedir, tunedir), shell=True)
 
     safe_symlink(os.path.join(os.path.dirname(config),'joshua.config.PRO.final'),
                  os.path.join(tunedir, 'joshua.config.final'))
@@ -445,7 +445,7 @@ def run_mira(tunedir, source, target, command, config, output, opts):
                   opts.metric, opts.iterations or 5)
 
     tuner_mem = '4g'
-    call("java -d64 -Xmx%s -cp %s/class joshua.mira.MIRA %s/mira.config > %s/mira.log 2>&1" % (tuner_mem, JOSHUA, tunedir, tunedir), shell=True)
+    call("java -d64 -Xmx%s -cp %s/class org.apache.joshua.mira.MIRA %s/mira.config > %s/mira.log 2>&1" % (tuner_mem, JOSHUA, tunedir, tunedir), shell=True)
 
     safe_symlink(os.path.join(os.path.dirname(config),'joshua.config.MIRA.final'),
                  os.path.join(tunedir, 'joshua.config.final'))
@@ -458,7 +458,7 @@ def run_adagrad(tunedir, source, target, command, config, output, opts):
                   opts.metric, opts.iterations or 10)
 
     tuner_mem = '4g'
-    call("java -d64 -Xmx%s -cp %s/class joshua.adagrad.AdaGrad %s/adagrad.config > %s/adagrad.log 2>&1" % (tuner_mem, JOSHUA, tunedir, tunedir), shell=True)
+    call("java -d64 -Xmx%s -cp %s/class org.apache.joshua.adagrad.AdaGrad %s/adagrad.config > %s/adagrad.log 2>&1" % (tuner_mem, JOSHUA, tunedir, tunedir), shell=True)
 
     safe_symlink(os.path.join(os.path.dirname(config),'joshua.config.ADAGRAD.final'),
                  os.path.join(tunedir, 'joshua.config.final'))
