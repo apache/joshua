@@ -1172,6 +1172,17 @@ if (! defined $GRAMMAR_FILE) {
   }
 }
 
+# Pack the entire model! Saves filtering and repacking of tuning and test sets
+if ($DO_PACK_GRAMMARS and ! $DO_FILTER_TM) {
+  $cachepipe->cmd("pack-grammar",
+                  "$SCRIPTDIR/support/grammar-packer.pl -a -T $TMPDIR -m $PACKER_MEM -g $GRAMMAR_FILE -o $RUNDIR/grammar.packed",
+                  "$RUNDIR/grammar.packed/vocabulary",
+                  "$RUNDIR/grammar.packed/encoding",
+                  "$RUNDIR/grammar.packed/slice_00000.source");
+  $GRAMMAR_FILE = "$RUNDIR/grammar.packed";
+}
+
+
 maybe_quit("THRAX");
 maybe_quit("GRAMMAR");
 maybe_quit("MODEL");
