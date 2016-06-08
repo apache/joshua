@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.ff.lm.berkeley_lm.LMGrammarBerkeley;
 import org.apache.joshua.decoder.ff.lm.buildin_lm.TrieLM;
 import org.testng.Assert;

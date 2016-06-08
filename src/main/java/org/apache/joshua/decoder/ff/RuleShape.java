@@ -27,7 +27,6 @@ import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.apache.joshua.util.FormatUtils;
-import org.apache.joshua.corpus.Vocabulary;
 
 /*
  * Implements the RuleShape feature for source, target, and paired source+target sides.

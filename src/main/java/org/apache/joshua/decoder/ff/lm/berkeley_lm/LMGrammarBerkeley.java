@@ -25,7 +25,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.ff.lm.DefaultNGramLanguageModel;
 
 import com.google.common.annotations.VisibleForTesting;

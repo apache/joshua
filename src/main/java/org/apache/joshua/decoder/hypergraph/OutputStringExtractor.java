@@ -20,7 +20,6 @@ package org.apache.joshua.decoder.hypergraph;
 
 import static java.lang.Math.min;
 import static org.apache.joshua.corpus.Vocabulary.getWords;
-import static org.apache.joshua.util.FormatUtils.isNonterminal;
 
 import java.util.Stack;
 

@@ -30,7 +30,6 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.segment_file.Sentence;

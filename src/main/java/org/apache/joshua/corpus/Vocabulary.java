@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.StampedLock;
 
-import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.ff.lm.NGramLanguageModel;
 import org.apache.joshua.util.FormatUtils;
 import org.slf4j.Logger;

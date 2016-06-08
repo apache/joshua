@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
 import org.apache.joshua.decoder.ff.FeatureFunction;
