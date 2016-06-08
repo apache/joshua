@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 import org.apache.joshua.corpus.Vocabulary;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  *
@@ -128,7 +128,6 @@ public class VocabularyTest {
   }
 
   @SuppressWarnings("static-access")
-  @Test(enabled=false)
   public void loadVocabFromFile() {
 
     String filename = "data/tiny.en";
