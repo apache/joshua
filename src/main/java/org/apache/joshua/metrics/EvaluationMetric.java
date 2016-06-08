@@ -27,6 +27,9 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.TreeMap;
 
+/***
+ * @author Omar Zaidan
+ */
 public abstract class EvaluationMetric {
   /* static data members */
   private static TreeMap<String, Integer> metricOptionCount; // maps metric names -> number of
@@ -73,6 +76,7 @@ public abstract class EvaluationMetric {
     metricOptionCount.put("SRC_BLEU", 4);
     metricOptionCount.put("PRECIS-SRC_BLEU", 6);
     metricOptionCount.put("GL_BLEU", 3);
+    metricOptionCount.put("SARI", 2); // options: max-ngram source-path
   }
 
   public static EvaluationMetric getMetric(String metricName, String[] metricOptions) {
@@ -111,7 +115,10 @@ public abstract class EvaluationMetric {
     } else if (metricName.equals("GL_BLEU")) {
       retMetric = new GradeLevelBLEU(metricOptions); // the "GL_BLEU" metric corresponds to the
                                                      // GradeLevelBLEU class
-    }
+    } else if (metricName.equals("SARI")) { 
+      retMetric = new SARI(metricOptions);
+    } 
+    
     return retMetric;
   }
 
