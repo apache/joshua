@@ -42,10 +42,10 @@ public class ArgsParser {
    * executed from the command line.
    * 
    * @param args string array of input arguments
-   * @param joshuaConfiguration the {@link org.apache.joshua.decoder.JoshuaConfiguration}
+   * @param config the {@link org.apache.joshua.decoder.JoshuaConfiguration}
    * @throws IOException if there is an error wit the input arguments
    */
-  public ArgsParser(String[] args, JoshuaConfiguration joshuaConfiguration) throws IOException {
+  public ArgsParser(String[] args, JoshuaConfiguration config) throws IOException {
 
     /*
      * Look for a verbose flag, -v.
@@ -57,7 +57,7 @@ public class ArgsParser {
       for (int i = 0; i < args.length; i++) {
         if (args[i].equals("-v")) {
           Decoder.VERBOSE = Integer.parseInt(args[i + 1].trim());
-          break;
+          config.setVerbosity(Decoder.VERBOSE);
         }
       
         if (args[i].equals("-version")) {
@@ -89,7 +89,7 @@ public class ArgsParser {
           setConfigFile(args[i + 1].trim());
           try {
             LOG.info("Parameters read from configuration file: {}", getConfigFile());
-            joshuaConfiguration.readConfigFile(getConfigFile());
+            config.readConfigFile(getConfigFile());
           } catch (IOException e) {
             throw new RuntimeException(e);
           }
@@ -98,8 +98,7 @@ public class ArgsParser {
       }
 
       // Now process all the command-line args
-      LOG.info("Parameters overridden from the command line:");
-      joshuaConfiguration.processCommandLineOptions(args);
+      config.processCommandLineOptions(args);
     }
   }
 

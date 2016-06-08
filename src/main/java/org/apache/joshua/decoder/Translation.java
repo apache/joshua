@@ -108,10 +108,6 @@ public class Translation {
         
         if (hypergraph != null) {
           
-          if (!joshuaConfiguration.hypergraphFilePattern.equals("")) {
-            hypergraph.dump(String.format(joshuaConfiguration.hypergraphFilePattern, source.id()), featureFunctions);
-          }
-
           long startTime = System.currentTimeMillis();
 
           // We must put this weight as zero, otherwise we get an error when we try to retrieve it

@@ -181,9 +181,6 @@ public class JoshuaConfiguration {
   /* The number of decoding threads to use (-threads). */
   public int num_parallel_decoders = 1;
 
-  // disk hg
-  public String hypergraphFilePattern = "";
-
   /*
    * When true, _OOV is appended to all words that are passed through (useful for something like
    * transliteration on the target side
@@ -307,7 +304,6 @@ public class JoshuaConfiguration {
     topN = 1;
     outputFormat = "%i ||| %s ||| %f ||| %c";
     num_parallel_decoders = 1;
-    hypergraphFilePattern = "";
     mark_oovs = false;
     // oracleFile = null;
     parse = false; // perform synchronous parsing
@@ -353,6 +349,8 @@ public class JoshuaConfiguration {
         }
       }
       out.close();
+      
+//      LOG.info("Parameters overridden from the command line:");
       this.readConfigFile(tmpFile.getCanonicalPath());
 
       tmpFile.delete();
@@ -427,27 +425,12 @@ public class JoshuaConfiguration {
             tms.add(tmLine);
 
           } else if (parameter.equals("v")) {
-            
-            Decoder.VERBOSE = Integer.parseInt(fds[1]);
-            switch (Decoder.VERBOSE) {
-            case 0:
-              LogManager.getRootLogger().setLevel(Level.OFF);
-              break;
-            case 1:
-              LogManager.getRootLogger().setLevel(Level.INFO);
-              break;
-            case 2:
-              LogManager.getRootLogger().setLevel(Level.DEBUG);
-              break;
-            }
+
+            // This is already handled in ArgsParser, skip it here, easier than removing it there
 
           } else if (parameter.equals(normalize_key("parse"))) {
             parse = Boolean.parseBoolean(fds[1]);
             LOG.debug("parse: {}", parse);
-
-          } else if (parameter.equals(normalize_key("dump-hypergraph"))) {
-            hypergraphFilePattern = fds[1].trim();
-            LOG.debug("  hypergraph dump file format: {}", hypergraphFilePattern);
 
           } else if (parameter.equals(normalize_key("oov-list"))) {
             if (new File(fds[1]).exists()) {
@@ -705,6 +688,26 @@ public class JoshuaConfiguration {
    * Checks for invalid variable configurations
    */
   public void sanityCheck() {
+  }
+  
+  /**
+   * Sets the verbosity level to v (0: OFF; 1: INFO; 2: DEBUG).
+   * 
+   * @param v
+   */
+  public void setVerbosity(int v) {
+    Decoder.VERBOSE = v;
+    switch (Decoder.VERBOSE) {
+    case 0:
+      LogManager.getRootLogger().setLevel(Level.OFF);
+      break;
+    case 1:
+      LogManager.getRootLogger().setLevel(Level.INFO);
+      break;
+    case 2:
+      LogManager.getRootLogger().setLevel(Level.DEBUG);
+      break;
+    }
   }
 
   /**

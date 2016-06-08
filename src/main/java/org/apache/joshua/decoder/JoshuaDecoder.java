@@ -31,6 +31,8 @@ import com.sun.net.httpserver.HttpServer;
 import org.apache.joshua.decoder.JoshuaConfiguration.SERVER_TYPE;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
 import org.apache.joshua.server.TcpServer;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.apache.joshua.server.ServerThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +53,9 @@ public class JoshuaDecoder {
   // Main
   // ===============================================================
   public static void main(String[] args) throws IOException {
+
+    // default log level
+    LogManager.getRootLogger().setLevel(Level.INFO);
 
     JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
     ArgsParser userArgs = new ArgsParser(args,joshuaConfiguration);
@@ -86,11 +91,6 @@ public class JoshuaDecoder {
       }
       return;
     }
-    
-    // Create the n-best output stream
-    FileWriter out = null;
-    if (joshuaConfiguration.n_best_file != null)
-      out = new FileWriter(joshuaConfiguration.n_best_file);
     
     // Create a TranslationRequest object, reading from a file if requested, or from STDIN
     InputStream input = (joshuaConfiguration.input_file != null) 
