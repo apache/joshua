@@ -62,7 +62,7 @@ delete $ENV{GREP_OPTIONS};
 
 die not_defined("JAVA_HOME") unless exists $ENV{JAVA_HOME};
 
-my (@CORPORA,$TUNE,$TEST,$ALIGNMENT,$SOURCE,$TARGET,@LMFILES,$GRAMMAR_FILE,$GLUE_GRAMMAR_FILE,$_TUNE_GRAMMAR_FILE,$_TEST_GRAMMAR_FILE,$THRAX_CONF_FILE, $_JOSHUA_CONFIG, $_JOSHUA_ARGS);
+my (@CORPORA,@TUNE,$TEST,$ALIGNMENT,$SOURCE,$TARGET,@LMFILES,$GRAMMAR_FILE,$GLUE_GRAMMAR_FILE,$_TUNE_GRAMMAR_FILE,$_TEST_GRAMMAR_FILE,$THRAX_CONF_FILE, $_JOSHUA_CONFIG, $_JOSHUA_ARGS);
 my $FIRST_STEP = "SUBSAMPLE";
 my $LAST_STEP  = "LAST";
 my $LMFILTER = "$ENV{HOME}/code/filter/filter";
@@ -241,7 +241,7 @@ my $retval = GetOptions(
   "readme=s"    => \$README,
   "corpus=s"        => \@CORPORA,
   "parsed-corpus=s"   => \$PARSED_CORPUS,
-  "tune=s"          => \$TUNE,
+  "tune=s"          => \@TUNE,
   "test=s"            => \$TEST,
   "prepare!"          => \$DO_PREPARE_CORPORA,
   "aligner=s"         => \$ALIGNER,
@@ -434,9 +434,9 @@ if (@CORPORA == 0 and $STEPS{$FIRST_STEP} < $STEPS{TUNE}) {
 }
 
 # make sure a tuning corpus was provided if we're doing tuning
-if (! defined $TUNE and ($STEPS{$FIRST_STEP} <= $STEPS{TUNE}
+if (scalar(@TUNE) == 0 and ($STEPS{$FIRST_STEP} <= $STEPS{TUNE}
                          and $STEPS{$LAST_STEP} >= $STEPS{TUNE})) { 
-  print "* FATAL: need a tuning set (--tune)\n";
+  print "* FATAL: need at least one tuning set (--tune)\n";
   exit 1;
 }
 
@@ -504,7 +504,9 @@ map {
 } (0..$#CORPORA);
 
 # Do the same for tuning and test data, and other files
-$TUNE = get_absolute_path($TUNE);
+map {
+  $TUNE[$_] = get_absolute_path($TUNE[$_]);
+} (0..$#TUNE);
 $TEST = get_absolute_path($TEST);
 
 $GRAMMAR_FILE = get_absolute_path($GRAMMAR_FILE);
@@ -609,9 +611,9 @@ if (defined $PARSED_CORPUS) {
   $TRAIN{parsed} = get_absolute_path($PARSED_CORPUS);
 }
 
-if ($TUNE) {
-  $TUNE{source} = "$TUNE.$SOURCE";
-  $TUNE{target} = "$TUNE.$TARGET";
+if (scalar(@TUNE) > 0) {
+  $TUNE{source} = "$TUNE[0].$SOURCE";
+  $TUNE{target} = "$TUNE[0].$TARGET";
 
   if (! -e "$TUNE{source}") {
     print "* FATAL: couldn't find tune source file at '$TUNE{source}'\n";
@@ -675,8 +677,8 @@ if (@CORPORA > 0) {
 }
 
 # prepare the tuning and development data
-if (defined $TUNE) {
-  my $prefixes = prepare_data("tune",[$TUNE],$MAXLEN_TUNE);
+if (@TUNE > 0) {
+  my $prefixes = prepare_data("tune",\@TUNE,$MAXLEN_TUNE);
   $TUNE{source} = "$DATA_DIRS{tune}/corpus.$SOURCE";
   $TUNE{target} = "$DATA_DIRS{tune}/corpus.$TARGET";
   my $ner_return = ner_annotate("$TUNE{source}", "$TUNE{source}.ner", $SOURCE);
@@ -1180,7 +1182,7 @@ TUNE:
 
 # prep the tuning data, unless already prepped
 if (! $PREPPED{TUNE}) {
-  my $prefixes = prepare_data("tune",[$TUNE],$MAXLEN_TUNE);
+  my $prefixes = prepare_data("tune",\@TUNE,$MAXLEN_TUNE);
   $TUNE{source} = "$DATA_DIRS{tune}/$prefixes->{lowercased}.$SOURCE";
   $TUNE{target} = "$DATA_DIRS{tune}/$prefixes->{lowercased}.$TARGET";
   $PREPPED{TUNE} = 1;
@@ -1509,7 +1511,7 @@ if (defined $TUNE_GRAMMAR) {
   } elsif (-e "tune/model/$basename.packed") {
     $TUNE_GRAMMAR = "tune/model/$basename.packed";
   } else {
-    print STDERR "* FATAL: tune model bundling didn't produce a grammar?";
+    print STDERR "* FATAL: tune model bundling didn't produce a grammar?\n";
     exit 1;
   }
 }
