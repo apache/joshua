@@ -35,7 +35,7 @@ public class MetaData {
       this.type = message.substring(0, firstSpace);
       this.tokenString = message.substring(firstSpace + 1);
     } else if (message.length() > 0) {
-      this.type = message.substring(1);
+      this.type = message.substring(0);
       this.tokenString = "";
     } else {
       type = "";
