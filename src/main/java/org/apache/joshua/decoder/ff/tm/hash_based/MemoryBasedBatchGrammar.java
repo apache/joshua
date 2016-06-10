@@ -83,6 +83,7 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
     super(joshuaConfiguration);
     this.root = new MemoryBasedTrie();
     this.joshuaConfiguration = joshuaConfiguration;
+    setSpanLimit(20);
   }
 
   public MemoryBasedBatchGrammar(String owner, JoshuaConfiguration joshuaConfiguration) {

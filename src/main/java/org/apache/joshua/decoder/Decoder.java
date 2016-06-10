@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -264,13 +265,18 @@ public class Decoder {
     if (meta.type().equals("set_weights")) {
       // Change a decoder weight
       String[] args = meta.tokens();
+      System.err.println(Arrays.toString(args));
       for (int i = 0; i < args.length; i += 2) {
-        float old_weight = Decoder.weights.getWeight(args[i]);
-        Decoder.weights.set(args[1], Float.parseFloat(args[i+1]));
-        LOG.error("@set_weights: {} {} -> {}", args[1], old_weight,
-            Decoder.weights.getWeight(args[0]));
+        String feature = args[i];
+        String newValue = args[i+1];
+        float old_weight = Decoder.weights.getWeight(feature);
+        Decoder.weights.set(feature, Float.parseFloat(newValue));
+        LOG.info("set_weights: {} {} -> {}", feature, old_weight, Decoder.weights.getWeight(args[0]));
       }
-
+      
+    } else if (meta.type().equals("get_weights")) {
+      meta.setResponse("weights " + Decoder.weights.toString());
+      
     } else if (meta.type().equals("add_rule")) {
       String args[] = meta.tokens(" ,,, ");
   
@@ -300,6 +306,8 @@ public class Decoder {
   
     } else if (meta.type().equals("list_rules")) {
   
+      LOG.info("list_rules");
+      
       JSONMessage message = new JSONMessage();
   
       // Walk the the grammar trie
@@ -315,6 +323,7 @@ public class Decoder {
         if (trie.hasRules()) {
           for (Rule rule: trie.getRuleCollection().getRules()) {
             message.addRule(rule.toString());
+            LOG.info("Found rule: " + rule);
           }
         }
   
@@ -694,7 +703,7 @@ public class Decoder {
             } catch (FileNotFoundException e) {
               String msg = String.format("Couldn't load packed grammar from '%s'", path)
                   + "Perhaps it doesn't exist, or it may be an old packed file format.";
-              throw new RuntimeException(e);
+              throw new RuntimeException(msg);
             }
           } else {
             // thrax, hiero, samt

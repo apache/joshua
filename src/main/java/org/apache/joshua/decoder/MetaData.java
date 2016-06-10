@@ -20,12 +20,26 @@ package org.apache.joshua.decoder;
 
 /*
  * This class is used to capture metadata command to Joshua on input and pass them to the
- * decoder.
+ * decoder. A metadata object comprises a type and a list of arguments. The type is one of the
+ * following commands:
+ * 
+ *  - add_weight NAME VALUE
+ *  - get_weights -> weights NAME VALUE NAME VALUE...
+ *  - add_rule SOURCE ,,, TARGET
+ *
+ * In the future, this should be done through the API.
  */
 
 public class MetaData {
+  
+  /* The metadata request that came in */
   String type;
+  
+  /* The list of arguments */
   String tokenString;
+  
+  /* The response (if any) */
+  String response;
   
   public MetaData(String message) {
     message = message.substring(1, message.length() - 1).trim();
@@ -41,6 +55,8 @@ public class MetaData {
       type = "";
       tokenString = "";
     }
+    
+    response = "";
   }
   
   public String type() {
@@ -57,5 +73,13 @@ public class MetaData {
     
   public String[] tokens() {
     return this.tokens("\\s+");
+  }
+
+  public void setResponse(String response) {
+    this.response = response;
+  }
+  
+  public String response() {
+    return this.response;
   }
 }

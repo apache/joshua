@@ -24,7 +24,28 @@ import java.util.List;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.apache.joshua.decoder.StructuredTranslation;
 import org.apache.joshua.decoder.Translation;
+
+/**
+ * Represents a JSON object returned by the server. The object has the format
+ * 
+ * { data: { 
+ *   translations: [
+ *     { annotatedSource: "",
+ *       translatedText: "",
+ *       raw_nbest: [
+ *         { hyp: "",
+ *           totalScore: 0.0, } ]
+ *       tokenization: { ... }
+ *       translatedTextRaw: "",
+ *       nbest: [
+ *         { translatedText: "",
+ *           translatedTextRaw: "",
+ *           tokenization: { ... } } ] } ] } }
+ * 
+ * @author post
+ */
 
 public class JSONMessage {
   public Data data = null;
@@ -40,7 +61,45 @@ public class JSONMessage {
       translations = new ArrayList<TranslationItem>();
     }
   }
+
+  public void addTranslation(Translation translation) {
+    String viterbi = translation.getStructuredTranslations().get(0).getTranslationString();
+    
+    TranslationItem item = addTranslation(viterbi);
+
+    for (StructuredTranslation hyp: translation.getStructuredTranslations()) {
+      String text = hyp.getTranslationString();
+      float score = hyp.getTranslationScore();
+
+      item.addHypothesis(text, score);
+    }
+    
+    if (translation.hasMetaData()) {
+      item.setMetaData(translation.getMetaData().response());
+    }
   
+      // old string-based k-best output
+  //    String[] results = translation.toString().split("\\n");
+  //    if (results.length > 0) {
+  //      String rawTranslation = results[0].split(" \\|\\|\\| ")[1];
+  //      JSONMessage.TranslationItem item = message.addTranslation(rawTranslation);
+  //
+  //      for (String result: results) {
+  //        String[] tokens = result.split(" \\|\\|\\| ");
+  //        String rawResult = tokens[1];
+  //        float score = Float.parseFloat(tokens[3]);
+  //        item.addHypothesis(rawResult, score);
+  //      }
+  //    }
+    }
+
+  /**
+   * Adds a new Translation to the JSON object. A Translation represents one or more hypotheses
+   * (or k-best items)
+   * 
+   * @param text
+   * @return the new TranslationItem object
+   */
   public TranslationItem addTranslation(String text) {
     if (data == null)
       data = new Data();
@@ -52,6 +111,7 @@ public class JSONMessage {
   
   public class TranslationItem {
     public String translatedText;
+    public String metaData = null;
     public List<NBestItem> raw_nbest;
     
     public TranslationItem(String value) {
@@ -59,8 +119,18 @@ public class JSONMessage {
       this.raw_nbest = new ArrayList<NBestItem>();
     }
     
+    /**
+     * Adds a new item to the translation's list of k-best items
+     * 
+     * @param hyp the hypothesis
+     * @param score its score
+     */
     public void addHypothesis(String hyp, float score) {
       this.raw_nbest.add(new NBestItem(hyp, score));
+    }
+
+    public void setMetaData(String msg) {
+      this.metaData = msg;
     }
   }
   
@@ -80,30 +150,6 @@ public class JSONMessage {
     rules.add(rule);
   }
 
-  public class MetaData {
-
-    public MetaData() {
-    }
-  }
-
-  public static JSONMessage buildMessage(Translation translation) {
-    JSONMessage message = new JSONMessage();
-    String[] results = translation.toString().split("\\n");
-    
-    if (results.length > 0) {
-      String rawTranslation = results[0].split(" \\|\\|\\| ")[1];
-      JSONMessage.TranslationItem item = message.addTranslation(rawTranslation);
-
-      for (String result: results) {
-        String[] tokens = result.split(" \\|\\|\\| ");
-        String rawResult = tokens[1];
-        float score = Float.parseFloat(tokens[3]);
-        item.addHypothesis(rawResult, score);
-      }
-    }
-    return message;
-  }
-  
   public String toString() {
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
     return gson.toJson(this) + "\n";

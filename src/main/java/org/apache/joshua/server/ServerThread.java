@@ -145,20 +145,23 @@ public class ServerThread extends Thread implements HttpHandler {
 
     HashMap<String, String> params = queryToMap(URLDecoder.decode(client.getRequestURI().getQuery(), "UTF-8"));
     String query = params.get("q");
-    
+
     BufferedReader reader = new BufferedReader(new StringReader(query));
     TranslationRequestStream request = new TranslationRequestStream(reader, joshuaConfiguration);
     
     Translations translations = decoder.decodeAll(request);
-    OutputStream out = new HttpWriter(client);
-    
+    JSONMessage message = new JSONMessage();
     for (Translation translation: translations) {
-      if (joshuaConfiguration.input_type == INPUT_TYPE.json || joshuaConfiguration.server_type == SERVER_TYPE.HTTP) {
-        JSONMessage message = JSONMessage.buildMessage(translation);
-        out.write(message.toString().getBytes());
-      }
+      LOG.info("TRANSLATION: '{}' with {} k-best items", translation, translation.getStructuredTranslations().size());
+      message.addTranslation(translation);
     }
+    
+    OutputStream out = new HttpWriter(client);
+    out.write(message.toString().getBytes());
+    if (LOG.isDebugEnabled())
+      LOG.debug(message.toString());
     out.close();
+    
     reader.close();
   }
 }

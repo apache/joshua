@@ -80,6 +80,8 @@ public class JoshuaDecoder {
         new TcpServer(decoder, port, joshuaConfiguration).start();
 
       } else if (joshuaConfiguration.server_type == SERVER_TYPE.HTTP) {
+        joshuaConfiguration.use_structured_output = true;
+        
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         LOG.info("HTTP Server running and listening on port {}.", port);
         server.createContext("/", new ServerThread(null, decoder, joshuaConfiguration));
