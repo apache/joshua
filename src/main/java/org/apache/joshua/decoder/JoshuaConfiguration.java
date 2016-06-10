@@ -693,7 +693,7 @@ public class JoshuaConfiguration {
   /**
    * Sets the verbosity level to v (0: OFF; 1: INFO; 2: DEBUG).
    * 
-   * @param v
+   * @param v the verbosity level (0, 1, or 2)
    */
   public void setVerbosity(int v) {
     Decoder.VERBOSE = v;

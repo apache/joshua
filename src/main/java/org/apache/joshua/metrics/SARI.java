@@ -31,7 +31,7 @@ import java.io.InputStream;
 /***
  * Implementation of the SARI metric for text-to-text correction.
  * 
- *  @article{xu2016optimizing,
+ * \@article{xu2016optimizing,
  *    title={Optimizing statistical machine translation for text simplification},
  *    author={Xu, Wei and Napoles, Courtney and Pavlick, Ellie and Chen, Quanze and Callison-Burch, Chris},
  *    journal={Transactions of the Association for Computational Linguistics},
