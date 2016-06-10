@@ -359,7 +359,7 @@ public class GrammarPacker {
         }
         String[] alignment_entries = alignment_line.split("\\s");
         byte[] alignments = new byte[alignment_entries.length * 2];
-        if (alignment_entries.length != 0) {
+        if (alignment_line.length() > 0) {
           for (int i = 0; i < alignment_entries.length; i++) {
             String[] parts = alignment_entries[i].split("-");
             alignments[2 * i] = Byte.parseByte(parts[0]);
