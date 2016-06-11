@@ -49,6 +49,7 @@ import org.apache.joshua.decoder.Translation;
 
 public class JSONMessage {
   public Data data = null;
+  public String metaData = null;
   public List<String> rules = null;
   
   public JSONMessage() {
@@ -74,10 +75,6 @@ public class JSONMessage {
       item.addHypothesis(text, score);
     }
     
-    if (translation.hasMetaData()) {
-      item.setMetaData(translation.getMetaData().response());
-    }
-  
       // old string-based k-best output
   //    String[] results = translation.toString().split("\\n");
   //    if (results.length > 0) {
@@ -109,9 +106,12 @@ public class JSONMessage {
     return newItem;
   }
   
+  public void setMetaData(String msg) {
+    this.metaData = msg;
+  }
+
   public class TranslationItem {
     public String translatedText;
-    public String metaData = null;
     public List<NBestItem> raw_nbest;
     
     public TranslationItem(String value) {
@@ -127,10 +127,6 @@ public class JSONMessage {
      */
     public void addHypothesis(String hyp, float score) {
       this.raw_nbest.add(new NBestItem(hyp, score));
-    }
-
-    public void setMetaData(String msg) {
-      this.metaData = msg;
     }
   }
   

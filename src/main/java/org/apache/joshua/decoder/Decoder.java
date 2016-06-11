@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,11 +42,9 @@ import org.apache.joshua.decoder.ff.StatefulFF;
 import org.apache.joshua.decoder.ff.lm.LanguageModelFF;
 import org.apache.joshua.decoder.ff.tm.Grammar;
 import org.apache.joshua.decoder.ff.tm.Rule;
-import org.apache.joshua.decoder.ff.tm.Trie;
 import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
 import org.apache.joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
 import org.apache.joshua.decoder.ff.tm.packed.PackedGrammar;
-import org.apache.joshua.decoder.io.JSONMessage;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
 import org.apache.joshua.decoder.phrase.PhraseTable;
 import org.apache.joshua.decoder.segment_file.Sentence;
@@ -255,118 +252,6 @@ public class Decoder {
   }
 
   /**
-   * When metadata is found on the input, it needs to be processed. That is done here. Sometimes
-   * this involves returning data to the client.
-   *
-   * @param meta
-   * @throws IOException
-   */
-  private void handleMetadata(MetaData meta) {
-    if (meta.type().equals("set_weights")) {
-      // Change a decoder weight
-      String[] args = meta.tokens();
-      System.err.println(Arrays.toString(args));
-      for (int i = 0; i < args.length; i += 2) {
-        String feature = args[i];
-        String newValue = args[i+1];
-        float old_weight = Decoder.weights.getWeight(feature);
-        Decoder.weights.set(feature, Float.parseFloat(newValue));
-        LOG.info("set_weights: {} {} -> {}", feature, old_weight, Decoder.weights.getWeight(args[0]));
-      }
-      
-    } else if (meta.type().equals("get_weights")) {
-      meta.setResponse("weights " + Decoder.weights.toString());
-      
-    } else if (meta.type().equals("add_rule")) {
-      String args[] = meta.tokens(" ,,, ");
-  
-      if (args.length != 2) {
-        LOG.error("* INVALID RULE '{}'", meta);
-        return;
-      }
-      
-      String source = args[0];
-      String target = args[1];
-      String featureStr = "";
-      if (args.length > 2) 
-        featureStr = args[2];
-          
-
-      /* Prepend source and target side nonterminals for phrase-based decoding. Probably better
-       * handled in each grammar type's addRule() function.
-       */
-      String ruleString = (joshuaConfiguration.search_algorithm.equals("stack"))
-          ? String.format("[X] ||| [X,1] %s ||| [X,1] %s ||| custom=1 %s", source, target, featureStr)
-          : String.format("[X] ||| %s ||| %s ||| custom=1 %s", source, target, featureStr);
-      
-      Rule rule = new HieroFormatReader().parseLine(ruleString);
-      Decoder.this.customPhraseTable.addRule(rule);
-      rule.estimateRuleCost(featureFunctions);
-      LOG.info("Added custom rule {}", rule.toString());
-  
-    } else if (meta.type().equals("list_rules")) {
-  
-      LOG.info("list_rules");
-      
-      JSONMessage message = new JSONMessage();
-  
-      // Walk the the grammar trie
-      ArrayList<Trie> nodes = new ArrayList<Trie>();
-      nodes.add(customPhraseTable.getTrieRoot());
-  
-      while (nodes.size() > 0) {
-        Trie trie = nodes.remove(0);
-  
-        if (trie == null)
-          continue;
-  
-        if (trie.hasRules()) {
-          for (Rule rule: trie.getRuleCollection().getRules()) {
-            message.addRule(rule.toString());
-            LOG.info("Found rule: " + rule);
-          }
-        }
-  
-        if (trie.getExtensions() != null)
-          nodes.addAll(trie.getExtensions());
-      }
-  
-    } else if (meta.type().equals("remove_rule")) {
-      // Remove a rule from a custom grammar, if present
-      String[] args = meta.tokenString().split(" ,,, ");
-      if (args.length != 2) {
-        return;
-      }
-  
-      // Search for the rule in the trie
-      int nt_i = Vocabulary.id(joshuaConfiguration.default_non_terminal);
-      Trie trie = customPhraseTable.getTrieRoot().match(nt_i);
-  
-      for (String word: args[0].split("\\s+")) {
-        int id = Vocabulary.id(word);
-        Trie nextTrie = trie.match(id);
-        if (nextTrie != null)
-          trie = nextTrie;
-      }
-  
-      if (trie.hasRules()) {
-        Rule matched = null;
-        for (Rule rule: trie.getRuleCollection().getRules()) {
-          String target = rule.getEnglishWords();
-          target = target.substring(target.indexOf(' ') + 1);
-  
-          if (args[1].equals(target)) {
-            matched = rule;
-            break;
-          }
-        }
-        trie.getRuleCollection().getRules().remove(matched);
-        return;
-      }
-    }
-  }
-
-  /**
    * This class handles running a DecoderThread (which takes care of the actual translation of an
    * input Sentence, returning a Translation object when its done). This is done in a thread so as
    * not to tie up the RequestHandler that launched it, freeing it to go on to the next sentence in
@@ -396,10 +281,6 @@ public class Decoder {
        * Process any found metadata.
        */
       
-      if (sentence.hasMetaData()) {
-        handleMetadata(sentence.getMetaData());
-      }
-
       /*
        * Use the thread to translate the sentence. Then record the translation with the
        * corresponding Translations object, and return the thread to the pool.
@@ -870,7 +751,7 @@ public class Decoder {
       
       try {
         
-        Class<?> clas = getClass(featureName);
+        Class<?> clas = getFeatureFunctionClass(featureName);
         Constructor<?> constructor = clas.getConstructor(FeatureVector.class,
             String[].class, JoshuaConfiguration.class);
         FeatureFunction feature = (FeatureFunction) constructor.newInstance(weights, fields, joshuaConfiguration);
@@ -896,7 +777,7 @@ public class Decoder {
    * @return the class, found in one of the search paths
    * @throws ClassNotFoundException
    */
-  private Class<?> getClass(String featureName) {
+  private Class<?> getFeatureFunctionClass(String featureName) {
     Class<?> clas = null;
 
     String[] packages = { "org.apache.joshua.decoder.ff", "org.apache.joshua.decoder.ff.lm", "org.apache.joshua.decoder.ff.phrase" };
@@ -914,5 +795,17 @@ public class Decoder {
       }
     }
     return clas;
+  }
+  
+  /**
+   *   
+   * @param rule
+   */
+  public void addCustomRule(Rule rule) {
+    rule.estimateRuleCost(featureFunctions);
+  }
+
+  public Grammar getCustomPhraseTable() {
+    return customPhraseTable;
   }
 }

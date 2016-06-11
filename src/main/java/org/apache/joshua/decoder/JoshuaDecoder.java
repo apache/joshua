@@ -109,16 +109,6 @@ public class JoshuaDecoder {
       nbest_out = new FileWriter(joshuaConfiguration.n_best_file);
 
     for (Translation translation: translations) {
-
-      /* Process metadata */
-      if (translation.hasMetaData()) {
-        MetaData md = translation.getMetaData();
-        if (md.type().equals("get_weight")) {
-          String weight = md.tokens()[0]; 
-          System.err.println(String.format("You want %s? You got it. It's %.3f", weight,
-              Decoder.weights.getWeight(weight)));
-        }
-      }
       
       /**
        * We need to munge the feature value outputs in order to be compatible with Moses tuners.

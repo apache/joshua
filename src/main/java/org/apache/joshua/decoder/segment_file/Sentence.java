@@ -31,7 +31,6 @@ import java.util.regex.Pattern;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
-import org.apache.joshua.decoder.MetaData;
 import org.apache.joshua.decoder.ff.tm.Grammar;
 import org.apache.joshua.lattice.Arc;
 import org.apache.joshua.lattice.Lattice;
@@ -78,8 +77,6 @@ public class Sentence {
   
   private JoshuaConfiguration config = null;
 
-  private MetaData metaData;
-
   /**
    * Constructor. Receives a string representing the input sentence. This string may be a
    * string-encoded lattice or a plain text string for decoding.
@@ -94,7 +91,6 @@ public class Sentence {
     
     config = joshuaConfiguration;
     
-    this.metaData = null;
     this.constraints = new LinkedList<ConstraintSpan>();
 
     // Check if the sentence has SGML markings denoting the
@@ -107,13 +103,6 @@ public class Sentence {
       this.id = Integer.parseInt(idstr);
 
     } else {
-      if (hasRawMetaData(inputString)) {
-        /* Found some metadata */
-        metaData = new MetaData(inputString.substring(0,  inputString.indexOf('|', 1)));
-
-        inputString = inputString.substring(inputString.indexOf('|', 1) + 1).trim();
-      }
-      
       if (inputString.indexOf(" ||| ") != -1) {
         /* Target-side given; used for parsing and forced decoding */
         String[] pieces = inputString.split("\\s?\\|{3}\\s?");
@@ -137,25 +126,6 @@ public class Sentence {
     // Only trim strings
     if (! (joshuaConfiguration.lattice_decoding && source.startsWith("(((")))
       adjustForLength(joshuaConfiguration.maxlen);
-  }
-  
-  /**
-   * Look for metadata in the input sentence. Metadata is any line starting with a literal '|',
-   * up to the next occurrence of a '|'
-   * 
-   * @param inputString
-   * @return whether metadata was found
-   */
-  private boolean hasRawMetaData(String inputString) {
-    return inputString.startsWith("| ") && inputString.indexOf(" |") > 0;
-  }
-  
-  public boolean hasMetaData() {
-    return this.metaData != null;
-  }
-  
-  public MetaData getMetaData() {
-    return this.metaData;
   }
 
   /**
