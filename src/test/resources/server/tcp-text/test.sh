@@ -18,12 +18,14 @@
 
 # This test case starts a server and then throws 10 threads at it to make sure threading is working.
 
-$JOSHUA/bin/decoder -threads 4 -server-port 9010 -output-format "%i ||| %s" -mark-oovs true > server.log 2>&1 &
+port=9011
+
+$JOSHUA/bin/decoder -threads 4 -server-port $port -output-format "%i ||| %s" -mark-oovs true -v 1 > server.log 2>&1 &
 serverpid=$!
 sleep 2
 
 for num in $(seq 0 9); do
-  echo -e "this\nthat\nthese\n\nthose\nmine\nhis\nyours\nhers" | nc localhost 9010 > output.$num 2> log.$num &
+  echo -e "this\nthat\nthese\n\nthose\nmine\nhis\nyours\nhers" | nc localhost $port > output.$num 2> log.$num &
   pids[$num]=$!
 done
 
