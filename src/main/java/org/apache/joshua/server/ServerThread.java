@@ -169,7 +169,7 @@ public class ServerThread extends Thread implements HttpHandler {
       LOG.info("TRANSLATION: '{}' with {} k-best items", translation, translation.getStructuredTranslations().size());
       message.addTranslation(translation);
     }
-    
+
     OutputStream out = new HttpWriter(client);
     out.write(message.toString().getBytes());
     if (LOG.isDebugEnabled())
@@ -188,7 +188,7 @@ public class ServerThread extends Thread implements HttpHandler {
   private String handleMetadata(String meta) {
     String[] tokens = meta.split("\\s+", 2);
     String type = tokens[0];
-    String args = tokens[1];
+    String args = tokens.length > 1 ? tokens[1] : "";
     String response = "";
     
     if (type.equals("get_weight")) {
