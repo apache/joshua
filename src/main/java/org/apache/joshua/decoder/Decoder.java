@@ -798,10 +798,12 @@ public class Decoder {
   }
   
   /**
-   *   
-   * @param rule
+   * Adds a rule to the custom grammar.  
+   * 
+   * @param rule the rule to add
    */
   public void addCustomRule(Rule rule) {
+    customPhraseTable.addRule(rule);
     rule.estimateRuleCost(featureFunctions);
   }
 

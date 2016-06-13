@@ -326,22 +326,18 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
    * features (such as a language model estimate). This getter and setter should also be cached, and
    * is basically provided to allow the PhraseModel feature to cache its (expensive) computation for
    * each rule.
-   * 
-   * @return the precomputable cost of each rule
+   *
+   * The weights are passed in as dense weights and sparse weights. This allows the dense weight
+   * precomputation to be even faster (since we don't have to query a hash map. 
+   *
+   * @param dense_weights the dense weights from the model
+   * @param weights the sparse weights from the model
    */
-  public float getPrecomputableCost() {
-    return precomputableCost;
-  }
-
-  public float getDenseFeature(int k) {
-    return getFeatureVector().getDense(k);
-  }
-  
-  public void setPrecomputableCost(float[] phrase_weights, FeatureVector weights) {
+  public void setPrecomputableCost(float[] dense_weights, FeatureVector weights) {
     float cost = 0.0f;
     FeatureVector features = getFeatureVector();
-    for (int i = 0; i < features.getDenseFeatures().size() && i < phrase_weights.length; i++) {
-      cost += phrase_weights[i] * features.getDense(i);
+    for (int i = 0; i < features.getDenseFeatures().size() && i < dense_weights.length; i++) {
+      cost += dense_weights[i] * features.getDense(i);
     }
 
     for (String key: features.getSparseFeatures().keySet()) {
@@ -350,7 +346,18 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
     
     this.precomputableCost = cost;
   }
-
+  
+  /**
+   * @return the precomputed model cost of each rule
+   */
+  public float getPrecomputableCost() {
+    return precomputableCost;
+  }
+  
+  public float getDenseFeature(int k) {
+    return getFeatureVector().getDense(k);
+  }
+  
   /**
    * This function estimates the cost of a rule, which is used for sorting the rules for cube
    * pruning. The estimated cost is basically the set of precomputable features (features listed
