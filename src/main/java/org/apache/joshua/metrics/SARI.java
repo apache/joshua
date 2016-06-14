@@ -38,7 +38,7 @@ import java.io.InputStream;
  *    volume={4},
  *    year={2016}}
  * 
- * @author Courtney Napoles
+ * @author Wei Xu
  */
 public class SARI extends EvaluationMetric {
   private static final Logger logger = Logger.getLogger(SARI.class.getName());
