@@ -128,6 +128,7 @@ public class ServerThread extends Thread implements HttpHandler {
     
     public HttpWriter(HttpExchange client) {
       this.client = client;
+      client.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
     }
     
     @Override
