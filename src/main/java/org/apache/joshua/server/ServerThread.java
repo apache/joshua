@@ -28,6 +28,7 @@ import java.net.SocketException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -214,23 +215,24 @@ public class ServerThread extends Thread implements HttpHandler {
     } else if (type.equals("add_rule")) {
       String argTokens[] = args.split(" \\|\\|\\| ");
   
-      if (argTokens.length != 2) {
+      if (argTokens.length != 3) {
         LOG.error("* INVALID RULE '{}'", meta);
         return;
       }
       
-      String source = argTokens[0];
-      String target = argTokens[1];
+      String lhs = argTokens[0];
+      String source = argTokens[1];
+      String target = argTokens[2];
       String featureStr = "";
-      if (argTokens.length > 2) 
-        featureStr = argTokens[2];
+      if (argTokens.length > 3) 
+        featureStr = argTokens[3];
           
       /* Prepend source and target side nonterminals for phrase-based decoding. Probably better
        * handled in each grammar type's addRule() function.
        */
       String ruleString = (joshuaConfiguration.search_algorithm.equals("stack"))
-          ? String.format("[X] ||| [X,1] %s ||| [X,1] %s ||| custom=1 %s", source, target, featureStr)
-          : String.format("[X] ||| %s ||| %s ||| custom=1 %s", source, target, featureStr);
+          ? String.format("%s ||| [X,1] %s ||| [X,1] %s ||| custom=1 %s", lhs, source, target, featureStr)
+          : String.format("%s ||| %s ||| %s ||| custom=1 %s", lhs, source, target, featureStr);
       
       Rule rule = new HieroFormatReader().parseLine(ruleString);
       decoder.addCustomRule(rule);
@@ -264,19 +266,14 @@ public class ServerThread extends Thread implements HttpHandler {
   
     } else if (type.equals("remove_rule")) {
       
-      // Remove a rule from a custom grammar, if present
-      String[] argTokens = args.split(" \\|\\|\\| ");
-      if (argTokens.length != 2) {
-        LOG.warn("didn't get two tokens");
-        return;
-      }
+      Rule rule = new HieroFormatReader().parseLine(args);
       
-      LOG.info("remove_rule source=" + argTokens[0] + " target=" + argTokens[1]);
+      LOG.info("remove_rule " + rule);
   
       Trie trie = decoder.getCustomPhraseTable().getTrieRoot();
-      for (String word: argTokens[0].split("\\s+")) {
-        int id = Vocabulary.id(word);
-        Trie nextTrie = trie.match(id);
+      int[] sourceTokens = rule.getFrench();
+      for (int i = 0; i < sourceTokens.length; i++) {
+        Trie nextTrie = trie.match(sourceTokens[i]);
         if (nextTrie == null)
           return;
         
@@ -284,17 +281,12 @@ public class ServerThread extends Thread implements HttpHandler {
       }
 
       if (trie.hasRules()) {
-        Rule matched = null;
-        for (Rule rule: trie.getRuleCollection().getRules()) {
-          String target = rule.getEnglishWords();
-          target = target.substring(target.indexOf(' ') + 1);
-  
-          if (argTokens[1].equals(target)) {
-            matched = rule;
+        for (Rule ruleCand: trie.getRuleCollection().getRules()) {
+          if (Arrays.equals(rule.getEnglish(), ruleCand.getEnglish())) {
+            trie.getRuleCollection().getRules().remove(ruleCand);
             break;
           }
         }
-        trie.getRuleCollection().getRules().remove(matched);
         return;
       }
     }
