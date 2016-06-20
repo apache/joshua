@@ -29,6 +29,7 @@ import static org.apache.joshua.util.FormatUtils.removeSentenceMarkers;
 import java.util.List;
 
 import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.hypergraph.HyperGraph;
 import org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationState;
 import org.apache.joshua.decoder.segment_file.Sentence;
@@ -61,7 +62,7 @@ public class StructuredTranslationFactory {
         extractTranslationTokens(translationString),
         extractTranslationScore(hypergraph),
         getViterbiWordAlignmentList(hypergraph),
-        getViterbiFeatures(hypergraph, featureFunctions, sourceSentence).getMap(),
+        getViterbiFeatures(hypergraph, featureFunctions, sourceSentence),
         (System.currentTimeMillis() - startTime) / 1000.0f);
   }
   
@@ -72,7 +73,7 @@ public class StructuredTranslationFactory {
    */
   public static StructuredTranslation fromEmptyOutput(final Sentence sourceSentence) {
         return new StructuredTranslation(
-                sourceSentence, "", emptyList(), 0, emptyList(), emptyMap(), 0f);
+                sourceSentence, "", emptyList(), 0, emptyList(), new FeatureVector(), 0f);
       }
   
   /**
@@ -92,7 +93,7 @@ public class StructuredTranslationFactory {
         extractTranslationTokens(translationString),
         derivationState.getModelCost(),
         derivationState.getWordAlignmentList(),
-        derivationState.getFeatures().getMap(),
+        derivationState.getFeatures(),
         (System.currentTimeMillis() - startTime) / 1000.0f);
   }
   

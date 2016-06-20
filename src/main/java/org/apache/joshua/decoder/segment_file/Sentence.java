@@ -75,7 +75,7 @@ public class Sentence {
   /* List of constraints */
   private final List<ConstraintSpan> constraints;
   
-  private JoshuaConfiguration config = null;
+  public JoshuaConfiguration config = null;
 
   /**
    * Constructor. Receives a string representing the input sentence. This string may be a

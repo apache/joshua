@@ -49,10 +49,9 @@ import org.apache.joshua.decoder.Translation;
 
 public class JSONMessage {
   public Data data = null;
-  public String metaData = null;
-  public List<String> rules = null;
-  
+  public List<String> metadata = null;
   public JSONMessage() {
+    metadata = new ArrayList<String>();
   }
   
   public class Data {
@@ -62,6 +61,15 @@ public class JSONMessage {
       translations = new ArrayList<TranslationItem>();
     }
   }
+//
+//  public class Metadata {
+//    public String metadata = null;
+//    public List<String> rules = null;
+//
+//    public Metadata() {
+//      rules = new ArrayList<String>();
+//    }
+//  }
 
   public void addTranslation(Translation translation) {
     String viterbi = translation.getStructuredTranslations().get(0).getTranslationString();
@@ -69,7 +77,7 @@ public class JSONMessage {
     TranslationItem item = addTranslation(viterbi);
 
     for (StructuredTranslation hyp: translation.getStructuredTranslations()) {
-      String text = hyp.getTranslationString();
+      String text = hyp.getFormattedTranslationString();
       float score = hyp.getTranslationScore();
 
       item.addHypothesis(text, score);
@@ -106,8 +114,8 @@ public class JSONMessage {
     return newItem;
   }
   
-  public void setMetaData(String msg) {
-    this.metaData = msg;
+  public void addMetaData(String msg) {
+    this.metadata.add(msg);
   }
 
   public class TranslationItem {
@@ -141,9 +149,7 @@ public class JSONMessage {
   }
   
   public void addRule(String rule) {
-    if (rules == null)
-      rules = new ArrayList<String>();
-    rules.add(rule);
+    metadata.add("custom_rule " + rule);
   }
 
   public String toString() {

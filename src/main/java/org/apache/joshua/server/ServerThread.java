@@ -164,7 +164,7 @@ public class ServerThread extends Thread implements HttpHandler {
     Translations translations = decoder.decodeAll(request);
     JSONMessage message = new JSONMessage();
     if (meta != null && ! meta.isEmpty())
-      message.setMetaData(handleMetadata(meta));
+      handleMetadata(meta, message);
 
     for (Translation translation: translations) {
       LOG.info("TRANSLATION: '{}' with {} k-best items", translation, translation.getStructuredTranslations().size());
@@ -186,11 +186,10 @@ public class ServerThread extends Thread implements HttpHandler {
    * @param meta the metadata request
    * @return result string (for some commands)
    */
-  private String handleMetadata(String meta) {
+  private void handleMetadata(String meta, JSONMessage message) {
     String[] tokens = meta.split("\\s+", 2);
     String type = tokens[0];
     String args = tokens.length > 1 ? tokens[1] : "";
-    String response = "";
     
     if (type.equals("get_weight")) {
       String weight = tokens[1];
@@ -207,17 +206,17 @@ public class ServerThread extends Thread implements HttpHandler {
         LOG.info("set_weights: {} {} -> {}", feature, old_weight, Decoder.weights.getWeight(feature));
       }
       
-      response = "weights " + Decoder.weights.toString();
+      message.addMetaData("weights " + Decoder.weights.toString());
       
     } else if (type.equals("get_weights")) {
-      response = "weights " + Decoder.weights.toString();
+      message.addMetaData("weights " + Decoder.weights.toString());
       
     } else if (type.equals("add_rule")) {
-      String argTokens[] = args.split(" ,,, ");
+      String argTokens[] = args.split(" \\|\\|\\| ");
   
       if (argTokens.length != 2) {
         LOG.error("* INVALID RULE '{}'", meta);
-        return "";
+        return;
       }
       
       String source = argTokens[0];
@@ -242,8 +241,6 @@ public class ServerThread extends Thread implements HttpHandler {
   
       LOG.info("list_rules");
       
-      JSONMessage message = new JSONMessage();
-  
       // Walk the the grammar trie
       ArrayList<Trie> nodes = new ArrayList<Trie>();
       nodes.add(decoder.getCustomPhraseTable().getTrieRoot());
@@ -257,7 +254,7 @@ public class ServerThread extends Thread implements HttpHandler {
         if (trie.hasRules()) {
           for (Rule rule: trie.getRuleCollection().getRules()) {
             message.addRule(rule.toString());
-            LOG.info("Found rule: " + rule);
+            LOG.debug("Found rule: " + rule);
           }
         }
   
@@ -267,9 +264,9 @@ public class ServerThread extends Thread implements HttpHandler {
   
     } else if (type.equals("remove_rule")) {
       // Remove a rule from a custom grammar, if present
-      String[] argTokens = args.split(" ,,, ");
+      String[] argTokens = args.split(" \\|\\|\\| ");
       if (argTokens.length != 2) {
-        return "";
+        return;
       }
   
       // Search for the rule in the trie
@@ -295,9 +292,8 @@ public class ServerThread extends Thread implements HttpHandler {
           }
         }
         trie.getRuleCollection().getRules().remove(matched);
-        return "";
+        return;
       }
     }
-    return response;
   }
 }

@@ -21,7 +21,12 @@ package org.apache.joshua.decoder;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationState;
+import org.apache.joshua.decoder.io.DeNormalize;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.decoder.segment_file.Token;
+import org.apache.joshua.util.FormatUtils;
 
 /**
  * A StructuredTranslation instance provides a more structured access to
@@ -40,7 +45,7 @@ public class StructuredTranslation {
   private final List<String> translationTokens;
   private final float translationScore;
   private final List<List<Integer>> translationWordAlignments;
-  private final Map<String,Float> translationFeatures;
+  private final FeatureVector translationFeatures;
   private final float extractionTime;
   
   public StructuredTranslation(
@@ -49,7 +54,7 @@ public class StructuredTranslation {
       final List<String> translationTokens,
       final float translationScore,
       final List<List<Integer>> translationWordAlignments,
-      final Map<String,Float> translationFeatures,
+      final FeatureVector translationFeatures,
       final float extractionTime) {
     this.sourceSentence = sourceSentence;
     this.translationString = translationString;
@@ -68,8 +73,30 @@ public class StructuredTranslation {
     return sourceSentence.id();
   }
 
+  /**
+   * Produces the raw translation hypothesis (still tokenized).
+   * 
+   * @return the raw translation hypothesis
+   */
   public String getTranslationString() {
     return translationString;
+  }
+  
+  /**
+   * Produces the translation formatted according to the value of {@value JoshuaConfiguration.output_format}.
+   * Also includes formatting options such as {@value JoshuaConfiguration.project_case}.
+   * 
+   * @return
+   */
+  public String getFormattedTranslationString() {
+    JoshuaConfiguration config = sourceSentence.config;
+    String outputString = config.outputFormat
+        .replace("%s", getTranslationString())
+        .replace("%S", DeNormalize.processSingleLine(maybeProjectCase(getTranslationString())))
+        .replace("%i", Integer.toString(getSentenceId()))
+        .replace("%f", config.moses ? translationFeatures.mosesString() : translationFeatures.toString())
+        .replace("%c", String.format("%.3f", getTranslationScore()));
+    return outputString;
   }
 
   public List<String> getTranslationTokens() {
@@ -89,7 +116,7 @@ public class StructuredTranslation {
   }
   
   public Map<String,Float> getTranslationFeatures() {
-    return translationFeatures;
+    return translationFeatures.getMap();
   }
   
   /**
@@ -98,5 +125,40 @@ public class StructuredTranslation {
    */
   public Float getExtractionTime() {
     return extractionTime;
+  }
+  
+  /**
+   * If requested, projects source-side lettercase to target, and appends the alignment from
+   * to the source-side sentence in ||s.
+   * 
+   * @param hypothesis todo
+   * @param state todo
+   * @return source-side lettercase to target, and appends the alignment from to the source-side sentence in ||s
+   */
+  private String maybeProjectCase(String hypothesis) {
+    String output = hypothesis;
+
+    JoshuaConfiguration config = sourceSentence.config;
+    if (config.project_case) {
+      String[] tokens = hypothesis.split("\\s+");
+      List<List<Integer>> points = getTranslationWordAlignments();
+      for (int i = 0; i < points.size(); i++) {
+        List<Integer> target = points.get(i);
+        for (int source: target) {
+          Token token = sourceSentence.getTokens().get(source + 1); // skip <s>
+          String annotation = "";
+          if (token != null && token.getAnnotation("lettercase") != null)
+            annotation = token.getAnnotation("lettercase");
+          if (source != 0 && annotation.equals("upper"))
+            tokens[i] = FormatUtils.capitalize(tokens[i]);
+          else if (annotation.equals("all-upper"))
+            tokens[i] = tokens[i].toUpperCase();
+        }
+      }
+
+      output = String.join(" ",  tokens);
+    }
+
+    return output;
   }
 }
