@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -C31
+#!/usr/bin/perl -C31
 # Matt Post <post@cs.jhu.edu>
 # June 2016
 
