@@ -263,23 +263,26 @@ public class ServerThread extends Thread implements HttpHandler {
       }
   
     } else if (type.equals("remove_rule")) {
+      
       // Remove a rule from a custom grammar, if present
       String[] argTokens = args.split(" \\|\\|\\| ");
       if (argTokens.length != 2) {
+        LOG.warn("didn't get two tokens");
         return;
       }
+      
+      LOG.info("remove_rule source=" + argTokens[0] + " target=" + argTokens[1]);
   
-      // Search for the rule in the trie
-      int nt_i = Vocabulary.id(joshuaConfiguration.default_non_terminal);
-      Trie trie = decoder.getCustomPhraseTable().getTrieRoot().match(nt_i);
-  
+      Trie trie = decoder.getCustomPhraseTable().getTrieRoot();
       for (String word: argTokens[0].split("\\s+")) {
         int id = Vocabulary.id(word);
         Trie nextTrie = trie.match(id);
-        if (nextTrie != null)
-          trie = nextTrie;
+        if (nextTrie == null)
+          return;
+        
+        trie = nextTrie;
       }
-  
+
       if (trie.hasRules()) {
         Rule matched = null;
         for (Rule rule: trie.getRuleCollection().getRules()) {
