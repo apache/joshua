@@ -215,7 +215,7 @@ public class ServerThread extends Thread implements HttpHandler {
     } else if (type.equals("add_rule")) {
       String argTokens[] = args.split(" \\|\\|\\| ");
   
-      if (argTokens.length <= 3) {
+      if (argTokens.length < 3) {
         LOG.error("* INVALID RULE '{}'", meta);
         return;
       }
