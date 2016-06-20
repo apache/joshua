@@ -152,7 +152,7 @@ public class ServerThread extends Thread implements HttpHandler {
    * @param client the client connection
    */
   @Override
-  public void handle(HttpExchange client) throws IOException {
+  public synchronized void handle(HttpExchange client) throws IOException {
 
     HashMap<String, String> params = queryToMap(URLDecoder.decode(client.getRequestURI().getQuery(), "UTF-8"));
     String query = params.get("q");
