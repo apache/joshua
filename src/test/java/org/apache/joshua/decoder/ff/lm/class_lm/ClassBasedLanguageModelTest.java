@@ -26,6 +26,7 @@ import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.lm.LanguageModelFF;
+import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -65,7 +66,7 @@ public class ClassBasedLanguageModelTest {
   @Test
   public void givenRuleWithSingleWord_whenGetRuleId_thenIsMappedToClass() {
     final int[] target = Vocabulary.addAll(new String[] { "professionalism" });
-    final Rule rule = new Rule(0, null, target, "", 0, 0);
+    final Rule rule = new Rule(0, null, target, new FeatureVector(), 0, OwnerMap.register(OwnerMap.UNKNOWN_OWNER));
     assertEquals(Vocabulary.word(ff.getRuleIds(rule)[0]), "13");
   }
 }

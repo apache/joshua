@@ -53,7 +53,7 @@ public class SentenceFilteredGrammar extends MemoryBasedBatchGrammar {
    * @param sentence {@link org.apache.joshua.lattice.Lattice} input
    */
   SentenceFilteredGrammar(AbstractGrammar baseGrammar, Sentence sentence) {
-    super(baseGrammar.joshuaConfiguration);
+    super(OwnerMap.getOwner(baseGrammar.getOwner()), baseGrammar.joshuaConfiguration, baseGrammar.getSpanLimit());
     this.baseGrammar = baseGrammar;
     this.sentence = sentence;
     this.tokens = sentence.getWordIDs();

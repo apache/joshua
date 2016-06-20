@@ -27,6 +27,8 @@ import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.tm.OwnerId;
+import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
@@ -49,7 +51,7 @@ public class LexicalFeatures extends StatelessFF {
   //whether this feature is restricted to a certain grammar/owner
   private final boolean ownerRestriction;
   // the grammar/owner this feature is restricted to fire
-  private final int owner;
+  private final OwnerId owner;
   // Strings separating words
   private static final String SEPARATOR = "~";
   
@@ -59,7 +61,7 @@ public class LexicalFeatures extends StatelessFF {
     super(weights, NAME, args, config);
     
     ownerRestriction = (parsedArgs.containsKey("owner")) ? true : false;
-    owner = ownerRestriction ? Vocabulary.id(parsedArgs.get("owner")) : 0;
+    owner = ownerRestriction ? OwnerMap.register(parsedArgs.get("owner")) : OwnerMap.UNKNOWN_OWNER_ID;
     
     useAlignments = parsedArgs.containsKey("alignments");
     useDeletions = parsedArgs.containsKey("deletions");
@@ -77,7 +79,7 @@ public class LexicalFeatures extends StatelessFF {
   public DPState compute(Rule rule, List<HGNode> tailNodes, int i, int j, SourcePath sourcePath,
       Sentence sentence, Accumulator acc) {
     
-    if (ownerRestriction && rule.getOwner() != owner) {
+    if (ownerRestriction && rule.getOwner().equals(owner)) {
       return null;
     }
 

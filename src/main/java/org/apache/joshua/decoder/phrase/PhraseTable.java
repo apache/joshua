@@ -18,6 +18,8 @@
  */
 package org.apache.joshua.decoder.phrase;
 
+import static org.apache.joshua.decoder.ff.tm.OwnerMap.UNKNOWN_OWNER;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -26,6 +28,7 @@ import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.tm.Grammar;
+import org.apache.joshua.decoder.ff.tm.OwnerId;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.RuleCollection;
 import org.apache.joshua.decoder.ff.tm.Trie;
@@ -73,8 +76,7 @@ public class PhraseTable implements Grammar {
   
   public PhraseTable(String owner, JoshuaConfiguration config) {
     this.config = config;
-    
-    this.backend = new MemoryBasedBatchGrammar(owner, config);
+    this.backend = new MemoryBasedBatchGrammar(owner, config, 20);
   }
       
   /**
@@ -129,7 +131,7 @@ public class PhraseTable implements Grammar {
 
     int nt_i = Vocabulary.id("[X]");
     Rule oovRule = new Rule(nt_i, new int[] { nt_i, sourceWord },
-        new int[] { -1, targetWord }, "", 1, null);
+        new int[] { -1, targetWord }, "", 1, UNKNOWN_OWNER);
     addRule(oovRule);
     oovRule.estimateRuleCost(featureFunctions);
         
@@ -170,7 +172,7 @@ public class PhraseTable implements Grammar {
   }
 
   @Override
-  public int getOwner() {
+  public OwnerId getOwner() {
     return backend.getOwner();
   }
 
