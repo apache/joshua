@@ -77,6 +77,7 @@ public abstract class EvaluationMetric {
     metricOptionCount.put("PRECIS-SRC_BLEU", 6);
     metricOptionCount.put("GL_BLEU", 3);
     metricOptionCount.put("SARI", 2); // options: max-ngram source-path
+    metricOptionCount.put("CHRF", 2); // options: beta (how much to weight recall vs precision) and max-ngram
   }
 
   public static EvaluationMetric getMetric(String metricName, String[] metricOptions) {
@@ -117,7 +118,10 @@ public abstract class EvaluationMetric {
                                                      // GradeLevelBLEU class
     } else if (metricName.equals("SARI")) { 
       retMetric = new SARI(metricOptions);
-    } 
+    
+    } else if (metricName.equals("CHRF")) {
+        retMetric = new CHRF(metricOptions);
+    }
     
     return retMetric;
   }
