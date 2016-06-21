@@ -28,7 +28,13 @@ import java.util.logging.Logger;
  * - Use of a length penalty to prevent chrF to prefer too long (with beta>1) or too short (with beta<1) translations
  * - Use of hash tables for efficient n-gram matching
  * 
- * If you use this metric in your research please cite [2]
+ * The metric has 2 parameters:
+ * - Beta. It assigns beta times more weight to recall than to precision. By default 1.
+ *   Although for evaluation the best correlation was found with beta=3, we've found the
+ *   best results for tuning so far with beta=1
+ * - Max-ngram. Maximum n-gram length (characters). By default 6.
+ * 
+ * If you use this metric in your research please cite [2].
  * 
  * [1] Maja Popovic. 2015. chrF: character n-gram F-score for automatic MT evaluation.
  * In Proceedings of the Tenth Workshop on Statistical Machine Translation. Lisbon, Portugal, pages 392–395.
@@ -41,7 +47,7 @@ import java.util.logging.Logger;
 public class CHRF extends EvaluationMetric {
     private static final Logger logger = Logger.getLogger(CHRF.class.getName());
 
-    protected double beta = 3;
+    protected double beta = 1;
     protected double factor;
     protected int maxGramLength = 6; // The maximum n-gram we care about
     //private double[] nGramWeights; //TODO to weight them differently
@@ -53,7 +59,7 @@ public class CHRF extends EvaluationMetric {
 
   public CHRF()
   {
-      this(3, 6);
+      this(1, 6);
   }
           
   public CHRF(String[] CHRF_options)
