@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  * An implementation of the chrF evaluation metric for tuning.
  * It is based on the original code by Maja Popovic [1] with the following main modifications:
  * - Adapted to extend Joshua's EvaluationMetric class
- * - Use of a length penalty to prevent chrF to prefer too long (with beta>1) or too short (with beta<1) translations
+ * - Use of a length penalty to prevent chrF to prefer too long (with beta %gt; 1) or too short (with beta &lt; 1) translations
  * - Use of hash tables for efficient n-gram matching
  * 
  * The metric has 2 parameters:

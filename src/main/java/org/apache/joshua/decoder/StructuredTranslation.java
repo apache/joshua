@@ -83,9 +83,9 @@ public class StructuredTranslation {
   }
   
   /**
-   * Returns the output string formatted according to {@value JoshuaConfiguration.output_format}.
+   * Returns the output string formatted according to JoshuaConfiguration.output_format.
    * 
-   * @return
+   * @return the formatted string
    */
   public String getFormattedTranslationString() {
     throw new RuntimeException("Not yet implemented");
@@ -101,6 +101,7 @@ public class StructuredTranslation {
 
   /**
    * Returns a list of target to source alignments.
+   * 
    * @return a list of target to source alignments
    */
   public List<List<Integer>> getTranslationWordAlignments() {

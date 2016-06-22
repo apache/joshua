@@ -102,7 +102,7 @@ public class JSONMessage {
    * Adds a new Translation to the JSON object. A Translation represents one or more hypotheses
    * (or k-best items)
    * 
-   * @param text
+   * @param text the translation text
    * @return the new TranslationItem object
    */
   public TranslationItem addTranslation(String text) {
