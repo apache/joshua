@@ -77,7 +77,7 @@ public class JSONMessage {
     TranslationItem item = addTranslation(viterbi);
 
     for (StructuredTranslation hyp: translation.getStructuredTranslations()) {
-      String text = hyp.getFormattedTranslationString();
+      String text = hyp.getTranslationString();
       float score = hyp.getTranslationScore();
 
       item.addHypothesis(text, score);
