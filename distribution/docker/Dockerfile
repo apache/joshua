@@ -15,14 +15,20 @@
 
 FROM java:latest
 
+LABEL Description="This image is used to provide a Joshua Decoder environment" Vendor="Apache Software Foundation"
+
 RUN apt-get update && \
     apt-get install -y \
-            ant \
             cmake \
+            git \
             g++ \
             libboost-all-dev \
+            libbz2-dev \
+            libeigen3-dev \
+            liblzma-dev \            
             libz-dev \
-            make
+            make \
+            maven
 
 
 RUN mkdir /opt/joshua
@@ -36,4 +42,6 @@ ENV JOSHUA=/opt/joshua
 # copy Joshua source code to image
 COPY . $JOSHUA
 
-RUN ant
+RUN sh download-deps.sh
+
+RUN mvn clean compile assembly:single
