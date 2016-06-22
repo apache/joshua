@@ -19,7 +19,7 @@
 package org.apache.joshua.decoder.ff.tm.packed;
 
 /***
- * This package implements Joshua's packed grammar structure, which enables the efficient loading	
+ * This package implements Joshua's packed grammar structure, which enables the efficient loading
  * and accessing of grammars. It is described in the paper:
  * 
  * @article{ganitkevitch2012joshua,
@@ -85,6 +85,7 @@ import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.tm.AbstractGrammar;
 import org.apache.joshua.decoder.ff.tm.BasicRuleCollection;
+import org.apache.joshua.decoder.ff.tm.OwnerId;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.RuleCollection;
 import org.apache.joshua.decoder.ff.tm.Trie;
@@ -98,6 +99,7 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,10 +125,9 @@ public class PackedGrammar extends AbstractGrammar {
 
   public PackedGrammar(String grammar_dir, int span_limit, String owner, String type,
       JoshuaConfiguration joshuaConfiguration) throws IOException {
-    super(joshuaConfiguration);
+    super(owner, joshuaConfiguration, span_limit);
 
     this.grammarDir = grammar_dir;
-    this.spanLimit = span_limit;
 
     // Read the vocabulary.
     vocabFile = new File(grammar_dir + File.separator + VOCABULARY_FILENAME);
@@ -146,9 +147,6 @@ public class PackedGrammar extends AbstractGrammar {
     LOG.info("Reading encoder configuration: {}{}encoding", grammar_dir, File.separator);
     encoding = new EncoderConfiguration();
     encoding.load(grammar_dir + File.separator + "encoding");
-
-    // Set phrase owner.
-    this.owner = Vocabulary.id(owner);
 
     final List<String> listing = Arrays.asList(new File(grammar_dir).list());
     sort(listing); // File.list() has arbitrary sort order
@@ -940,11 +938,11 @@ public class PackedGrammar extends AbstractGrammar {
         }
 
         @Override
-        public void setOwner(int ow) {
+        public void setOwner(OwnerId owner) {
         }
 
         @Override
-        public int getOwner() {
+        public OwnerId getOwner() {
           return owner;
         }
 

@@ -19,12 +19,13 @@
 package org.apache.joshua.decoder.ff;
 
 import java.util.ArrayList;
-import java.util.List;	
+import java.util.List;
 
-import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.tm.OwnerId;
+import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.phrase.Hypothesis;
@@ -42,15 +43,15 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  */
 public class PhrasePenalty extends StatelessFF {
 
-  private int owner = 0;
+  private final OwnerId owner;
   private float value = 1.0f;
   
   public PhrasePenalty(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, "PhrasePenalty", args, config);
     if (parsedArgs.containsKey("owner"))
-      this.owner = Vocabulary.id(parsedArgs.get("owner"));
+      this.owner = OwnerMap.register(parsedArgs.get("owner"));
     else // default
-      this.owner = Vocabulary.id("pt"); 
+      this.owner = OwnerMap.register("pt"); 
   }
 
   @Override
@@ -58,7 +59,7 @@ public class PhrasePenalty extends StatelessFF {
       Sentence sentence, Accumulator acc) {
 
     if (rule != null && rule != Hypothesis.BEGIN_RULE && rule != Hypothesis.END_RULE 
-        && (owner == 0 || rule.getOwner() == owner))
+        && (rule.getOwner().equals(owner)))
       acc.add(denseFeatureIndex, value);
 
     return null;
@@ -79,7 +80,7 @@ public class PhrasePenalty extends StatelessFF {
   @Override
   public float estimateCost(Rule rule, Sentence sentence) {
     if (rule != null && rule != Hypothesis.BEGIN_RULE && rule != Hypothesis.END_RULE 
-        && (owner == 0 || rule.getOwner() == owner))
+        && (rule.getOwner().equals(owner)))
       return weights.getDense(denseFeatureIndex) * value;
     return 0.0f;
   }

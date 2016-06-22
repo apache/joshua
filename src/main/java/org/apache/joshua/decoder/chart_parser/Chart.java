@@ -139,7 +139,7 @@ public class Chart {
     for (int i = 0; i < grammars.length; i++)
       this.grammars[i + 1] = grammars[i];
 
-    MemoryBasedBatchGrammar oovGrammar = new MemoryBasedBatchGrammar("oov", this.config);
+    MemoryBasedBatchGrammar oovGrammar = new MemoryBasedBatchGrammar("oov", this.config, 20);
     AbstractGrammar.addOOVRules(oovGrammar, sentence.getLattice(), featureFunctions,
         this.config.true_oovs_only);
     this.grammars[0] = oovGrammar;

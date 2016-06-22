@@ -28,6 +28,7 @@ import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.JoshuaConfiguration.OOVItem;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.tm.AbstractGrammar;
+import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.GrammarReader;
 import org.apache.joshua.decoder.ff.tm.Trie;
@@ -64,7 +65,7 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
   private int numDenseFeatures = 0;
 
   /* The trie root. */
-  private MemoryBasedTrie root = null;
+  private MemoryBasedTrie root = new MemoryBasedTrie();
 
   /* The file containing the grammar. */
   private String grammarFile;
@@ -79,33 +80,28 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
   // Constructors
   // ===============================================================
 
-  public MemoryBasedBatchGrammar(JoshuaConfiguration joshuaConfiguration) {
-    super(joshuaConfiguration);
-    this.root = new MemoryBasedTrie();
-    this.joshuaConfiguration = joshuaConfiguration;
-    setSpanLimit(20);
+  /**
+   * Constructor used by Decoder mostly. Default spanLimit of 20
+   */
+  public MemoryBasedBatchGrammar(String owner, JoshuaConfiguration config, int spanLimit) {
+    super(owner, config, spanLimit);
   }
 
-  public MemoryBasedBatchGrammar(String owner, JoshuaConfiguration joshuaConfiguration) {
-    this(joshuaConfiguration);
-    this.owner = Vocabulary.id(owner);
-  }
-
-  public MemoryBasedBatchGrammar(GrammarReader<Rule> gr, JoshuaConfiguration joshuaConfiguration) {
-    // this.defaultOwner = Vocabulary.id(defaultOwner);
-    // this.defaultLHS = Vocabulary.id(defaultLHSSymbol);
-    this(joshuaConfiguration);
-    modelReader = gr;
+  /**
+   * Constructor to initialize a GrammarReader (unowned)
+   */
+  public MemoryBasedBatchGrammar(
+      final GrammarReader<Rule> reader, final JoshuaConfiguration config, final int spanLimit) {
+    super(OwnerMap.UNKNOWN_OWNER, config, spanLimit);
+    modelReader = reader;
   }
 
   public MemoryBasedBatchGrammar(String formatKeyword, String grammarFile, String owner,
       String defaultLHSSymbol, int spanLimit, JoshuaConfiguration joshuaConfiguration)
       throws IOException {
 
-    this(joshuaConfiguration);
-    this.owner = Vocabulary.id(owner);
+    super(owner, joshuaConfiguration, spanLimit);
     Vocabulary.id(defaultLHSSymbol);
-    this.spanLimit = spanLimit;
     this.grammarFile = grammarFile;
 
     // ==== loading grammar
@@ -141,10 +137,6 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
   // Methods
   // ===============================================================
 
-  public void setSpanLimit(int spanLimit) {
-    this.spanLimit = spanLimit;
-  }
-
   @Override
   public int getNumRules() {
     return this.qtyRulesRead;
@@ -172,13 +164,8 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
    */
   public void addRule(Rule rule) {
 
-    // TODO: Why two increments?
     this.qtyRulesRead++;
 
-    // if (owner == -1) {
-    // System.err.println("* FATAL: MemoryBasedBatchGrammar::addRule(): owner not set for grammar");
-    // System.exit(1);
-    // }
     rule.setOwner(owner);
 
     if (numDenseFeatures == 0)

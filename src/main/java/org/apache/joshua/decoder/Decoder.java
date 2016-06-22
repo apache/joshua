@@ -19,6 +19,7 @@
 package org.apache.joshua.decoder;
 
 import static org.apache.joshua.decoder.ff.FeatureVector.DENSE_FEATURE_NAMES;
+import static org.apache.joshua.decoder.ff.tm.OwnerMap.getOwner;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -41,6 +43,8 @@ import org.apache.joshua.decoder.ff.PhraseModel;
 import org.apache.joshua.decoder.ff.StatefulFF;
 import org.apache.joshua.decoder.ff.lm.LanguageModelFF;
 import org.apache.joshua.decoder.ff.tm.Grammar;
+import org.apache.joshua.decoder.ff.tm.OwnerId;
+import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
 import org.apache.joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
@@ -363,6 +367,7 @@ public class Decoder {
 
   public static void resetGlobalState() {
     // clear/reset static variables
+    OwnerMap.clear();
     DENSE_FEATURE_NAMES.clear();
     Vocabulary.clear();
     Vocabulary.unregisterLanguageModels();
@@ -594,10 +599,6 @@ public class Decoder {
 
         } else {
 
-          int maxSourceLen = parsedArgs.containsKey("max-source-len")
-              ? Integer.parseInt(parsedArgs.get("max-source-len"))
-              : -1;
-
           joshuaConfiguration.search_algorithm = "stack";
           grammar = new PhraseTable(path, owner, type, joshuaConfiguration);
         }
@@ -609,8 +610,7 @@ public class Decoder {
 
     } else {
       LOG.warn("no grammars supplied!  Supplying dummy glue grammar.");
-      MemoryBasedBatchGrammar glueGrammar = new MemoryBasedBatchGrammar("glue", joshuaConfiguration);
-      glueGrammar.setSpanLimit(-1);
+      MemoryBasedBatchGrammar glueGrammar = new MemoryBasedBatchGrammar("glue", joshuaConfiguration, -1);
       glueGrammar.addGlueRules(featureFunctions);
       this.grammars.add(glueGrammar);
     }
@@ -619,14 +619,13 @@ public class Decoder {
     if (joshuaConfiguration.search_algorithm.equals("stack"))
       this.customPhraseTable = new PhraseTable(null, "custom", "phrase", joshuaConfiguration);
     else
-      this.customPhraseTable = new MemoryBasedBatchGrammar("custom", joshuaConfiguration);
+      this.customPhraseTable = new MemoryBasedBatchGrammar("custom", joshuaConfiguration, 20);
     this.grammars.add(this.customPhraseTable);
     
     /* Create an epsilon-deleting grammar */
     if (joshuaConfiguration.lattice_decoding) {
       LOG.info("Creating an epsilon-deleting grammar");
-      MemoryBasedBatchGrammar latticeGrammar = new MemoryBasedBatchGrammar("lattice", joshuaConfiguration);
-      latticeGrammar.setSpanLimit(-1);
+      MemoryBasedBatchGrammar latticeGrammar = new MemoryBasedBatchGrammar("lattice", joshuaConfiguration, -1);
       HieroFormatReader reader = new HieroFormatReader();
 
       String goalNT = FormatUtils.cleanNonTerminal(joshuaConfiguration.goal_symbol);
@@ -644,13 +643,14 @@ public class Decoder {
     }
 
     /* Now create a feature function for each owner */
-    HashSet<String> ownersSeen = new HashSet<String>();
+    final Set<OwnerId> ownersSeen = new HashSet<OwnerId>();
 
     for (Grammar grammar: this.grammars) {
-      String owner = Vocabulary.word(grammar.getOwner());
+      OwnerId owner = grammar.getOwner();
       if (! ownersSeen.contains(owner)) {
-        this.featureFunctions.add(new PhraseModel(weights, new String[] { "tm", "-owner", owner },
-            joshuaConfiguration, grammar));
+        this.featureFunctions.add(
+            new PhraseModel(
+                weights, new String[] { "tm", "-owner", getOwner(owner) }, joshuaConfiguration, grammar));
         ownersSeen.add(owner);
       }
     }

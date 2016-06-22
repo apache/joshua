@@ -29,10 +29,10 @@ import org.apache.joshua.decoder.segment_file.Token;
 import org.apache.joshua.lattice.Arc;
 import org.apache.joshua.lattice.Lattice;
 import org.apache.joshua.lattice.Node;
-
-import cern.colt.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import cern.colt.Arrays;
 
 /**
  * Partial implementation of the <code>Grammar</code> interface that provides logic for sorting a
@@ -60,7 +60,7 @@ public abstract class AbstractGrammar implements Grammar {
    * The grammar's owner, used to determine which weights are applicable to the dense features found
    * within.
    */
-  protected int owner = -1;
+  protected final OwnerId owner;
   
   /*
    * The maximum length of a source-side phrase. Mostly used by the phrase-based decoder.
@@ -78,29 +78,29 @@ public abstract class AbstractGrammar implements Grammar {
   }
   
   @Override
-  public int getOwner() {
+  public OwnerId getOwner() {
     return owner;
   }
+  
+  public int getSpanLimit() {
+    return spanLimit;
+  }
 
-  /* The maximum span of the input this rule can be applied to. */
-  protected int spanLimit = 1;
+  /* The maximum span of the input this grammar rules can be applied to. */
+  protected final int spanLimit;
 
-  protected JoshuaConfiguration joshuaConfiguration;
+  protected final JoshuaConfiguration joshuaConfiguration;
 
   /**
-   * Constructs an empty, unsorted grammar.
+   * Creates an empty, unsorted grammar with given owner and spanlimit
    * 
    * @see Grammar#isSorted()
    * @param config a {@link org.apache.joshua.decoder.JoshuaConfiguration} object
    */
-  public AbstractGrammar(JoshuaConfiguration config) {
+  public AbstractGrammar(final String owner, final JoshuaConfiguration config, final int spanLimit) {
+    this.sorted = false;
+    this.owner = OwnerMap.register(owner);
     this.joshuaConfiguration = config;
-    this.sorted = false;
-  }
-
-  public AbstractGrammar(int owner, int spanLimit) {
-    this.sorted = false;
-    this.owner = owner;
     this.spanLimit = spanLimit;
   }
 
