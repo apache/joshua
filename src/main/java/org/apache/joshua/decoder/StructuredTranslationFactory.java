@@ -62,7 +62,7 @@ public class StructuredTranslationFactory {
         extractTranslationTokens(translationString),
         extractTranslationScore(hypergraph),
         getViterbiWordAlignmentList(hypergraph),
-        getViterbiFeatures(hypergraph, featureFunctions, sourceSentence),
+        getViterbiFeatures(hypergraph, featureFunctions, sourceSentence).getMap(),
         (System.currentTimeMillis() - startTime) / 1000.0f);
   }
   
@@ -73,7 +73,7 @@ public class StructuredTranslationFactory {
    */
   public static StructuredTranslation fromEmptyOutput(final Sentence sourceSentence) {
         return new StructuredTranslation(
-                sourceSentence, "", emptyList(), 0, emptyList(), new FeatureVector(), 0f);
+                sourceSentence, "", emptyList(), 0, emptyList(), emptyMap(), 0f);
       }
   
   /**
@@ -93,7 +93,7 @@ public class StructuredTranslationFactory {
         extractTranslationTokens(translationString),
         derivationState.getModelCost(),
         derivationState.getWordAlignmentList(),
-        derivationState.getFeatures(),
+        derivationState.getFeatures().getMap(),
         (System.currentTimeMillis() - startTime) / 1000.0f);
   }
   

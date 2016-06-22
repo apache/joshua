@@ -45,7 +45,7 @@ public class StructuredTranslation {
   private final List<String> translationTokens;
   private final float translationScore;
   private final List<List<Integer>> translationWordAlignments;
-  private final FeatureVector translationFeatures;
+  private final Map<String,Float> translationFeatures;
   private final float extractionTime;
   
   public StructuredTranslation(
@@ -54,7 +54,7 @@ public class StructuredTranslation {
       final List<String> translationTokens,
       final float translationScore,
       final List<List<Integer>> translationWordAlignments,
-      final FeatureVector translationFeatures,
+      final Map<String,Float> translationFeatures,
       final float extractionTime) {
     this.sourceSentence = sourceSentence;
     this.translationString = translationString;
@@ -83,20 +83,12 @@ public class StructuredTranslation {
   }
   
   /**
-   * Produces the translation formatted according to the value of {@value JoshuaConfiguration.output_format}.
-   * Also includes formatting options such as {@value JoshuaConfiguration.project_case}.
+   * Returns the output string formatted according to {@value JoshuaConfiguration.output_format}.
    * 
    * @return
    */
   public String getFormattedTranslationString() {
-    JoshuaConfiguration config = sourceSentence.config;
-    String outputString = config.outputFormat
-        .replace("%s", getTranslationString())
-        .replace("%S", DeNormalize.processSingleLine(maybeProjectCase(getTranslationString())))
-        .replace("%i", Integer.toString(getSentenceId()))
-        .replace("%f", config.moses ? translationFeatures.mosesString() : translationFeatures.toString())
-        .replace("%c", String.format("%.3f", getTranslationScore()));
-    return outputString;
+    throw new RuntimeException("Not yet implemented");
   }
 
   public List<String> getTranslationTokens() {
@@ -116,7 +108,7 @@ public class StructuredTranslation {
   }
   
   public Map<String,Float> getTranslationFeatures() {
-    return translationFeatures.getMap();
+    return translationFeatures;
   }
   
   /**
