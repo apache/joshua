@@ -21,11 +21,12 @@ package org.apache.joshua.decoder.ff;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Grammar;
+import org.apache.joshua.decoder.ff.tm.OwnerId;
+import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
@@ -44,28 +45,26 @@ import org.apache.joshua.decoder.segment_file.Sentence;
 public class PhraseModel extends StatelessFF {
 
   /* The owner of the grammar. */
-  private int ownerID;
-  private String owner;
+  private final OwnerId ownerID;
+  private final String owner;
 
   private float[] phrase_weights = null;
 
   public PhraseModel(FeatureVector weights, String[] args, JoshuaConfiguration config, Grammar g) {
     super(weights, "tm_", args, config);
 
-    String owner = parsedArgs.get("owner");
-    this.name = String.format("tm_%s", owner);
+    // Store the owner and name
+    this.owner = parsedArgs.get("owner");
+    this.ownerID = OwnerMap.register(owner);
+    this.name = String.format("tm_%s", this.owner);
 
     /*
      * Determine the number of features by querying the example grammar that was passed in.
      */
     phrase_weights = new float[g.getNumDenseFeatures()];
-//    System.err.println(String.format("GOT %d FEATURES FOR %s", g.getNumDenseFeatures(), owner));
     for (int i = 0; i < phrase_weights.length; i++)
       phrase_weights[i] = weights.getSparse(String.format("tm_%s_%d", owner, i));
-
-    // Store the owner.
-    this.owner = owner;
-    this.ownerID = Vocabulary.id(owner);
+    
   }
 
   /**
@@ -88,7 +87,7 @@ public class PhraseModel extends StatelessFF {
   @Override
   public float estimateCost(final Rule rule, Sentence sentence) {
 
-    if (rule != null && rule.getOwner() == ownerID) {
+    if (rule != null && rule.getOwner().equals(ownerID)) {
       if (rule.getPrecomputableCost() <= Float.NEGATIVE_INFINITY)
         rule.setPrecomputableCost(phrase_weights, weights);
 
@@ -105,7 +104,7 @@ public class PhraseModel extends StatelessFF {
   public DPState compute(Rule rule, List<HGNode> tailNodes, int i, int j, SourcePath sourcePath,
       Sentence sentence, Accumulator acc) {
 
-    if (rule != null && rule.getOwner() == ownerID) {
+    if (rule != null && rule.getOwner().equals(ownerID)) {
       /*
        * Here, we peak at the Accumulator object. If it's asking for scores, then we don't bother to
        * add each feature, but rather compute the inner product and add *that*. This is totally
@@ -130,6 +129,6 @@ public class PhraseModel extends StatelessFF {
   }
 
   public String toString() {
-    return name + " " + Vocabulary.word(ownerID);
+    return name;
   }
 }

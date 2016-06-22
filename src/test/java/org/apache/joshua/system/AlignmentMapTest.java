@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.tm.Rule;
 
 import org.junit.Before;
@@ -51,7 +52,7 @@ public class AlignmentMapTest {
     expectedAlignmentMap.put(1, Arrays.asList(3));
     expectedAlignmentMap.put(3, Arrays.asList(3));
     rule1 = new Rule(-1, sourceRhs, targetRhs, "", arity, alignment);
-    rule2 = new Rule(-1, sourceRhs, targetRhs, "", arity, null); // rule with no alignment
+    rule2 = new Rule(-1, sourceRhs, targetRhs, new FeatureVector(), arity, null); // rule with no alignment
   }
 
   @Test

@@ -21,12 +21,13 @@ package org.apache.joshua.decoder.ff;
 import java.util.List;
 
 import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.tm.OwnerId;
+import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
-import org.apache.joshua.decoder.chart_parser.SourcePath;
-import org.apache.joshua.corpus.Vocabulary;
 
 /**
  * This feature function counts rules from a particular grammar (identified by the owner) having an
@@ -39,14 +40,14 @@ import org.apache.joshua.corpus.Vocabulary;
 public class ArityPhrasePenalty extends StatelessFF {
 
   // when the rule.arity is in the range, then this feature is activated
-  private final int owner;
+  private final OwnerId owner;
   private final int minArity;
   private final int maxArity;
 
   public ArityPhrasePenalty(final FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, "ArityPenalty", args, config);
 
-    this.owner = Vocabulary.id(parsedArgs.get("owner"));
+    this.owner = OwnerMap.register(parsedArgs.get("owner"));
     this.minArity = Integer.parseInt(parsedArgs.get("min-arity"));
     this.maxArity = Integer.parseInt(parsedArgs.get("max-arity"));
   }
@@ -55,7 +56,7 @@ public class ArityPhrasePenalty extends StatelessFF {
    * Returns 1 if the arity penalty feature applies to the current rule.
    */
   private int isEligible(final Rule rule) {
-    if (this.owner == rule.getOwner() && rule.getArity() >= this.minArity
+    if (this.owner.equals(rule.getOwner()) && rule.getArity() >= this.minArity
         && rule.getArity() <= this.maxArity)
       return 1;
 

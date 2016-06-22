@@ -18,6 +18,8 @@
  */
 package org.apache.joshua.decoder.ff.tm;
 
+import static org.apache.joshua.decoder.ff.tm.OwnerMap.UNKNOWN_OWNER_ID;
+
 import java.util.ArrayList;
 import java.util.Arrays;  
 import java.util.Comparator;
@@ -66,7 +68,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
    * a feature function will be fired for this rule only if the owner of the rule matches the owner
    * of the feature function
    */
-  private int owner = -1;
+  private OwnerId owner = UNKNOWN_OWNER_ID;
 
   /**
    * This is the cost computed only from the features present with the grammar rule. This cost is
@@ -99,7 +101,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
    * @param arity Number of nonterminals in the source language right-hand side.
    * @param owner todo
    */
-  public Rule(int lhs, int[] source, int[] target, String sparseFeatures, int arity, int owner) {
+  public Rule(int lhs, int[] source, int[] target, String sparseFeatures, int arity, OwnerId owner) {
     this.lhs = lhs;
     this.source = source;
     this.arity = arity;
@@ -119,7 +121,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
    * @param arity todo
    * @param owner todo
    */
-  public Rule(int lhs, int[] sourceRhs, int[] targetRhs, FeatureVector features, int arity, int owner) {
+  public Rule(int lhs, int[] sourceRhs, int[] targetRhs, FeatureVector features, int arity, OwnerId owner) {
     this.lhs = lhs;
     this.source = sourceRhs;
     this.arity = arity;
@@ -132,7 +134,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
 
   /**
    * Constructor used for SamtFormatReader and GrammarBuilderWalkerFunction's getRuleWithSpans()
-   * Owner set to -1
+   * Rule is unowned.
    * @param lhs todo
    * @param sourceRhs todo
    * @param targetRhs todo
@@ -140,7 +142,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
    * @param arity todo
    */
   public Rule(int lhs, int[] sourceRhs, int[] targetRhs, String sparseFeatures, int arity) {
-    this(lhs, sourceRhs, targetRhs, sparseFeatures, arity, -1);
+    this(lhs, sourceRhs, targetRhs, sparseFeatures, arity, OwnerMap.UNKNOWN_OWNER_ID);
   }
 
   /**
@@ -191,8 +193,8 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
    */
   private Supplier<FeatureVector> initializeFeatureSupplierFromString(){
     return Suppliers.memoize(() ->{
-      if (owner != -1) {
-        return new FeatureVector(getFeatureString(), "tm_" + Vocabulary.word(owner) + "_");
+      if (!owner.equals(UNKNOWN_OWNER_ID)) {
+        return new FeatureVector(getFeatureString(), "tm_" + OwnerMap.getOwner(owner) + "_");
       } else {
         return new FeatureVector();
       }
@@ -264,11 +266,11 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
     return this.arity;
   }
 
-  public void setOwner(int owner) {
+  public void setOwner(final OwnerId owner) {
     this.owner = owner;
   }
 
-  public int getOwner() {
+  public OwnerId getOwner() {
     return this.owner;
   }
 

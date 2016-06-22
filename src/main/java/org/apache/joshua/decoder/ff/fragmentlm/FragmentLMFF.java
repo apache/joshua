@@ -31,6 +31,8 @@ import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.StatefulFF;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.tm.OwnerId;
+import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
 import org.apache.joshua.decoder.hypergraph.HGNode;
@@ -304,10 +306,11 @@ public class FragmentLMFF extends StatefulFF {
         .parseLine("[SBAR] ||| that he was done ||| that he was done ||| 0");
     Rule rulePERIOD = new HieroFormatReader().parseLine("[.] ||| . ||| . ||| 0");
   
-    ruleS.setOwner(0);
-    ruleVP.setOwner(0);
-    ruleSBAR.setOwner(0);
-    rulePERIOD.setOwner(0);
+    final OwnerId owner = OwnerMap.register("0");
+    ruleS.setOwner(owner);
+    ruleVP.setOwner(owner);
+    ruleSBAR.setOwner(owner);
+    rulePERIOD.setOwner(owner);
   
     HyperEdge edgeSBAR = new HyperEdge(ruleSBAR, 0.0f, 0.0f, null, (SourcePath) null);
   

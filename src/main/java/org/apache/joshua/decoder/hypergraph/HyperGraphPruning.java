@@ -164,7 +164,7 @@ public class HyperGraphPruning extends TrivialInsideOutside {
     double postLogProb = getEdgeUnormalizedPosteriorLogProb(dt, parent);
 
 
-    if (dt.getRule() != null && dt.getRule().getOwner() == glueGrammarOwner
+    if (dt.getRule() != null && dt.getRule().getOwner().equals(glueGrammarOwner)
         && dt.getRule().getArity() == 2) { // specicial rule: S->S X
       // TODO
       return (postLogProb - this.bestLogProb < THRESHOLD_GLUE);

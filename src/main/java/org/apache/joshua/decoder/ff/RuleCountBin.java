@@ -20,10 +20,11 @@ package org.apache.joshua.decoder.ff;
 
 import java.util.List;
 
-import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.tm.OwnerId;
+import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
@@ -38,9 +39,11 @@ public class RuleCountBin extends StatelessFF {
 
   private static final Logger LOG = LoggerFactory.getLogger(RuleCountBin.class);
   private int field = -1;
+  private final OwnerId owner;
 
   public RuleCountBin(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, "RuleCountBin", args, config);
+    owner = OwnerMap.register("pt");
 
     field = Integer.parseInt(parsedArgs.get("field"));
   }
@@ -49,7 +52,7 @@ public class RuleCountBin extends StatelessFF {
   public DPState compute(Rule rule, List<HGNode> tailNodes, int i, int j, SourcePath sourcePath,
       Sentence sentence, Accumulator acc) {
 
-    if (rule.getOwner() != Vocabulary.id("pt"))
+    if (rule.getOwner().equals(owner))
       return null;
     
     float rarityPenalty = -rule.getFeatureVector().getSparse(String.format("tm_pt_%d", field));

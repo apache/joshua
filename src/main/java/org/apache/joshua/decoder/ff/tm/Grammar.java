@@ -95,7 +95,7 @@ public interface Grammar {
    * Return the grammar's owner.
    * @return grammar owner
    */
-  int getOwner();
+  OwnerId getOwner();
 
   /**
    * Return the maximum source phrase length (terminals + nonterminals)

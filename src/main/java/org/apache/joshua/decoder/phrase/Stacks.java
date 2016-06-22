@@ -35,6 +35,8 @@ package org.apache.joshua.decoder.phrase;
  * TODO Lattice decoding is not yet supported (March 2015).
  */
 
+import static org.apache.joshua.decoder.ff.tm.OwnerMap.UNKNOWN_OWNER;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,7 +98,7 @@ public class Stacks {
       if (grammars[i] instanceof PhraseTable)
         phraseTables[j++] = (PhraseTable) grammars[i];
     
-    phraseTables[phraseTables.length - 2] = new PhraseTable("null", config);
+    phraseTables[phraseTables.length - 2] = new PhraseTable(UNKNOWN_OWNER, config);
     phraseTables[phraseTables.length - 2].addRule(Hypothesis.END_RULE);
     
     phraseTables[phraseTables.length - 1] = new PhraseTable("oov", config);

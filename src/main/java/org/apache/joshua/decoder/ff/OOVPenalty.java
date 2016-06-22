@@ -25,6 +25,8 @@ import java.util.List;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.JoshuaConfiguration.OOVItem;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.tm.OwnerId;
+import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
@@ -42,7 +44,7 @@ import org.apache.joshua.decoder.chart_parser.SourcePath;
  * @author Matt Post post@cs.jhu.edu
  */
 public class OOVPenalty extends StatelessFF {
-  private final int ownerID;
+  private final OwnerId ownerID;
   
   /* The default value returned for OOVs. Can be overridden with -oov-list */
   private final float defaultValue = -100f;
@@ -51,7 +53,7 @@ public class OOVPenalty extends StatelessFF {
   public OOVPenalty(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, "OOVPenalty", args, config);
 
-    ownerID = Vocabulary.id("oov");
+    ownerID = OwnerMap.register("oov");
     oovWeights = new HashMap<Integer,Float>();
     
     if (config.oovList != null) {
@@ -79,7 +81,7 @@ public class OOVPenalty extends StatelessFF {
   public DPState compute(Rule rule, List<HGNode> tailNodes, int i, int j, SourcePath sourcePath,
       Sentence sentence, Accumulator acc) {
     
-    if (rule != null && this.ownerID == rule.getOwner()) {
+    if (rule != null && this.ownerID.equals(rule.getOwner())) {
       acc.add(denseFeatureIndex, getValue(rule.getLHS()));
     }
 
@@ -95,7 +97,7 @@ public class OOVPenalty extends StatelessFF {
    */
   @Override
   public float estimateCost(Rule rule, Sentence sentence) {
-    if (rule != null && this.ownerID == rule.getOwner())
+    if (rule != null && this.ownerID.equals(rule.getOwner()))
       return weights.getDense(denseFeatureIndex) * getValue(rule.getLHS());
     return 0.0f;
   }

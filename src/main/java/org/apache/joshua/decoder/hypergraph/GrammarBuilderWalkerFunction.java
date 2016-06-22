@@ -55,8 +55,7 @@ public class GrammarBuilderWalkerFunction implements WalkerFunction {
   private HashSet<Rule> rules;
 
   public GrammarBuilderWalkerFunction(String goal,JoshuaConfiguration joshuaConfiguration) {
-    grammar = new MemoryBasedBatchGrammar(reader,joshuaConfiguration);
-    grammar.setSpanLimit(1000);
+    grammar = new MemoryBasedBatchGrammar(reader, joshuaConfiguration, 1000);
     outStream = null;
     goalSymbol = Vocabulary.id(goal);
     rules = new HashSet<Rule>();
