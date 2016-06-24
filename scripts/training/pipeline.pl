@@ -1998,7 +1998,7 @@ sub get_features {
   my ($grammar) = @_;
 
   if (-d $grammar) {
-    chomp(my @features = `java -cp $JOSHUA/class joshua.util.encoding.EncoderConfiguration $grammar | grep ^feature: | awk '{print \$NF}'`);
+    chomp(my @features = `java -cp $JOSHUA/target/joshua-*-with-dependencies.jar org.apache.joshua.util.encoding.EncoderConfiguration $grammar | grep ^feature: | awk '{print \$NF}'`);
     return @features;
 
   } elsif (-e $grammar) {
