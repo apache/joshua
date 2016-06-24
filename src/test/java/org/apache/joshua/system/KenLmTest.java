@@ -80,6 +80,18 @@ public class KenLmTest {
     assertTrue(kenLm.isKnownWord("Wayne"));
     assertFalse(kenLm.isKnownWord("Wayne2222"));
   }
+  
+  @Test
+  public void givenKenLm_whenIsLmOov_thenResultsAreCorrect() {
+    KenLM kenLm = new KenLM(LANGUAGE_MODEL_PATH);
+    registerLanguageModel(kenLm);
+    int id = Vocabulary.id("Wayne");
+    int id2 = Vocabulary.id("wekjfhaew;jvnae;goiawehco;eiwnf;oi");
+    assertTrue(kenLm.isKnownWord(Vocabulary.word(id)));
+    assertFalse(kenLm.isKnownWord(Vocabulary.word(id2)));
+    assertFalse(kenLm.isOov(id));
+    assertTrue(kenLm.isOov(id2));
+  }
 
   @Before
   public void setUp() throws Exception {

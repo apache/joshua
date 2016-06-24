@@ -80,9 +80,11 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
 
     // map to ken lm ids
     final long[] words = mapToKenLmIds(ruleWords, null, true);
-
+    
     // Get the probability of applying the rule and the new state
-    return weight * ((KenLM) languageModel).estimateRule(words);
+    float lmCost = weight * ((KenLM) languageModel).estimateRule(words);
+    float oovCost = oovWeight * ((withOovFeature) ? getOovs(ruleWords) : 0f);
+    return lmCost + oovCost;
   }
 
   /**
@@ -103,6 +105,11 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
       ruleWords = getTags(rule, i, j, sentence);
     } else {
       ruleWords = getRuleIds(rule);
+    }
+    
+    // Record the oov count
+    if (withOovFeature) {
+      acc.add(oovDenseFeatureIndex, getOovs(ruleWords));
     }
 
      // map to ken lm ids

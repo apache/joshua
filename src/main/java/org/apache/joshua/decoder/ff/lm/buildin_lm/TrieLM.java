@@ -29,11 +29,11 @@ import java.util.Map;
 import java.util.Scanner;
 
 import org.apache.joshua.corpus.Vocabulary;
-import  org.apache.joshua.decoder.ff.lm.AbstractLM;
-import  org.apache.joshua.decoder.ff.lm.ArpaFile;
-import  org.apache.joshua.decoder.ff.lm.ArpaNgram;
-import  org.apache.joshua.util.Bits;
-import  org.apache.joshua.util.Regex;
+import org.apache.joshua.decoder.ff.lm.AbstractLM;
+import org.apache.joshua.decoder.ff.lm.ArpaFile;
+import org.apache.joshua.decoder.ff.lm.ArpaNgram;
+import org.apache.joshua.util.Bits;
+import org.apache.joshua.util.Regex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -327,5 +327,9 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
 
   }
 
+  @Override
+  public boolean isOov(int id) {
+    throw new RuntimeException("Not implemented!");
+  }
 
 }

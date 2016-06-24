@@ -18,11 +18,16 @@
  */
 package org.apache.joshua.decoder.ff.lm.berkeley_lm;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-
 import edu.berkeley.nlp.lm.ArrayEncodedNgramLanguageModel;
+
+import org.apache.joshua.corpus.Vocabulary;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
+
+import static org.testng.Assert.assertEquals;
 
 public class LMBerkeleySentenceProbablityTest {
 
@@ -43,5 +48,17 @@ public class LMBerkeleySentenceProbablityTest {
 
     float result = grammar.sentenceLogProbability(new int[] {0, 2, 3, 0}, 2, 0);
     assertEquals(expected, result, 0.0);
+  }
+  
+  @Test
+  public void givenUnknownWord_whenIsOov_thenCorrectlyDetected() {
+    LMGrammarBerkeley lm = new LMGrammarBerkeley(2, "resources/berkeley_lm/lm");
+    assertTrue(lm.isOov(Vocabulary.id("UNKNOWN_WORD")));
+    assertFalse(lm.isOov(Vocabulary.id("chat-rooms")));
+  }
+  
+  @AfterMethod
+  public void tearDown() {
+    Vocabulary.clear();
   }
 }

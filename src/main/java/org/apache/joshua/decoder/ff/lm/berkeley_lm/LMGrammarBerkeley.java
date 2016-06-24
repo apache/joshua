@@ -112,6 +112,12 @@ public class LMGrammarBerkeley extends DefaultNGramLanguageModel {
 
     return false;
   }
+  
+  @Override
+  public  boolean isOov(int id) {
+    // for Berkeley, we unfortunately have to temporarily convert to String
+    return lm.getWordIndexer().getIndexPossiblyUnk(Vocabulary.word(id)) <= 0;
+  };
 
   @Override
   public float sentenceLogProbability(int[] sentence, int order, int startIndex) {

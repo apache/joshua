@@ -557,4 +557,11 @@ public class BloomFilterLanguageModel extends DefaultNGramLanguageModel implemen
     }
     return wittenBell(lm_ngram, order);
   }
+
+  @Override
+  public boolean isOov(int id) {
+    int[] ngram = new int[] {id};
+    int MAX_QCOUNT = getCount(ngram, ngram.length - 1, ngram.length, maxQ);
+    return (MAX_QCOUNT == 0);
+  }
 }

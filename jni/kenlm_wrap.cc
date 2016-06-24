@@ -114,6 +114,8 @@ public:
   // Returns the internal lm::WordIndex for a string
   virtual uint GetLmId(const StringPiece& word) const = 0;
 
+  virtual bool IsLmOov(const int joshua_id) const = 0;
+
   virtual bool IsKnownWordIndex(const lm::WordIndex& id) const = 0;
 
   virtual float ProbRule(jlong *begin, jlong *end, lm::ngram::ChartState& state) const = 0;
@@ -173,6 +175,13 @@ public:
 
   uint GetLmId(const StringPiece& word) const {
     return m_.GetVocabulary().Index(word);
+  }
+
+  bool IsLmOov(const int joshua_id) const {
+    if (map_.size() <= joshua_id) {
+      return true;
+    }
+    return !IsKnownWordIndex(map_[joshua_id]);
   }
 
   bool IsKnownWordIndex(const lm::WordIndex& id) const {
@@ -406,6 +415,12 @@ JNIEXPORT jfloat JNICALL Java_org_apache_joshua_decoder_ff_lm_KenLM_probForStrin
   }
   return lm_base->ProbForWordIndexArray(values,
       values + length);
+}
+
+JNIEXPORT jboolean JNICALL Java_org_apache_joshua_decoder_ff_lm_KenLM_isLmOov(
+    JNIEnv *env, jclass, jlong pointer, jint word) {
+    const VirtualBase* lm_base = reinterpret_cast<const VirtualBase*>(pointer);
+    return lm_base->IsLmOov(word);
 }
 
 JNIEXPORT jboolean JNICALL Java_org_apache_joshua_decoder_ff_lm_KenLM_isKnownWord(
