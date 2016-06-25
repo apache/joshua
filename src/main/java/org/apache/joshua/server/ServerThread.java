@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.URLDecoder;
@@ -109,12 +110,12 @@ public class ServerThread extends Thread implements HttpHandler {
     }
   }
   
-  public HashMap<String, String> queryToMap(String query){
+  public HashMap<String, String> queryToMap(String query) throws UnsupportedEncodingException {
     HashMap<String, String> result = new HashMap<String, String>();
     for (String param : query.split("&")) {
         String pair[] = param.split("=");
         if (pair.length > 1) {
-            result.put(pair[0], pair[1]);
+          result.put(pair[0], URLDecoder.decode(pair[1], "UTF-8"));
         } else {
             result.put(pair[0], "");
         }
@@ -155,7 +156,7 @@ public class ServerThread extends Thread implements HttpHandler {
   @Override
   public synchronized void handle(HttpExchange client) throws IOException {
 
-    HashMap<String, String> params = queryToMap(URLDecoder.decode(client.getRequestURI().getQuery(), "UTF-8"));
+    HashMap<String, String> params = queryToMap(client.getRequestURI().getQuery());
     String query = params.get("q");
     String meta = params.get("meta");
     
