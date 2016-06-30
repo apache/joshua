@@ -70,4 +70,12 @@ public interface NGramLanguageModel {
   float ngramLogProbability(int[] ngram, int order);
 
   float ngramLogProbability(int[] ngram);
+  
+  /**
+   * Check whether a word corresponding to the given id is OOV to the language model.
+   * @param id Vocabulary id
+   * @return True if the word is OOV w.r.t language model training data
+   */
+  boolean isOov(int id);
+
 }

@@ -281,7 +281,7 @@ public abstract class FeatureFunction {
   public static HashMap<String, String> parseArgs(String[] args) {
     HashMap<String, String> parsedArgs = new HashMap<String, String>();
     boolean lookingForValue = false;
-    String currentKey = "";
+    String currentKey = null;
     for (int i = 0; i < args.length; i++) {
 
       Pattern argKeyPattern = Pattern.compile("^-[a-zA-Z]\\S+");
@@ -303,6 +303,12 @@ public abstract class FeatureFunction {
           lookingForValue = false;
         }
       }
+    }
+    
+    // make sure we add the last key without value
+    if (lookingForValue && currentKey != null) {
+      // end of line, no value
+      parsedArgs.put(currentKey, "");
     }
     return parsedArgs;
   }

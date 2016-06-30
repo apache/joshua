@@ -42,6 +42,8 @@ import org.apache.joshua.decoder.segment_file.Sentence;
 public class LMGrammarBerkeleyTest {
 
   private static final String INPUT = "the chat-rooms";
+  private static final String EXPECTED_OUTPUT = "tm_glue_0=2.000 lm_0=-7.153\n";
+  private static final String EXPECTED_OUTPUT_WITH_OOV = "tm_glue_0=2.000 lm_0=-7.153 lm_0_oov=0.000\n";
   private static final String[] OPTIONS = "-v 0 -output-format %f".split(" ");
 
   private JoshuaConfiguration joshuaConfig;
@@ -69,12 +71,23 @@ public class LMGrammarBerkeleyTest {
     joshuaConfig.processCommandLineOptions(OPTIONS);
     joshuaConfig.features.add("LanguageModel -lm_type berkeleylm -lm_order 2 -lm_file " + lmFile);
     decoder = new Decoder(joshuaConfig, null);
-    String translation = decode(INPUT).toString();
-    assertEquals(lmFile, "tm_glue_0=2.000 lm_0=-7.153\n", translation);
+    final String translation = decode(INPUT).toString();
+    assertEquals(translation, EXPECTED_OUTPUT);
   }
 
   private Translation decode(String input) {
     final Sentence sentence = new Sentence(input, 0, joshuaConfig);
     return decoder.decode(sentence);
+  }
+  
+  @Test
+  public void givenLmWithOovFeature_whenDecoder_thenCorrectFeaturesReturned() {
+    joshuaConfig = new JoshuaConfiguration();
+    joshuaConfig.processCommandLineOptions(OPTIONS);
+    joshuaConfig.features.add("LanguageModel -lm_type berkeleylm -oov_feature -lm_order 2 -lm_file resources/berkeley_lm/lm");
+    decoder = new Decoder(joshuaConfig, null);
+    final String translation = decode(INPUT).toString();
+    assertEquals(Decoder.weights.getDenseFeatures().size(), 3);
+    assertEquals(translation, EXPECTED_OUTPUT_WITH_OOV);
   }
 }

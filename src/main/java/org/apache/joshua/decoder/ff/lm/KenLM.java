@@ -21,6 +21,7 @@ package org.apache.joshua.decoder.ff.lm;
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.ff.lm.NGramLanguageModel;
 import org.apache.joshua.decoder.ff.state_maintenance.KenLMState;
+import org.apache.joshua.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,6 +76,8 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
   private final static native float probForString(long ptr, String[] words);
 
   private final static native boolean isKnownWord(long ptr, String word);
+  
+  private final static native boolean isLmOov(long ptr, int word);
 
   private final static native StateProbPair probRule(long ptr, long pool, long words[]);
   
@@ -183,6 +186,19 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
   public String getStartSymbol() {
     return Vocabulary.START_SYM;
   }
+  
+  /**
+   * Returns whether the given Vocabulary ID is unknown to the
+   * KenLM vocabulary. This can be used for a LanguageModel_OOV features
+   * and does not need to convert to an intermediate string.
+   */
+  @Override
+  public boolean isOov(int wordId) {
+    if (FormatUtils.isNonterminal(wordId)) {
+      throw new IllegalArgumentException("Should not query for nonterminals!");
+    }
+    return isLmOov(pointer, wordId);
+  }
 
   public boolean isKnownWord(String word) {
     return isKnownWord(pointer, word);
@@ -230,4 +246,5 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
   public float ngramLogProbability(int[] ngram) {
     return prob(ngram);
   }
+
 }

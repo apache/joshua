@@ -18,6 +18,8 @@
  */
 package org.apache.joshua.decoder.ff.lm;
 
+import static org.apache.joshua.util.FormatUtils.isNonterminal;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,25 +81,36 @@ public class LanguageModelFF extends StatefulFF {
    * </ol>
    */
   protected NGramLanguageModel languageModel;
+  
+  protected final static String NAME_PREFIX = "lm_";
+  protected final static String OOV_SUFFIX = "_oov";
+  protected final String oovFeatureName;
 
   /**
    * We always use this order of ngram, though the LMGrammar may provide higher order probability.
    */
   protected final int ngramOrder;
 
-  /*
+  /**
    * We cache the weight of the feature since there is only one.
    */
   protected float weight;
+  protected float oovWeight;
   protected String type;
   protected String path;
 
-  /* Whether this is a class-based LM */
+  /** Whether this is a class-based LM */
   protected boolean isClassLM;
   private ClassMap classMap;
+  
+  /** Whether this feature function fires LM oov indicators */ 
+  protected boolean withOovFeature;
+  protected int oovDenseFeatureIndex = -1;
 
   public LanguageModelFF(FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, String.format("lm_%d", LanguageModelFF.LM_INDEX++), args, config);
+    super(weights, NAME_PREFIX + LM_INDEX, args, config);
+    this.oovFeatureName = NAME_PREFIX + LM_INDEX + OOV_SUFFIX;
+    LM_INDEX++;
 
     this.type = parsedArgs.get("lm_type");
     this.ngramOrder = Integer.parseInt(parsedArgs.get("lm_order"));
@@ -107,9 +120,14 @@ public class LanguageModelFF extends StatefulFF {
       this.isClassLM = true;
       this.classMap = new ClassMap(parsedArgs.get("class_map"));
     }
+    
+    if (parsedArgs.containsKey("oov_feature")) {
+      this.withOovFeature = true;
+    }
 
     // The dense feature initialization hasn't happened yet, so we have to retrieve this as sparse
     this.weight = weights.getSparse(name);
+    this.oovWeight = weights.getSparse(oovFeatureName);
 
     initializeLM();
   }
@@ -117,9 +135,13 @@ public class LanguageModelFF extends StatefulFF {
   @Override
   public ArrayList<String> reportDenseFeatures(int index) {
     denseFeatureIndex = index;
+    oovDenseFeatureIndex = denseFeatureIndex + 1;
 
-    final ArrayList<String> names = new ArrayList<String>(1);
+    final ArrayList<String> names = new ArrayList<String>(2);
     names.add(name);
+    if (withOovFeature) {
+      names.add(oovFeatureName);
+    }
     return names;
   }
 
@@ -177,6 +199,10 @@ public class LanguageModelFF extends StatefulFF {
     } else {
       words = getRuleIds(rule);
     }
+    
+    if (withOovFeature) {
+      acc.add(oovDenseFeatureIndex, getOovs(words));
+    }
 
     return computeTransition(words, tailNodes, acc);
 
@@ -195,6 +221,21 @@ public class LanguageModelFF extends StatefulFF {
     }
     // Regular LM: use rule word ids
     return rule.getEnglish();
+  }
+  
+  /**
+   * Returns the number of LM oovs on the rule's target side.
+   * Skips nonterminals.
+   */
+  @VisibleForTesting
+  public int getOovs(final int[] words) {
+    int result = 0;
+    for (int id : words) {
+      if (!isNonterminal(id) && languageModel.isOov(id)) {
+        result++;
+      }
+    }
+    return result;
   }
 
   /**
@@ -259,7 +300,7 @@ public class LanguageModelFF extends StatefulFF {
     /* Very important to make a copy here, so the original rule is not modified */
     int[] tokens = Arrays.copyOf(rule.getEnglish(), rule.getEnglish().length);
     for (int i = 0; i < tokens.length; i++) {
-      if (tokens[i] > 0 ) {
+      if (tokens[i] > 0 ) { // skip non-terminals
         tokens[i] = this.classMap.getClassID(tokens[i]);
       }
     }
@@ -279,13 +320,13 @@ public class LanguageModelFF extends StatefulFF {
   @Override
   public float estimateCost(Rule rule, Sentence sentence) {
 
-    float estimate = 0.0f;
+    float lmEstimate = 0.0f;
     boolean considerIncompleteNgrams = true;
 
     int[] enWords = getRuleIds(rule);
 
     List<Integer> words = new ArrayList<Integer>();
-    boolean skipStart = (enWords[0] == startSymbolId);
+    boolean skipStart = (enWords[0] == startSymbolId); 
 
     /*
      * Move through the words, accumulating language model costs each time we have an n-gram (n >=
@@ -294,16 +335,18 @@ public class LanguageModelFF extends StatefulFF {
     for (int c = 0; c < enWords.length; c++) {
       int currentWord = enWords[c];
       if (FormatUtils.isNonterminal(currentWord)) {
-        estimate += scoreChunkLogP(words, considerIncompleteNgrams, skipStart);
+        lmEstimate += scoreChunkLogP(words, considerIncompleteNgrams, skipStart);
         words.clear();
         skipStart = false;
       } else {
         words.add(currentWord);
       }
     }
-    estimate += scoreChunkLogP(words, considerIncompleteNgrams, skipStart);
+    lmEstimate += scoreChunkLogP(words, considerIncompleteNgrams, skipStart);
+    
+    final float oovEstimate = (withOovFeature) ? getOovs(enWords) : 0f;
 
-    return weight * estimate;
+    return weight * lmEstimate + oovWeight * oovEstimate;
   }
 
   /**
@@ -324,6 +367,7 @@ public class LanguageModelFF extends StatefulFF {
       }
       estimate += scoreChunkLogP(leftContext, true, skipStart);
     }
+    // NOTE: no future cost for oov weight
     return weight * estimate;
   }
 
