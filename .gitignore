@@ -57,3 +57,4 @@ build
 /eclipse-bin/
 .classpath
 /target/
+.project

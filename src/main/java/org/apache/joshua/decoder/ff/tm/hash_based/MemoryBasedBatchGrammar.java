@@ -52,10 +52,6 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
 
   private static final Logger LOG = LoggerFactory.getLogger(MemoryBasedBatchGrammar.class);
 
-  // ===============================================================
-  // Instance Fields
-  // ===============================================================
-
   /* The number of rules read. */
   private int qtyRulesRead = 0;
 
@@ -72,16 +68,11 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
 
   private GrammarReader<Rule> modelReader;
 
-  // ===============================================================
-  // Static Fields
-  // ===============================================================
-
-  // ===============================================================
-  // Constructors
-  // ===============================================================
-
   /**
    * Constructor used by Decoder mostly. Default spanLimit of 20
+   * @param owner the associated decoder-wide {@link org.apache.joshua.decoder.ff.tm.OwnerMap}
+   * @param config a {@link org.apache.joshua.decoder.JoshuaConfiguration} object
+   * @param spanLimit the maximum span of the input grammar rule(s) can be applied to.
    */
   public MemoryBasedBatchGrammar(String owner, JoshuaConfiguration config, int spanLimit) {
     super(owner, config, spanLimit);
@@ -89,6 +80,9 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
 
   /**
    * Constructor to initialize a GrammarReader (unowned)
+   * @param reader the GrammarReader used for storing ASCII line-based grammars on disk.
+   * @param config a {@link org.apache.joshua.decoder.JoshuaConfiguration} object
+   * @param spanLimit the maximum span of the input grammar rule(s) can be applied to.
    */
   public MemoryBasedBatchGrammar(
       final GrammarReader<Rule> reader, final JoshuaConfiguration config, final int spanLimit) {

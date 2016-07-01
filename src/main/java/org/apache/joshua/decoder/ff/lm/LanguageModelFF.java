@@ -212,6 +212,8 @@ public class LanguageModelFF extends StatefulFF {
    * Retrieve ids from rule. These are either simply the rule ids on the target
    * side, their corresponding class map ids, or the configured source-side
    * annotation tags.
+   * @param rule an input from from which to retrieve ids
+   * @return an array if int's representing the id's from the input Rule
    */
   @VisibleForTesting
   public int[] getRuleIds(final Rule rule) {
@@ -226,6 +228,8 @@ public class LanguageModelFF extends StatefulFF {
   /**
    * Returns the number of LM oovs on the rule's target side.
    * Skips nonterminals.
+   * @param words an input int array representing words we wish to obtain OOVs for
+   * @return the number of OOVs for thr given int array
    */
   @VisibleForTesting
   public int getOovs(final int[] words) {

@@ -95,7 +95,9 @@ public abstract class AbstractGrammar implements Grammar {
    * Creates an empty, unsorted grammar with given owner and spanlimit
    * 
    * @see Grammar#isSorted()
+   * @param owner the associated decoder-wide {@link org.apache.joshua.decoder.ff.tm.OwnerMap}
    * @param config a {@link org.apache.joshua.decoder.JoshuaConfiguration} object
+   * @param spanLimit the maximum span of the input grammar rule(s) can be applied to.
    */
   public AbstractGrammar(final String owner, final JoshuaConfiguration config, final int spanLimit) {
     this.sorted = false;

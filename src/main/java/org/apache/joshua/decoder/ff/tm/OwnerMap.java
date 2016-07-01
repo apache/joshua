@@ -26,9 +26,10 @@ import com.google.common.collect.HashBiMap;
 /**
  * OwnerMap maintains a decoder-wide mapping between 'owner' strings and
  * corresponding IDs, typed as OwnerId. Using this more strongly typed mapping,
- * we can separate wordIDs in {@link Vocabulary} from {@link OwnerId}s. For
- * example, this prevents packed grammars to overwrite the owner mappings from
- * previously loaded packaged grammars.
+ * we can separate wordIDs in {@link org.apache.joshua.corpus.Vocabulary} from 
+ * {@link org.apache.joshua.decoder.ff.tm.OwnerId}s. For example, this prevents 
+ * packed grammars to overwrite the owner mappings from previously loaded packaged 
+ * grammars.
  * 
  * @author fhieber
  *
@@ -51,6 +52,8 @@ public class OwnerMap {
    * Register or get OwnerId for given ownerString. This is only called during
    * feature function and grammar initalization and thus does not require
    * sophisticated locking.
+   * @param ownerString the OwnerId to register or get
+   * @return the registered or existing OwnerId
    */
   public static synchronized OwnerId register(String ownerString) {
     if (map.inverse().containsKey(ownerString)) {
