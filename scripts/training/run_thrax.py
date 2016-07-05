@@ -100,7 +100,7 @@ conf_file.close()
 
 # Run Hadoop
 run('%s/bin/hadoop jar %s -D mapred.child.java.opts="-Xmx%s" -D hadoop.tmp.dir=%s %s %s > thrax.log 2>&1' % (HADOOP, THRAX_JAR, '4g', args.tmp_dir, conf_file_name, THRAXDIR))
-run('rm -f grammar grammar.gz')
+run('rm -f %s' % (args.output_file))
 run('%s/bin/hadoop fs -getmerge %s/final/ %s' % (HADOOP, THRAXDIR, args.output_file))
 
 # Cleanup
