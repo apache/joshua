@@ -1818,7 +1818,7 @@ sub prepare_data {
     my @files =  map { "$_.$ext" } @$corpora;
     push(@indeps, @files);
     if ($MAXLINES != 0) {
-      push(@infiles, "<(head -n $MAXLINES " . join(" ", @files) . ")");
+      push(@infiles, "<(head -qn $MAXLINES " . join(" ", @files) . ")");
     } else {
       push(@infiles, "<(cat " . join(" ", @files) . ")");
     }
