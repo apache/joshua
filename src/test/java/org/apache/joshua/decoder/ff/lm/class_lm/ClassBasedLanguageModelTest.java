@@ -28,10 +28,14 @@ import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.lm.LanguageModelFF;
 import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
+import org.testng.SkipException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+/**
+ * This unit test relies on KenLM.  If the KenLM library is not found when the test is run all tests will be skipped.
+ */
 public class ClassBasedLanguageModelTest {
 
   private static final float WEIGHT = 0.5f;
@@ -49,7 +53,12 @@ public class ClassBasedLanguageModelTest {
       "-class_map", "./src/test/resources/lm/class_lm/class.map" };
 
     JoshuaConfiguration config = new JoshuaConfiguration();
-    ff = new LanguageModelFF(weights, args, config);
+    try {
+      ff = new LanguageModelFF(weights, args, config);
+    } catch (ExceptionInInitializerError kenLmException) {
+      throw new SkipException("Skipping test because KenLM.so/dylib was not found");
+    }
+
   }
 
   @AfterMethod
