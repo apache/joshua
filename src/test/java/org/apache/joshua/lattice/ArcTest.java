@@ -18,8 +18,6 @@
  */
 package org.apache.joshua.lattice;
 
-import org.apache.joshua.lattice.Arc;
-
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

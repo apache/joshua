@@ -18,8 +18,6 @@
  */
 package org.apache.joshua.corpus;
 
-import org.apache.joshua.corpus.Span;
-
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

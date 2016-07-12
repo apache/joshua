@@ -16,9 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- package org.apache.joshua.system;
-
-import static org.junit.Assert.assertTrue;
+package org.apache.joshua.system;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -33,10 +31,11 @@ import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.Translations;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Integration test for multithreaded Joshua decoder tests. Grammar used is a
@@ -52,7 +51,7 @@ public class MultithreadedTranslationTests {
   private int previousLogLevel;
   private final static long NANO_SECONDS_PER_SECOND = 1_000_000_000;
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.search_algorithm = "cky";
@@ -89,7 +88,7 @@ public class MultithreadedTranslationTests {
     Decoder.VERBOSE = 0;
   }
 
-  @After
+  @AfterMethod
   public void tearDown() throws Exception {
     this.decoder.cleanUp();
     this.decoder = null;

@@ -18,8 +18,6 @@
  */
  package org.apache.joshua.system;
 
-import static org.junit.Assert.*;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -28,9 +26,13 @@ import java.util.Map;
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.tm.Rule;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
+
 
 public class AlignmentMapTest {
   
@@ -39,7 +41,7 @@ public class AlignmentMapTest {
   private static Map<Integer, List<Integer>> expectedAlignmentMap = null;
   private static final int[] expectedNonTerminalPositions = {2,5};
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     Vocabulary.clear();
     int[] sourceRhs = {Vocabulary.id("A1"),Vocabulary.id("A2"),-1,Vocabulary.id("B"),Vocabulary.id("C"),-2};

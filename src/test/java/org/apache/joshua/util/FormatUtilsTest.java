@@ -18,15 +18,17 @@
  */
  package org.apache.joshua.util;
 
+import org.testng.annotations.Test;
+
 import static org.apache.joshua.util.FormatUtils.cleanNonTerminal;
 import static org.apache.joshua.util.FormatUtils.escapeSpecialSymbols;
 import static org.apache.joshua.util.FormatUtils.isNonterminal;
 import static org.apache.joshua.util.FormatUtils.ensureNonTerminalBrackets;
 import static org.apache.joshua.util.FormatUtils.stripNonTerminalIndex;
 import static org.apache.joshua.util.FormatUtils.unescapeSpecialSymbols;
-import static org.junit.Assert.*;
-
-import org.junit.Test;
+import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertFalse;
 
 public class FormatUtilsTest {
   

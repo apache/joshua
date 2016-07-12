@@ -28,7 +28,7 @@ import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.lm.LanguageModelFF;
 import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
-import org.testng.SkipException;
+import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -53,12 +53,7 @@ public class ClassBasedLanguageModelTest {
       "-class_map", "./src/test/resources/lm/class_lm/class.map" };
 
     JoshuaConfiguration config = new JoshuaConfiguration();
-    try {
-      ff = new LanguageModelFF(weights, args, config);
-    } catch (ExceptionInInitializerError kenLmException) {
-      throw new SkipException("Skipping test because KenLM.so/dylib was not found");
-    }
-
+    KenLmTestUtil.Guard(() -> ff = new LanguageModelFF(weights, args, config));
   }
 
   @AfterMethod

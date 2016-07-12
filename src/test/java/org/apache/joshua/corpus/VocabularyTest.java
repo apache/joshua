@@ -18,19 +18,17 @@
  */
 package org.apache.joshua.corpus;
 
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
 import static org.apache.joshua.util.FormatUtils.isNonterminal;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertFalse;
 
 import java.io.File;
 import java.io.IOException;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 public class VocabularyTest {
   private static final String WORD1 = "word1";
@@ -38,16 +36,16 @@ public class VocabularyTest {
   private static final String NON_TERMINAL = "[X]";
   private static final String GOAL = "[GOAL]";
 
-  @Before
+  @BeforeMethod
   public void init() {
     Vocabulary.clear();
   }
-  
-  @After
+
+  @AfterMethod
   public void deinit() {
     Vocabulary.clear();
   }
-  
+
   @Test
   public void givenVocabulary_whenEmpty_thenOnlyContainsUnknownWord() {
     assertTrue(Vocabulary.hasId(Vocabulary.UNKNOWN_ID));
@@ -56,7 +54,7 @@ public class VocabularyTest {
     assertEquals(Vocabulary.UNKNOWN_WORD, Vocabulary.word(Vocabulary.UNKNOWN_ID));
     assertEquals(1, Vocabulary.size());
   }
-  
+
   @Test
   public void givenVocabulary_whenNewWord_thenMappingIsAdded() {
     final int FIRST_WORD_ID = 1;
@@ -68,7 +66,7 @@ public class VocabularyTest {
     assertEquals(WORD1, Vocabulary.word(FIRST_WORD_ID));
     assertEquals(2, Vocabulary.size());
   }
-  
+
   @Test
   public void givenVocabulary_whenCheckingStringInBracketsOrNegativeNumber_thenIsNonTerminal() {
     //non-terminals
@@ -79,51 +77,51 @@ public class VocabularyTest {
     assertFalse(isNonterminal("["));
     assertFalse(isNonterminal("]"));
     assertFalse(isNonterminal(""));
-    
+
     //negative numbers indicate non-terminals
     assertTrue(isNonterminal(-1));
     assertTrue(isNonterminal(-5));
-    
+
     //positive numbers indicate terminals:
     assertFalse(isNonterminal(0));
     assertFalse(isNonterminal(5));
+
+
   }
-  
+
   @Test
   public void givenVocabulary_whenNonTerminal_thenReturnsStrictlyPositiveNonTerminalIndices() {
     final int FIRST_NON_TERMINAL_INDEX = 1;
     assertTrue(Vocabulary.id(NON_TERMINAL) < 0);
     assertTrue(Vocabulary.hasId(FIRST_NON_TERMINAL_INDEX));
     assertTrue(Vocabulary.hasId(-FIRST_NON_TERMINAL_INDEX));
-    
+
     assertTrue(Vocabulary.id("") > 0);
     assertTrue(Vocabulary.id(WORD1) > 0);
-    
+
     final int SECOND_NON_TERMINAL_INDEX = 4;
     assertTrue(Vocabulary.id(GOAL) < 0);
     assertTrue(Vocabulary.hasId(SECOND_NON_TERMINAL_INDEX));
     assertTrue(Vocabulary.hasId(-SECOND_NON_TERMINAL_INDEX));
-    
+
     assertTrue(Vocabulary.id(WORD2) > 0);
   }
-  
-  @Rule
-  public TemporaryFolder folder = new TemporaryFolder();
-  
+
   @Test
   public void givenVocabulary_whenWritenAndReading_thenVocabularyStaysTheSame() throws IOException {
-    File vocabFile = folder.newFile();
-    
+    File vocabFile = File.createTempFile( "vocab", "tmp");
+    vocabFile.deleteOnExit();
+
     int id1 = Vocabulary.id(WORD1);
     int id2 = Vocabulary.id(NON_TERMINAL);
     int id3 = Vocabulary.id(WORD2);
-    
+
     Vocabulary.write(vocabFile.getAbsolutePath());
-    
+
     Vocabulary.clear();
-    
+
     Vocabulary.read(vocabFile);
-    
+
     assertEquals(4, Vocabulary.size()); //unknown word + 3 other words
     assertTrue(Vocabulary.hasId(id1));
     assertTrue(Vocabulary.hasId(id2));
