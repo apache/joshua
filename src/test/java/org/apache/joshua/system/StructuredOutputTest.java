@@ -25,11 +25,10 @@ import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.segment_file.Sentence;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.Assert;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * Integration test for the complete Joshua decoder using a toy grammar that translates
@@ -54,7 +53,7 @@ public class StructuredOutputTest {
       Arrays.asList(), Arrays.asList(7));
   private static final double expectedScore = -17.0;
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.search_algorithm = "cky";
@@ -81,7 +80,7 @@ public class StructuredOutputTest {
                                              // constructor/initialize)
   }
 
-  @After
+  @AfterMethod
   public void tearDown() throws Exception {
     decoder.cleanUp();
     decoder = null;

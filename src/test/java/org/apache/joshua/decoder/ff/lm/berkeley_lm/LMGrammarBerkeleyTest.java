@@ -18,27 +18,20 @@
  */
 package org.apache.joshua.decoder.ff.lm.berkeley_lm;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
-
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
 
 /**
  * Replacement for test/lm/berkeley/test.sh regression test
  */
-@RunWith(value = Parameterized.class)
+
 public class LMGrammarBerkeleyTest {
 
   private static final String INPUT = "the chat-rooms";
@@ -49,24 +42,21 @@ public class LMGrammarBerkeleyTest {
   private JoshuaConfiguration joshuaConfig;
   private Decoder decoder;
 
-  @Parameters
-  public static List<String> lmFiles() {
-    return Arrays.asList("resources/berkeley_lm/lm",
-        "resources/berkeley_lm/lm.gz",
-        "resources/berkeley_lm/lm.berkeleylm",
-        "resources/berkeley_lm/lm.berkeleylm.gz");
+  @DataProvider(name = "languageModelFiles")
+  public Object[][] lmFiles() {
+    return new Object[][]{{"resources/berkeley_lm/lm"},
+            {"resources/berkeley_lm/lm.gz"},
+            {"resources/berkeley_lm/lm.berkeleylm"},
+            {"resources/berkeley_lm/lm.berkeleylm.gz"}};
   }
 
-  @After
+  @AfterMethod
   public void tearDown() throws Exception {
     decoder.cleanUp();
   }
 
-  @Parameter
-  public String lmFile;
-
-  @Test
-  public void verifyLM() {
+  @Test(dataProvider = "languageModelFiles")
+  public void verifyLM(String lmFile) {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.processCommandLineOptions(OPTIONS);
     joshuaConfig.features.add("LanguageModel -lm_type berkeleylm -lm_order 2 -lm_file " + lmFile);
@@ -79,7 +69,7 @@ public class LMGrammarBerkeleyTest {
     final Sentence sentence = new Sentence(input, 0, joshuaConfig);
     return decoder.decode(sentence);
   }
-  
+
   @Test
   public void givenLmWithOovFeature_whenDecoder_thenCorrectFeaturesReturned() {
     joshuaConfig = new JoshuaConfiguration();
@@ -90,4 +80,6 @@ public class LMGrammarBerkeleyTest {
     assertEquals(Decoder.weights.getDenseFeatures().size(), 3);
     assertEquals(translation, EXPECTED_OUTPUT_WITH_OOV);
   }
+
+
 }

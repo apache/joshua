@@ -43,7 +43,7 @@ import org.apache.joshua.decoder.segment_file.Sentence;
 public class StateMinimizingLanguageModel extends LanguageModelFF {
 
   // maps from sentence numbers to KenLM-side pools used to allocate state
-  private static final ConcurrentHashMap<Integer, Long> poolMap = new ConcurrentHashMap<Integer, Long>();
+  private static final ConcurrentHashMap<Integer, Long> poolMap = new ConcurrentHashMap<>();
 
   public StateMinimizingLanguageModel(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, args, config);
@@ -118,7 +118,7 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
     final int sentID = sentence.id();
     // Since sentId is unique across threads, next operations are safe, but not atomic!
     if (!poolMap.containsKey(sentID)) {
-      poolMap.put(sentID, KenLM.createPool());
+      poolMap.put(sentID, ((KenLM) languageModel).createLMPool());
     }
 
     // Get the probability of applying the rule and the new state
@@ -170,7 +170,7 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
    */
   public void destroyPool(int sentId) {
     if (poolMap.containsKey(sentId))
-      KenLM.destroyPool(poolMap.get(sentId));
+      ((KenLM) languageModel).destroyLMPool(poolMap.get(sentId));
     poolMap.remove(sentId);
   }
 

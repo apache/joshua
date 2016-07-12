@@ -18,11 +18,13 @@
  */
 package org.apache.joshua.decoder.phrase;
 
-import static org.junit.Assert.*;	
+import org.testng.annotations.Test;
 
 import java.util.BitSet;
 
-import org.junit.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertFalse;
 
 public class CoverageTest {
 

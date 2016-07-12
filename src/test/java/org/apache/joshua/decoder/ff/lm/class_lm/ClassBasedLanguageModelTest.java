@@ -25,6 +25,7 @@ import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.ff.lm.KenLM;
 import org.apache.joshua.decoder.ff.lm.LanguageModelFF;
 import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
@@ -55,7 +56,7 @@ public class ClassBasedLanguageModelTest {
     JoshuaConfiguration config = new JoshuaConfiguration();
     try {
       ff = new LanguageModelFF(weights, args, config);
-    } catch (ExceptionInInitializerError kenLmException) {
+    } catch (KenLM.KenLMLoadException e) {
       throw new SkipException("Skipping test because KenLM.so/dylib was not found");
     }
 

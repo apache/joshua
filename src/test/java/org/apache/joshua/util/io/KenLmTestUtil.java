@@ -16,30 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.joshua.corpus;
+package org.apache.joshua.util.io;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.testng.SkipException;
 
 /**
- *
- * 
- * @author Lane Schwartz
+ * Created by kellens on 7/12/16.
  */
-public class SpanTest {
+public class KenLmTestUtil {
 
-  @Test
-  public void iterator() {
-
-    Span span = new Span(1,10);
-
-    int expected = 1;
-
-    for (int actual : span) {
-      Assert.assertEquals(actual, expected);
-      expected++;
+  public static void Guard(Runnable kenLmLoadingCode) {
+    try {
+      kenLmLoadingCode.run();
+    } catch (RuntimeException e) {
+      throw new SkipException("Skipping test because KenLM.so/dylib was not found");
     }
-
   }
-
 }

@@ -26,14 +26,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.ff.lm.berkeley_lm.LMGrammarBerkeley;
 import org.apache.joshua.decoder.ff.lm.buildin_lm.TrieLM;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
  * Unit tests for testing ARPA language model class.
- * 
+ *
  * @author Lane Schwartz
  */
 public class ArpaFileTest {
@@ -116,7 +115,7 @@ public class ArpaFileTest {
 
     ArpaFile arpaFile = new ArpaFile(arpaFileName, vocab);
 
-    Map<Integer, Integer> counts = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> counts = new HashMap<>();
 
     boolean iterationOccurred = false;
 
@@ -125,8 +124,6 @@ public class ArpaFileTest {
       iterationOccurred = true;
 
       int order = ngram.order();
-      //			System.err.println("Order = " + order);
-
       int count;
       if (counts.containsKey(order)) {
         count = counts.get(order) + 1;
@@ -162,65 +159,6 @@ public class ArpaFileTest {
     ArpaFile arpaFile = new ArpaFile(arpaFileName, vocab);
 
     TrieLM lm = new TrieLM(arpaFile);
-    //		System.err.println(lm.getChildren().size());
     Assert.assertNotSame(lm.getChildren().size(), 0);
-  }
-
-  @Test(dependsOnMethods = { "setup", "testIteration", "testChildren" })
-  public void testTrie() throws FileNotFoundException {
-    ArpaFile arpaFile = new ArpaFile(arpaFileName, vocab);
-
-    TrieLM lm = new TrieLM(arpaFile);
-
-    testLm(lm);
-
-  }
-
-  @Test(dependsOnMethods = { "setup", "testIteration", "testChildren" })
-  public void testBerkeley() throws FileNotFoundException {
-
-    LMGrammarBerkeley lm = new LMGrammarBerkeley(3, arpaFileName);
-
-    testLm(lm);
-
-  }
-
-  /**
-   * @param lm
-   */
-  private void testLm(NGramLanguageModel lm) {
-    // Test unigrams known to be in the language model
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("a")), -1.992672, 0.000001f);
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("because")), -2.713723, 0.000001f);
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("boycott")), -4.678545, 0.000001f);
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("of")), -1.609573, 0.000001f);
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("parliament")), -3.875917, 0.000001f);
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("potato")), -9.753210, 0.000001f);
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("resumption")), -4.678545, 0.000001f);
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("the")), -1.712444, 0.000001f);
-
-    // Test unigrams known to NOT be in the language model
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("banana")), -JoshuaConfiguration.lm_ceiling_cost, 0.000001f);
-
-    // Test bigrams known to be in the language model
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("because of")), -0.3552987, 0.000001f);
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("of the")), -0.7507797, 0.000001f);
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("resumption of")), -0.7266324, 0.000001f);
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("the resumption")), -3.936147, 0.000001f);
-
-    // Test trigrams known to be in the language model
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("because of the")), -0.6309999f, 0.000001f);
-
-    // Test bigrams know to NOT be in the language model (but the unigrams are)
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("a boycott")), -4.678545f + -0.1195484f, 0.000001f);
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("of parliament")), -3.875917f + -0.1991907f, 0.000001f);
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("the potato")), -9.753210f + -0.1606644f, 0.000001f);
-//    Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("potato parliament")), -3.875917f + -0.0f, 0.000001f);
-
-    // Test trigrams know to NOT be in the language model (but the bigrams are)
-//    int[] words = vocab.getIDs("because of a");
-//    double f = lm.ngramLogProbability(words);
-//    Assert.assertEquals(f, -1.403534f + -0.03083654f, 0.000001f);
-    //		//Assert.assertEquals(lm.ngramLogProbability(vocab.getIDs("of the parliament")), -3.875917f + -0.05237135f, 0.000001f);
   }
 }

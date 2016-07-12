@@ -19,8 +19,8 @@
 package org.apache.joshua.system;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,10 +31,9 @@ import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.StructuredTranslation;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.segment_file.Sentence;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * Integration test for the complete Joshua decoder using a toy grammar that translates
@@ -73,7 +72,7 @@ public class StructuredTranslationTest {
     EXPECTED_FEATURES.put("OOVPenalty", 0.0f);
   }
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.search_algorithm = "cky";
@@ -100,7 +99,7 @@ public class StructuredTranslationTest {
                                              // constructor/initialize)
   }
 
-  @After
+  @AfterMethod
   public void tearDown() throws Exception {
     decoder.cleanUp();
     decoder = null;
