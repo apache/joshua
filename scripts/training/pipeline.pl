@@ -1120,7 +1120,14 @@ if (! defined $GRAMMAR_FILE) {
                     "model/phrase-table.gz",
         );
 
-    $GRAMMAR_FILE = "model/phrase-table.gz";
+    # Convert the model to Joshua format
+    $cachepipe->cmd("convert-moses-to-joshua",
+                    "$CAT model/phrase-table.gz | $SCRIPTDIR/support/phrase2hiero.py | gzip -9n > grammar.gz",
+                    "model/phrase-table.gz",
+                    "grammar.gz",
+        );
+
+    $GRAMMAR_FILE = "grammar.gz";
 
   } elsif ($GRAMMAR_TYPE eq "samt" or $GRAMMAR_TYPE eq "hiero" or $GRAMMAR_TYPE eq "phrase") {
 
@@ -1159,7 +1166,7 @@ if (! defined $GRAMMAR_FILE) {
 
     # Convert phrase model to hiero format (Thrax should do this!)
     if ($GRAMMAR_TYPE eq "phrase") {
-        system("mv grammar.gz grammar.tmp.gz; gzip -cd grammar.tmp.gz | $SCRIPTDIR/support/phrase2hiero.pl | gzip -9n > grammar.gz; rm -rf grammar.tmp.gz");
+        system("mv grammar.gz grammar.tmp.gz; gzip -cd grammar.tmp.gz | $SCRIPTDIR/support/phrase2hiero.py | gzip -9n > grammar.gz; rm -rf grammar.tmp.gz");
      }
   } else {
 
