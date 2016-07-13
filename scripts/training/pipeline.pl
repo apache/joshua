@@ -1835,7 +1835,7 @@ sub prepare_data {
   my $infiles =  join(" ", @infiles);
   my $outfiles = join(" ", @outfiles);
   # only skip blank lines for training data
-  if ($label eq "train") {
+  if ($label ne "test") {
     $cachepipe->cmd("$label-copy-and-filter",
                     "$PASTE $infiles | $SCRIPTDIR/training/filter-empty-lines.pl | $SCRIPTDIR/support/split2files $outfiles",
                     @indeps, @outfiles);
