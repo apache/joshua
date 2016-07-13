@@ -15,6 +15,13 @@ binmode(STDERR, ":utf8");
 
 my ($language) = shift(@ARGV) || "en";
 
+my $have_html_entities = eval
+{
+  require HTML::Entities;
+  HTML::Entities->import();
+  1;
+};
+
 while(<STDIN>) {
   s/\r//g;
   # remove extra spaces
@@ -89,5 +96,13 @@ while(<STDIN>) {
   }
   # Replace the rest of the nonbreaking spaces with a regular space.
   s/[\xA0]+/ /g;
+
+  if ($have_html_entities) {
+    $_ = decode_entities($_);
+  }
+
+  # Get rid of unicode directional indicators
+  s/[\x{200E}\x{200F}\x{202B}]//;
+
   print $_;
 }
