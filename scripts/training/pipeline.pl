@@ -1648,9 +1648,11 @@ if ($OPTIMIZER_RUN == 1) {
 }
 
 $tm_switch = "";
-$tm_copy_config_args = "";
-$tm_switch .= ($DO_PACK_GRAMMARS) ? "--pack-tm" : "--tm";
-$tm_switch .= " $TEST_GRAMMAR";
+if (defined $TEST_GRAMMAR) {
+  $tm_copy_config_args = "";
+  $tm_switch .= ($DO_PACK_GRAMMARS) ? "--pack-tm" : "--tm";
+  $tm_switch .= " $TEST_GRAMMAR";
+}
 
 # Add in the glue grammar
 if (defined $GLUE_GRAMMAR_FILE) {
