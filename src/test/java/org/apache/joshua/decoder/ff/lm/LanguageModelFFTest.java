@@ -16,20 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.joshua.decoder.ff.lm;
 
-import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.testng.Assert.assertEquals;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.state_maintenance.NgramDPState;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class LanguageModelFFTest {
 
@@ -37,7 +38,7 @@ public class LanguageModelFFTest {
 
   private LanguageModelFF ff;
 
-  @Before
+  @BeforeMethod
   public void setUp() {
     Decoder.resetGlobalState();
 
@@ -49,7 +50,7 @@ public class LanguageModelFFTest {
     ff = new LanguageModelFF(weights, args, config);
   }
 
-  @After
+  @AfterMethod
   public void tearDown() {
     Decoder.resetGlobalState();
   }
@@ -59,11 +60,11 @@ public class LanguageModelFFTest {
     int[] left = {3};
     NgramDPState currentState = new NgramDPState(left, new int[left.length]);
 
-    float score = ff.languageModel.sentenceLogProbability(left, 2, 1);
-    assertEquals(-99.0f, score, 0.0);
+    float score =  ff.getLM().sentenceLogProbability(left, 2, 1);
+    assertEquals(-99.0f, score, 0.0f);
 
     float cost = ff.estimateFutureCost(null, currentState, null);
-    assertEquals(score * WEIGHT, cost, 0.0);
+    assertEquals(score * WEIGHT, cost, 0.0f);
   }
 
   @Test
@@ -72,11 +73,11 @@ public class LanguageModelFFTest {
     int[] left = {startSymbolId};
     NgramDPState currentState = new NgramDPState(left, new int[left.length]);
 
-    float score = ff.languageModel.sentenceLogProbability(left, 2, 2);
-    assertEquals(0.0f, score, 0.0);
+    float score = ff.getLM().sentenceLogProbability(left, 2, 2);
+    assertEquals(0.0f, score, 0.0f);
 
     float cost = ff.estimateFutureCost(null, currentState, null);
-    assertEquals(score * WEIGHT, cost, 0.0);
+    assertEquals(cost, score * WEIGHT, 0.0f);
   }
 
   @Test
@@ -86,10 +87,10 @@ public class LanguageModelFFTest {
     int[] left = {startSymbolId, 3};
     NgramDPState currentState = new NgramDPState(left, new int[left.length]);
 
-    float score = ff.languageModel.sentenceLogProbability(left, 2, 2);
-    assertEquals(-100.752754f, score, 0.0f);
+    float score = ff.getLM().sentenceLogProbability(left, 2, 2);
+    assertEquals(score, -100.752754f, 0.0f);
 
     float cost = ff.estimateFutureCost(null, currentState, null);
-    assertEquals(score * WEIGHT, cost, 0.0f);
+    assertEquals(cost, score * WEIGHT, 0.0f);
   }
 }

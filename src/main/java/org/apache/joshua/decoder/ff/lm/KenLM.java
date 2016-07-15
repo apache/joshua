@@ -19,7 +19,6 @@
 package org.apache.joshua.decoder.ff.lm;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.ff.lm.NGramLanguageModel;
 import org.apache.joshua.decoder.ff.state_maintenance.KenLMState;
 import org.apache.joshua.util.FormatUtils;
 import org.slf4j.Logger;
@@ -39,29 +38,12 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
   private static final Logger LOG = LoggerFactory.getLogger(KenLM.class);
 
-  static {
-    try {
-      System.loadLibrary("ken");
-    } catch (UnsatisfiedLinkError e) {
-      //TODO: send these prints to LOG.err
-      LOG.error("* FATAL: Can't find libken.so (libken.dylib on OS X) in $JOSHUA/lib");
-      LOG.error("*        This probably means that the KenLM library didn't compile.");
-      LOG.error("*        Make sure that BOOST_ROOT is set to the root of your boost");
-      LOG.error("*        installation (it's not /opt/local/, the default), change to");
-      LOG.error("*        $JOSHUA, and type 'ant kenlm'. If problems persist, see the");
-      LOG.error("*        website (joshua-decoder.org)."); //FIXME: update link to newer url
-      throw new RuntimeException(e);
-    }
-  }
-
   private final long pointer;
 
   // this is read from the config file, used to set maximum order
   private final int ngramOrder;
   // inferred from model file (may be larger than ngramOrder)
   private final int N;
-  // whether left-state minimization was requested
-  private boolean minimizing;
 
   private final static native long construct(String file_name);
 
@@ -85,10 +67,13 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
   private final static native float probString(long ptr, int words[], int start);
 
-  public final static native long createPool();
-  public final static native void destroyPool(long pointer);
+  private final static native long createPool();
+
+  private final static native void destroyPool(long pointer);
 
   public KenLM(int order, String file_name) {
+    initializeSystemLibrary();
+
     ngramOrder = order;
 
     pointer = construct(file_name);
@@ -101,9 +86,35 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
    * @param file_name string path to an input file
    */
   public KenLM(String file_name) {
+    initializeSystemLibrary();
+
     pointer = construct(file_name);
     N = order(pointer);
     ngramOrder = N;
+  }
+
+  private void initializeSystemLibrary() {
+    try {
+      System.loadLibrary("ken");
+    } catch (UnsatisfiedLinkError e) {
+      LOG.error("Can't find libken.so (libken.dylib on OS X) on the Java library path.");
+      throw new KenLMLoadException(e);
+    }
+  }
+
+  public class KenLMLoadException extends RuntimeException {
+
+    public KenLMLoadException(UnsatisfiedLinkError e) {
+      super(e);
+    }
+  }
+
+  public long createLMPool() {
+    return createPool();
+  }
+
+  public void destroyLMPool(long pointer) {
+    destroyPool(pointer);
   }
 
   public void destroy() {

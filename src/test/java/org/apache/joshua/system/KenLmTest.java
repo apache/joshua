@@ -16,18 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- package org.apache.joshua.system;
+package org.apache.joshua.system;
+
+import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.lm.KenLM;
+import org.apache.joshua.util.io.KenLmTestUtil;
+import org.testng.SkipException;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.apache.joshua.corpus.Vocabulary.registerLanguageModel;
 import static org.apache.joshua.corpus.Vocabulary.unregisterLanguageModels;
-import static org.junit.Assert.*;
-import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.ff.lm.KenLM;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertFalse;
 
 /**
  * KenLM JNI interface tests.
@@ -35,15 +38,17 @@ import org.junit.Test;
  * If run in Eclipse, add -Djava.library.path=build/lib to JVM arguments
  * of the run configuration.
  */
-@Ignore("re-enable as soon as kenlm native library support will be in place")
+
 public class KenLmTest {
 
   private static final String LANGUAGE_MODEL_PATH = "resources/kenlm/oilers.kenlm";
+  private KenLM kenLm;
 
   @Test
   public void givenKenLm_whenQueryingForNgramProbability_thenProbIsCorrect() {
     // GIVEN
-    KenLM kenLm = new KenLM(3, LANGUAGE_MODEL_PATH);
+    KenLmTestUtil.Guard(() -> kenLm = new KenLM(3, LANGUAGE_MODEL_PATH));
+
     int[] words = Vocabulary.addAll("Wayne Gretzky");
     registerLanguageModel(kenLm);
 
@@ -52,13 +57,14 @@ public class KenLmTest {
 
     // THEN
     assertEquals("Found the wrong probability for 2-gram \"Wayne Gretzky\"", -0.99f, probability,
-        Float.MIN_VALUE);
+            Float.MIN_VALUE);
   }
-  
+
   @Test
   public void givenKenLm_whenQueryingForNgramProbability_thenIdAndStringMethodsReturnTheSame() {
     // GIVEN
-    KenLM kenLm = new KenLM(LANGUAGE_MODEL_PATH);
+    KenLmTestUtil.Guard(() -> kenLm = new KenLM(LANGUAGE_MODEL_PATH));
+
     registerLanguageModel(kenLm);
     String sentence = "Wayne Gretzky";
     String[] words = sentence.split("\\s+");
@@ -76,30 +82,18 @@ public class KenLmTest {
 
   @Test
   public void givenKenLm_whenIsKnownWord_thenReturnValuesAreCorrect() {
-    KenLM kenLm = new KenLM(LANGUAGE_MODEL_PATH);
+    KenLmTestUtil.Guard(() -> kenLm = new KenLM(LANGUAGE_MODEL_PATH));
     assertTrue(kenLm.isKnownWord("Wayne"));
     assertFalse(kenLm.isKnownWord("Wayne2222"));
   }
-  
-  @Test
-  public void givenKenLm_whenIsLmOov_thenResultsAreCorrect() {
-    KenLM kenLm = new KenLM(LANGUAGE_MODEL_PATH);
-    registerLanguageModel(kenLm);
-    int id = Vocabulary.id("Wayne");
-    int id2 = Vocabulary.id("wekjfhaew;jvnae;goiawehco;eiwnf;oi");
-    assertTrue(kenLm.isKnownWord(Vocabulary.word(id)));
-    assertFalse(kenLm.isKnownWord(Vocabulary.word(id2)));
-    assertFalse(kenLm.isOov(id));
-    assertTrue(kenLm.isOov(id2));
-  }
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     Vocabulary.clear();
     unregisterLanguageModels();
   }
 
-  @After
+  @AfterMethod
   public void tearDown() throws Exception {
     Vocabulary.clear();
     unregisterLanguageModels();
