@@ -276,6 +276,7 @@ my $retval = GetOptions(
   "maxlen-tune=i"        => \$MAXLEN_TUNE,
   "maxlen-test=i"        => \$MAXLEN_TEST,
   "maxlines=i"        => \$MAXLINES,
+  "maxlen-phrase=i"   => \$MAX_PHRASE_LEN,
   "tokenizer-source=s"      => \$TOKENIZER_SOURCE,
   "tokenizer-target=s"      => \$TOKENIZER_TARGET,
   "normalizer=s"      => \$NORMALIZER,
