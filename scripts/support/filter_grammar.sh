@@ -17,4 +17,6 @@
 #
 # Wrapper around the grammar filter
 
-java -Xmx4g -Dfile.encoding=utf8 -cp $JOSHUA/class joshua.tools.TestSetFilter "$@"
+JOSHUA=$(readlink -f $(dirname $0)/../..)
+JAR_PATH=$JOSHUA/target/joshua-*-jar-with-dependencies.jar
+java -Xmx4g -Dfile.encoding=utf8 -cp $JAR_PATH org.apache.joshua.tools.TestSetFilter "$@"
