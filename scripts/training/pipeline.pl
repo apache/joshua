@@ -1837,9 +1837,16 @@ sub prepare_data {
 
   my $infiles =  join(" ", @infiles);
   my $outfiles = join(" ", @outfiles);
-  $cachepipe->cmd("$label-copy-and-filter",
-                  "$PASTE $infiles | $SCRIPTDIR/support/split2files $outfiles",
-                  @indeps, @outfiles);
+  # only skip blank lines for training data
+  if ($label ne "test") {
+    $cachepipe->cmd("$label-copy-and-filter",
+                    "$PASTE $infiles | $SCRIPTDIR/training/filter-empty-lines.pl | $SCRIPTDIR/support/split2files $outfiles",
+                    @indeps, @outfiles);
+  } else {
+    $cachepipe->cmd("$label-copy-and-filter",
+                    "$PASTE $infiles | $SCRIPTDIR/support/split2files $outfiles",
+                    @indeps, @outfiles);
+  }
 
   # Done concatenating and filtering files
 
@@ -1857,11 +1864,9 @@ sub prepare_data {
         } else {
           my $TOKENIZER = ($lang eq $SOURCE) ? $TOKENIZER_SOURCE : $TOKENIZER_TARGET;
 
-          # Normalization can delete lines, so they might need to be filtered out
-          my $maybe_filter = ($label eq "test") ? "" : "| grep -v ^\$";
           my $ext = $lang; $ext =~ s/\.\d//;
           $cachepipe->cmd("$label-tokenize-$lang",
-                          "$CAT $DATA_DIRS{$label}/$prefix.$lang | $NORMALIZER $ext | $TOKENIZER -l $ext 2> /dev/null $maybe_filter > $DATA_DIRS{$label}/$prefix.tok.$lang",
+                          "$CAT $DATA_DIRS{$label}/$prefix.$lang | $NORMALIZER $ext | $TOKENIZER -l $ext 2> /dev/null > $DATA_DIRS{$label}/$prefix.tok.$lang",
                           "$DATA_DIRS{$label}/$prefix.$lang", "$DATA_DIRS{$label}/$prefix.tok.$lang");
         }
 
