@@ -81,14 +81,26 @@ $('#sourceTxt').keypress(function (e) {
     }
 });
 
+/*
+ * Retrieves the text from the text box and tokenizes it.
+ */
 function gettext() {
-    return $("#sourceTxt").val().replace(/([^\.!\?])([\.!\?,]+)/g, "$1 $2");
+    var text = $("#sourceTxt").val();
+    var tokenizedText = text.replace(/([\.!\?,;"'])/g, " $1 ").replace(/ +/g, " ");
+    // alert(text + " -> " + tokenizedText);
+    return tokenizedText;
 }
 
+/*
+ * Returns the name of the server.
+ */
 function getserver() {
     return $("#server_host").val()
 }
 
+/*
+ * Returns the name of the port.
+ */
 function getport() {
     return $("#server_port").val()
 }
