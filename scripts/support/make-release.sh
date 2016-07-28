@@ -52,7 +52,7 @@ tar czf release/joshua-$version.tgz \
     joshua-$version/scripts \
     joshua-$version/test \
     joshua-$version/examples \
-    joshua-$version/thrax/bin/thrax.jar \
+    joshua-$version/thrax/bin/thrax.jar
 
 ln -sf joshua-$version release/joshua-runtime-$version
 tar czf release/joshua-runtime-$version.tgz \
@@ -64,7 +64,7 @@ tar czf release/joshua-runtime-$version.tgz \
     joshua-runtime-$version/class \
     joshua-runtime-$version/lib/{ant*,jung*,junit*jar,README,LICENSES} \
     joshua-runtime-$version/scripts \
-    joshua-runtime-$version/examples \
+    joshua-runtime-$version/examples
 
 rm -f joshua-$version
 rm -f VERSION
