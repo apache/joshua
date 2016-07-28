@@ -40,8 +40,9 @@ fi
 set -u
 
 JOSHUA=$(dirname $0)/..
-JAR_PATH=$JOSHUA/target/joshua-*-jar-with-dependencies.jar
 RES_OVERRIDE_PATH=$JOSHUA/src/main/resources
+# Get the jar file (only the most recent, if there are many)
+JAR_PATH=$(ls -t $JOSHUA/target/joshua-*-jar-with-dependencies.jar | head -n1)
 exec java -Xmx${mem} \
 	-Dfile.encoding=utf8 \
 	-Djava.library.path=$JOSHUA/lib \
