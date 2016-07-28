@@ -139,7 +139,7 @@ They include:
 
 - Significantly improved and expanded documentation (both user and developer)
 
-  See http://apache.joshua.org/4.0 or ./apache.joshua.org/4.0/index.html (local mirror)
+  See http://joshua-decoder.org/4.0 or ./joshua-decoder.org/4.0/index.html (local mirror)
 
 - Synchronous parsing
 

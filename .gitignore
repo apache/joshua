@@ -41,8 +41,6 @@ doxygen_*.tmp
 *.so
 .cachepipe
 
-joshua-decoder.org
-joshua.apache.org
 release
 
 scripts/training/MGIZA/
