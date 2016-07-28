@@ -49,7 +49,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
       LOG.error("*        Make sure that BOOST_ROOT is set to the root of your boost");
       LOG.error("*        installation (it's not /opt/local/, the default), change to");
       LOG.error("*        $JOSHUA, and type 'ant kenlm'. If problems persist, see the");
-      LOG.error("*        website (joshua-decoder.org)."); //FIXME: update link to newer url
+      LOG.error("*        website (joshua.apache.org)."); 
       throw new RuntimeException(e);
     }
   }

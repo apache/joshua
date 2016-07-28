@@ -496,7 +496,7 @@ public class Decoder {
           errMsg.append("FATAL: Invalid feature weight line found in config file.\n");
           errMsg.append(String.format("The line was '%s'\n", pairStr));
           errMsg.append("You might be using an old version of the config file that is no longer supported\n");
-          errMsg.append("Check joshua-decoder.org or email joshua_support@googlegroups.com for help\n");
+          errMsg.append("Check joshua.apache.org or email joshua_support@googlegroups.com for help\n");
           errMsg.append("Code = " + 17);
           throw new RuntimeException(errMsg.toString());
         }
