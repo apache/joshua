@@ -20,7 +20,7 @@
 
 import static com.google.common.base.Charsets.UTF_8;
 import static java.nio.file.Files.readAllBytes;
-import static org.junit.Assert.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -30,16 +30,14 @@ import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.segment_file.Sentence;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.apache.joshua.util.io.KenLmTestUtil;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * Reimplements the constrained phrase decoding test
  */
-@Ignore("re-enable as soon as kenlm native library support will be in place")
 public class PhraseDecodingTest {
 
   private static final String CONFIG = "resources/phrase_decoder/config";
@@ -49,20 +47,20 @@ public class PhraseDecodingTest {
   private JoshuaConfiguration joshuaConfig = null;
   private Decoder decoder = null;
 
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.readConfigFile(CONFIG);
-    decoder = new Decoder(joshuaConfig, "");
+    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig, ""));
   }
 
-  @After
+  @AfterMethod
   public void tearDown() throws Exception {
     decoder.cleanUp();
     decoder = null;
   }
 
-  @Test
+  @Test(enabled = false)
   public void givenInput_whenPhraseDecoding_thenOutputIsAsExpected() throws IOException {
     final String translation = decode(INPUT).toString();
     final String gold = new String(readAllBytes(GOLD_PATH), UTF_8);
