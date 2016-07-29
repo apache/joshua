@@ -1,3 +1,25 @@
 language: java
-jdk:
-  - oraclejdk8
+sudo: true
+
+matrix:
+  include:
+    - os: linux
+      jdk: oraclejdk8
+    - os: osx
+      osx_image: xcode8
+    - os: linux
+      dist: trusty
+      jdk: oraclejdk8
+      before_install:
+      - sudo apt-get -y install software-properties-common
+      - sudo add-apt-repository -y ppa:george-edison55/cmake-3.x
+      - sudo apt-get -y update
+      - sudo apt-get -y install build-essential libboost-all-dev zlib1g-dev libbz2-dev liblzma-dev cmake cmake-data
+      - export JOSHUA=`pwd`
+      - ./download-deps.sh
+    - os: osx
+      osx_image: xcode8
+      before_install:
+      - export JOSHUA=`pwd`
+      - export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
+      - ./download-deps.sh
