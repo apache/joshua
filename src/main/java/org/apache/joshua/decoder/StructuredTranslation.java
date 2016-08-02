@@ -88,7 +88,7 @@ public class StructuredTranslation {
    * @return the formatted string
    */
   public String getFormattedTranslationString() {
-    return maybeProjectCase(getTranslationString());
+    return DeNormalize.processSingleLine(maybeProjectCase(getTranslationString()));
   }
 
   public List<String> getTranslationTokens() {
