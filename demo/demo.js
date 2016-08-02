@@ -218,6 +218,12 @@ function record_results(data, status) {
 
     result += "</ul>";
     $("#output").html(result);
+
+    $(".oov").click(function(e) {
+        var oov = e.target.innerHTML;
+        $("#addPhrase_source").val(oov);
+        $("#addPhrase_target").select();
+    });
 };
 
 /**
