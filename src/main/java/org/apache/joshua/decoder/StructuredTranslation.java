@@ -88,7 +88,7 @@ public class StructuredTranslation {
    * @return the formatted string
    */
   public String getFormattedTranslationString() {
-    throw new RuntimeException("Not yet implemented");
+    return maybeProjectCase(getTranslationString());
   }
 
   public List<String> getTranslationTokens() {
@@ -124,9 +124,8 @@ public class StructuredTranslation {
    * If requested, projects source-side lettercase to target, and appends the alignment from
    * to the source-side sentence in ||s.
    * 
-   * @param hypothesis todo
-   * @param state todo
-   * @return source-side lettercase to target, and appends the alignment from to the source-side sentence in ||s
+   * @param hypothesis the string hypothesis
+   * @return source-side lettercase to target, and appends the alignment from to the source-side sentence
    */
   private String maybeProjectCase(String hypothesis) {
     String output = hypothesis;

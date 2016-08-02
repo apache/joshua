@@ -72,7 +72,7 @@ public class JSONMessage {
 //  }
 
   public void addTranslation(Translation translation) {
-    String viterbi = translation.getStructuredTranslations().get(0).getTranslationString();
+    String viterbi = translation.getStructuredTranslations().get(0).getFormattedTranslationString();
     
     TranslationItem item = addTranslation(viterbi);
 

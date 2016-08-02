@@ -221,7 +221,7 @@ function record_results(data, status) {
 
     $(".oov").click(function(e) {
         var oov = e.target.innerHTML;
-        $("#addPhrase_source").val(oov);
+        $("#addPhrase_source").val(oov.toLowerCase());
         $("#addPhrase_target").select();
     });
 };
