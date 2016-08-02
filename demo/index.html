@@ -17,28 +17,31 @@
     <style type="text/css">
       /* Move down content because we have a fixed navbar that is 50px tall */
       body {
-        padding-top: 50px;
-        padding-bottom: 20px;
-        <!-- background-image: url("apache_joshua_logo.png"); -->
-        <!-- background-repeat: no-repeat; -->
-        <!-- background-position: -300px -300px; -->
+        background-image: url("apache_joshua_logo_faded.png");
+        background-repeat: no-repeat;
+        background-position: -300px -300px;
+      }
+
+      oov {
+        color: red;
+        font-weight: bold;
+        text-decoration: -300px -300px;
+      }
+
+      .navbar-brand {
+        font-weight: bold;
+        color: black
       }
     </style>
   </head>
 
   <body>
 
-    <nav class="navbar navbar-inverse navbar-fixed-top">
+    <nav class="navbar navbar-static-top">
       <div class="container">
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
           <a class="navbar-brand" href="#">
-            Apache Joshua Machine Translation Toolkit
+            Apache Joshua Machine Translation Demonstration
           </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
@@ -56,11 +59,6 @@
     </nav>
 
     <!-- Main jumbotron for a primary marketing message or call to action -->
-    <div class="page-header">
-      <div class="container">
-        <h1>Translation Console</h1>
-      </div>
-    </div>
 
     <div class="container">
       <div>
@@ -81,7 +79,7 @@
 
             <div class="panel-body">
               <div class="row">
-                <div class="col-lg-8">
+                <div class="col-lg-12">
                   <fieldset class="form-group">
                     <textarea class="form-control" id="sourceTxt" rows="5" placeholder="Enter sentences one per line and type ^-return or ⌘-return to submit" autofocus="autofocus"></textarea>
                   </fieldset>
