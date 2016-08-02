@@ -158,8 +158,8 @@ $('#add_rule').click(function() {
     var ruleStr = "add_rule [X] ||| " + sourcePhrase + " ||| " + targetPhrase;
 
     // Add word-word alignment if unambiguous
-    // if (sourcePhrase.split().length == 1 && targetPhrase.split().length == 1)
-    //     ruleStr += " |||   ||| 0-0";
+    if (sourcePhrase.split().length == 1 && targetPhrase.split().length == 1)
+        ruleStr += " |||   ||| 0-0";
 
     sendMeta(ruleStr);
 
