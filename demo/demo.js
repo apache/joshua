@@ -229,8 +229,8 @@ function record_results(data, status) {
 /**
  * Cleans out OOVs
  */
-function clean_oovs(str) {
-    str = str.replace(/(\S+)_OOV/g, "<span class='oov'>$1</span>");
+function clean(str) {
+    str = str.replace(/(\S+?)_OOV/g, "<span class='oov'>$1</span>");
     str = str.replace(/ ([\.\?,])/g, "$1");
     str = str.replace(/" (.*?) "/g, "\"$1\"");
     return str;
