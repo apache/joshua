@@ -212,8 +212,8 @@ function record_results(data, status) {
     /* This version outputs the 1-best candidate of multiple input sentences */
     $(data.data.translations).each(function(i, item) {
         // result += item.totalScore + " " + item.hyp + "<br/>\n";
-        result += "<li class=\"list-group-item\"><span class=\"badge\">" + (i + 1) + "</span>" + clean_oovs(item.translatedText) + "</li>";
-        // result += "<li class=\"list-group-item\">" + clean_oovs(item.translatedText) + "</li>";
+        // result += "<li class=\"list-group-item\"><span class=\"badge\">" + (i + 1) + "</span>" + clean(item.translatedText) + "</li>";
+        result += "<li class=\"list-group-item\">" + clean(item.translatedText) + "</li>";
     });
 
     result += "</ul>";
