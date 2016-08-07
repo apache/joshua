@@ -46,16 +46,16 @@ public class ComputeNodeResult {
   private static final Logger LOG = LoggerFactory.getLogger(ComputeNodeResult.class);
 
   // The cost incurred by the rule itself (and all associated feature functions)
-  private float transitionCost;
+  private final float transitionCost;
 
   // transitionCost + the Viterbi costs of the tail nodes.
-  private float viterbiCost;
+  private final float viterbiCost;
 
   // viterbiCost + a future estimate (outside cost estimate).
-  private float pruningCostEstimate;
+  private final float pruningCostEstimate;
 
   // The StateComputer objects themselves serve as keys.
-  private List<DPState> dpStates;
+  private final List<DPState> dpStates;
 
   /**
    * Computes the new state(s) that are produced when applying the given rule to the list of tail
@@ -99,7 +99,7 @@ public class ComputeNodeResult {
       }
     }
 
-    List<DPState> allDPStates = new ArrayList<DPState>();
+    List<DPState> allDPStates = new ArrayList<>();
 
     // The transition cost is the new cost incurred by applying this rule
     float transitionCost = 0.0f;

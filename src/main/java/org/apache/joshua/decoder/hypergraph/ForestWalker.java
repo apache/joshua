@@ -31,20 +31,20 @@ import java.util.Set;
  */
 public class ForestWalker {
 
-  public static enum TRAVERSAL {
+  public enum TRAVERSAL {
     PREORDER, POSTORDER
-  };
+  }
 
-  private Set<HGNode> visitedNodes;
+  private final Set<HGNode> visitedNodes;
   private TRAVERSAL traversalType = TRAVERSAL.PREORDER;
 
   public ForestWalker() {
-    visitedNodes = new HashSet<HGNode>();
+    visitedNodes = new HashSet<>();
   }
 
   public ForestWalker(TRAVERSAL traversal) {
     this.traversalType = traversal;
-    visitedNodes = new HashSet<HGNode>();
+    visitedNodes = new HashSet<>();
   }
   
   public void walk(HGNode node, WalkerFunction walker) {

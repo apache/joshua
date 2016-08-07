@@ -66,11 +66,11 @@ public class JoshuaConfiguration {
   public boolean project_case = false;
 
   // List of grammar files to read
-  public ArrayList<String> tms = new ArrayList<String>();
+  public ArrayList<String> tms = new ArrayList<>();
 
   // A rule cache for commonly used tries to avoid excess object allocations
   // Testing shows there's up to ~95% hit rate when cache size is 5000 Trie nodes.
-  public Integer cachedRuleSize = new Integer(5000);
+  public Integer cachedRuleSize = 5000;
 
   /*
    * The file to read the weights from (part of the sparse features implementation). Weights can
@@ -94,9 +94,9 @@ public class JoshuaConfiguration {
    * If this is empty, an unweighted default_non_terminal is used.
    */
   public class OOVItem implements Comparable<OOVItem> {
-    public String label;
+    public final String label;
 
-    public float weight;
+    public final float weight;
 
     OOVItem(String l, float w) {
       label = l;
@@ -192,17 +192,19 @@ public class JoshuaConfiguration {
 
 
   /* A list of the feature functions. */
-  public ArrayList<String> features = new ArrayList<String>();
+  public ArrayList<String> features = new ArrayList<>();
 
   /* A list of weights found in the main config file (instead of in a separate weights file) */
-  public ArrayList<String> weights = new ArrayList<String>();
+  public ArrayList<String> weights = new ArrayList<>();
 
   /* Determines whether to expect JSON input or plain lines */
-  public enum INPUT_TYPE { plain, json };
+  public enum INPUT_TYPE { plain, json }
+
   public INPUT_TYPE input_type = INPUT_TYPE.plain;
 
   /* Type of server. Not sure we need to keep the regular TCP one around. */
-  public enum SERVER_TYPE { none, TCP, HTTP };
+  public enum SERVER_TYPE { none, TCP, HTTP }
+
   public SERVER_TYPE server_type = SERVER_TYPE.TCP;
 
   /* If set, Joshua will start a (multi-threaded, per "threads") TCP/IP server on this port. */
@@ -286,10 +288,10 @@ public class JoshuaConfiguration {
     LOG.info("\n\tResetting the StatefullFF global state index ...");
     LOG.info("\n\t...done");
     StatefulFF.resetGlobalStateIndex();
-    tms = new ArrayList<String>();
+    tms = new ArrayList<>();
     weights_file = "";
     default_non_terminal = "[X]";
-    oovList = new ArrayList<OOVItem>();
+    oovList = new ArrayList<>();
     oovList.add(new OOVItem(default_non_terminal, 1.0f));
     goal_symbol = "[GOAL]";
     amortized_sorting = true;
@@ -307,8 +309,8 @@ public class JoshuaConfiguration {
     mark_oovs = false;
     // oracleFile = null;
     parse = false; // perform synchronous parsing
-    features = new ArrayList<String>();
-    weights = new ArrayList<String>();
+    features = new ArrayList<>();
+    weights = new ArrayList<>();
     server_port = 0;
 
     reordering_limit = 8;
@@ -376,7 +378,7 @@ public class JoshuaConfiguration {
          * interpreted as features.
          */
 
-        if (line.indexOf("=") != -1) { // parameters; (not feature function)
+        if (line.contains("=")) { // parameters; (not feature function)
           String[] fds = Regex.equalsWithSpaces.split(line, 2);
           if (fds.length < 2) {
             LOG.warn("skipping config file line '{}'", line);
@@ -434,7 +436,7 @@ public class JoshuaConfiguration {
 
           } else if (parameter.equals(normalize_key("oov-list"))) {
             if (new File(fds[1]).exists()) {
-              oovList = new ArrayList<OOVItem>();
+              oovList = new ArrayList<>();
               try {
                 File file = new File(fds[1]);
                 BufferedReader br = new BufferedReader(new FileReader(file));
@@ -462,7 +464,7 @@ public class JoshuaConfiguration {
               if (tokens.length % 2 != 0) {
                 throw new RuntimeException(String.format("* FATAL: invalid format for '%s'", fds[0]));
               }
-              oovList = new ArrayList<OOVItem>();
+              oovList = new ArrayList<>();
 
               for (int i = 0; i < tokens.length; i += 2)
                 oovList.add(new OOVItem(FormatUtils.ensureNonTerminalBrackets(tokens[i]),
@@ -538,12 +540,16 @@ public class JoshuaConfiguration {
             LOG.info("pop-limit: {}", pop_limit);
 
           } else if (parameter.equals(normalize_key("input-type"))) {
-            if (fds[1].equals("json")) {
+            switch (fds[1]) {
+            case "json":
               input_type = INPUT_TYPE.json;
-            } else if (fds[1].equals("plain")) {
+              break;
+            case "plain":
               input_type = INPUT_TYPE.plain;
-            } else {
-              throw new RuntimeException(String.format("* FATAL: invalid server type '%s'", fds[1]));
+              break;
+            default:
+              throw new RuntimeException(
+                  String.format("* FATAL: invalid server type '%s'", fds[1]));
             }
             LOG.info("    input-type: {}", input_type);
 
@@ -573,7 +579,6 @@ public class JoshuaConfiguration {
 
           } else if (parameter.equals("c") || parameter.equals("config")) {
             // this was used to send in the config file, just ignore it
-            ;
 
           } else if (parameter.equals(normalize_key("feature-function"))) {
             // add the feature to the list of features for later processing

@@ -41,7 +41,7 @@ public class LabelCombinationFF extends StatelessFF {
     return name.toLowerCase();
   }
 
-  private final String computeRuleLabelCombinationDescriptor(Rule rule) {
+  private String computeRuleLabelCombinationDescriptor(Rule rule) {
     StringBuilder result = new StringBuilder(getLowerCasedFeatureName() + "_");
     result.append(RulePropertiesQuerying.getLHSAsString(rule));
     // System.out.println("Rule: " + rule);

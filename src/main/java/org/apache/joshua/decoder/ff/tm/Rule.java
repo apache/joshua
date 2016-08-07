@@ -107,7 +107,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
     this.arity = arity;
     this.owner = owner;
     this.target = target;
-    this.sparseFeatureStringSupplier = Suppliers.memoize(() -> { return sparseFeatures; });
+    this.sparseFeatureStringSupplier = Suppliers.memoize(() -> sparseFeatures);
     this.featuresSupplier = initializeFeatureSupplierFromString();
     this.alignmentSupplier = initializeAlignmentSupplier();
   }
@@ -127,7 +127,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
     this.arity = arity;
     this.owner = owner;
     this.target = targetRhs;
-    this.featuresSupplier = Suppliers.memoize(() -> { return features; });
+    this.featuresSupplier = Suppliers.memoize(() -> features);
     this.sparseFeatureStringSupplier = initializeSparseFeaturesStringSupplier();
     this.alignmentSupplier = initializeAlignmentSupplier();
   }
@@ -205,9 +205,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
    * If Rule was constructed with a FeatureVector, we lazily populate the sparseFeaturesStringSupplier.
    */
   private Supplier<String> initializeSparseFeaturesStringSupplier() {
-    return Suppliers.memoize(() -> {
-      return getFeatureVector().toString();
-    });
+    return Suppliers.memoize(() -> getFeatureVector().toString());
   }
 
   // ===============================================================
@@ -240,10 +238,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
     if (!Arrays.equals(getFrench(), other.getFrench())) {
       return false;
     }
-    if (!Arrays.equals(target, other.getEnglish())) {
-      return false;
-    }
-    return true;
+    return Arrays.equals(target, other.getEnglish());
   }
 
   public int hashCode() {
@@ -396,17 +391,16 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   // ===============================================================
 
   public String toString() {
-    StringBuffer sb = new StringBuffer();
-    sb.append(Vocabulary.word(this.getLHS()));
-    sb.append(" ||| ");
-    sb.append(getFrenchWords());
-    sb.append(" ||| ");
-    sb.append(getEnglishWords());
-    sb.append(" |||");
-    sb.append(" " + getFeatureVector());
-    sb.append(String.format(" ||| est=%.3f", getEstimatedCost()));
-    sb.append(String.format(" pre=%.3f", getPrecomputableCost()));
-    return sb.toString();
+    String sb = Vocabulary.word(this.getLHS()) +
+        " ||| " +
+        getFrenchWords() +
+        " ||| " +
+        getEnglishWords() +
+        " |||" +
+        " " + getFeatureVector() +
+        String.format(" ||| est=%.3f", getEstimatedCost()) +
+        String.format(" pre=%.3f", getPrecomputableCost());
+    return sb;
   }
   
   /**
@@ -422,22 +416,24 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
     int nt = 1;
     for (int i = 0; i < getFrench().length; i++) {
       if (getFrench()[i] < 0)
-        sb.append(" " + Vocabulary.word(getFrench()[i]).replaceFirst("\\]", String.format(",%d]", nt++)));
+        sb.append(" ").append(
+            Vocabulary.word(getFrench()[i]).replaceFirst("\\]", String.format(",%d]", nt++)));
       else
-        sb.append(" " + Vocabulary.word(getFrench()[i]));
+        sb.append(" ").append(Vocabulary.word(getFrench()[i]));
     }
     sb.append(" |||");
     nt = 1;
     for (int i = 0; i < getEnglish().length; i++) {
       if (getEnglish()[i] < 0)
-        sb.append(" " + Vocabulary.word(getEnglish()[i]).replaceFirst("\\]", String.format(",%d]", nt++)));
+        sb.append(" ").append(
+            Vocabulary.word(getEnglish()[i]).replaceFirst("\\]", String.format(",%d]", nt++)));
       else
-        sb.append(" " + Vocabulary.word(getEnglish()[i]));
+        sb.append(" ").append(Vocabulary.word(getEnglish()[i]));
     }
     sb.append(" |||");
-    sb.append(" " + getFeatureString());
+    sb.append(" ").append(getFeatureString());
     if (getAlignmentString() != null)
-      sb.append(" ||| " + getAlignmentString());
+      sb.append(" ||| ").append(getAlignmentString());
     return sb.toString();
   }
 
@@ -473,7 +469,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
     StringBuilder sb = new StringBuilder();
     for (Integer index : getEnglish()) {
       if (index >= 0)
-        sb.append(Vocabulary.word(index) + " ");
+        sb.append(Vocabulary.word(index)).append(" ");
       else
         sb.append(Vocabulary.word(foreignNTs[-index - 1]).replace("]",
             String.format(",%d] ", Math.abs(index))));
@@ -527,14 +523,14 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
    */
   public Map<Integer, List<Integer>> getAlignmentMap() {
     byte[] alignmentArray = getAlignment();
-    Map<Integer, List<Integer>> alignmentMap = new HashMap<Integer, List<Integer>>();
+    Map<Integer, List<Integer>> alignmentMap = new HashMap<>();
     if (alignmentArray != null) {
       for (int alignmentIdx = 0; alignmentIdx < alignmentArray.length; alignmentIdx += 2 ) {
         int s = alignmentArray[alignmentIdx];
         int t = alignmentArray[alignmentIdx + 1];
         List<Integer> values = alignmentMap.get(t);
         if (values == null)
-          alignmentMap.put(t, values = new ArrayList<Integer>());
+          alignmentMap.put(t, values = new ArrayList<>());
         values.add(s);
       }
     }
@@ -603,22 +599,19 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
    * @return true if there is a match
    */
   public boolean matches(Sentence sentence) {
-    boolean match = getPattern().matcher(sentence.fullSource()).find();
     // System.err.println(String.format("match(%s,%s) = %s", Pattern.quote(getFrenchWords()),
     // sentence.annotatedSource(), match));
-    return match;
+    return getPattern().matcher(sentence.fullSource()).find();
   }
 
   /**
    * This comparator is used for sorting the rules during cube pruning. An estimate of the cost
    * of each rule is computed and used to sort. 
    */
-  public static Comparator<Rule> EstimatedCostComparator = new Comparator<Rule>() {
-    public int compare(Rule rule1, Rule rule2) {
-      float cost1 = rule1.getEstimatedCost();
-      float cost2 = rule2.getEstimatedCost();
-      return Float.compare(cost2,  cost1);
-    }
+  public static final Comparator<Rule> EstimatedCostComparator = (rule1, rule2) -> {
+    float cost1 = rule1.getEstimatedCost();
+    float cost2 = rule2.getEstimatedCost();
+    return Float.compare(cost2,  cost1);
   };
   
   public int compare(Rule rule1, Rule rule2) {

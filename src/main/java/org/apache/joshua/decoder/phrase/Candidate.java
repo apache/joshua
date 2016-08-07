@@ -37,19 +37,19 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 public class Candidate {
 
   // the set of hypotheses that can be paired with phrases from this span 
-  private List<Hypothesis> hypotheses;
+  private final List<Hypothesis> hypotheses;
 
   // the list of target phrases gathered from a span of the input
-  private TargetPhrases phrases;
+  private final TargetPhrases phrases;
 
   // source span of new phrase
-  public Span span;
+  public final Span span;
   
   // future cost of applying phrases to hypotheses
-  float future_delta;
+  final float future_delta;
   
   // indices into the hypotheses and phrases arrays (used for cube pruning)
-  private int[] ranks;
+  private final int[] ranks;
   
   // scoring and state information 
   private ComputeNodeResult result;
@@ -186,7 +186,7 @@ public class Candidate {
    * @return a list of size one, wrapping the tail node pointer
    */
   public List<HGNode> getTailNodes() {
-    List<HGNode> tailNodes = new ArrayList<HGNode>();
+    List<HGNode> tailNodes = new ArrayList<>();
     tailNodes.add(getHypothesis());
     return tailNodes;
   }

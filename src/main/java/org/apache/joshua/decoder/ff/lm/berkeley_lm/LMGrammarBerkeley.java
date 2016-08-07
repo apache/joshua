@@ -53,7 +53,7 @@ public class LMGrammarBerkeley extends DefaultNGramLanguageModel {
 
   private int[] vocabIdToMyIdMapping;
 
-  private ThreadLocal<int[]> arrayScratch = new ThreadLocal<int[]>() {
+  private final ThreadLocal<int[]> arrayScratch = new ThreadLocal<int[]>() {
 
     @Override
     protected int[] initialValue() {
@@ -117,7 +117,7 @@ public class LMGrammarBerkeley extends DefaultNGramLanguageModel {
   public  boolean isOov(int id) {
     // for Berkeley, we unfortunately have to temporarily convert to String
     return lm.getWordIndexer().getIndexPossiblyUnk(Vocabulary.word(id)) <= 0;
-  };
+  }
 
   @Override
   public float sentenceLogProbability(int[] sentence, int order, int startIndex) {

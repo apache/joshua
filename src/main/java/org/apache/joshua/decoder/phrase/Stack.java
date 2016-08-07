@@ -43,20 +43,20 @@ public class Stack extends ArrayList<Hypothesis> {
 
   private static final long serialVersionUID = 7885252799032416068L;
 
-  private HashMap<Coverage, ArrayList<Hypothesis>> coverages;
+  private final HashMap<Coverage, ArrayList<Hypothesis>> coverages;
   
-  private Sentence sentence;
-  private List<FeatureFunction> featureFunctions;
-  private JoshuaConfiguration config;
+  private final Sentence sentence;
+  private final List<FeatureFunction> featureFunctions;
+  private final JoshuaConfiguration config;
 
   /* The list of states we've already visited. */
-  private HashSet<Candidate> visitedStates;
+  private final HashSet<Candidate> visitedStates;
   
   /* A list of candidates sorted for consideration for entry to the chart (for cube pruning) */
-  private PriorityQueue<Candidate> candidates;
+  private final PriorityQueue<Candidate> candidates;
   
   /* Short-circuits adding a cube-prune state more than once */
-  private HashMap<Hypothesis, Hypothesis> deduper;
+  private final HashMap<Hypothesis, Hypothesis> deduper;
   
   /**
    * Create a new stack. Stacks are organized one for each number of source words that are covered.
@@ -70,10 +70,10 @@ public class Stack extends ArrayList<Hypothesis> {
     this.sentence = sentence;
     this.config = config;
     
-    this.candidates = new PriorityQueue<Candidate>(1, new CandidateComparator());
-    this.coverages = new HashMap<Coverage, ArrayList<Hypothesis>>();
-    this.visitedStates = new HashSet<Candidate>();
-    this.deduper = new HashMap<Hypothesis,Hypothesis>();
+    this.candidates = new PriorityQueue<>(1, new CandidateComparator());
+    this.coverages = new HashMap<>();
+    this.visitedStates = new HashSet<>();
+    this.deduper = new HashMap<>();
   }
 
   /**
@@ -86,7 +86,7 @@ public class Stack extends ArrayList<Hypothesis> {
   public boolean add(Hypothesis hyp) {
     
     if (! coverages.containsKey((hyp.getCoverage())))
-      coverages.put(hyp.getCoverage(), new ArrayList<Hypothesis>()); 
+      coverages.put(hyp.getCoverage(), new ArrayList<>());
     coverages.get(hyp.getCoverage()).add(hyp);
     
     return super.add(hyp);
@@ -153,7 +153,7 @@ public class Stack extends ArrayList<Hypothesis> {
       String newWords = cand.getRule().getEnglishWords().replace("[X,1] ",  "");
           
       // If the string is not found in the target sentence, explore the cube neighbors
-      if (sentence.fullTarget().indexOf(oldWords + " " + newWords) == -1) {
+      if (!sentence.fullTarget().contains(oldWords + " " + newWords)) {
         Candidate next = cand.extendPhrase();
         if (next != null)
           addCandidate(next); 

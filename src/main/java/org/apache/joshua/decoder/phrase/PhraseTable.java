@@ -18,8 +18,6 @@
  */
 package org.apache.joshua.decoder.phrase;
 
-import static org.apache.joshua.decoder.ff.tm.OwnerMap.UNKNOWN_OWNER;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -43,7 +41,7 @@ import org.apache.joshua.decoder.ff.tm.packed.PackedGrammar;
  */
 public class PhraseTable implements Grammar {
   
-  private JoshuaConfiguration config;
+  private final JoshuaConfiguration config;
   private Grammar backend;
   
   /**
@@ -118,7 +116,7 @@ public class PhraseTable implements Grammar {
    * @param rule the rule to add
    */
   public void addRule(Rule rule) {
-    ((MemoryBasedBatchGrammar)backend).addRule(rule);
+    backend.addRule(rule);
   }
   
   @Override

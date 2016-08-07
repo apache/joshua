@@ -51,9 +51,7 @@ public class TranslationRequestStream {
   private final JoshuaConfiguration joshuaConfiguration;
   private int sentenceNo = -1;
 
-  private Sentence nextSentence = null;
-
-  /* Plain text or JSON input */ 
+  /* Plain text or JSON input */
   private StreamHandler requestHandler = null;
 
   /* Whether the request has been killed by a broken client connection. */
@@ -139,7 +137,7 @@ public class TranslationRequestStream {
    * new one.
    */
   public synchronized Sentence next() {
-    nextSentence = null;
+    Sentence nextSentence = null;
     
     if (isShutDown)
       return null;

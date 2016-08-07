@@ -61,7 +61,7 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
   private int numDenseFeatures = 0;
 
   /* The trie root. */
-  private MemoryBasedTrie root = new MemoryBasedTrie();
+  private final MemoryBasedTrie root = new MemoryBasedTrie();
 
   /* The file containing the grammar. */
   private String grammarFile;
@@ -171,9 +171,7 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
 
     maxSourcePhraseLength = Math.max(maxSourcePhraseLength, french.length);
 
-    for (int k = 0; k < french.length; k++) {
-      int curSymID = french[k];
-
+    for (int curSymID : french) {
       /*
        * Note that the nonTerminal symbol in the french is not cleaned (i.e., will be sth like
        * [X,1]), but the symbol in the Trie has to be cleaned, so that the match does not care about
@@ -186,7 +184,7 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
       if (null == nextLayer) {
         nextLayer = new MemoryBasedTrie();
         if (pos.hasExtensions() == false) {
-          pos.childrenTbl = new HashMap<Integer, MemoryBasedTrie>();
+          pos.childrenTbl = new HashMap<>();
         }
         pos.childrenTbl.put(curSymID, nextLayer);
       }

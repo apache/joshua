@@ -42,7 +42,7 @@ public class RuleShape extends StatelessFF {
     private final String string;
     private boolean repeats;
 
-    private WordType(final String string) {
+    WordType(final String string) {
       this.string = string;
       this.repeats = false;
     }

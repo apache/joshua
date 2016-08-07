@@ -48,17 +48,17 @@ public class GrammarBuilderWalkerFunction implements WalkerFunction {
 
   private static final Logger LOG = LoggerFactory.getLogger(GrammarBuilderWalkerFunction.class);
 
-  private MemoryBasedBatchGrammar grammar;
-  private static HieroFormatReader reader = new HieroFormatReader();
+  private final MemoryBasedBatchGrammar grammar;
+  private static final HieroFormatReader reader = new HieroFormatReader();
   private PrintStream outStream;
-  private int goalSymbol;
-  private HashSet<Rule> rules;
+  private final int goalSymbol;
+  private final HashSet<Rule> rules;
 
   public GrammarBuilderWalkerFunction(String goal,JoshuaConfiguration joshuaConfiguration) {
     grammar = new MemoryBasedBatchGrammar(reader, joshuaConfiguration, 1000);
     outStream = null;
     goalSymbol = Vocabulary.id(goal);
-    rules = new HashSet<Rule>();
+    rules = new HashSet<>();
   }
 
   public GrammarBuilderWalkerFunction(String goal, PrintStream out,JoshuaConfiguration joshuaConfiguration) {
@@ -104,10 +104,8 @@ public class GrammarBuilderWalkerFunction implements WalkerFunction {
     // if this would be unary abstract, getNewSource will be null
     if (source == null) return null;
     int[] target = getNewTargetFromSource(source);
-    Rule result =
-        new Rule(headLabel, source, target, edgeRule.getFeatureString(), edgeRule.getArity());
     // System.err.printf("new rule is %s\n", result);
-    return result;
+    return new Rule(headLabel, source, target, edgeRule.getFeatureString(), edgeRule.getArity());
   }
 
   private static int[] getNewSource(boolean isGlue, HyperEdge edge) {

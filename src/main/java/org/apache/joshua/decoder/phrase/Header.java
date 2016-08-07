@@ -30,7 +30,7 @@ public class Header implements Comparable<Header>, Comparator<Header> {
   private static final Logger LOG = LoggerFactory.getLogger(Header.class);
 
   private float score;
-  private int arity;
+  private final int arity;
   private Note note;
     
   protected Header() {

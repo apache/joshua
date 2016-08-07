@@ -39,7 +39,7 @@ public class Coverage {
   private BitSet bits;
 
   // Default bit vector length
-  private static int INITIAL_LENGTH = 10;
+  private static final int INITIAL_LENGTH = 10;
 
   public Coverage() {
     firstZero = 0;

@@ -57,6 +57,6 @@ class SuperNode {
    */
   public SuperNode(int lhs) {
     this.lhs = lhs;
-    this.nodes = new ArrayList<HGNode>();
+    this.nodes = new ArrayList<>();
   }
 }

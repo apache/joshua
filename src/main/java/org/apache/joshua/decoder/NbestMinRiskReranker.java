@@ -55,13 +55,12 @@ public class NbestMinRiskReranker {
 
   double scalingFactor = 1.0;
 
-  static int bleuOrder = 4;
-  static boolean doNgramClip = true;
+  static final int bleuOrder = 4;
+  static final boolean doNgramClip = true;
 
-  static boolean useGoogleLinearCorpusGain = false;
+  static final boolean useGoogleLinearCorpusGain = false;
 
-  final PriorityBlockingQueue<RankerResult> resultsQueue =
-      new PriorityBlockingQueue<RankerResult>();
+  final PriorityBlockingQueue<RankerResult> resultsQueue = new PriorityBlockingQueue<>();
 
   public NbestMinRiskReranker(boolean produceRerankedNbest, double scalingFactor) {
     this.produceRerankedNbest = produceRerankedNbest;
@@ -85,12 +84,12 @@ public class NbestMinRiskReranker {
       }
     } 
 
-    List<String> hypsItself = new ArrayList<String>();
+    List<String> hypsItself = new ArrayList<>();
     // ArrayList<String> l_feat_scores = new ArrayList<String>();
-    List<Double> baselineScores = new ArrayList<Double>(); // linear combination of all baseline
+    List<Double> baselineScores = new ArrayList<>(); // linear combination of all baseline
                                                            // features
-    List<HashMap<String, Integer>> ngramTbls = new ArrayList<HashMap<String, Integer>>();
-    List<Integer> sentLens = new ArrayList<Integer>();
+    List<HashMap<String, Integer>> ngramTbls = new ArrayList<>();
+    List<Integer> sentLens = new ArrayList<>();
 
     for (String hyp : nbest) {
       String[] fds = Regex.threeBarsWithSpace.split(hyp);
@@ -104,7 +103,7 @@ public class NbestMinRiskReranker {
       String[] words = Regex.spaces.split(hypothesis);
       sentLens.add(words.length);
 
-      HashMap<String, Integer> ngramTbl = new HashMap<String, Integer>();
+      HashMap<String, Integer> ngramTbl = new HashMap<>();
       Ngram.getNgrams(ngramTbl, 1, bleuOrder, words);
       ngramTbls.add(ngramTbl);
 
@@ -125,13 +124,11 @@ public class NbestMinRiskReranker {
      * */
     computeNormalizedProbs(baselineScores, scalingFactor);
 
-    List<Double> normalizedProbs = baselineScores;
-
     // === required by google linear corpus gain
     HashMap<String, Double> posteriorCountsTbl = null;
     if (useGoogleLinearCorpusGain) {
-      posteriorCountsTbl = new HashMap<String, Double>();
-      getGooglePosteriorCounts(ngramTbls, normalizedProbs, posteriorCountsTbl);
+      posteriorCountsTbl = new HashMap<>();
+      getGooglePosteriorCounts(ngramTbls, baselineScores, posteriorCountsTbl);
     }
 
 
@@ -143,7 +140,7 @@ public class NbestMinRiskReranker {
      * */
     double bestGain = -1000000000;// set as worst gain
     String bestHyp = null;
-    List<Double> gains = new ArrayList<Double>();
+    List<Double> gains = new ArrayList<>();
     for (int i = 0; i < hypsItself.size(); i++) {
       String curHyp = hypsItself.get(i);
       int curHypLen = sentLens.get(i);
@@ -154,7 +151,7 @@ public class NbestMinRiskReranker {
         curGain = computeExpectedLinearCorpusGain(curHypLen, curHypNgramTbl, posteriorCountsTbl);
       } else {
         curGain =
-            computeExpectedGain(curHypLen, curHypNgramTbl, ngramTbls, sentLens, normalizedProbs);
+            computeExpectedGain(curHypLen, curHypNgramTbl, ngramTbls, sentLens, baselineScores);
       }
 
       gains.add(curGain);
@@ -335,7 +332,7 @@ public class NbestMinRiskReranker {
     LOG.info("Running mbr reranking");
 
     int oldSentID = -1;
-    List<String> nbest = new ArrayList<String>();
+    List<String> nbest = new ArrayList<>();
 
     Scanner scanner = new Scanner(System.in, "UTF-8");
 
@@ -415,7 +412,7 @@ public class NbestMinRiskReranker {
     final int sentID;
 
     RankerTask(final List<String> nbest, final int sentID) {
-      this.nbest = new ArrayList<String>(nbest);
+      this.nbest = new ArrayList<>(nbest);
       this.sentID = sentID;
     }
 

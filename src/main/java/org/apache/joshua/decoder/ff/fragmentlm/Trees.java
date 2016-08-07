@@ -36,9 +36,9 @@ import org.apache.joshua.corpus.Vocabulary;
 public class Trees {
 
   public static class PennTreeReader implements Iterator<Tree> {
-    public static String ROOT_LABEL = "ROOT";
+    public static final String ROOT_LABEL = "ROOT";
 
-    PushbackReader in;
+    final PushbackReader in;
     Tree nextTree;
 
     public boolean hasNext() {
@@ -115,7 +115,7 @@ public class Trees {
     }
 
     private List<Tree> readChildList() throws IOException {
-      List<Tree> children = new ArrayList<Tree>();
+      List<Tree> children = new ArrayList<>();
       readWhiteSpace();
       while (!isRightParen(peek())) {
         children.add(readTree(false));
@@ -168,7 +168,7 @@ public class Trees {
     }
 
     public PennTreeReader(Reader in) {
-      this.in = new PushbackReader((java.io.Reader) in);
+      this.in = new PushbackReader(in);
       nextTree = readRootTree();
       // System.out.println(nextTree);
     }

@@ -54,9 +54,9 @@ public interface ConstraintRule {
    * The interpretation of a RHS is that it provides a hard constraint to filter the regular grammar
    * such that only rules generating the desired translation can be used.</p>
    */
-  public enum Type {
+  enum Type {
     RULE, LHS, RHS
-  };
+  }
 
   /** 
    * Return the type of this ConstraintRule.

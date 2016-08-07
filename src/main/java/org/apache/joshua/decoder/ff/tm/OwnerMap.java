@@ -37,7 +37,7 @@ import com.google.common.collect.HashBiMap;
 public class OwnerMap {
 
   // bi-directional mapping between OwnerId and Owner strings
-  private static BiMap<OwnerId, String> map = HashBiMap.create();
+  private static final BiMap<OwnerId, String> map = HashBiMap.create();
 
   public static final OwnerId UNKNOWN_OWNER_ID = new OwnerId(0);
   public static final String UNKNOWN_OWNER = "<unowned>";

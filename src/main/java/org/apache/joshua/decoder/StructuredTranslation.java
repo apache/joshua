@@ -21,9 +21,6 @@ package org.apache.joshua.decoder;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.joshua.decoder.ff.FeatureVector;
-import org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationState;
-import org.apache.joshua.decoder.io.DeNormalize;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.apache.joshua.decoder.segment_file.Token;
 import org.apache.joshua.util.FormatUtils;
