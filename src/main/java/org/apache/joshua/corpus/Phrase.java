@@ -34,7 +34,7 @@ public interface Phrase extends Comparable<Phrase> {
    * 
    * @return an int[] corresponding to the ID of each word in the phrase
    */
-  public int[] getWordIDs();
+  int[] getWordIDs();
 
   /**
    * Returns the integer word id of the word at the specified position.
