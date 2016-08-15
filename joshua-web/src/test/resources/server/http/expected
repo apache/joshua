@@ -1,0 +1,16 @@
+{
+  "data": {
+    "translations": [
+      {
+        "translatedText": "I_OOV love_OOV it_OOV when_OOV I_OOV get_OOV the_OOV house_OOV clean_OOV before_OOV the_OOV weekend_OOV",
+        "raw_nbest": [
+          {
+            "hyp": "0 ||| I_OOV love_OOV it_OOV when_OOV I_OOV get_OOV the_OOV house_OOV clean_OOV before_OOV the_OOV weekend_OOV ||| tm_glue_0\u003d12.000 ||| 0.000",
+            "totalScore": 0.0
+          }
+        ]
+      }
+    ]
+  },
+  "metadata": []
+}
