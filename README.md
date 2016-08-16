@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/apache/incubator-joshua.svg?branch=master)](https://travis-ci.org/apache/incubator-joshua)
+
 # Welcome to Apache Joshua (Incubating)
 <img src="https://s.apache.org/joshua_logo" align="right" width="300" />
 
@@ -25,7 +27,7 @@ Joshua 6.X includes the following new features:
 
 ## Quick start
 
-Joshua must be run with a Java JDK 1.8 minimum. 
+Joshua must be run with a Java JDK 1.8 minimum.
 
 To run the decoder in any form requires setting a few basic environment
 variables: `$JAVA_HOME`, `$JOSHUA`, and, for certain portions of the model-training
