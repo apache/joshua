@@ -63,22 +63,15 @@ public class MosesFormatReader extends HieroFormatReader {
    *    
    * becomes
    * 
-   *    [X] ||| [X,1] mots francaises ||| [X,1] French words ||| 1 2 3  ||| 0-1 1-0
+   *    [X] ||| mots francaises ||| French words ||| 1 2 3  ||| 0-1 1-0
    *    
-   * For thrax-extracted phrasal grammars, it transforms
-   * 
-   *    [X] ||| mots francaises ||| French words ||| 1 2 3 ||| 0-1 1-0
-   *
-   * into
-   * 
-   *    [X] ||| [X,1] mots francaises ||| [X,1] French words ||| 1 2 3 ||| 0-1 1-0
+   * For thrax-extracted phrasal grammars, no transformation is needed.
    */
   @Override
   public Rule parseLine(String line) {
     String[] fields = line.split(Constants.fieldDelimiter);
     
-    String nt = FormatUtils.cleanNonTerminal(Constants.defaultNT);
-    StringBuffer hieroLine = new StringBuffer(Constants.defaultNT + " ||| [" + nt + ",1] " + fields[0] + " ||| [" + nt + ",1] " + fields[1] + " |||");
+    StringBuffer hieroLine = new StringBuffer(Constants.defaultNT + " ||| " + fields[0] + " ||| " + fields[1] + " |||");
 
     String mosesFeatureString = fields[2];
     for (String value: mosesFeatureString.split(" ")) {

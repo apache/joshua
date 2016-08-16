@@ -18,8 +18,6 @@
  */
 package org.apache.joshua.decoder.phrase;
 
-import static org.apache.joshua.decoder.ff.tm.OwnerMap.UNKNOWN_OWNER;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -80,14 +78,13 @@ public class PhraseTable implements Grammar {
   }
       
   /**
-   * Returns the longest source phrase read. Because phrases have a dummy nonterminal prepended to
-   * them, we need to subtract 1.
+   * Returns the longest source phrase read.
    * 
    * @return the longest source phrase read.
    */
   @Override
   public int getMaxSourcePhraseLength() {
-    return this.backend.getMaxSourcePhraseLength() - 1;
+    return this.backend.getMaxSourcePhraseLength();
   }
 
   /**
@@ -99,7 +96,6 @@ public class PhraseTable implements Grammar {
   public RuleCollection getPhrases(int[] sourceWords) {
     if (sourceWords.length != 0) {
       Trie pointer = getTrieRoot();
-      pointer = pointer.match(Vocabulary.id("[X]"));
       int i = 0;
       while (pointer != null && i < sourceWords.length)
         pointer = pointer.match(sourceWords[i++]);

@@ -57,3 +57,4 @@ build
 .classpath
 /target/
 .project
+/doc/

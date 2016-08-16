@@ -19,9 +19,17 @@
 package org.apache.joshua.decoder.phrase;
 
 /*** 
- * A candidate is basically a cube prune state. It contains a list of hypotheses and target
- * phrases, and an instantiated candidate is a pair of indices that index these two lists. This
- * is the "cube prune" position.
+ * A candidate represents a translation hypothesis that may possibly be added to the translation
+ * hypergraph. It groups together (a) a set of translation hypotheses all having the same coverage
+ * vector and (b) a set of compatible phrase extensions that all cover the same source span. A 
+ * Candidate object therefore denotes a particular precise coverage vector. When a Candidate is
+ * instantiated, it has values in ranks[] that are indices into these two lists representing
+ * the current cube prune state.
+ * 
+ * For any particular (previous hypothesis) x (translation option) combination (a selection from
+ * both lists), there is no guarantee about whether this is a (m)onotonic, (s)wap, or (d)iscontinuous
+ * rule application. This must be inferred from the span (recording the portion of the input being
+ * translated) and the last index of the previous hypothesis under consideration.
  */
 
 import java.util.ArrayList;
@@ -30,26 +38,40 @@ import java.util.List;
 
 import org.apache.joshua.corpus.Span;
 import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
+import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.segment_file.Sentence;
 
 public class Candidate {
-
+  
+  private List<FeatureFunction> featureFunctions;
+  private Sentence sentence;
+  
+  // source span of new phrase
+  public Span span;
+  
   // the set of hypotheses that can be paired with phrases from this span 
   private List<Hypothesis> hypotheses;
 
   // the list of target phrases gathered from a span of the input
   private TargetPhrases phrases;
-
-  // source span of new phrase
-  public Span span;
   
   // future cost of applying phrases to hypotheses
-  float future_delta;
+  private float future_delta;
   
   // indices into the hypotheses and phrases arrays (used for cube pruning)
   private int[] ranks;
+  
+  // the reordering rule used by an instantiated Candidate
+  private Rule rule;
+  
+  // the HGNode built over the current target side phrase
+  private HGNode phraseNode;
+  
+  // the cost of the current configuration
+  private ComputeNodeResult computedResult;
   
   // scoring and state information 
   private ComputeNodeResult result;
@@ -96,22 +118,27 @@ public class Candidate {
         ranks[0], hypotheses.size(), ranks[1], phrases.size(),
         getHypothesis(), getRule().getEnglishWords().replaceAll("\\[.*?\\] ",""), getSpan());
   }
-  
-  public Candidate(List<Hypothesis> hypotheses, TargetPhrases phrases, Span span, float delta) {
-    this.hypotheses = hypotheses;
-    this.phrases = phrases;
-    this.span = span;
-    this.future_delta = delta;
-    this.ranks = new int[] { 0, 0 };
-  }
 
-  public Candidate(List<Hypothesis> hypotheses, TargetPhrases phrases, Span span, float delta, int[] ranks) {
+  public Candidate(List<FeatureFunction> featureFunctions, Sentence sentence, 
+      List<Hypothesis> hypotheses, TargetPhrases phrases, Span span, float delta, int[] ranks) {
     this.hypotheses = hypotheses;
     this.phrases = phrases;
     this.span = span;
     this.future_delta = delta;
     this.ranks = ranks;
+    this.rule = isMonotonic() ? Hypothesis.MONO_RULE : Hypothesis.END_RULE;
 //    this.score = hypotheses.get(ranks[0]).score + phrases.get(ranks[1]).getEstimatedCost();
+    this.phraseNode = null;
+  }
+  
+  /**
+   * Determines whether the current previous hypothesis extended with the currently selected
+   * phrase represents a straight or inverted rule application.
+   * 
+   * @return
+   */
+  private boolean isMonotonic() {
+    return getHypothesis().getLastSourceIndex() < span.start;
   }
   
   /**
@@ -131,7 +158,7 @@ public class Candidate {
    */
   public Candidate extendHypothesis() {
     if (ranks[0] < hypotheses.size() - 1) {
-      return new Candidate(hypotheses, phrases, span, future_delta, new int[] { ranks[0] + 1, ranks[1] });
+      return new Candidate(featureFunctions, sentence, hypotheses, phrases, span, future_delta, new int[] { ranks[0] + 1, ranks[1] });
     }
     return null;
   }
@@ -143,7 +170,7 @@ public class Candidate {
    */
   public Candidate extendPhrase() {
     if (ranks[1] < phrases.size() - 1) {
-      return new Candidate(hypotheses, phrases, span, future_delta, new int[] { ranks[0], ranks[1] + 1 });
+      return new Candidate(featureFunctions, sentence, hypotheses, phrases, span, future_delta, new int[] { ranks[0], ranks[1] + 1 });
     }
     
     return null;
@@ -170,13 +197,24 @@ public class Candidate {
   }
   
   /**
-   * This returns the target side {@link org.apache.joshua.corpus.Phrase}, which is a {@link org.apache.joshua.decoder.ff.tm.Rule} object. This is just a
-   * convenience function that works by returning the phrase indexed in ranks[1].
+   * This returns a new Hypothesis (HGNode) representing the phrase being added, i.e., a terminal
+   * production in the hypergraph. The score and DP state are computed only here on demand.
+   * 
+   * @return a new hypergraph node representing the phrase translation
+   */
+  public HGNode getPhraseNode() {
+    ComputeNodeResult result = new ComputeNodeResult(featureFunctions, getRule(), null, span.start, span.end, null, sentence);
+    phraseNode = new HGNode(-1, span.end, rule.getLHS(), result.getDPStates(), null, result.getPruningEstimate());
+    return phraseNode;
+  }
+    
+  /**
+   * This returns the rule being applied (straight or inverted)
    * 
    * @return the phrase at position ranks[1]
    */
   public Rule getRule() {
-    return phrases.get(ranks[1]);
+    return this.rule;
   }
   
   /**
@@ -187,7 +225,13 @@ public class Candidate {
    */
   public List<HGNode> getTailNodes() {
     List<HGNode> tailNodes = new ArrayList<HGNode>();
-    tailNodes.add(getHypothesis());
+    if (isMonotonic()) {
+      tailNodes.add(getHypothesis());
+      tailNodes.add(getPhraseNode());
+    } else {
+      tailNodes.add(getPhraseNode());
+      tailNodes.add(getHypothesis());
+    }
     return tailNodes;
   }
   
@@ -202,13 +246,8 @@ public class Candidate {
     return cov;
   }
 
-  /**
-   * Sets the result of a candidate (TODO should just be moved to the constructor).
-   * 
-   * @param result todo
-   */
-  public void setResult(ComputeNodeResult result) {
-    this.result = result;
+  public ComputeNodeResult getResult() {
+    return computedResult;
   }
 
   /**
@@ -233,9 +272,5 @@ public class Candidate {
   
   public List<DPState> getStates() {
     return result.getDPStates();
-  }
-
-  public ComputeNodeResult getResult() {
-    return result;
   }
 }

@@ -22,13 +22,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
 import org.apache.joshua.decoder.JoshuaConfiguration;
-import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
-import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +43,6 @@ public class Stack extends ArrayList<Hypothesis> {
   private HashMap<Coverage, ArrayList<Hypothesis>> coverages;
   
   private Sentence sentence;
-  private List<FeatureFunction> featureFunctions;
   private JoshuaConfiguration config;
 
   /* The list of states we've already visited. */
@@ -65,8 +61,7 @@ public class Stack extends ArrayList<Hypothesis> {
    * @param sentence input for a {@link org.apache.joshua.lattice.Lattice}
    * @param config populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
-  public Stack(List<FeatureFunction> featureFunctions, Sentence sentence, JoshuaConfiguration config) {
-    this.featureFunctions = featureFunctions;
+  public Stack(Sentence sentence, JoshuaConfiguration config) {
     this.sentence = sentence;
     this.config = config;
     
@@ -149,6 +144,9 @@ public class Stack extends ArrayList<Hypothesis> {
 
     // Constrained decoding
     if (sentence.target() != null) {
+      throw new RuntimeException("* FATAL! Constrained decoding no longer works for the new phrase format");
+      // TODO: fix constrained decoding
+      /*
       String oldWords = cand.getHypothesis().bestHyperedge.getRule().getEnglishWords().replace("[X,1] ",  "");
       String newWords = cand.getRule().getEnglishWords().replace("[X,1] ",  "");
           
@@ -159,12 +157,10 @@ public class Stack extends ArrayList<Hypothesis> {
           addCandidate(next); 
         return;
       }
+      */
     }
 
     // TODO: sourcepath
-    ComputeNodeResult result = new ComputeNodeResult(this.featureFunctions, cand.getRule(),
-        cand.getTailNodes(), -1, cand.getSpan().end, null, this.sentence);
-    cand.setResult(result);
     
     candidates.add(cand);
   }
@@ -199,6 +195,7 @@ public class Stack extends ArrayList<Hypothesis> {
   /**
    * Adds a popped candidate to the chart / main stack. This is a candidate we have decided to
    * keep around.
+   * 
    * @param complete a completely-initialized translation {@link org.apache.joshua.decoder.phrase.Candidate}
    * 
    */

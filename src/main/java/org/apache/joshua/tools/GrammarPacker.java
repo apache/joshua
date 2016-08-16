@@ -61,9 +61,13 @@ public class GrammarPacker {
    * table packing that packed phrases without the [X,1] on the source and target sides, which
    * then required special handling in the decoder to use for phrase-based decoding.
    * 
-   * 
+   * - 4 (August 2016). Phrase-based decoding rewritten to represent phrases without a builtin
+   * nonterminal. Instead, cost-less glue rules are used in phrase-based decoding. This eliminates
+   * the need for special handling of phrase grammars (except for having to add a LHS), and lets
+   * phrase grammars be used in both hierarchical and phrase-based decoding without conversion.
+   *
    */
-  public static final int VERSION = 3;
+  public static final int VERSION = 4;
   
   // Size limit for slice in bytes.
   private static int DATA_SIZE_LIMIT = (int) (Integer.MAX_VALUE * 0.8);

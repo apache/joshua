@@ -43,7 +43,7 @@ public class Future {
 
     sentlen = chart.SentenceLength();
     entries = new ChartSpan<Float>(sentlen + 1, Float.NEGATIVE_INFINITY);
-
+    
     /*
      * The sentence is represented as a sequence of words, with the first and last words set
      * to <s> and </s>. We start indexing at 1 because the first word (<s>) is always covered.
@@ -68,7 +68,7 @@ public class Future {
 
     // All the phrases are in, now do minimum dynamic programming.  Lengths 0 and 1 were already handled above.
     for (int length = 2; length <= chart.SentenceLength(); length++) {
-      for (int begin = 1; begin <= chart.SentenceLength() - length; begin++) {
+      for (int begin = 1; begin < chart.SentenceLength() - length; begin++) {
         for (int division = begin + 1; division < begin + length; division++) {
           setEntry(begin, begin + length, Math.max(getEntry(begin, begin + length), getEntry(begin, division) + getEntry(division, begin + length)));
         }
@@ -106,14 +106,13 @@ public class Future {
 
   private float getEntry(int begin, int end) {
     assert end >= begin;
-    assert end < this.sentlen;
+    assert end <= this.sentlen;
     return entries.get(begin, end);
   }
 
   private void setEntry(int begin, int end, float value) {
     assert end >= begin;
-    assert end < this.sentlen;
-    //    System.err.println(String.format("future cost from %d to %d is %.5f", begin, end, value));
+    assert end <= this.sentlen;
     entries.set(begin, end, value);
   }
 }
