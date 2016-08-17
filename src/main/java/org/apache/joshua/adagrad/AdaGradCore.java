@@ -40,6 +40,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -49,7 +50,6 @@ import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.metrics.EvaluationMetric;
 import org.apache.joshua.util.StreamGobbler;
 
-import EDU.oswego.cs.dl.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -719,7 +719,7 @@ public class AdaGradCore {
         candCount[i] = 0;
         lastUsedIndex[i] = -1;
         // suffStats_array[i].clear();
-        suffStats_array[i] = new ConcurrentHashMap();
+        suffStats_array[i] = new ConcurrentHashMap<>();
       }
 
       // initLambda[0] is not used!
@@ -1539,7 +1539,7 @@ public class AdaGradCore {
 
         /*
          * line format:
-         * 
+         *
          * i ||| words of candidate translation . ||| feat-1_val feat-2_val ... feat-numParams_val
          * .*
          */
@@ -1922,13 +1922,13 @@ public class AdaGradCore {
       /*
        * InputStream inStream = new FileInputStream(new File(origFileName)); BufferedReader inFile =
        * new BufferedReader(new InputStreamReader(inStream, "utf8"));
-       * 
+       *
        * FileOutputStream outStream = new FileOutputStream(newFileName, false); OutputStreamWriter
        * outStreamWriter = new OutputStreamWriter(outStream, "utf8"); BufferedWriter outFile = new
        * BufferedWriter(outStreamWriter);
-       * 
+       *
        * String line; while(inFile.ready()) { line = inFile.readLine(); writeLine(line, outFile); }
-       * 
+       *
        * inFile.close(); outFile.close();
        */
       return true;
@@ -2026,10 +2026,10 @@ public class AdaGradCore {
           /*
            * OBSOLETE MODIFICATION //SPECIAL HANDLING FOR AdaGrad CLASSIFIER PARAMETERS String[]
            * paramA = line.split("\\s+");
-           * 
+           *
            * if( paramA[0].equals("-classifierParams") ) { String classifierParam = ""; for(int p=1;
            * p<=paramA.length-1; p++) classifierParam += paramA[p]+" ";
-           * 
+           *
            * if(paramA.length>=2) { String[] tmpParamA = new String[2]; tmpParamA[0] = paramA[0];
            * tmpParamA[1] = classifierParam; paramA = tmpParamA; } else {
            * println("Malformed line in config file:"); println(origLine); System.exit(70); } }//END
@@ -2572,12 +2572,12 @@ public class AdaGradCore {
     /*
      * 1: -docSet bottom 8d 2: -docSet bottom 25% the bottom ceil(0.20*numDocs) documents 3: -docSet
      * top 8d 4: -docSet top 25% the top ceil(0.20*numDocs) documents
-     * 
+     *
      * 5: -docSet window 11d around 90percentile 11 docs centered around 80th percentile (complain
      * if not enough docs; don't adjust) 6: -docSet window 11d around 40rank 11 docs centered around
      * doc ranked 50 (complain if not enough docs; don't adjust)
-     * 
-     * 
+     *
+     *
      * [0]: method (0-6) [1]: first (1-indexed) [2]: last (1-indexed) [3]: size [4]: center [5]:
      * arg1 (-1 for method 0) [6]: arg2 (-1 for methods 0-4)
      */
