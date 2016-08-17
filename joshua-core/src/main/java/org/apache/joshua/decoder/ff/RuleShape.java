@@ -18,6 +18,8 @@
  */
 package org.apache.joshua.decoder.ff;
 
+import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
+
 import java.util.List;
 
 import org.apache.joshua.decoder.JoshuaConfiguration;
@@ -89,11 +91,11 @@ public class RuleShape extends StatelessFF {
   @Override
   public DPState compute(Rule rule, List<HGNode> tailNodes, int i_, int j, SourcePath sourcePath,
       Sentence sentence, Accumulator acc) {
-    final String sourceShape = getRulePattern(rule.getFrench());
-    final String targetShape = getRulePattern(rule.getEnglish());
-    acc.add(name + "_source_" + sourceShape, 1);
-    acc.add(name + "_target_" + sourceShape, 1);
-    acc.add(name + "_sourceTarget_" + sourceShape + "_" + targetShape, 1);
+    final String sourceShape = getRulePattern(rule.getSource());
+    final String targetShape = getRulePattern(rule.getTarget());
+    acc.add(hashFeature(name + "_source_" + sourceShape), 1);
+    acc.add(hashFeature(name + "_target_" + sourceShape), 1);
+    acc.add(hashFeature(name + "_sourceTarget_" + sourceShape + "_" + targetShape), 1);
     return null;
   }
 }

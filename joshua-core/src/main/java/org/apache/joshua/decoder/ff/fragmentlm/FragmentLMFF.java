@@ -18,10 +18,11 @@
  */
 package org.apache.joshua.decoder.ff.fragmentlm;
 
+import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
@@ -31,12 +32,8 @@ import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.StatefulFF;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
-import org.apache.joshua.decoder.ff.tm.OwnerId;
-import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
-import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
 import org.apache.joshua.decoder.hypergraph.HGNode;
-import org.apache.joshua.decoder.hypergraph.HyperEdge;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,12 +207,12 @@ public class FragmentLMFF extends StatefulFF {
 
           if (fragment.getLabel() == tree.getLabel() && match(fragment, tree)) {
 //             System.err.println(String.format("  FIRING: matched %s against %s", fragment, tree));
-            acc.add(fragment.escapedString(), 1);
+            acc.add(hashFeature(fragment.escapedString()), 1);
             if (OPTS_DEPTH)
               if (fragment.isLexicalized())
-                acc.add(String.format("FragmentFF_lexdepth%d", fragment.getDepth()), 1);
+                acc.add(hashFeature(String.format("FragmentFF_lexdepth%d", fragment.getDepth())), 1);
               else
-                acc.add(String.format("FragmentFF_depth%d", fragment.getDepth()), 1);
+                acc.add(hashFeature(String.format("FragmentFF_depth%d", fragment.getDepth())), 1);
           }
         }
       }
@@ -288,47 +285,6 @@ public class FragmentLMFF extends StatefulFF {
   public float estimateCost(Rule rule, Sentence sentence) {
     // TODO Auto-generated method stub
     return 0;
-  }
-  
-  public static void main(String[] args) {
-    /* Add an LM fragment, then create a dummy multi-level hypergraph to match the fragment against. */
-    // FragmentLMFF fragmentLMFF = new FragmentLMFF(new FeatureVector(), (StateComputer) null, "");
-    FragmentLMFF fragmentLMFF = new FragmentLMFF(new FeatureVector(),
-        new String[] {"-lm", "test/fragments.txt", "-map", "test/mapping.txt"}, null);
-  
-    Tree fragment = Tree.fromString("(S NP (VP (VBD \"said\") SBAR) (. \".\"))");
-  
-    Rule ruleS = new HieroFormatReader()
-        .parseLine("[S] ||| the man [VP,1] [.,2] ||| the man [VP,1] [.,2] ||| 0");
-    Rule ruleVP = new HieroFormatReader()
-        .parseLine("[VP] ||| said [SBAR,1] ||| said [SBAR,1] ||| 0");
-    Rule ruleSBAR = new HieroFormatReader()
-        .parseLine("[SBAR] ||| that he was done ||| that he was done ||| 0");
-    Rule rulePERIOD = new HieroFormatReader().parseLine("[.] ||| . ||| . ||| 0");
-  
-    final OwnerId owner = OwnerMap.register("0");
-    ruleS.setOwner(owner);
-    ruleVP.setOwner(owner);
-    ruleSBAR.setOwner(owner);
-    rulePERIOD.setOwner(owner);
-  
-    HyperEdge edgeSBAR = new HyperEdge(ruleSBAR, 0.0f, 0.0f, null, (SourcePath) null);
-  
-    HGNode nodeSBAR = new HGNode(3, 7, ruleSBAR.getLHS(), null, edgeSBAR, 0.0f);
-    ArrayList<HGNode> tailNodesVP = new ArrayList<HGNode>();
-    Collections.addAll(tailNodesVP, nodeSBAR);
-    HyperEdge edgeVP = new HyperEdge(ruleVP, 0.0f, 0.0f, tailNodesVP, (SourcePath) null);
-    HGNode nodeVP = new HGNode(2, 7, ruleVP.getLHS(), null, edgeVP, 0.0f);
-  
-    HyperEdge edgePERIOD = new HyperEdge(rulePERIOD, 0.0f, 0.0f, null, (SourcePath) null);
-    HGNode nodePERIOD = new HGNode(7, 8, rulePERIOD.getLHS(), null, edgePERIOD, 0.0f);
-  
-    ArrayList<HGNode> tailNodes = new ArrayList<HGNode>();
-    Collections.addAll(tailNodes, nodeVP, nodePERIOD);
-  
-    Tree tree = Tree.buildTree(ruleS, tailNodes, 1);
-    boolean matched = fragmentLMFF.match(fragment, tree);
-    LOG.info("Does\n  {} match\n  {}??\n  -> {}", fragment, tree, matched);
   }
 
   /**

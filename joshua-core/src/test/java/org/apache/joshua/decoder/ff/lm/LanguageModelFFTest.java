@@ -26,6 +26,7 @@ import static org.testng.Assert.assertEquals;
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.ff.FeatureMap;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.state_maintenance.NgramDPState;
 import org.testng.annotations.AfterMethod;
@@ -42,8 +43,8 @@ public class LanguageModelFFTest {
   public void setUp() {
     Decoder.resetGlobalState();
 
-    FeatureVector weights = new FeatureVector();
-    weights.set("lm_0", WEIGHT);
+    FeatureVector weights = new FeatureVector(2);
+    weights.put(FeatureMap.hashFeature("lm_0"), WEIGHT);
     String[] args = {"-lm_type", "berkeleylm", "-lm_order", "2", "-lm_file", "./src/test/resources/lm/berkeley/lm"};
 
     JoshuaConfiguration config = new JoshuaConfiguration();

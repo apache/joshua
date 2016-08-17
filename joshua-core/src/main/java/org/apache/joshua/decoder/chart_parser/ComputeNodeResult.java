@@ -18,14 +18,15 @@
  */
 package org.apache.joshua.decoder.chart_parser;
 
-import java.util.ArrayList;
+import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.ff.StatefulFF;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.ff.StatefulFF;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
@@ -120,8 +121,8 @@ public class ComputeNodeResult {
 
       if (LOG.isDebugEnabled()) {
         LOG.debug("FEATURE {} = {} * {} = {}", feature.getName(),
-            acc.getScore() / Decoder.weights.getSparse(feature.getName()),
-            Decoder.weights.getSparse(feature.getName()), acc.getScore());
+            acc.getScore() / Decoder.weights.getOrDefault(hashFeature(feature.getName())),
+            Decoder.weights.getOrDefault(hashFeature(feature.getName())), acc.getScore());
       }
 
       if (feature.isStateful()) {
@@ -174,15 +175,15 @@ public class ComputeNodeResult {
       HyperEdge edge, int i, int j, Sentence sentence) {
 
     // Initialize the set of features with those that were present with the rule in the grammar.
-    FeatureVector featureDelta = new FeatureVector();
+    FeatureVector featureDelta = new FeatureVector(featureFunctions.size());
 
     // === compute feature logPs
     for (FeatureFunction ff : featureFunctions) {
       // A null rule signifies the final transition.
       if (edge.getRule() == null)
-        featureDelta.add(ff.computeFinalFeatures(edge.getTailNodes().get(0), i, j, edge.getSourcePath(), sentence));
+        featureDelta.addInPlace(ff.computeFinalFeatures(edge.getTailNodes().get(0), i, j, edge.getSourcePath(), sentence));
       else {
-        featureDelta.add(ff.computeFeatures(edge.getRule(), edge.getTailNodes(), i, j, edge.getSourcePath(), sentence));
+        featureDelta.addInPlace(ff.computeFeatures(edge.getRule(), edge.getTailNodes(), i, j, edge.getSourcePath(), sentence));
       }
     }
 

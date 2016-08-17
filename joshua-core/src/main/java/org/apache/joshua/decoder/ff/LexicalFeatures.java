@@ -19,6 +19,7 @@
 package org.apache.joshua.decoder.ff;
 
 import static com.google.common.cache.CacheBuilder.newBuilder;
+import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +56,7 @@ public class LexicalFeatures extends StatelessFF {
   // Strings separating words
   private static final String SEPARATOR = "~";
   
-  private final Cache<Rule, List<String>> featureCache;
+  private final Cache<Rule, List<Integer>> featureCache;
   
   public LexicalFeatures(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, NAME, args, config);
@@ -83,13 +84,13 @@ public class LexicalFeatures extends StatelessFF {
       return null;
     }
 
-    List<String> featureNames = featureCache.getIfPresent(rule);
-    if (featureNames == null) {
-      featureNames = getFeatures(rule);
-      featureCache.put(rule, featureNames);
+    List<Integer> featureIds = featureCache.getIfPresent(rule);
+    if (featureIds == null) {
+      featureIds = getFeatures(rule);
+      featureCache.put(rule, featureIds);
     }
-    for (String feature : featureNames) {
-      acc.add(feature, VALUE);
+    for (int featureId : featureIds) {
+      acc.add(featureId, VALUE);
     }
     
     return null;
@@ -100,15 +101,15 @@ public class LexicalFeatures extends StatelessFF {
    * @param rule
    * @return String representing the feature name.s
    */
-  private List<String> getFeatures(final Rule rule) {
-    final List<String> result = new ArrayList<>();
+  private List<Integer> getFeatures(final Rule rule) {
+    final List<Integer> result = new ArrayList<>();
     
     byte[] alignments = rule.getAlignment();
     if (alignments == null) {
       return result;
     }
-    int[] sourceWords = rule.getFrench();
-    int[] targetWords = rule.getEnglish();
+    int[] sourceWords = rule.getSource();
+    int[] targetWords = rule.getTarget();
     
     // sourceAligned & targetAligned indicate whether an index is covered by alignments
     boolean[] sourceAligned = new boolean[sourceWords.length];
@@ -121,11 +122,11 @@ public class LexicalFeatures extends StatelessFF {
       sourceAligned[sourceIndex] = true;
       targetAligned[targetIndex] = true;
       if (useAlignments) {
-        result.add(
+        result.add(hashFeature(
             "T:" + 
             Vocabulary.word(sourceWords[sourceIndex]) + 
             SEPARATOR + 
-            Vocabulary.word(targetWords[targetIndex]));
+            Vocabulary.word(targetWords[targetIndex])));
       }
     }
     
@@ -133,7 +134,7 @@ public class LexicalFeatures extends StatelessFF {
     if (useDeletions) {
       for (int i = 0; i < sourceAligned.length; i++) {
         if (!sourceAligned[i] && ! FormatUtils.isNonterminal(sourceWords[i])) {
-          result.add("D:" + Vocabulary.word(sourceWords[i]));
+          result.add(hashFeature("D:" + Vocabulary.word(sourceWords[i])));
         }
       }
     }
@@ -142,7 +143,7 @@ public class LexicalFeatures extends StatelessFF {
     if (useInsertions) {
       for (int i = 0; i < targetAligned.length; i++) {
         if (useInsertions && !targetAligned[i] && ! FormatUtils.isNonterminal(targetWords[i])) {
-          result.add("I:" + Vocabulary.word(targetWords[i]));
+          result.add(hashFeature("I:" + Vocabulary.word(targetWords[i])));
         }
       }
     }

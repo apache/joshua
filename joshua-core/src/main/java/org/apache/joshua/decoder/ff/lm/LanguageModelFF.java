@@ -30,6 +30,7 @@ import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Support;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
+import org.apache.joshua.decoder.ff.FeatureMap;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.StatefulFF;
 import org.apache.joshua.decoder.ff.lm.berkeley_lm.LMGrammarBerkeley;
@@ -84,7 +85,7 @@ public class LanguageModelFF extends StatefulFF {
   
   protected final static String NAME_PREFIX = "lm_";
   protected final static String OOV_SUFFIX = "_oov";
-  protected final String oovFeatureName;
+  protected final int oovFeatureId;
 
   /**
    * We always use this order of ngram, though the LMGrammar may provide higher order probability.
@@ -94,8 +95,6 @@ public class LanguageModelFF extends StatefulFF {
   /**
    * We cache the weight of the feature since there is only one.
    */
-  protected float weight;
-  protected float oovWeight;
   protected String type;
   protected String path;
 
@@ -105,11 +104,10 @@ public class LanguageModelFF extends StatefulFF {
   
   /** Whether this feature function fires LM oov indicators */ 
   protected boolean withOovFeature;
-  protected int oovDenseFeatureIndex = -1;
 
   public LanguageModelFF(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, NAME_PREFIX + LM_INDEX, args, config);
-    this.oovFeatureName = NAME_PREFIX + LM_INDEX + OOV_SUFFIX;
+    this.oovFeatureId = FeatureMap.hashFeature(NAME_PREFIX + LM_INDEX + OOV_SUFFIX);
     LM_INDEX++;
 
     this.type = parsedArgs.get("lm_type");
@@ -125,24 +123,7 @@ public class LanguageModelFF extends StatefulFF {
       this.withOovFeature = true;
     }
 
-    // The dense feature initialization hasn't happened yet, so we have to retrieve this as sparse
-    this.weight = weights.getSparse(name);
-    this.oovWeight = weights.getSparse(oovFeatureName);
-
     initializeLM();
-  }
-
-  @Override
-  public ArrayList<String> reportDenseFeatures(int index) {
-    denseFeatureIndex = index;
-    oovDenseFeatureIndex = denseFeatureIndex + 1;
-
-    final ArrayList<String> names = new ArrayList<String>(2);
-    names.add(name);
-    if (withOovFeature) {
-      names.add(oovFeatureName);
-    }
-    return names;
   }
 
   /**
@@ -176,7 +157,7 @@ public class LanguageModelFF extends StatefulFF {
   }
 
   public String logString() {
-    return String.format("%s, order %d (weight %.3f), classLm=%s", name, languageModel.getOrder(), weight, isClassLM);
+    return String.format("%s, order %d (weight %.3f), classLm=%s", name, languageModel.getOrder(), weights.getOrDefault(featureId), isClassLM);
   }
 
   /**
@@ -201,7 +182,7 @@ public class LanguageModelFF extends StatefulFF {
     }
     
     if (withOovFeature) {
-      acc.add(oovDenseFeatureIndex, getOovs(words));
+      acc.add(oovFeatureId, getOovs(words));
     }
 
     return computeTransition(words, tailNodes, acc);
@@ -222,7 +203,7 @@ public class LanguageModelFF extends StatefulFF {
       return getClasses(rule);
     }
     // Regular LM: use rule word ids
-    return rule.getEnglish();
+    return rule.getTarget();
   }
   
   /**
@@ -254,7 +235,7 @@ public class LanguageModelFF extends StatefulFF {
    */
   protected int[] getTags(Rule rule, int begin, int end, Sentence sentence) {
     /* Very important to make a copy here, so the original rule is not modified */
-    int[] tokens = Arrays.copyOf(rule.getEnglish(), rule.getEnglish().length);
+    int[] tokens = Arrays.copyOf(rule.getTarget(), rule.getTarget().length);
     byte[] alignments = rule.getAlignment();
 
     //    System.err.println(String.format("getTags() %s", rule.getRuleString()));
@@ -302,7 +283,7 @@ public class LanguageModelFF extends StatefulFF {
       throw new RuntimeException("The class map is not set. Cannot use the class LM ");
     }
     /* Very important to make a copy here, so the original rule is not modified */
-    int[] tokens = Arrays.copyOf(rule.getEnglish(), rule.getEnglish().length);
+    int[] tokens = Arrays.copyOf(rule.getTarget(), rule.getTarget().length);
     for (int i = 0; i < tokens.length; i++) {
       if (tokens[i] > 0 ) { // skip non-terminals
         tokens[i] = this.classMap.getClassID(tokens[i]);
@@ -350,7 +331,7 @@ public class LanguageModelFF extends StatefulFF {
     
     final float oovEstimate = (withOovFeature) ? getOovs(enWords) : 0f;
 
-    return weight * lmEstimate + oovWeight * oovEstimate;
+    return weights.getOrDefault(featureId) * lmEstimate + weights.getOrDefault(oovFeatureId) * oovEstimate;
   }
 
   /**
@@ -372,7 +353,7 @@ public class LanguageModelFF extends StatefulFF {
       estimate += scoreChunkLogP(leftContext, true, skipStart);
     }
     // NOTE: no future cost for oov weight
-    return weight * estimate;
+    return weights.getOrDefault(featureId) * estimate;
   }
 
   /**
@@ -446,7 +427,7 @@ public class LanguageModelFF extends StatefulFF {
       }
     }
     //    acc.add(name, transitionLogP);
-    acc.add(denseFeatureIndex, transitionLogP);
+    acc.add(featureId, transitionLogP);
 
     if (left_context != null) {
       return new NgramDPState(left_context, Arrays.copyOfRange(current, ccount - this.ngramOrder
@@ -489,7 +470,7 @@ public class LanguageModelFF extends StatefulFF {
 
     // Tell the accumulator
     //    acc.add(name, res);
-    acc.add(denseFeatureIndex, res);
+    acc.add(featureId, res);
 
     // State is the same
     return new NgramDPState(leftContext, rightContext);

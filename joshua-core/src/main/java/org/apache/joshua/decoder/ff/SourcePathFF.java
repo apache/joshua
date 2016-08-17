@@ -18,7 +18,6 @@
  */
 package org.apache.joshua.decoder.ff;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.joshua.decoder.JoshuaConfiguration;
@@ -43,21 +42,12 @@ public final class SourcePathFF extends StatelessFF {
   public SourcePathFF(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, "SourcePath", args, config);
   }
-
-  @Override
-  public ArrayList<String> reportDenseFeatures(int index) {
-    denseFeatureIndex = index;
-    
-    ArrayList<String> names = new ArrayList<String>();
-    names.add(name);
-    return names;
-  }
   
   @Override
   public DPState compute(Rule rule, List<HGNode> tailNodes, int i, int j, SourcePath sourcePath,
       Sentence sentence, Accumulator acc) {
 
-    acc.add(denseFeatureIndex,  sourcePath.getPathCost());
+    acc.add(featureId,  sourcePath.getPathCost());
     return null;
   }
 }

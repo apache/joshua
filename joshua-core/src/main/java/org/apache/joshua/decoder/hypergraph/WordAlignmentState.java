@@ -58,12 +58,12 @@ public class WordAlignmentState {
    */
   public WordAlignmentState(final Rule rule, final int start) {
     trgPoints = new LinkedList<AlignedSourceTokens>();
-    srcLength = rule.getFrench().length;
+    srcLength = rule.getSource().length;
     numNT = rule.getArity();
     srcStart = start;
     final Map<Integer, List<Integer>> alignmentMap = rule.getAlignmentMap();
     final int[] nonTerminalSourcePositions = rule.getNonTerminalSourcePositions();
-    final int[] trg = rule.getEnglish();
+    final int[] trg = rule.getTarget();
     // for each target index, create a TargetAlignmentPoint
     for (int trgIndex = 0; trgIndex < trg.length; trgIndex++) {
       final AlignedSourceTokens trgPoint = new AlignedSourceTokens();

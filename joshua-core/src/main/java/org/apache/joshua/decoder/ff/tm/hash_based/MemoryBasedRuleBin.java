@@ -18,6 +18,8 @@
  */
 package org.apache.joshua.decoder.ff.tm.hash_based;
 
+import java.util.Arrays;
+
 import org.apache.joshua.decoder.ff.tm.BasicRuleCollection;
 import org.apache.joshua.decoder.ff.tm.Rule;
 
@@ -47,13 +49,13 @@ public class MemoryBasedRuleBin extends BasicRuleCollection {
     // XXX This if clause seems bogus.
     if (rules.size() <= 0) { // first time
       this.arity = rule.getArity();
-      this.sourceTokens = rule.getFrench();
+      this.sourceTokens = rule.getSource();
     }
     if (rule.getArity() != this.arity) {
       return;
     }
     rules.add(rule);
     sorted = false;
-    rule.setFrench(this.sourceTokens);
+    assert(Arrays.equals(rule.getSource(), this.sourceTokens));
   }
 }

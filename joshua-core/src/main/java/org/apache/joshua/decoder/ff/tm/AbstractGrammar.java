@@ -165,8 +165,8 @@ public abstract class AbstractGrammar implements Grammar {
         if (LOG.isDebugEnabled()) {
           StringBuilder s = new StringBuilder();
           for (Rule r : rules.getSortedRules(models)) {
-            s.append("\n\t" + r.getLHS() + " ||| " + Arrays.toString(r.getFrench()) + " ||| "
-                + Arrays.toString(r.getEnglish()) + " ||| " + r.getFeatureVector() + " ||| "
+            s.append("\n\t" + r.getLHS() + " ||| " + Arrays.toString(r.getSource()) + " ||| "
+                + Arrays.toString(r.getTarget()) + " ||| " + r.getFeatureVector() + " ||| "
                 + r.getEstimatedCost() + "  " + r.getClass().getName() + "@"
                 + Integer.toHexString(System.identityHashCode(r)));
           }

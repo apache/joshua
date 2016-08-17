@@ -26,7 +26,9 @@ import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.testng.reporters.Files;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,6 +54,7 @@ public class KBestExtractionTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
+    //BROKEN
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.readConfigFile(CONFIG);
     joshuaConfig.outputFormat = "%i ||| %s ||| %c";
@@ -68,7 +71,8 @@ public class KBestExtractionTest {
   public void givenInput_whenKbestExtraction_thenOutputIsAsExpected() throws IOException {
     final String translation = decode(INPUT).toString();
     final String gold = new String(readAllBytes(GOLD_PATH), UTF_8);
-    assertEquals(gold, translation);
+    Files.writeFile(translation, new File("resources/kbest_extraction/output.actual"));
+    assertEquals(translation, gold);
   }
 
   private Translation decode(String input) {

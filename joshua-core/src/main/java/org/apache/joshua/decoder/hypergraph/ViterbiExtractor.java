@@ -93,8 +93,9 @@ public class ViterbiExtractor {
       final HyperGraph hg,
       final List<FeatureFunction> featureFunctions,
       final Sentence sentence) {
-    if (hg == null)
-      return new FeatureVector();
+    if (hg == null) {
+      return new FeatureVector(0);
+    }
 
     final FeatureVectorExtractor extractor = new FeatureVectorExtractor(
         featureFunctions, sentence);

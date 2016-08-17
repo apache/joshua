@@ -94,7 +94,7 @@ public class Candidate {
   public String toString() {
     return String.format("CANDIDATE(hyp %d/%d, phr %d/%d) [%s] phrase=[%s] span=%s",
         ranks[0], hypotheses.size(), ranks[1], phrases.size(),
-        getHypothesis(), getRule().getEnglishWords().replaceAll("\\[.*?\\] ",""), getSpan());
+        getHypothesis(), getRule().getTargetWords().replaceAll("\\[.*?\\] ",""), getSpan());
   }
   
   public Candidate(List<Hypothesis> hypotheses, TargetPhrases phrases, Span span, float delta) {

@@ -367,7 +367,7 @@ public class BLEU {
 
     Rule rule = edge.getRule();
     if (rule != null) {
-      int[] symbols = rule.getEnglish();
+      int[] symbols = rule.getTarget();
 
 //      System.err.println(String.format("compute(%s)", rule));
       

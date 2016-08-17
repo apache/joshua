@@ -18,6 +18,8 @@
  */
 package org.apache.joshua.decoder.ff;
 
+import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
+
 /***
  * @author Gideon Wenniger
  */
@@ -121,10 +123,10 @@ public class LabelSubstitutionFF extends StatelessFF {
       for (int nonterinalIndex = 0; nonterinalIndex < ruleSourceNonterminals.size(); nonterinalIndex++) {
         String ruleNonterminal = ruleSourceNonterminals.get(nonterinalIndex);
         String substitutionNonterminal = substitutionNonterminals.get(nonterinalIndex);
-        acc.add(computeLabelMatchingFeature(ruleNonterminal, substitutionNonterminal), 1);
-        acc.add(computeLabelSubstitutionFeature(ruleNonterminal, substitutionNonterminal), 1);
+        acc.add(hashFeature(computeLabelMatchingFeature(ruleNonterminal, substitutionNonterminal)), 1);
+        acc.add(hashFeature(computeLabelSubstitutionFeature(ruleNonterminal, substitutionNonterminal)), 1);
       }
-      acc.add(getGapLabelsForRuleSubstitutionSuffix(rule, tailNodes), 1);
+      acc.add(hashFeature(getGapLabelsForRuleSubstitutionSuffix(rule, tailNodes)), 1);
     }
     return null;
   }

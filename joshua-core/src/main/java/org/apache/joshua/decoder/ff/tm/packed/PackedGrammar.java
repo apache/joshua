@@ -55,6 +55,8 @@ package org.apache.joshua.decoder.ff.tm.packed;
  */
 
 import static java.util.Collections.sort;
+import static org.apache.joshua.decoder.ff.FeatureMap.getFeature;
+import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -94,14 +96,13 @@ import org.apache.joshua.util.FormatUtils;
 import org.apache.joshua.util.encoding.EncoderConfiguration;
 import org.apache.joshua.util.encoding.FloatEncoder;
 import org.apache.joshua.util.io.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PackedGrammar extends AbstractGrammar {
 
@@ -181,11 +182,6 @@ public class PackedGrammar extends AbstractGrammar {
     for (PackedSlice ps : slices)
       num_rules += ps.featureSize;
     return num_rules;
-  }
-
-  @Override
-  public int getNumDenseFeatures() {
-    return encoding.getNumDenseFeatures();
   }
 
   /**
@@ -344,7 +340,6 @@ public class PackedGrammar extends AbstractGrammar {
     private final int[] targetLookup;
     private int featureSize;
     private float[] estimated;
-    private float[] precomputable;
 
     private final static int BUFFER_HEADER_POSITION = 8;
 
@@ -386,9 +381,7 @@ public class PackedGrammar extends AbstractGrammar {
     private void initializeFeatureStructures() {
       int num_blocks = features.getInt(0);
       estimated = new float[num_blocks];
-      precomputable = new float[num_blocks];
       Arrays.fill(estimated, Float.NEGATIVE_INFINITY);
-      Arrays.fill(precomputable, Float.NEGATIVE_INFINITY);
       featureSize = features.getInt(4);
     }
 
@@ -430,7 +423,7 @@ public class PackedGrammar extends AbstractGrammar {
       }
     }
 
-    private final int[] getTarget(int pointer) {
+    private final int[] getTargetArray(int pointer) {
       // Figure out level.
       int tgt_length = 1;
       while (tgt_length < (targetLookup.length + 1) && targetLookup[tgt_length] <= pointer)
@@ -468,34 +461,27 @@ public class PackedGrammar extends AbstractGrammar {
 
     /**
      * Returns the FeatureVector associated with a rule (represented as a block ID).
-     * These features are in the form "feature1=value feature2=value...". By default, unlabeled
-     * features are named using the pattern.
+     * The feature ids are hashed corresponding to feature names prepended with the owner string:
+     * i.e. '0' becomes '<owner>_0'.
      * @param block_id
      * @return feature vector
      */
-
-    private final FeatureVector loadFeatureVector(int block_id) {
+    private final FeatureVector loadFeatureVector(int block_id, OwnerId ownerId) {
       int featurePosition = getIntFromByteBuffer(block_id, features);
       final int numFeatures = encoding.readId(features, featurePosition);
 
       featurePosition += EncoderConfiguration.ID_SIZE;
-      final FeatureVector featureVector = new FeatureVector();
+      final FeatureVector featureVector = new FeatureVector(encoding.getNumDenseFeatures());
       FloatEncoder encoder;
-      String featureName;
 
       for (int i = 0; i < numFeatures; i++) {
         final int innerId = encoding.readId(features, featurePosition);
-        final int outerId = encoding.outerId(innerId);
         encoder = encoding.encoder(innerId);
-        // TODO (fhieber): why on earth are dense feature ids (ints) encoded in the vocabulary?
-        featureName = Vocabulary.word(outerId);
+        final int outerId = encoding.outerId(innerId);
+        final int ownedFeatureId = hashFeature(getFeature(outerId), ownerId);
         final float value = encoder.read(features, featurePosition);
-        try {
-          int index = Integer.parseInt(featureName);
-          featureVector.increment(index, -value);
-        } catch (NumberFormatException e) {
-          featureVector.increment(featureName, value);
-        }
+        
+        featureVector.add(ownedFeatureId, value);
         featurePosition += EncoderConfiguration.ID_SIZE + encoder.size();
       }
       
@@ -668,7 +654,10 @@ public class PackedGrammar extends AbstractGrammar {
         return sorted;
       }
 
-      private synchronized void sortRules(List<FeatureFunction> models) {
+      /**
+       * Estimates rule costs for all rules at this trie node.
+       */
+      private synchronized void sortRules(List<FeatureFunction> featureFunctions) {
         int num_children = source[position];
         int rule_position = position + 2 * (num_children + 1);
         int num_rules = source[rule_position - 1];
@@ -676,19 +665,24 @@ public class PackedGrammar extends AbstractGrammar {
           this.sorted = true;
           return;
         }
-        Integer[] rules = new Integer[num_rules];
+        final Integer[] rules = new Integer[num_rules];
 
-        int target_address;
         int block_id;
+        int lhs;
+        int[] target;
+        byte[] alignments;
+        FeatureVector features;
+        
         for (int i = 0; i < num_rules; ++i) {
-          target_address = source[rule_position + 1 + 3 * i];
+          // we construct very short-lived rule objects for sorting
           rules[i] = rule_position + 2 + 3 * i;
           block_id = source[rules[i]];
-
-          Rule rule = new Rule(source[rule_position + 3 * i], src,
-              getTarget(target_address), loadFeatureVector(block_id), arity, owner);
-          estimated[block_id] = rule.estimateRuleCost(models);
-          precomputable[block_id] = rule.getPrecomputableCost();
+          lhs = source[rule_position + 3 * i];
+          target = getTargetArray(source[rule_position + 1 + 3 * i]);
+          features = loadFeatureVector(block_id, owner);
+          alignments = getAlignmentArray(block_id);
+          final Rule rule = new Rule(lhs, src, target, arity, features, alignments, owner);
+          estimated[block_id] = rule.estimateRuleCost(featureFunctions);
         }
 
         Arrays.sort(rules, new Comparator<Integer>() {
@@ -803,12 +797,12 @@ public class PackedGrammar extends AbstractGrammar {
        */
       public final class PackedPhrasePair extends PackedRule {
 
-        private final Supplier<int[]> englishSupplier;
+        private final Supplier<int[]> targetSupplier;
         private final Supplier<byte[]> alignmentSupplier;
 
         public PackedPhrasePair(int address) {
           super(address);
-          englishSupplier = initializeEnglishSupplier();
+          targetSupplier = initializeTargetSupplier();
           alignmentSupplier = initializeAlignmentSupplier();
         }
 
@@ -826,9 +820,9 @@ public class PackedGrammar extends AbstractGrammar {
          * This means this implementation should be as thread-safe and performant as possible.
          */
 
-        private Supplier<int[]> initializeEnglishSupplier(){
+        private Supplier<int[]> initializeTargetSupplier(){
           Supplier<int[]> result = Suppliers.memoize(() ->{
-            int[] phrase = getTarget(source[address + 1]);
+            int[] phrase = getTargetArray(source[address + 1]);
             int[] tgt = new int[phrase.length + 1];
             tgt[0] = -1;
             for (int i = 0; i < phrase.length; i++)
@@ -851,22 +845,22 @@ public class PackedGrammar extends AbstractGrammar {
         }
 
         /**
-         * Take the English phrase of the underlying rule and prepend an [X].
+         * Take the target phrase of the underlying rule and prepend an [X].
          * 
          * @return the augmented phrase
          */
         @Override
-        public int[] getEnglish() {
-          return this.englishSupplier.get();
+        public int[] getTarget() {
+          return this.targetSupplier.get();
         }
         
         /**
-         * Take the French phrase of the underlying rule and prepend an [X].
+         * Take the source phrase of the underlying rule and prepend an [X].
          * 
-         * @return the augmented French phrase
+         * @return the augmented source phrase
          */
         @Override
-        public int[] getFrench() {
+        public int[] getSource() {
           int phrase[] = new int[src.length + 1];
           int ntid = Vocabulary.id(PackedGrammar.this.joshuaConfiguration.default_non_terminal);
           phrase[0] = ntid;
@@ -892,27 +886,28 @@ public class PackedGrammar extends AbstractGrammar {
 
       public class PackedRule extends Rule {
         protected final int address;
-        private final Supplier<int[]> englishSupplier;
+        private final Supplier<int[]> targetSupplier;
         private final Supplier<FeatureVector> featureVectorSupplier;
         private final Supplier<byte[]> alignmentsSupplier;
 
         public PackedRule(int address) {
+          super(source[address], src, null, PackedTrie.this.getArity(), null, null, owner);
           this.address = address;
-          this.englishSupplier = intializeEnglishSupplier();
+          this.targetSupplier = intializeTargetSupplier();
           this.featureVectorSupplier = initializeFeatureVectorSupplier();
           this.alignmentsSupplier = initializeAlignmentsSupplier();
         }
 
-        private Supplier<int[]> intializeEnglishSupplier(){
+        private Supplier<int[]> intializeTargetSupplier(){
           Supplier<int[]> result = Suppliers.memoize(() ->{
-            return getTarget(source[address + 1]);
+            return getTargetArray(source[address + 1]);
           });
           return result;
         }
 
         private Supplier<FeatureVector> initializeFeatureVectorSupplier(){
           Supplier<FeatureVector> result = Suppliers.memoize(() ->{
-            return loadFeatureVector(source[address + 2]);
+            return loadFeatureVector(source[address + 2], owner);
          });
           return result;
         }
@@ -929,25 +924,8 @@ public class PackedGrammar extends AbstractGrammar {
         }
 
         @Override
-        public void setArity(int arity) {
-        }
-
-        @Override
         public int getArity() {
           return PackedTrie.this.getArity();
-        }
-
-        @Override
-        public void setOwner(OwnerId owner) {
-        }
-
-        @Override
-        public OwnerId getOwner() {
-          return owner;
-        }
-
-        @Override
-        public void setLHS(int lhs) {
         }
 
         @Override
@@ -956,20 +934,12 @@ public class PackedGrammar extends AbstractGrammar {
         }
 
         @Override
-        public void setEnglish(int[] eng) {
+        public int[] getTarget() {
+          return this.targetSupplier.get();
         }
 
         @Override
-        public int[] getEnglish() {
-          return this.englishSupplier.get();
-        }
-
-        @Override
-        public void setFrench(int[] french) {
-        }
-
-        @Override
-        public int[] getFrench() {
+        public int[] getSource() {
           return src;
         }
 
@@ -982,44 +952,15 @@ public class PackedGrammar extends AbstractGrammar {
         public byte[] getAlignment() {
           return this.alignmentsSupplier.get();
         }
-        
-        @Override
-        public String getAlignmentString() {
-            throw new RuntimeException("AlignmentString not implemented for PackedRule!");
-        }
 
         @Override
         public float getEstimatedCost() {
           return estimated[source[address + 2]];
         }
 
-//        @Override
-//        public void setPrecomputableCost(float cost) {
-//          precomputable[source[address + 2]] = cost;
-//        }
-
-        @Override
-        public float getPrecomputableCost() {
-          return precomputable[source[address + 2]];
-        }
-
         @Override
         public float estimateRuleCost(List<FeatureFunction> models) {
           return estimated[source[address + 2]];
-        }
-
-        @Override
-        public String toString() {
-          StringBuffer sb = new StringBuffer();
-          sb.append(Vocabulary.word(this.getLHS()));
-          sb.append(" ||| ");
-          sb.append(getFrenchWords());
-          sb.append(" ||| ");
-          sb.append(getEnglishWords());
-          sb.append(" |||");
-          sb.append(" " + getFeatureVector());
-          sb.append(String.format(" ||| %.3f", getEstimatedCost()));
-          return sb.toString();
         }
       }
     }

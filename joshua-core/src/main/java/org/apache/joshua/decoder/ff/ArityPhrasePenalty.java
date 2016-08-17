@@ -46,7 +46,6 @@ public class ArityPhrasePenalty extends StatelessFF {
 
   public ArityPhrasePenalty(final FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, "ArityPenalty", args, config);
-
     this.owner = OwnerMap.register(parsedArgs.get("owner"));
     this.minArity = Integer.parseInt(parsedArgs.get("min-arity"));
     this.maxArity = Integer.parseInt(parsedArgs.get("max-arity"));
@@ -66,7 +65,7 @@ public class ArityPhrasePenalty extends StatelessFF {
   @Override
   public DPState compute(Rule rule, List<HGNode> tailNodes, int i, int j, SourcePath sourcePath,
       Sentence sentence, Accumulator acc) {
-    acc.add(name, isEligible(rule));
+    acc.add(featureId, isEligible(rule));
     
     return null;
   }

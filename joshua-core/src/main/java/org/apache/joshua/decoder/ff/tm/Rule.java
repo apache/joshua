@@ -19,212 +19,87 @@
 package org.apache.joshua.decoder.ff.tm;
 
 import static org.apache.joshua.decoder.ff.tm.OwnerMap.UNKNOWN_OWNER_ID;
+import static org.apache.joshua.util.Constants.NT_REGEX;
+import static org.apache.joshua.util.Constants.fieldDelimiter;
 
 import java.util.ArrayList;
-import java.util.Arrays;  
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
-
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class define the interface for Rule. 
- * 
- * All feature scores are interpreted as negative log probabilities, and are therefore negated.
- * Note that not all features need to be negative log probs, but you should be aware that they
- * will be negated, so if you want a positive count, it should come in as negative.
- * 
- * Normally, the feature score in the rule should be *cost* (i.e., -LogP), so that the feature
- * weight should be positive
+ * This class defines the interface for Rule. Components of a rule (left-hand-side,
+ * source words, target words, features, alignments) are final and can not be modified.
+ * This forces creators of Rule instances to decide on feature namespaces and owner in advances and greatly
+ * simplifies the code.
  * 
  * @author Zhifei Li, zhifei.work@gmail.com
  * @author Matt Post post@cs.jhu.edu
+ * @author fhieber
  */
 public class Rule implements Comparator<Rule>, Comparable<Rule> {
-
+  
   private static final Logger LOG = LoggerFactory.getLogger(Rule.class);
-  private int lhs; // tag of this rule
-  private int[] source; // pointer to the RuleCollection, as all the rules under it share the same
-                         // Source side
-  protected int arity;
+  
+  /** left hand side vocabulary id */
+  private final int lhs;
 
-  // And a string containing the sparse ones
-  //protected final String sparseFeatureString;
-  protected final Supplier<String> sparseFeatureStringSupplier;
-  private final Supplier<FeatureVector> featuresSupplier;
+  /** source vocabulary ids */
+  private final int[] source;
+  
+  /** target vocabulary ids */
+  private final int[] target;
+  
+  /** arity of the rule (number of non-terminals) */
+  protected final int arity;
 
-  /*
-   * a feature function will be fired for this rule only if the owner of the rule matches the owner
-   * of the feature function
-   */
+  /** the {@link FeatureVector} associated with this {@link Rule} */
+  private final FeatureVector featureVector;
+
+  /** The {@link OwnerId} this rule belongs to. */
   private OwnerId owner = UNKNOWN_OWNER_ID;
 
   /**
-   * This is the cost computed only from the features present with the grammar rule. This cost is
+   * This is the rule cost computed only from local rule context. This cost is
    * needed to sort the rules in the grammar for cube pruning, but isn't the full cost of applying
    * the rule (which will include contextual features that can't be computed until the rule is
    * applied).
    */
   private float estimatedCost = Float.NEGATIVE_INFINITY;
 
-  private float precomputableCost = Float.NEGATIVE_INFINITY;
-
-  private int[] target;
-
-  // The alignment string, e.g., 0-0 0-1 1-1 2-1
-  private String alignmentString;
-  private final Supplier<byte[]> alignmentSupplier;
-
+  private final byte[] alignments;
+  
   /**
-   * Constructs a new rule using the provided parameters. Rule id for this rule is
-   * undefined. Note that some of the sparse features may be unlabeled, but they cannot be mapped to
-   * their default names ("tm_OWNER_INDEX") until later, when we know the owner of the rule. This is
-   * not known until the rule is actually added to a grammar in Grammar::addRule().
-   * 
-   * Constructor used by other constructors below;
-   * 
-   * @param lhs Left-hand side of the rule.
-   * @param source Source language right-hand side of the rule.
-   * @param target Target language right-hand side of the rule.
-   * @param sparseFeatures Feature value scores for the rule.
-   * @param arity Number of nonterminals in the source language right-hand side.
-   * @param owner todo
+   * Constructs a rule given its dependencies. ownerId should be the same as used for
+   * 'hashing'/creating the {@link FeatureVector} features.
    */
-  public Rule(int lhs, int[] source, int[] target, String sparseFeatures, int arity, OwnerId owner) {
+  public Rule(int lhs, int[] source, int[] target, int arity, FeatureVector features, byte[] alignments, OwnerId ownerId) {
     this.lhs = lhs;
     this.source = source;
-    this.arity = arity;
-    this.owner = owner;
     this.target = target;
-    this.sparseFeatureStringSupplier = Suppliers.memoize(() -> { return sparseFeatures; });
-    this.featuresSupplier = initializeFeatureSupplierFromString();
-    this.alignmentSupplier = initializeAlignmentSupplier();
-  }
-  
-  /**
-   * Constructor used by PackedGrammar's sortRules()
-   * @param lhs todo
-   * @param sourceRhs todo
-   * @param targetRhs todo
-   * @param features todo
-   * @param arity todo
-   * @param owner todo
-   */
-  public Rule(int lhs, int[] sourceRhs, int[] targetRhs, FeatureVector features, int arity, OwnerId owner) {
-    this.lhs = lhs;
-    this.source = sourceRhs;
     this.arity = arity;
-    this.owner = owner;
-    this.target = targetRhs;
-    this.featuresSupplier = Suppliers.memoize(() -> { return features; });
-    this.sparseFeatureStringSupplier = initializeSparseFeaturesStringSupplier();
-    this.alignmentSupplier = initializeAlignmentSupplier();
+    this.featureVector = features;
+    this.alignments = alignments;
+    this.owner = ownerId;
   }
 
-  /**
-   * Constructor used for SamtFormatReader and GrammarBuilderWalkerFunction's getRuleWithSpans()
-   * Rule is unowned.
-   * @param lhs todo
-   * @param sourceRhs todo
-   * @param targetRhs todo
-   * @param sparseFeatures todo
-   * @param arity todo
-   */
-  public Rule(int lhs, int[] sourceRhs, int[] targetRhs, String sparseFeatures, int arity) {
-    this(lhs, sourceRhs, targetRhs, sparseFeatures, arity, OwnerMap.UNKNOWN_OWNER_ID);
-  }
-
-  /**
-   * Constructor used for addOOVRules(), HieroFormatReader and PhraseRule.
-   * @param lhs todo
-   * @param sourceRhs todo
-   * @param targetRhs todo
-   * @param sparseFeatures todo
-   * @param arity todo
-   * @param alignment todo
-   */
-  public Rule(int lhs, int[] sourceRhs, int[] targetRhs, String sparseFeatures, int arity, String alignment) {
-    this(lhs, sourceRhs, targetRhs, sparseFeatures, arity);
-    this.alignmentString = alignment;
-  }
-  
-  /**
-   * Constructor (implicitly) used by PackedRule
-   */
-  public Rule() {
-    this.lhs = -1;
-    this.sparseFeatureStringSupplier = initializeSparseFeaturesStringSupplier();
-    this.featuresSupplier = initializeFeatureSupplierFromString();
-    this.alignmentSupplier = initializeAlignmentSupplier();
-  }
-
-  // ==========================================================================
-  // Lazy loading Suppliers for alignments, feature vector, and feature strings
-  // ==========================================================================
-  
-  private Supplier<byte[]> initializeAlignmentSupplier(){
-    return Suppliers.memoize(() ->{
-      byte[] alignment = null;
-      String alignmentString = getAlignmentString();
-      if (alignmentString != null) {
-        String[] tokens = alignmentString.split("[-\\s]+");
-        alignment = new byte[tokens.length];
-        for (int i = 0; i < tokens.length; i++)
-          alignment[i] = (byte) Short.parseShort(tokens[i]);
-      }
-      return alignment;
-    });
-  }
-  
-  /**
-   * If Rule was constructed with sparseFeatures String, we lazily populate the
-   * FeatureSupplier.
-   */
-  private Supplier<FeatureVector> initializeFeatureSupplierFromString(){
-    return Suppliers.memoize(() ->{
-      if (!owner.equals(UNKNOWN_OWNER_ID)) {
-        return new FeatureVector(getFeatureString(), "tm_" + OwnerMap.getOwner(owner) + "_");
-      } else {
-        return new FeatureVector();
-      }
-    });
-  }
-  
-  /**
-   * If Rule was constructed with a FeatureVector, we lazily populate the sparseFeaturesStringSupplier.
-   */
-  private Supplier<String> initializeSparseFeaturesStringSupplier() {
-    return Suppliers.memoize(() -> {
-      return getFeatureVector().toString();
-    });
-  }
-
-  // ===============================================================
-  // Attributes
-  // ===============================================================
-
-  public void setEnglish(int[] eng) {
-    this.target = eng;
-  }
-
-  public int[] getEnglish() {
+  public int[] getTarget() {
     return this.target;
   }
 
   /**
-   * Two Rules are equal of they have the same LHS, the same source RHS and the same target
-   * RHS.
+   * Two Rules are equal of they have the same LHS, the same source RHS and the same target RHS.
    * 
    * @param o the object to check for equality
    * @return true if o is the same Rule as this rule, false otherwise
@@ -237,10 +112,10 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
     if (getLHS() != other.getLHS()) {
       return false;
     }
-    if (!Arrays.equals(getFrench(), other.getFrench())) {
+    if (!Arrays.equals(getSource(), other.getSource())) {
       return false;
     }
-    if (!Arrays.equals(target, other.getEnglish())) {
+    if (!Arrays.equals(target, other.getTarget())) {
       return false;
     }
     return true;
@@ -249,61 +124,29 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   public int hashCode() {
     // I just made this up. If two rules are equal they'll have the
     // same hashcode. Maybe someone else can do a better job though?
-    int frHash = Arrays.hashCode(getFrench());
+    int frHash = Arrays.hashCode(getSource());
     int enHash = Arrays.hashCode(target);
     return frHash ^ enHash ^ getLHS();
   }
-
-  // ===============================================================
-  // Attributes
-  // ===============================================================
-
-  public void setArity(int arity) {
-    this.arity = arity;
-  }
-
+  
   public int getArity() {
     return this.arity;
-  }
-
-  public void setOwner(final OwnerId owner) {
-    this.owner = owner;
   }
 
   public OwnerId getOwner() {
     return this.owner;
   }
 
-  public void setLHS(int lhs) {
-    this.lhs = lhs;
-  }
-
   public int getLHS() {
     return this.lhs;
   }
 
-  public void setFrench(int[] french) {
-    this.source = french;
-  }
-
-  public int[] getFrench() {
+  public int[] getSource() {
     return this.source;
   }
 
-  /**
-   * This function does the work of turning the string version of the sparse features (passed in
-   * when the rule was created) into an actual set of features. This is a bit complicated because we
-   * support intermingled labeled and unlabeled features, where the unlabeled features are mapped to
-   * a default name template of the form "tm_OWNER_INDEX".
-   * 
-   * This function returns the dense (phrasal) features discovered when the rule was loaded. Dense
-   * features are the list of unlabeled features that preceded labeled ones. They can also be
-   * specified as labeled features of the form "tm_OWNER_INDEX", but the former format is preferred.
-   * 
-   * @return the {@link org.apache.joshua.decoder.ff.FeatureVector} for this rule
-   */
   public FeatureVector getFeatureVector() {
-    return featuresSupplier.get();
+    return featureVector;
   }
 
   /**
@@ -321,44 +164,6 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   public float getEstimatedCost() {
     return estimatedCost;
   }
-
-  /**
-   * Precomputable costs is the inner product of the weights found on each grammar rule and the
-   * weight vector. This is slightly different from the estimated rule cost, which can include other
-   * features (such as a language model estimate). This getter and setter should also be cached, and
-   * is basically provided to allow the PhraseModel feature to cache its (expensive) computation for
-   * each rule.
-   *
-   * The weights are passed in as dense weights and sparse weights. This allows the dense weight
-   * precomputation to be even faster (since we don't have to query a hash map. 
-   *
-   * @param dense_weights the dense weights from the model
-   * @param weights the sparse weights from the model
-   */
-  public void setPrecomputableCost(float[] dense_weights, FeatureVector weights) {
-    float cost = 0.0f;
-    FeatureVector features = getFeatureVector();
-    for (int i = 0; i < features.getDenseFeatures().size() && i < dense_weights.length; i++) {
-      cost += dense_weights[i] * features.getDense(i);
-    }
-
-    for (String key: features.getSparseFeatures().keySet()) {
-      cost += weights.getSparse(key) * features.getSparse(key);
-    }
-    
-    this.precomputableCost = cost;
-  }
-  
-  /**
-   * @return the precomputed model cost of each rule
-   */
-  public float getPrecomputableCost() {
-    return precomputableCost;
-  }
-  
-  public float getDenseFeature(int k) {
-    return getFeatureVector().getDense(k);
-  }
   
   /**
    * This function estimates the cost of a rule, which is used for sorting the rules for cube
@@ -374,104 +179,86 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
    * @return estimated cost of the rule
    */
   public float estimateRuleCost(List<FeatureFunction> models) {
-    if (null == models)
-      return 0.0f;
-
+    
     if (this.estimatedCost <= Float.NEGATIVE_INFINITY) {
-      this.estimatedCost = 0.0f; // weights.innerProduct(computeFeatures());
-
-      LOG.debug("estimateCost({} ;; {})", getFrenchWords(), getEnglishWords());
-      for (FeatureFunction ff : models) {
+      float result = 0.0f;
+      LOG.debug("estimateRuleCost({} ;; {})", getSourceWords(), getTargetWords());
+      for (final FeatureFunction ff : models) {
         float val = ff.estimateCost(this, null);
         LOG.debug("  FEATURE {} -> {}", ff.getName(), val);
-        this.estimatedCost += val; 
+        result += val; 
       }
+      this.estimatedCost = result;
     }
-    
+
     return estimatedCost;
   }
 
-  // ===============================================================
-  // Methods
-  // ===============================================================
-
+  /**
+   * Returns an informative String for the rule, including estimated cost and the rule's owner.
+   */
+  @Override
   public String toString() {
-    StringBuffer sb = new StringBuffer();
-    sb.append(Vocabulary.word(this.getLHS()));
-    sb.append(" ||| ");
-    sb.append(getFrenchWords());
-    sb.append(" ||| ");
-    sb.append(getEnglishWords());
-    sb.append(" |||");
-    sb.append(" " + getFeatureVector());
-    sb.append(String.format(" ||| est=%.3f", getEstimatedCost()));
-    sb.append(String.format(" pre=%.3f", getPrecomputableCost()));
-    return sb.toString();
+    return new StringBuffer(textFormat())
+        .append(fieldDelimiter)
+        .append(getEstimatedCost())
+        .append(fieldDelimiter)
+        .append(OwnerMap.getOwner(getOwner()))
+        .toString();
   }
   
   /**
-   * Returns a version of the rule suitable for reading in from a text file.
-   * 
-   * @return string version of the rule
+   * Returns a string version of the rule parsable by the {@link HieroFormatReader}.
    */
   public String textFormat() {
-    StringBuffer sb = new StringBuffer();
-    sb.append(Vocabulary.word(this.getLHS()));
-    sb.append(" |||");
-    
-    int nt = 1;
-    for (int i = 0; i < getFrench().length; i++) {
-      if (getFrench()[i] < 0)
-        sb.append(" " + Vocabulary.word(getFrench()[i]).replaceFirst("\\]", String.format(",%d]", nt++)));
-      else
-        sb.append(" " + Vocabulary.word(getFrench()[i]));
-    }
-    sb.append(" |||");
-    nt = 1;
-    for (int i = 0; i < getEnglish().length; i++) {
-      if (getEnglish()[i] < 0)
-        sb.append(" " + Vocabulary.word(getEnglish()[i]).replaceFirst("\\]", String.format(",%d]", nt++)));
-      else
-        sb.append(" " + Vocabulary.word(getEnglish()[i]));
-    }
-    sb.append(" |||");
-    sb.append(" " + getFeatureString());
-    if (getAlignmentString() != null)
-      sb.append(" ||| " + getAlignmentString());
-    return sb.toString();
-  }
-
-  public String getFeatureString() {
-    return sparseFeatureStringSupplier.get();
+    return new StringBuffer()
+        .append(Vocabulary.word(this.getLHS()))
+        .append(fieldDelimiter)
+        .append(getSourceWords())
+        .append(fieldDelimiter)
+        .append(getTargetWords())
+        .append(fieldDelimiter)
+        .append(getFeatureVector().textFormat())
+        .append(fieldDelimiter)
+        .append(getAlignmentString())
+        .toString();
   }
 
   /**
    * Returns an alignment as a sequence of integers. The integers at positions i and i+1 are paired,
    * with position i indexing the source and i+1 the target.
    * 
-   * @return a byte[] from the {@link com.google.common.base.Supplier}
+   * @return a byte[]
    */
   public byte[] getAlignment() {
-    return this.alignmentSupplier.get();
+    return this.alignments;
   }
   
   public String getAlignmentString() {
-    return this.alignmentString;
+    byte[] alignments = getAlignment();
+    if (alignments == null || alignments.length == 0) {
+      return "";
+    }
+    final StringBuilder b = new StringBuilder();
+    for (int i = 0; i < alignments.length - 1; i+=2) {
+      b.append(alignments[i]).append("-").append(alignments[i+1]).append(" ");
+    }
+    return b.toString().trim();
   }
 
   /**
-   * The nonterminals on the English side are pointers to the source side nonterminals (-1 and -2),
+   * The nonterminals on the target side are pointers to the source side nonterminals (-1 and -2),
    * rather than being directly encoded. These number indicate the correspondence between the
    * nonterminals on each side, introducing a level of indirection however when we want to resolve
    * them. So to get the ID, we need to look up the corresponding source side ID.
    * 
-   * @return The string of English words
+   * @return The string of target words
    */
-  public String getEnglishWords() {
+  public String getTargetWords() {
     int[] foreignNTs = getForeignNonTerminals();
   
     StringBuilder sb = new StringBuilder();
-    for (Integer index : getEnglish()) {
+    for (Integer index : getTarget()) {
       if (index >= 0)
         sb.append(Vocabulary.word(index) + " ");
       else
@@ -482,23 +269,15 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
     return sb.toString().trim();
   }
 
-  public boolean isTerminal() {
-    for (int i = 0; i < getEnglish().length; i++)
-      if (getEnglish()[i] < 0)
-        return false;
-  
-    return true;
-  }
-
   /**
-   * Return the French (source) nonterminals as list of Strings
+   * Return the source nonterminals as list of Strings
    * 
    * @return a list of strings
    */
   public int[] getForeignNonTerminals() {
     int[] nts = new int[getArity()];
     int index = 0;
-    for (int id : getFrench())
+    for (int id : getSource())
       if (id < 0)
         nts[index++] = -id;
     return nts;
@@ -512,8 +291,8 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   public int[] getNonTerminalSourcePositions() {
     int[] nonTerminalPositions = new int[getArity()];
     int ntPos = 0;
-    for (int sourceIdx = 0; sourceIdx < getFrench().length; sourceIdx++) {
-      if (getFrench()[sourceIdx] < 0)
+    for (int sourceIdx = 0; sourceIdx < getSource().length; sourceIdx++) {
+      if (getSource()[sourceIdx] < 0)
         nonTerminalPositions[ntPos++] = sourceIdx;
     }
     return nonTerminalPositions;
@@ -542,28 +321,28 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   }
 
   /**
-   * Return the English (target) nonterminals as list of Strings
+   * Return the target nonterminals as list of Strings
    * 
    * @return list of strings
    */
-  public int[] getEnglishNonTerminals() {
+  public int[] getTargetNonTerminals() {
     int[] nts = new int[getArity()];
     int[] foreignNTs = getForeignNonTerminals();
     int index = 0;
   
-    for (int i : getEnglish()) {
+    for (int i : getTarget()) {
       if (i < 0)
-        nts[index++] = foreignNTs[Math.abs(getEnglish()[i]) - 1];
+        nts[index++] = foreignNTs[Math.abs(getTarget()[i]) - 1];
     }
   
     return nts;
   }
 
-  private int[] getNormalizedEnglishNonterminalIndices() {
+  private int[] getNormalizedTargetNonterminalIndices() {
     int[] result = new int[getArity()];
   
     int ntIndex = 0;
-    for (Integer index : getEnglish()) {
+    for (Integer index : getTarget()) {
       if (index < 0)
         result[ntIndex++] = -index - 1;
     }
@@ -572,23 +351,21 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
   }
 
   public boolean isInverting() {
-    int[] normalizedEnglishNonTerminalIndices = getNormalizedEnglishNonterminalIndices();
-    if (normalizedEnglishNonTerminalIndices.length == 2) {
-      if (normalizedEnglishNonTerminalIndices[0] == 1) {
+    int[] normalizedTargetNonTerminalIndices = getNormalizedTargetNonterminalIndices();
+    if (normalizedTargetNonTerminalIndices.length == 2) {
+      if (normalizedTargetNonTerminalIndices[0] == 1) {
         return true;
       }
     }
     return false;
   }
 
-  public String getFrenchWords() {
-    return Vocabulary.getWords(getFrench());
+  public String getSourceWords() {
+    return Vocabulary.getWords(getSource());
   }
 
-  public static final String NT_REGEX = "\\[[^\\]]+?\\]";
-
   private Pattern getPattern() {
-    String source = getFrenchWords();
+    String source = getSourceWords();
     String pattern = Pattern.quote(source);
     pattern = pattern.replaceAll(NT_REGEX, "\\\\E.+\\\\Q");
     pattern = pattern.replaceAll("\\\\Q\\\\E", "");
@@ -603,10 +380,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
    * @return true if there is a match
    */
   public boolean matches(Sentence sentence) {
-    boolean match = getPattern().matcher(sentence.fullSource()).find();
-    // System.err.println(String.format("match(%s,%s) = %s", Pattern.quote(getFrenchWords()),
-    // sentence.annotatedSource(), match));
-    return match;
+    return getPattern().matcher(sentence.fullSource()).find();
   }
 
   /**
@@ -615,9 +389,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
    */
   public static Comparator<Rule> EstimatedCostComparator = new Comparator<Rule>() {
     public int compare(Rule rule1, Rule rule2) {
-      float cost1 = rule1.getEstimatedCost();
-      float cost2 = rule2.getEstimatedCost();
-      return Float.compare(cost2,  cost1);
+      return Float.compare(rule1.getEstimatedCost(),  rule2.getEstimatedCost());
     }
   };
   
@@ -627,9 +399,5 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
 
   public int compareTo(Rule other) {
     return EstimatedCostComparator.compare(this, other);
-  }
-
-  public String getRuleString() {
-    return String.format("%s -> %s ||| %s", Vocabulary.word(getLHS()), getFrenchWords(), getEnglishWords());
   }
 }

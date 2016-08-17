@@ -35,9 +35,9 @@ import static org.testng.Assert.assertEquals;
 public class LMGrammarBerkeleyTest {
 
   private static final String INPUT = "the chat-rooms";
-  private static final String EXPECTED_OUTPUT = "tm_glue_0=2.000 lm_0=-7.153\n";
-  private static final String EXPECTED_OUTPUT_WITH_OOV = "tm_glue_0=2.000 lm_0=-7.153 lm_0_oov=0.000\n";
-  private static final String[] OPTIONS = "-v 0 -output-format %f".split(" ");
+  private static final String EXPECTED_OUTPUT = "glue_0=-2.000000 lm_0=-7.152632\n";
+  private static final String EXPECTED_OUTPUT_WITH_OOV = "glue_0=-2.000000 lm_0=-7.152632 lm_0_oov=0.000000\n";
+  private static final String[] OPTIONS = "-v 1 -output-format %f".split(" ");
 
   private JoshuaConfiguration joshuaConfig;
   private Decoder decoder;
@@ -77,9 +77,7 @@ public class LMGrammarBerkeleyTest {
     joshuaConfig.features.add("LanguageModel -lm_type berkeleylm -oov_feature -lm_order 2 -lm_file resources/berkeley_lm/lm");
     decoder = new Decoder(joshuaConfig, null);
     final String translation = decode(INPUT).toString();
-    assertEquals(Decoder.weights.getDenseFeatures().size(), 3);
     assertEquals(translation, EXPECTED_OUTPUT_WITH_OOV);
   }
-
 
 }

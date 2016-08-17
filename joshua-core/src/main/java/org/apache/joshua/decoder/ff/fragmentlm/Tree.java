@@ -547,7 +547,7 @@ public class Tree implements Serializable {
    * @return the Tree 
    */
   public static Tree buildTree(Rule rule, DerivationState[] derivationStates, int maxDepth) {
-    Tree tree = getFragmentFromYield(rule.getEnglishWords());
+    Tree tree = getFragmentFromYield(rule.getTargetWords());
 
     if (tree == null) {
       return null;
@@ -572,7 +572,7 @@ public class Tree implements Serializable {
      * the incoming DerivationState items, which are ordered by the source side.
      */
     ArrayList<Integer> tailIndices = new ArrayList<Integer>();
-    int[] englishInts = rule.getEnglish();
+    int[] englishInts = rule.getTarget();
     for (int i = 0; i < englishInts.length; i++)
       if (englishInts[i] < 0)
         tailIndices.add(-(englishInts[i] + 1));
@@ -623,7 +623,7 @@ public class Tree implements Serializable {
   public static Tree buildTree(DerivationState derivationState, int maxDepth) {
     Rule rule = derivationState.edge.getRule();
     
-    Tree tree = getFragmentFromYield(rule.getEnglishWords());
+    Tree tree = getFragmentFromYield(rule.getTargetWords());
 
     if (tree == null) {
       return null;
@@ -644,7 +644,7 @@ public class Tree implements Serializable {
        * the incoming DerivationState items, which are ordered by the source side.
        */
       ArrayList<Integer> tailIndices = new ArrayList<Integer>();
-      int[] englishInts = rule.getEnglish();
+      int[] englishInts = rule.getTarget();
       for (int i = 0; i < englishInts.length; i++)
         if (englishInts[i] < 0)
           tailIndices.add(-(englishInts[i] + 1));
@@ -685,10 +685,10 @@ public class Tree implements Serializable {
    * @return shallow clone of the Tree object
    */
   public static Tree buildTree(Rule rule, List<HGNode> tailNodes, int maxDepth) {
-    Tree tree = getFragmentFromYield(rule.getEnglishWords());
+    Tree tree = getFragmentFromYield(rule.getTargetWords());
 
     if (tree == null) {
-      tree = new Tree(String.format("(%s %s)", Vocabulary.word(rule.getLHS()), rule.getEnglishWords()));
+      tree = new Tree(String.format("(%s %s)", Vocabulary.word(rule.getLHS()), rule.getTargetWords()));
       // System.err.println("COULDN'T FIND " + rule.getEnglishWords());
       // System.err.println("RULE " + rule);
       // for (Entry<String, Tree> pair: rulesToFragments.entrySet())
@@ -703,7 +703,7 @@ public class Tree implements Serializable {
       List<Tree> frontier = tree.getNonterminalYield();
 
       ArrayList<Integer> tailIndices = new ArrayList<Integer>();
-      int[] englishInts = rule.getEnglish();
+      int[] englishInts = rule.getTarget();
       for (int i = 0; i < englishInts.length; i++)
         if (englishInts[i] < 0)
           tailIndices.add(-1 * englishInts[i] - 1);
@@ -734,7 +734,7 @@ public class Tree implements Serializable {
           }
         } catch (IndexOutOfBoundsException e) {
           LOG.error("ERROR at index {}", i);
-          LOG.error("RULE: {}  TREE: {}", rule.getEnglishWords(), tree);
+          LOG.error("RULE: {}  TREE: {}", rule.getTargetWords(), tree);
           LOG.error("  FRONTIER:");
           for (Tree kid : frontier) {
             LOG.error("    {}", kid);

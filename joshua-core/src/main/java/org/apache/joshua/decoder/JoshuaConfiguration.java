@@ -18,15 +18,16 @@
  */
 package org.apache.joshua.decoder;
 
+import static org.apache.joshua.util.Constants.TM_PREFIX;
 import static org.apache.joshua.util.FormatUtils.cleanNonTerminal;
 import static org.apache.joshua.util.FormatUtils.ensureNonTerminalBrackets;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -409,7 +410,7 @@ public class JoshuaConfiguration {
               features.add(String.format("LanguageModel -lm_type %s -lm_order %s -lm_file %s",
                   tokens[0], tokens[1], tokens[5]));
 
-          } else if (parameter.equals(normalize_key("tm"))) {
+          } else if (parameter.equals(normalize_key(TM_PREFIX))) {
             /* If found, convert old format:
              *   tm = TYPE OWNER MAXSPAN PATH
              * to new format

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.FeatureMap;
 import org.apache.joshua.util.io.LineReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +81,7 @@ public class FeatureTypeAnalyzer {
         String encoder_key = fields[1];
         ArrayList<Integer> feature_ids = new ArrayList<Integer>();
         for (int i = 2; i < fields.length; i++)
-          feature_ids.add(Vocabulary.id(fields[i]));
+          feature_ids.add(FeatureMap.hashFeature(fields[i]));
         addFeatures(encoder_key, feature_ids);
       }
     }
@@ -125,7 +126,7 @@ public class FeatureTypeAnalyzer {
     }
     if (LOG.isInfoEnabled()) {
       for (int id : featureToType.keySet()) {
-        LOG.info("Type inferred: {} is {}", (labeled ? Vocabulary.word(id) : "Feature " + id),
+        LOG.info("Type inferred: {} is {}", (labeled ? FeatureMap.getFeature(id) : "Feature " + id),
             types.get(featureToType.get(id)).encoder.getKey());
       }
     }
@@ -173,7 +174,7 @@ public class FeatureTypeAnalyzer {
     out_stream.writeInt(featureToType.size());
     for (int feature_id : featureToType.keySet()) {
       if (labeled)
-        out_stream.writeUTF(Vocabulary.word(feature_id));
+        out_stream.writeUTF(FeatureMap.getFeature(feature_id));
       else
         out_stream.writeInt(feature_id);
       out_stream.writeInt(featureIdMap.get(feature_id));
@@ -185,8 +186,9 @@ public class FeatureTypeAnalyzer {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     for (int feature_id : featureToType.keySet()) {
-      sb.append(types.get(featureToType.get(feature_id)).analyzer.toString(Vocabulary.word(feature_id)));
+      sb.append(types.get(featureToType.get(feature_id)).analyzer.toString(FeatureMap.getFeature(feature_id)));
     }
+    System.out.println(sb.toString());
     return sb.toString();
   }
 

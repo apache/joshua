@@ -83,13 +83,6 @@ public interface Grammar {
    * @return the number of rules stored in the grammar
    */
   int getNumRules();
-  
-  /**
-   * Returns the number of dense features.
-   * 
-   * @return the number of dense features
-   */
-  int getNumDenseFeatures();
 
   /**
    * Return the grammar's owner.

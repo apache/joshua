@@ -18,9 +18,10 @@
  */
 package org.apache.joshua.decoder.hypergraph;
 
-import static org.apache.joshua.util.FormatUtils.unescapeSpecialSymbols;
-import static org.apache.joshua.util.FormatUtils.removeSentenceMarkers;
 import static java.util.Collections.emptyList;
+import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
+import static org.apache.joshua.util.FormatUtils.removeSentenceMarkers;
+import static org.apache.joshua.util.FormatUtils.unescapeSpecialSymbols;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -36,17 +37,18 @@ import java.util.PriorityQueue;
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.BLEU;
 import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.StructuredTranslation;
+import org.apache.joshua.decoder.StructuredTranslationFactory;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.fragmentlm.Tree;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
+import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.io.DeNormalize;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.apache.joshua.decoder.segment_file.Token;
 import org.apache.joshua.util.FormatUtils;
-import org.apache.joshua.decoder.StructuredTranslation;
-import org.apache.joshua.decoder.StructuredTranslationFactory;
 
 /**
  * <p>This class implements lazy k-best extraction on a hyper-graph.</p>
@@ -230,7 +232,7 @@ public class KBestExtractor {
        * If you want to output them, you have to replay them.
        */
 
-      FeatureVector features = new FeatureVector();
+      FeatureVector features = new FeatureVector(0);
       if (outputFormat.contains("%f") || outputFormat.contains("%d"))
         features = derivationState.getFeatures();
 
@@ -240,7 +242,7 @@ public class KBestExtractor {
           .replace("%S", DeNormalize.processSingleLine(hypothesis))
           // TODO (kellens): Fix the recapitalization here
           .replace("%i", Integer.toString(sentence.id()))
-          .replace("%f", joshuaConfiguration.moses ? features.mosesString() : features.toString())
+          .replace("%f", features.textFormat())
           .replace("%c", String.format("%.3f", derivationState.cost));
 
       if (outputFormat.contains("%t")) {
@@ -738,7 +740,7 @@ public class KBestExtractor {
      * @return float representing model cost plus the BLEU score
      */
     public float getCost() {
-      return cost - weights.getSparse("BLEU") * bleu;
+      return cost - weights.getOrDefault(hashFeature("BLEU")) * bleu;
     }
 
     public String toString() {
@@ -939,11 +941,11 @@ public class KBestExtractor {
       /* Find the fragment corresponding to this flattened rule in the fragment map; if it's not
        * there, just pretend it's a depth-one rule.
        */
-      Tree fragment = Tree.getFragmentFromYield(rule.getEnglishWords());
+      Tree fragment = Tree.getFragmentFromYield(rule.getTargetWords());
       if (fragment == null) {
         String subtree = String.format("(%s{%d-%d} %s)", unbracketedLHS, 
             state.parentNode.i, state.parentNode.j, 
-            quoteTerminals(rule.getEnglishWords()));
+            quoteTerminals(rule.getTargetWords()));
         fragment = Tree.fromString(subtree);
       }
       
@@ -1027,15 +1029,16 @@ public class KBestExtractor {
         // KBestExtractor.this.weights.innerProduct(features));
         sb.append(String.format("%d-%d", state.parentNode.i, state.parentNode.j));
         sb.append(" ||| " + Vocabulary.word(rule.getLHS()) + " -> "
-            + Vocabulary.getWords(rule.getFrench()) + " /// " + rule.getEnglishWords());
+            + Vocabulary.getWords(rule.getSource()) + " /// " + rule.getTargetWords());
         sb.append(" |||");
         for (DPState dpState : state.parentNode.getDPStates()) {
           sb.append(" " + dpState);
         }
-        sb.append(" ||| " + transitionFeatures);
+        sb.append(" ||| " + transitionFeatures.textFormat());
         sb.append(" ||| " + weights.innerProduct(transitionFeatures));
         if (rule.getAlignment() != null)
           sb.append(" ||| " + Arrays.toString(rule.getAlignment()));
+        sb.append(" ||| " + OwnerMap.getOwner(rule.getOwner()));
         sb.append("\n");
       }
     }

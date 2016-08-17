@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.FeatureMap;
 
 public class EncoderConfiguration {
 
@@ -82,7 +83,7 @@ public class EncoderConfiguration {
       int outer_id;
       if (labeled) {
         String feature_name = in_stream.readUTF();
-        outer_id = Vocabulary.id(feature_name);
+        outer_id = FeatureMap.hashFeature(feature_name);
         try {
           Integer.parseInt(feature_name);
           numDenseFeatures++;
@@ -94,7 +95,7 @@ public class EncoderConfiguration {
       int encoder_index = in_stream.readInt();
       if (encoder_index >= num_encoders) {
         throw new RuntimeException("Error deserializing EncoderConfig. " + "Feature "
-            + (labeled ? Vocabulary.word(outer_id) : outer_id) + " referring to encoder "
+            + (labeled ? FeatureMap.getFeature(outer_id) : outer_id) + " referring to encoder "
             + encoder_index + " when only " + num_encoders + " known.");
       }
       encoderById[inner_id] = encoders[encoder_index];

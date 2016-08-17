@@ -57,7 +57,7 @@ public class RuleFF extends StatelessFF {
   private static final String SEPARATOR = "~";
   private static final String SIDES_SEPARATOR = "->";
   
-  private final Cache<Rule, String> featureCache;
+  private final Cache<Rule, Integer> featureCache;
   
   public RuleFF(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, NAME, args, config);
@@ -96,12 +96,12 @@ public class RuleFF extends StatelessFF {
       return null;
     }
 
-    String featureName = featureCache.getIfPresent(rule);
-    if (featureName == null) {
-      featureName = getRuleString(rule);
-      featureCache.put(rule, featureName);
+    Integer featureId = featureCache.getIfPresent(rule);
+    if (featureId == null) {
+      featureId = hashRuleFeature(rule);
+      featureCache.put(rule, featureId);
     }
-    acc.add(featureName, VALUE);
+    acc.add(featureId, VALUE);
     
     return null;
   }
@@ -111,16 +111,16 @@ public class RuleFF extends StatelessFF {
    * @param rule
    * @return String representing the feature name.s
    */
-  private String getRuleString(final Rule rule) {
+  private int hashRuleFeature(final Rule rule) {
     final StringBuilder sb = new StringBuilder(Vocabulary.word(rule.getLHS()))
       .append(SIDES_SEPARATOR);
     if (sides == Sides.SOURCE || sides == Sides.BOTH) {
-      sb.append(Vocabulary.getWords(rule.getFrench(), SEPARATOR));
+      sb.append(Vocabulary.getWords(rule.getSource(), SEPARATOR));
     }
     sb.append(SIDES_SEPARATOR);
     if (sides == Sides.TARGET || sides == Sides.BOTH) {
-      sb.append(Vocabulary.getWords(rule.getEnglish(), SEPARATOR));
+      sb.append(Vocabulary.getWords(rule.getTarget(), SEPARATOR));
     }
-    return sb.toString();
+    return FeatureMap.hashFeature(sb.toString());
   }
 }
