@@ -9,7 +9,7 @@ There are two steps:
          -feature-function OOVPenalty \
          -feature-function "PhrasePenalty -owner custom" \
          -weight-overwrite "OOVPenalty 1 PhrasePenalty -1" \
-         -mark-oovs
+         -mark-oovs -lowercase -projectcase -output-format %S
 
    Alternately, you can use the config file in this directory, which
    contains all the above parameteres, and simply run it like this:

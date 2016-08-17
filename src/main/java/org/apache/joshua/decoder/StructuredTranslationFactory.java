@@ -33,6 +33,8 @@ import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.hypergraph.HyperGraph;
 import org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationState;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.decoder.segment_file.Token;
+import org.apache.joshua.util.FormatUtils;
 
 /**
  * This factory provides methods to create StructuredTranslation objects
@@ -112,6 +114,4 @@ public class StructuredTranslationFactory {
       return asList(translationString.split("\\s+"));
     }
   }
-  
-
 }
