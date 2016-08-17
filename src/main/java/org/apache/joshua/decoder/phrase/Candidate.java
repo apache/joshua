@@ -67,14 +67,17 @@ public class Candidate {
   // the reordering rule used by an instantiated Candidate
   private Rule rule;
   
-  // the HGNode built over the current target side phrase
-  private HGNode phraseNode;
-  
-  // the cost of the current configuration
+  /* 
+   * Stores the inside cost of the current phrase, as well as the computed dynamic programming
+   * state. Expensive to compute so there is an option of delaying it.
+   */
   private ComputeNodeResult computedResult;
   
-  // scoring and state information 
-  private ComputeNodeResult result;
+  /*
+   * This is the HGNode built over the current target side phrase. It requires the computed results
+   * as part of its constructor, so we delay computing it unless needed.
+   */
+  private HGNode phraseNode;
   
   /**
    * When candidate objects are extended, the new one is initialized with the same underlying
@@ -121,6 +124,8 @@ public class Candidate {
 
   public Candidate(List<FeatureFunction> featureFunctions, Sentence sentence, 
       List<Hypothesis> hypotheses, TargetPhrases phrases, Span span, float delta, int[] ranks) {
+    this.featureFunctions = featureFunctions;
+    this.sentence = sentence;
     this.hypotheses = hypotheses;
     this.phrases = phrases;
     this.span = span;
@@ -128,7 +133,11 @@ public class Candidate {
     this.ranks = ranks;
     this.rule = isMonotonic() ? Hypothesis.MONO_RULE : Hypothesis.END_RULE;
 //    this.score = hypotheses.get(ranks[0]).score + phrases.get(ranks[1]).getEstimatedCost();
-    this.phraseNode = null;
+    
+    // TODO: compute this proactively or lazily according to a parameter
+    getResult();
+//    this.phraseNode = null;
+//    this.computedResult = null; 
   }
   
   /**
@@ -203,9 +212,23 @@ public class Candidate {
    * @return a new hypergraph node representing the phrase translation
    */
   public HGNode getPhraseNode() {
-    ComputeNodeResult result = new ComputeNodeResult(featureFunctions, getRule(), null, span.start, span.end, null, sentence);
-    phraseNode = new HGNode(-1, span.end, rule.getLHS(), result.getDPStates(), null, result.getPruningEstimate());
+    getResult();
     return phraseNode;
+  }
+  
+  /**
+   * Ensures that the cost of applying the edge has been computed. This is tucked away in an
+   * accessor so that we can do it lazily if we wish.
+   * 
+   * @return
+   */
+  public ComputeNodeResult getResult() {
+    if (computedResult == null) {
+      computedResult = new ComputeNodeResult(featureFunctions, getRule(), null, span.start, span.end, null, sentence);
+      phraseNode = new HGNode(-1, span.end, rule.getLHS(), computedResult.getDPStates(), null, computedResult.getPruningEstimate());
+    }
+    
+    return computedResult;
   }
     
   /**
@@ -246,10 +269,6 @@ public class Candidate {
     return cov;
   }
 
-  public ComputeNodeResult getResult() {
-    return computedResult;
-  }
-
   /**
    * This returns the sum of two costs: the HypoState cost + the transition cost. The HypoState cost
    * is in turn the sum of two costs: the Viterbi cost of the underlying hypothesis, and the adjustment
@@ -263,7 +282,13 @@ public class Candidate {
    * @return the sum of two costs: the HypoState cost + the transition cost
    */
   public float score() {
-    return getHypothesis().getScore() + future_delta + result.getTransitionCost();
+    float score = getHypothesis().getScore() + future_delta;
+    /* 
+     * TODO: you can add this if it's been computed.
+     */
+    if (computedResult != null)
+      score += computedResult.getTransitionCost();
+    return score;
   }
   
   public float getFutureEstimate() {
@@ -271,6 +296,6 @@ public class Candidate {
   }
   
   public List<DPState> getStates() {
-    return result.getDPStates();
+    return getResult().getDPStates();
   }
 }
