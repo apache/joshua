@@ -60,7 +60,7 @@ public class PhraseDecodingTest {
     decoder = null;
   }
 
-  @Test(enabled = false)
+  @Test(enabled = true)
   public void givenInput_whenPhraseDecoding_thenOutputIsAsExpected() throws IOException {
     final String translation = decode(INPUT).toString();
     final String gold = new String(readAllBytes(GOLD_PATH), UTF_8);
@@ -69,6 +69,7 @@ public class PhraseDecodingTest {
 
   private Translation decode(String input) {
     final Sentence sentence = new Sentence(input, 0, joshuaConfig);
+    joshuaConfig.setVerbosity(2);
     return decoder.decode(sentence);
   }
 
