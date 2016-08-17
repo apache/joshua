@@ -18,6 +18,7 @@
  */
 package org.apache.joshua.decoder.ff.tm;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -29,10 +30,9 @@ import org.apache.joshua.decoder.segment_file.Token;
 import org.apache.joshua.lattice.Arc;
 import org.apache.joshua.lattice.Lattice;
 import org.apache.joshua.lattice.Node;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import cern.colt.Arrays;
 
 /**
  * Partial implementation of the <code>Grammar</code> interface that provides logic for sorting a
