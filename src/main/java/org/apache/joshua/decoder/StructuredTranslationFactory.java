@@ -32,20 +32,18 @@ import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.hypergraph.HyperGraph;
 import org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationState;
 import org.apache.joshua.decoder.segment_file.Sentence;
-import org.apache.joshua.decoder.segment_file.Token;
-import org.apache.joshua.util.FormatUtils;
 
 /**
  * This factory provides methods to create StructuredTranslation objects
  * from either Viterbi derivations or KBest derivations.
- * 
+ *
  * @author fhieber
  */
 public class StructuredTranslationFactory {
-  
+
   /**
    * Returns a StructuredTranslation instance from the Viterbi derivation.
-   * 
+   *
    * @param sourceSentence the source sentence
    * @param hypergraph the hypergraph object
    * @param featureFunctions the list of active feature functions
@@ -66,7 +64,7 @@ public class StructuredTranslationFactory {
         getViterbiFeatures(hypergraph, featureFunctions, sourceSentence).getMap(),
         (System.currentTimeMillis() - startTime) / 1000.0f);
   }
-  
+
   /**
    * Returns a StructuredTranslation from an empty decoder output
    * @param sourceSentence the source sentence
@@ -76,9 +74,9 @@ public class StructuredTranslationFactory {
         return new StructuredTranslation(
                 sourceSentence, "", emptyList(), 0, emptyList(), emptyMap(), 0f);
       }
-  
+
   /**
-   * Returns a StructuredTranslation instance from a KBest DerivationState. 
+   * Returns a StructuredTranslation instance from a KBest DerivationState.
    * @param sourceSentence Sentence object representing the source.
    * @param derivationState the KBest DerivationState.
    * @return A StructuredTranslation object representing the derivation encoded by derivationState.
@@ -97,7 +95,7 @@ public class StructuredTranslationFactory {
         derivationState.getFeatures().getMap(),
         (System.currentTimeMillis() - startTime) / 1000.0f);
   }
-  
+
   private static float extractTranslationScore(final HyperGraph hypergraph) {
     if (hypergraph == null) {
       return 0;
@@ -105,7 +103,7 @@ public class StructuredTranslationFactory {
       return hypergraph.goalNode.getScore();
     }
   }
-  
+
   private static List<String> extractTranslationTokens(final String translationString) {
     if (translationString.isEmpty()) {
       return emptyList();

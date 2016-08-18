@@ -25,12 +25,11 @@ import java.util.NoSuchElementException;
 
 /**
  * Wraps a reader with "line" index information.
- * 
+ *
  * @author wren ng thornton wren@users.sourceforge.net
  * @version $LastChangedDate: 2009-03-26 15:06:57 -0400 (Thu, 26 Mar 2009) $
  */
 public class IndexedReader<E> implements Reader<E> {
-
   /** A name for the type of elements the reader produces. */
   private final String elementName;
 
@@ -46,7 +45,7 @@ public class IndexedReader<E> implements Reader<E> {
     this.reader = reader;
   }
 
-  /** 
+  /**
    * Return the number of elements delivered so far.
    * @return integer representing the number of elements delivered so far
    */
@@ -72,7 +71,7 @@ public class IndexedReader<E> implements Reader<E> {
   // Reader
   // ===============================================================
 
-  /** 
+  /**
    * Delegated to the underlying reader.
    * @return true if the reader is ready
    * @throws IOException if there is an error determining readiness
@@ -92,6 +91,7 @@ public class IndexedReader<E> implements Reader<E> {
    * however, when we fall out of scope, the underlying reader will too, so its finalizer may be
    * called. For correctness, be sure to manually close all readers.
    */
+  @Override
   public void close() throws IOException {
     try {
       this.reader.close();
@@ -102,6 +102,7 @@ public class IndexedReader<E> implements Reader<E> {
 
 
   /** Delegated to the underlying reader. */
+  @Override
   public E readLine() throws IOException {
     E line;
     try {
@@ -119,6 +120,7 @@ public class IndexedReader<E> implements Reader<E> {
   // ===============================================================
 
   /** Return self as an iterator. */
+  @Override
   public Iterator<E> iterator() {
     return this;
   }
@@ -129,12 +131,14 @@ public class IndexedReader<E> implements Reader<E> {
   // ===============================================================
 
   /** Delegated to the underlying reader. */
+  @Override
   public boolean hasNext() {
     return this.reader.hasNext();
   }
 
 
   /** Delegated to the underlying reader. */
+  @Override
   public E next() throws NoSuchElementException {
     E line = this.reader.next();
     // Let exceptions out, we'll wrap any errors a closing time.
@@ -149,6 +153,7 @@ public class IndexedReader<E> implements Reader<E> {
    * returns the number of elements delivered to the client, so removing an element from the
    * underlying collection does not affect that number.
    */
+  @Override
   public void remove() throws UnsupportedOperationException {
     this.reader.remove();
   }

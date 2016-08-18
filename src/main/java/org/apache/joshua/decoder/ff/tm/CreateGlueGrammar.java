@@ -30,7 +30,6 @@ import java.util.Set;
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.util.io.LineReader;
-
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -46,7 +45,7 @@ public class CreateGlueGrammar {
 
   @Option(name = "--grammar", aliases = {"-g"}, required = true, usage = "provide grammar to determine list of NonTerminal symbols.")
   private String grammarPath;
-  
+
   @Option(name = "--goal", aliases = {"-goal"}, required = false, usage = "specify custom GOAL symbol. Default: 'GOAL'")
   private final String goalSymbol = cleanNonTerminal(new JoshuaConfiguration().goal_symbol);
 
@@ -59,9 +58,9 @@ public class CreateGlueGrammar {
   private static final String R_END = "[%1$s] ||| [%1$s,1] </s> ||| [%1$s,1] </s> ||| 0";
   // [GOAL] ||| <s> [X,1] </s> ||| <s> [X,1] </s> ||| 0
   private static final String R_TOP = "[%1$s] ||| <s> [%2$s,1] </s> ||| <s> [%2$s,1] </s> ||| 0";
-  
+
   private void run() throws IOException {
-    
+
     File grammar_file = new File(grammarPath);
     if (!grammar_file.exists()) {
       throw new IOException("Grammar file doesn't exist: " + grammarPath);
@@ -78,38 +77,39 @@ public class CreateGlueGrammar {
         }
       }
     // otherwise we collect cleaned left-hand sides from the rules in the text grammar.
-    } else { 
-      final LineReader reader = new LineReader(grammarPath);
-      while (reader.hasNext()) {
-        final String line = reader.next();
-        int lhsStart = line.indexOf("[") + 1;
-        int lhsEnd = line.indexOf("]");
-        if (lhsStart < 1 || lhsEnd < 0) {
-          LOG.info("malformed rule: {}\n", line);
-          continue;
+    } else {
+      try (final LineReader reader = new LineReader(grammarPath);) {
+        while (reader.hasNext()) {
+          final String line = reader.next();
+          int lhsStart = line.indexOf("[") + 1;
+          int lhsEnd = line.indexOf("]");
+          if (lhsStart < 1 || lhsEnd < 0) {
+            LOG.info("malformed rule: {}\n", line);
+            continue;
+          }
+          final String lhs = line.substring(lhsStart, lhsEnd);
+          nonTerminalSymbols.add(lhs);
         }
-        final String lhs = line.substring(lhsStart, lhsEnd);
-        nonTerminalSymbols.add(lhs);
       }
     }
-    
+
     LOG.info("{} nonTerminal symbols read: {}", nonTerminalSymbols.size(),
         nonTerminalSymbols.toString());
 
     // write glue rules to stdout
-    
+
     System.out.println(String.format(R_START, goalSymbol));
-    
+
     for (String nt : nonTerminalSymbols)
       System.out.println(String.format(R_TWO, goalSymbol, nt));
-    
+
     System.out.println(String.format(R_END, goalSymbol));
-    
+
     for (String nt : nonTerminalSymbols)
       System.out.println(String.format(R_TOP, goalSymbol, nt));
 
   }
-  
+
   public static void main(String[] args) throws IOException {
     final CreateGlueGrammar glueCreator = new CreateGlueGrammar();
     final CmdLineParser parser = new CmdLineParser(glueCreator);

@@ -71,6 +71,7 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
    * Returns a collection of single-non-terminal labels that exactly cover the specified span in the
    * lattice.
    */
+  @Override
   public Collection<Integer> getConstituentLabels(int from, int to) {
     Collection<Integer> labels = new HashSet<>();
     int span_length = to - from;
@@ -167,6 +168,7 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
    * in the lattice. The number of non-terminals concatenated is limited by MAX_CONCATENATIONS and
    * the total number of labels returned is bounded by MAX_LABELS.
    */
+  @Override
   public Collection<Integer> getConcatenatedLabels(int from, int to) {
     Collection<Integer> labels = new HashSet<>();
 
@@ -216,6 +218,7 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
   }
 
   // TODO: can pre-comupute all that in top-down fashion.
+  @Override
   public Collection<Integer> getCcgLabels(int from, int to) {
     Collection<Integer> labels = new HashSet<>();
 
@@ -296,10 +299,12 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
     return span;
   }
 
+  @Override
   public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
     // TODO Auto-generated method stub
   }
 
+  @Override
   public void writeExternal(ObjectOutput out) throws IOException {
     // TODO Auto-generated method stub
   }
@@ -310,16 +315,13 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
    * @throws IOException if the file does not exist
    */
   public void readExternalText(String file_name) throws IOException {
-    LineReader reader = new LineReader(file_name);
-    initialize();
-    for (String line : reader) {
-      if (line.trim().equals("")) continue;
-      appendFromPennFormat(line);
+    try (LineReader reader = new LineReader(file_name);) {
+      initialize();
+      for (String line : reader) {
+        if (line.trim().equals("")) continue;
+        appendFromPennFormat(line);
+      }
     }
-  }
-
-  public void writeExternalText(String file_name) throws IOException {
-    // TODO Auto-generated method stub
   }
 
   @Override

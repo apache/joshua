@@ -62,26 +62,27 @@ public class FeatureTypeAnalyzer {
   }
 
   public void readConfig(String config_filename) throws IOException {
-    LineReader reader = new LineReader(config_filename);
-    while (reader.hasNext()) {
-      // Clean up line, chop comments off and skip if the result is empty.
-      String line = reader.next().trim();
-      if (line.indexOf('#') != -1)
-        line = line.substring(0, line.indexOf('#'));
-      if (line.isEmpty())
-        continue;
-      String[] fields = line.split("[\\s]+");
+    try(LineReader reader = new LineReader(config_filename);) {
+      while (reader.hasNext()) {
+        // Clean up line, chop comments off and skip if the result is empty.
+        String line = reader.next().trim();
+        if (line.indexOf('#') != -1)
+          line = line.substring(0, line.indexOf('#'));
+        if (line.isEmpty())
+          continue;
+        String[] fields = line.split("[\\s]+");
 
-      if ("encoder".equals(fields[0])) {
-        // Adding an encoder to the mix.
-        if (fields.length < 3) {
-          throw new RuntimeException("Incomplete encoder line in config.");
+        if ("encoder".equals(fields[0])) {
+          // Adding an encoder to the mix.
+          if (fields.length < 3) {
+            throw new RuntimeException("Incomplete encoder line in config.");
+          }
+          String encoder_key = fields[1];
+          List<Integer> feature_ids = new ArrayList<Integer>();
+          for (int i = 2; i < fields.length; i++)
+            feature_ids.add(Vocabulary.id(fields[i]));
+          addFeatures(encoder_key, feature_ids);
         }
-        String encoder_key = fields[1];
-        ArrayList<Integer> feature_ids = new ArrayList<Integer>();
-        for (int i = 2; i < fields.length; i++)
-          feature_ids.add(Vocabulary.id(fields[i]));
-        addFeatures(encoder_key, feature_ids);
       }
     }
   }
@@ -182,6 +183,7 @@ public class FeatureTypeAnalyzer {
     out_stream.close();
   }
 
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     for (int feature_id : featureToType.keySet()) {
@@ -198,7 +200,7 @@ public class FeatureTypeAnalyzer {
     this.labeled = labeled;
   }
 
-  class FeatureType {
+  static class FeatureType {
     FloatEncoder encoder;
     Analyzer analyzer;
     int bits;
@@ -236,6 +238,7 @@ public class FeatureTypeAnalyzer {
         analyzer.add(value);
     }
 
+    @Override
     public boolean equals(Object t) {
       if (t != null && t instanceof FeatureType) {
         FeatureType that = (FeatureType) t;

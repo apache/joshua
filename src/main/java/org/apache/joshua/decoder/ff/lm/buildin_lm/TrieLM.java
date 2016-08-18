@@ -44,12 +44,12 @@ import org.slf4j.LoggerFactory;
  * <p>
  * The trie itself represents language model context.
  * <p>
- * Conceptually, each node in the trie stores a map 
+ * Conceptually, each node in the trie stores a map
  * from conditioning word to log probability.
  * <p>
- * Additionally, each node in the trie stores 
+ * Additionally, each node in the trie stores
  * the backoff weight for that context.
- * 
+ *
  * @author Lane Schwartz
  * @see <a href="http://www.speech.sri.com/projects/srilm/manpages/ngram-discount.7.html">SRILM ngram-discount documentation</a>
  */
@@ -63,23 +63,23 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
   private static final int ROOT_NODE_ID = 0;
 
 
-  /** 
-   * Maps from (node id, word id for child) --> node id of child. 
+  /**
+   * Maps from (node id, word id for child) --> node id of child.
    */
   private final Map<Long,Integer> children;
 
   /**
-   * Maps from (node id, word id for lookup word) --> 
-   * log prob of lookup word given context 
-   * 
+   * Maps from (node id, word id for lookup word) -->
+   * log prob of lookup word given context
+   *
    * (the context is defined by where you are in the tree).
    */
   private final Map<Long,Float> logProbs;
 
   /**
-   * Maps from (node id) --> 
-   * backoff weight for that context 
-   * 
+   * Maps from (node id) -->
+   * backoff weight for that context
+   *
    * (the context is defined by where you are in the tree).
    */
   private final Map<Integer,Float> backoffs;
@@ -90,7 +90,7 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
 
   /**
    * Constructs a language model object from the specified ARPA file.
-   * 
+   *
    * @param arpaFile input ARPA file
    * @throws FileNotFoundException if the input file cannot be located
    */
@@ -149,7 +149,7 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
       {
         // Find where the backoff should be stored
         int backoffNodeID = ROOT_NODE_ID;
-        { 
+        {
           long backoffNodeKey = Bits.encodeAsLong(backoffNodeID, word);
           int wordChildID;
           if (children.containsKey(backoffNodeKey)) {
@@ -188,62 +188,13 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
 
 
   @Override
-  protected double logProbabilityOfBackoffState_helper(
-      int[] ngram, int order, int qtyAdditionalBackoffWeight
-      ) {
+  protected double logProbabilityOfBackoffState_helper(int[] ngram, int order, int qtyAdditionalBackoffWeight) {
     throw new UnsupportedOperationException("probabilityOfBackoffState_helper undefined for TrieLM");
   }
 
   @Override
   protected float ngramLogProbability_helper(int[] ngram, int order) {
-
-//    float logProb = (float) -JoshuaConfiguration.lm_ceiling_cost;//Float.NEGATIVE_INFINITY; // log(0.0f)
-    float backoff = 0.0f; // log(1.0f)
-
-    int i = ngram.length - 1;
-    int word = ngram[i];
-    i -= 1;
-
-    int nodeID = ROOT_NODE_ID;
-
-    while (true) {
-
-      {
-        long key = Bits.encodeAsLong(nodeID, word);
-        if (logProbs.containsKey(key)) {
-//          logProb = logProbs.get(key);
-          backoff = 0.0f; // log(0.0f)
-        }
-      }
-
-      if (i < 0) {
-        break;
-      }
-
-      {
-        long key = Bits.encodeAsLong(nodeID, ngram[i]);
-
-        if (children.containsKey(key)) {
-          nodeID = children.get(key);
-
-          backoff += backoffs.get(nodeID);
-
-          i -= 1;
-
-        } else {
-          break;
-        }
-      }
-
-    }
-
-//    double result = logProb + backoff;
-//    if (result < -JoshuaConfiguration.lm_ceiling_cost) {
-//      result = -JoshuaConfiguration.lm_ceiling_cost;
-//    }
-//
-//    return result;
-    return (Float) null;
+    throw new UnsupportedOperationException();
   }
 
   public Map<Long,Integer> getChildren() {
@@ -264,66 +215,65 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
     int n = Integer.valueOf(args[2]);
     LOG.info("N-gram order will be {}", n);
 
-    Scanner scanner = new Scanner(new File(args[1]));
+    try (Scanner scanner = new Scanner(new File(args[1]));) {
+      LinkedList<String> wordList = new LinkedList<>();
+      LinkedList<String> window = new LinkedList<>();
 
-    LinkedList<String> wordList = new LinkedList<>();
-    LinkedList<String> window = new LinkedList<>();
+      LOG.info("Starting to scan {}", args[1]);
+      while (scanner.hasNext()) {
 
-    LOG.info("Starting to scan {}", args[1]);
-    while (scanner.hasNext()) {
+        LOG.info("Getting next line...");
+        String line = scanner.nextLine();
+        LOG.info("Line: {}", line);
 
-      LOG.info("Getting next line...");
-      String line = scanner.nextLine();
-      LOG.info("Line: {}", line);
+        String[] words = Regex.spaces.split(line);
+        wordList.clear();
 
-      String[] words = Regex.spaces.split(line);
-      wordList.clear();
+        wordList.add("<s>");
+        Collections.addAll(wordList, words);
+        wordList.add("</s>");
 
-      wordList.add("<s>");
-      Collections.addAll(wordList, words);
-      wordList.add("</s>");
-
-      ArrayList<Integer> sentence = new ArrayList<>();
-      //        int[] ids = new int[wordList.size()];
-      for (String aWordList : wordList) {
-        sentence.add(Vocabulary.id(aWordList));
-        //          ids[i] = ;
-      }
-
-
-
-      while (! wordList.isEmpty()) {
-        window.clear();
-
-        {
-          int i=0;
-          for (String word : wordList) {
-            if (i>=n) break;
-            window.add(word);
-            i++;
-          }
-          wordList.remove();
+        ArrayList<Integer> sentence = new ArrayList<>();
+        // int[] ids = new int[wordList.size()];
+        for (String aWordList : wordList) {
+          sentence.add(Vocabulary.id(aWordList));
+          // ids[i] = ;
         }
 
-        {
-          int i=0;
-          int[] wordIDs = new int[window.size()];
-          for (String word : window) {
-            wordIDs[i] = Vocabulary.id(word);
-            i++;
+        while (!wordList.isEmpty()) {
+          window.clear();
+
+          {
+            int i = 0;
+            for (String word : wordList) {
+              if (i >= n)
+                break;
+              window.add(word);
+              i++;
+            }
+            wordList.remove();
           }
 
-          LOG.info("logProb {} = {}", window, lm.ngramLogProbability(wordIDs, n));
+          {
+            int i = 0;
+            int[] wordIDs = new int[window.size()];
+            for (String word : window) {
+              wordIDs[i] = Vocabulary.id(word);
+              i++;
+            }
+
+            LOG.info("logProb {} = {}", window, lm.ngramLogProbability(wordIDs, n));
+          }
         }
+
+        double logProb = lm.sentenceLogProbability(sentence, n, 2);// .ngramLogProbability(ids,
+                                                                   // n);
+        double prob = Math.exp(logProb);
+
+        LOG.info("Total logProb = {}", logProb);
+        LOG.info("Total    prob = {}", prob);
       }
-
-      double logProb = lm.sentenceLogProbability(sentence, n, 2);//.ngramLogProbability(ids, n);
-      double prob = Math.exp(logProb);
-
-      LOG.info("Total logProb = {}", logProb);
-      LOG.info("Total    prob = {}",  prob);
     }
-
   }
 
   @Override

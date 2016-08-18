@@ -18,14 +18,13 @@
  */
 package org.apache.joshua.adagrad;
 
-import java.util.Collections;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
-import java.lang.Math;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.metrics.EvaluationMetric;
@@ -37,7 +36,7 @@ public class Optimizer {
     output = _output; // (not used for now)
     isOptimizable = _isOptimizable;
     initialLambda = _initialLambda; // initial weights array
-    paramDim = initialLambda.length - 1;    
+    paramDim = initialLambda.length - 1;
     initialLambda = _initialLambda;
     feat_hash = _feat_hash; // feature hash table
     stats_hash = _stats_hash; // suff. stats hash table
@@ -57,7 +56,7 @@ public class Optimizer {
 	  System.arraycopy(finalLambda, 1, initialLambda, 1, paramDim);
     	  if(needShuffle)
 	      Collections.shuffle(sents);
-    
+
 	  double oraMetric, oraScore, predMetric, predScore;
 	  double[] oraPredScore = new double[4];
 	  double loss = 0;
@@ -70,10 +69,9 @@ public class Optimizer {
 	  String[] vecOraFeat;
 	  String[] vecPredFeat;
 	  String[] featInfo;
-	  int thisBatchSize = 0;
 	  int numBatch = 0;
 	  int numUpdate = 0;
-	  Iterator it;
+	  Iterator<Integer> it;
 	  Integer diffFeatId;
 
 	  //update weights
@@ -91,14 +89,13 @@ public class Optimizer {
 	  HashMap<Integer, Double> H = new HashMap<>();
 	  while( sentCount < sentNum ) {
 	      loss = 0;
-	      thisBatchSize = batchSize;
 	      ++numBatch;
 	      HashMap<Integer, Double> featDiff = new HashMap<>();
 	      for(int b = 0; b < batchSize; ++b ) {
 		  //find out oracle and prediction
 		  s = sents.get(sentCount);
 		  findOraPred(s, oraPredScore, oraPredFeat, finalLambda, featScale);
-      
+
 		  //the model scores here are already scaled in findOraPred
 		  oraMetric = oraPredScore[0];
 		  oraScore = oraPredScore[1];
@@ -106,18 +103,18 @@ public class Optimizer {
 		  predScore = oraPredScore[3];
 		  oraFeat = oraPredFeat[0];
 		  predFeat = oraPredFeat[1];
-      
+
 		  //update the scale
 		  if(needScale) { //otherwise featscale remains 1.0
 		      sumMetricScore += Math.abs(oraMetric + predMetric);
 		      //restore the original model score
 		      sumModelScore += Math.abs(oraScore + predScore) / featScale;
-        
+
 		      if(sumModelScore/sumMetricScore > scoreRatio)
 			  featScale = sumMetricScore/sumModelScore;
 		  }
 		  // processedSent++;
-      
+
 		  vecOraFeat = oraFeat.split("\\s+");
 		  vecPredFeat = predFeat.split("\\s+");
 
@@ -169,13 +166,12 @@ public class Optimizer {
 
 		  //remember the model scores here are already scaled
 		  double singleLoss = evalMetric.getToBeMinimized() ?
-		      (predMetric-oraMetric) - (oraScore-predScore)/featScale: 
+		      (predMetric-oraMetric) - (oraScore-predScore)/featScale:
 		      (oraMetric-predMetric) - (oraScore-predScore)/featScale;
 		  if(singleLoss > 0)
 		      loss += singleLoss;
 		  ++sentCount;
 		  if( sentCount >= sentNum ) {
-		      thisBatchSize = b + 1;
 		      break;
 		  }
 	      } //for(int b : batchSize)
@@ -189,7 +185,7 @@ public class Optimizer {
 		  Set<Integer> diffFeatSet = featDiff.keySet();
 		  it = diffFeatSet.iterator();
 		  while(it.hasNext()) { //note these are all non-zero gradients!
-		      diffFeatId = (Integer)it.next();
+		      diffFeatId = it.next();
 		      diffFeatVal = -1.0 * featDiff.get(diffFeatId); //gradient
 		      if( regularization > 0 ) {
 			  lastUpdateTime =
@@ -297,7 +293,7 @@ public class Optimizer {
 		  	  finalLambda[i] =
 		  	      Math.signum(oldVal) * clip( Math.abs(oldVal) - lam * eta * (numUpdate - lastUpdate.get(i)) / Hii );
 		      else if( regularization == 2 ) {
-		  	  finalLambda[i] = 
+		  	  finalLambda[i] =
 		  	      Math.pow( Hii/(lam+Hii), (numUpdate - lastUpdate.get(i)) ) * oldVal;
 		  	  if(needAvg) { //fill the gap due to lazy update
 		  	      double prevLambdaCopy = finalLambda[i];
@@ -338,7 +334,7 @@ public class Optimizer {
 	  // numParamToPrint = paramDim > 10 ? 10 : paramDim; // how many parameters
 	  // // to print
 	  // result = paramDim > 10 ? "Final lambda (first 10): {" : "Final lambda: {";
-    
+
 	  // for (int i = 1; i <= numParamToPrint; ++i)
 	  //     result += String.format("%.4f", finalLambda[i]) + " ";
 
@@ -412,7 +408,7 @@ public class Optimizer {
 
     return evalMetric.score(corpusStatsVal);
   }
-  
+
   private void findOraPred(int sentId, double[] oraPredScore, String[] oraPredFeat, double[] lambda, double featScale)
   {
     double oraMetric=0, oraScore=0, predMetric=0, predScore=0;
@@ -424,11 +420,11 @@ public class Optimizer {
     String oraCand = ""; //only used when BLEU/TER-BLEU is used as metric
     String[] featStr;
     String[] featInfo;
-    
+
     int actualFeatId;
     double bestOraScore;
     double worstPredScore;
-    
+
     if(oraSelectMode==1)
       bestOraScore = NegInf; //larger score will be selected
     else {
@@ -437,7 +433,7 @@ public class Optimizer {
       else
         bestOraScore = NegInf;
     }
-    
+
     if(predSelectMode==1 || predSelectMode==2)
       worstPredScore = NegInf; //larger score will be selected
     else {
@@ -548,14 +544,14 @@ public class Optimizer {
 			  }
 		  }
 	  }
-    
+
     oraPredScore[0] = oraMetric;
     oraPredScore[1] = oraScore;
     oraPredScore[2] = predMetric;
     oraPredScore[3] = predScore;
     oraPredFeat[0] = oraFeat;
     oraPredFeat[1] = predFeat;
-    
+
     //update the BLEU metric statistics if pseudo corpus is used to compute BLEU/TER-BLEU
     if(evalMetric.get_metricName().equals("BLEU") && usePseudoBleu ) {
       String statString;
@@ -566,7 +562,7 @@ public class Optimizer {
       for (int j = 0; j < evalMetric.get_suffStatsCount(); j++)
         bleuHistory[sentId][j] = R*bleuHistory[sentId][j]+Integer.parseInt(statVal_str[j]);
     }
-    
+
     if(evalMetric.get_metricName().equals("TER-BLEU") && usePseudoBleu ) {
       String statString;
       String[] statVal_str;
@@ -577,7 +573,7 @@ public class Optimizer {
         bleuHistory[sentId][j] = R*bleuHistory[sentId][j]+Integer.parseInt(statVal_str[j+2]); //the first 2 stats are TER stats
     }
   }
-  
+
   // compute *sentence-level* metric score for cand
   private double computeSentMetric(int sentId, String cand) {
     String statString;
@@ -667,7 +663,7 @@ public class Optimizer {
   {
     return featScale;
   }
-  
+
   public static void initBleuHistory(int sentNum, int statCount)
   {
     bleuHistory = new double[sentNum][statCount];
@@ -682,7 +678,7 @@ public class Optimizer {
   {
       return finalMetricScore;
   }
-  
+
   private final Vector<String> output;
   private double[] initialLambda;
   private final double[] finalLambda;
@@ -706,11 +702,11 @@ public class Optimizer {
                                             //updates in each epoch if necessary
   public static double eta;
   public static double lam;
-  public static double R; //corpus decay(used only when pseudo corpus is used to compute BLEU) 
+  public static double R; //corpus decay(used only when pseudo corpus is used to compute BLEU)
   public static EvaluationMetric evalMetric;
   public static double[] normalizationOptions;
   public static double[][] bleuHistory;
-  
+
   private final static double NegInf = (-1.0 / 0.0);
   private final static double PosInf = (+1.0 / 0.0);
 }

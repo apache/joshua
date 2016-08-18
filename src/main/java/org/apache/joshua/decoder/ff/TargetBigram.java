@@ -80,8 +80,7 @@ public class TargetBigram extends StatefulFF {
     this.vocab = new HashSet<>();
     this.vocab.add("<s>");
     this.vocab.add("</s>");
-    try {
-      LineReader lineReader = new LineReader(filename);
+    try(LineReader lineReader = new LineReader(filename);) {
       for (String line: lineReader) {
         if (lineReader.lineno() > maxTerms)
           break;
@@ -189,7 +188,7 @@ public class TargetBigram extends StatefulFF {
   }
 
   /**
-   * TargetBigram features are only computed across hyperedges, so there is nothing to be done here. 
+   * TargetBigram features are only computed across hyperedges, so there is nothing to be done here.
    */
   @Override
   public float estimateCost(Rule rule, Sentence sentence) {

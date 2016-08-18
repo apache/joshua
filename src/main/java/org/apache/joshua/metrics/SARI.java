@@ -14,30 +14,30 @@
  */
 package org.apache.joshua.metrics;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Iterator;
+
 // Changed PROCore.java (text normalization function) and EvaluationMetric too
 
 import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.logging.Logger;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 
 /***
  * Implementation of the SARI metric for text-to-text correction.
- * 
+ *
  * \@article{xu2016optimizing,
  *    title={Optimizing statistical machine translation for text simplification},
  *    author={Xu, Wei and Napoles, Courtney and Pavlick, Ellie and Chen, Quanze and Callison-Burch, Chris},
  *    journal={Transactions of the Association for Computational Linguistics},
  *    volume={4},
  *    year={2016}}
- * 
+ *
  * @author Wei Xu
  */
 public class SARI extends EvaluationMetric {
@@ -77,6 +77,7 @@ public class SARI extends EvaluationMetric {
 
   }
 
+  @Override
   protected void initialize() {
     metricName = "SARI";
     toBeMinimized = false;
@@ -88,10 +89,12 @@ public class SARI extends EvaluationMetric {
 
   }
 
+  @Override
   public double bestPossibleScore() {
     return 1.0;
   }
 
+  @Override
   public double worstPossibleScore() {
     return 0.0;
   }
@@ -165,6 +168,7 @@ public class SARI extends EvaluationMetric {
   }
 
   // set contents of stats[] here!
+  @Override
   public int[] suffStats(String cand_str, int i) {
     int[] stats = new int[suffStatsCount];
 
@@ -173,9 +177,9 @@ public class SARI extends EvaluationMetric {
     for (int n = 1; n <= maxGramLength; ++n) {
 
       // ADD OPERATIONS
-      HashMap cand_sub_src = substractHashMap(candNgramCounts[n], srcNgramCounts[i][n]);
-      HashMap cand_and_ref_sub_src = intersectHashMap(cand_sub_src, refNgramCounts[i][n]);
-      HashMap ref_sub_src = substractHashMap(refNgramCounts[i][n], srcNgramCounts[i][n]);
+      HashMap<String, Integer> cand_sub_src = substractHashMap(candNgramCounts[n], srcNgramCounts[i][n]);
+      HashMap<String, Integer> cand_and_ref_sub_src = intersectHashMap(cand_sub_src, refNgramCounts[i][n]);
+      HashMap<String, Integer> ref_sub_src = substractHashMap(refNgramCounts[i][n], srcNgramCounts[i][n]);
 
       stats[StatIndex.values().length * (n - 1)
           + StatIndex.ADDBOTH.ordinal()] = cand_and_ref_sub_src.keySet().size();
@@ -190,11 +194,11 @@ public class SARI extends EvaluationMetric {
       // System.out.println("ref_sub_src" + ref_sub_src + ref_sub_src.keySet().size());
 
       // DELETION OPERATIONS
-      HashMap src_sub_cand = substractHashMap(srcNgramCounts[i][n], candNgramCounts[n],
-          this.refsPerSen, this.refsPerSen);
-      HashMap src_sub_ref = substractHashMap(srcNgramCounts[i][n], refNgramCounts[i][n],
-          this.refsPerSen, 1);
-      HashMap src_sub_cand_sub_ref = intersectHashMap(src_sub_cand, src_sub_ref, 1, 1);
+      HashMap<String, Integer> src_sub_cand = substractHashMap(srcNgramCounts[i][n], candNgramCounts[n],
+          refsPerSen, refsPerSen);
+      HashMap<String, Integer> src_sub_ref = substractHashMap(srcNgramCounts[i][n], refNgramCounts[i][n],
+          refsPerSen, 1);
+      HashMap<String, Integer> src_sub_cand_sub_ref = intersectHashMap(src_sub_cand, src_sub_ref, 1, 1);
 
       stats[StatIndex.values().length * (n - 1) + StatIndex.DELBOTH.ordinal()] = sumHashMapByValues(
           src_sub_cand_sub_ref);
@@ -209,14 +213,14 @@ public class SARI extends EvaluationMetric {
       // System.out.println("src_sub_ref" + src_sub_ref + sumHashMapByValues(src_sub_ref));
 
       stats[StatIndex.values().length * (n - 1) + StatIndex.DELREF.ordinal()] = src_sub_ref.keySet()
-          .size() * this.refsPerSen;
+          .size() * refsPerSen;
 
       // KEEP OPERATIONS
-      HashMap src_and_cand = intersectHashMap(srcNgramCounts[i][n], candNgramCounts[n],
-          this.refsPerSen, this.refsPerSen);
-      HashMap src_and_ref = intersectHashMap(srcNgramCounts[i][n], refNgramCounts[i][n],
-          this.refsPerSen, 1);
-      HashMap src_and_cand_and_ref = intersectHashMap(src_and_cand, src_and_ref, 1, 1);
+      HashMap<String, Integer> src_and_cand = intersectHashMap(srcNgramCounts[i][n], candNgramCounts[n],
+          refsPerSen, refsPerSen);
+      HashMap<String, Integer> src_and_ref = intersectHashMap(srcNgramCounts[i][n], refNgramCounts[i][n],
+          refsPerSen, 1);
+      HashMap<String, Integer> src_and_cand_and_ref = intersectHashMap(src_and_cand, src_and_ref, 1, 1);
 
       stats[StatIndex.values().length * (n - 1)
           + StatIndex.KEEPBOTH.ordinal()] = sumHashMapByValues(src_and_cand_and_ref);
@@ -232,55 +236,11 @@ public class SARI extends EvaluationMetric {
               divideHashMap(src_and_cand_and_ref, src_and_ref));
       stats[StatIndex.values().length * (n - 1) + StatIndex.KEEPREF.ordinal()] = src_and_ref
           .keySet().size();
-
-      // System.out.println("src_and_cand_and_ref" + src_and_cand_and_ref);
-      // System.out.println("src_and_cand" + src_and_cand);
-      // System.out.println("src_and_ref" + src_and_ref);
-
-      // stats[StatIndex.values().length * (n - 1) + StatIndex.KEEPBOTH2.ordinal()] = (int)
-      // sumHashMapByDoubleValues(divideHashMap(src_and_cand_and_ref,src_and_ref)) * 100000000 /
-      // src_and_ref.keySet().size() ;
-      // stats[StatIndex.values().length * (n - 1) + StatIndex.KEEPREF.ordinal()] =
-      // src_and_ref.keySet().size() * 8;
-
-      // System.out.println("src_and_cand_and_ref" + src_and_cand_and_ref);
-      // System.out.println("src_and_cand" + src_and_cand);
-      // System.out.println("divide" + divideHashMap(src_and_cand_and_ref,src_and_cand));
-      // System.out.println(sumHashMapByDoubleValues(divideHashMap(src_and_cand_and_ref,src_and_cand)));
-
     }
-
-    int n = 1;
-
-    // System.out.println("CAND: " + candNgramCounts[n]);
-    // System.out.println("SRC: " + srcNgramCounts[i][n]);
-    // System.out.println("REF: " + refNgramCounts[i][n]);
-
-    HashMap src_and_cand = intersectHashMap(srcNgramCounts[i][n], candNgramCounts[n],
-        this.refsPerSen, this.refsPerSen);
-    HashMap src_and_ref = intersectHashMap(srcNgramCounts[i][n], refNgramCounts[i][n],
-        this.refsPerSen, 1);
-    HashMap src_and_cand_and_ref = intersectHashMap(src_and_cand, src_and_ref, 1, 1);
-    // System.out.println("SRC&CAND&REF : " + src_and_cand_and_ref);
-
-    HashMap cand_sub_src = substractHashMap(candNgramCounts[n], srcNgramCounts[i][n]);
-    HashMap cand_and_ref_sub_src = intersectHashMap(cand_sub_src, refNgramCounts[i][n]);
-    // System.out.println("CAND&REF-SRC : " + cand_and_ref_sub_src);
-
-    HashMap src_sub_cand = substractHashMap(srcNgramCounts[i][n], candNgramCounts[n],
-        this.refsPerSen, this.refsPerSen);
-    HashMap src_sub_ref = substractHashMap(srcNgramCounts[i][n], refNgramCounts[i][n],
-        this.refsPerSen, 1);
-    HashMap src_sub_cand_sub_ref = intersectHashMap(src_sub_cand, src_sub_ref, 1, 1);
-    // System.out.println("SRC-REF-CAND : " + src_sub_cand_sub_ref);
-
-    // System.out.println("DEBUG:" + Arrays.toString(stats));
-    // System.out.println("REF-SRC: " + substractHashMap(refNgramCounts[i], srcNgramCounts[i][0],
-    // (double)refsPerSen));
-
     return stats;
   }
 
+  @Override
   public double score(int[] stats) {
     if (stats.length != suffStatsCount) {
       System.out.println("Mismatch between stats.length and suffStatsCount (" + stats.length
@@ -320,23 +280,13 @@ public class SARI extends EvaluationMetric {
           + StatIndex.DELBOTH.ordinal()];
       int delCandTotalNgram = stats[StatIndex.values().length * (n - 1)
           + StatIndex.DELCAND.ordinal()];
-      int delRefTotalNgram = stats[StatIndex.values().length * (n - 1)
-          + StatIndex.DELREF.ordinal()];
 
       double prec_del_n = 0.0;
       if (delCandTotalNgram > 0) {
         prec_del_n = delCandCorrectNgram / (double) delCandTotalNgram;
       }
 
-      double recall_del_n = 0.0;
-      if (delRefTotalNgram > 0) {
-        recall_del_n = delCandCorrectNgram / (double) delRefTotalNgram;
-      }
-
       // System.out.println("\nDEBUG-SARI:" + delCandCorrectNgram + " " + delRefTotalNgram);
-
-      double f1_del_n = meanHarmonic(prec_del_n, recall_del_n);
-
       // sc += weights[n] * f1_del_n;
       sc += weights[n] * prec_del_n;
 
@@ -410,7 +360,7 @@ public class SARI extends EvaluationMetric {
     double sumcounts = 0;
 
     for (Map.Entry<String, Double> e : counter.entrySet()) {
-      sumcounts += (double) e.getValue();
+      sumcounts += e.getValue();
     }
 
     return sumcounts;
@@ -420,7 +370,7 @@ public class SARI extends EvaluationMetric {
     int sumcounts = 0;
 
     for (Map.Entry<String, Integer> e : counter.entrySet()) {
-      sumcounts += (int) e.getValue();
+      sumcounts += e.getValue();
     }
 
     return sumcounts;
@@ -432,7 +382,6 @@ public class SARI extends EvaluationMetric {
 
     for (Map.Entry<String, Integer> e : counter1.entrySet()) {
       String ngram = e.getKey();
-      int count1 = e.getValue();
       int count2 = counter2.containsKey(ngram) ? counter2.get(ngram) : 0;
       if (count2 == 0) {
         newcounter.put(ngram, 1);
@@ -482,7 +431,6 @@ public class SARI extends EvaluationMetric {
 
     for (Map.Entry<String, Integer> e : counter1.entrySet()) {
       String ngram = e.getKey();
-      int count1 = e.getValue();
       int count2 = counter2.containsKey(ngram) ? counter2.get(ngram) : 0;
       if (count2 > 0) {
         newcounter.put(ngram, 1);
@@ -661,6 +609,7 @@ public class SARI extends EvaluationMetric {
 
   }
 
+  @Override
   public void printDetailedScore_fromStats(int[] stats, boolean oneLiner) {
     System.out.println(metricName + " = " + score(stats));
 

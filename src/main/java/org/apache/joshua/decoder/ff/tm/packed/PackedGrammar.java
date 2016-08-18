@@ -21,27 +21,27 @@ package org.apache.joshua.decoder.ff.tm.packed;
 /***
  * This package implements Joshua's packed grammar structure, which enables the efficient loading
  * and accessing of grammars. It is described in the paper:
- * 
+ *
  * @article{ganitkevitch2012joshua,
  *   Author = {Ganitkevitch, J. and Cao, Y. and Weese, J. and Post, M. and Callison-Burch, C.},
  *   Journal = {Proceedings of WMT12},
  *   Title = {Joshua 4.0: Packing, PRO, and paraphrases},
  *   Year = {2012}}
- *   
+ *
  * The packed grammar works by compiling out the grammar tries into a compact format that is loaded
  * and parsed directly from Java arrays. A fundamental problem is that Java arrays are indexed
  * by ints and not longs, meaning the maximum size of the packed grammar is about 2 GB. This forces
  * the use of packed grammar slices, which together constitute the grammar. The figure in the
- * paper above shows what each slice looks like. 
- * 
+ * paper above shows what each slice looks like.
+ *
  * The division across slices is done in a depth-first manner. Consider the entire grammar organized
  * into a single source-side trie. The splits across tries are done by grouping the root-level
- * outgoing trie arcs --- and the entire trie beneath them --- across slices. 
- * 
- * This presents a problem: if the subtree rooted beneath a single top-level arc is too big for a 
+ * outgoing trie arcs --- and the entire trie beneath them --- across slices.
+ *
+ * This presents a problem: if the subtree rooted beneath a single top-level arc is too big for a
  * slice, the grammar can't be packed. This happens with very large Hiero grammars, for example,
  * where there are a *lot* of rules that start with [X].
- * 
+ *
  * A solution being worked on is to split that symbol and pack them into separate grammars with a
  * shared vocabulary, and then rely on Joshua's ability to query multiple grammars for rules to
  * solve this problem. This is not currently implemented but could be done directly in the
@@ -63,7 +63,6 @@ import java.io.InputStream;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.file.Files;
@@ -73,7 +72,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -94,14 +92,13 @@ import org.apache.joshua.util.FormatUtils;
 import org.apache.joshua.util.encoding.EncoderConfiguration;
 import org.apache.joshua.util.encoding.FloatEncoder;
 import org.apache.joshua.util.io.LineReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PackedGrammar extends AbstractGrammar {
 
@@ -135,14 +132,14 @@ public class PackedGrammar extends AbstractGrammar {
     if (!Vocabulary.read(vocabFile)) {
       throw new RuntimeException("mismatches or collisions while reading on-disk vocabulary");
     }
-    
+
     // Read the config
     String configFile = grammar_dir + File.separator + "config";
     if (new File(configFile).exists()) {
       LOG.info("Reading packed config: {}", configFile);
       readConfig(configFile);
     }
-    
+
     // Read the quantizer setup.
     LOG.info("Reading encoder configuration: {}{}encoding", grammar_dir, File.separator);
     encoding = new EncoderConfiguration();
@@ -226,14 +223,14 @@ public class PackedGrammar extends AbstractGrammar {
    * that represent the subtrie for a particular firstword.
    * If the GrammarPacker has to distribute rules for a
    * source-side firstword across multiple slices, a
-   * SliceAggregatingTrie node is created that aggregates those 
+   * SliceAggregatingTrie node is created that aggregates those
    * tries to hide
    * this additional complexity from the grammar interface
    * This feature allows packing of grammars where the list of rules
    * for a single source-side firstword would exceed the maximum array
    * size of Java (2gb).
    */
-  public final class PackedRoot implements Trie {
+  public static final class PackedRoot implements Trie {
 
     private final HashMap<Integer, Trie> lookup;
 
@@ -241,9 +238,9 @@ public class PackedGrammar extends AbstractGrammar {
       final Map<Integer, List<Trie>> childTries = collectChildTries(slices);
       lookup = buildLookupTable(childTries);
     }
-    
+
     /**
-     * Determines whether trie nodes for source first-words are spread over 
+     * Determines whether trie nodes for source first-words are spread over
      * multiple packedSlices by counting their occurrences.
      * @param slices
      * @return A mapping from first word ids to a list of trie nodes.
@@ -251,12 +248,12 @@ public class PackedGrammar extends AbstractGrammar {
     private Map<Integer, List<Trie>> collectChildTries(final List<PackedSlice> slices) {
       final Map<Integer, List<Trie>> childTries = new HashMap<>();
       for (PackedSlice packedSlice : slices) {
-        
+
         // number of tries stored in this packedSlice
         final int num_children = packedSlice.source[0];
         for (int i = 0; i < num_children; i++) {
           final int id = packedSlice.source[2 * i + 1];
-          
+
           /* aggregate tries with same root id
            * obtain a Trie node, already at the correct address in the packedSlice.
            * In other words, the lookup index already points to the correct trie node in the packedSlice.
@@ -271,7 +268,7 @@ public class PackedGrammar extends AbstractGrammar {
       }
       return childTries;
     }
-    
+
     /**
      * Build a lookup table for children tries.
      * If the list contains only a single child node, a regular trie node
@@ -497,7 +494,7 @@ public class PackedGrammar extends AbstractGrammar {
         }
         featurePosition += EncoderConfiguration.ID_SIZE + encoder.size();
       }
-      
+
       return featureVector;
     }
 
@@ -511,7 +508,7 @@ public class PackedGrammar extends AbstractGrammar {
       if (alignments == null)
         throw new RuntimeException("No alignments available.");
       int alignment_position = getIntFromByteBuffer(block_id, alignments);
-      int num_points = (int) alignments.get(alignment_position);
+      int num_points = alignments.get(alignment_position);
       byte[] alignment = new byte[num_points * 2];
 
       alignments.position(alignment_position + 1);
@@ -533,6 +530,7 @@ public class PackedGrammar extends AbstractGrammar {
       return getTrie(0);
     }
 
+    @Override
     public String toString() {
       return name;
     }
@@ -540,9 +538,9 @@ public class PackedGrammar extends AbstractGrammar {
     /**
      * A trie node within the grammar slice. Identified by its position within the source array,
      * and, as a supplement, the source string leading from the trie root to the node.
-     * 
+     *
      * @author jg
-     * 
+     *
      */
     public class PackedTrie implements Trie, RuleCollection {
 
@@ -785,14 +783,14 @@ public class PackedGrammar extends AbstractGrammar {
           throw new UnsupportedOperationException();
         }
       }
-      
+
       /**
        * A packed phrase pair represents a rule of the form of a phrase pair, packed with the
        * grammar-packer.pl script, which simply adds a nonterminal [X] to the left-hand side of
        * all phrase pairs (and converts the Moses features). The packer then packs these. We have
        * to then put a nonterminal on the source and target sides to treat the phrase pairs like
-       * left-branching rules, which is how Joshua deals with phrase decoding. 
-       * 
+       * left-branching rules, which is how Joshua deals with phrase decoding.
+       *
        * @author Matt Post post@cs.jhu.edu
        *
        */
@@ -845,17 +843,17 @@ public class PackedGrammar extends AbstractGrammar {
 
         /**
          * Take the English phrase of the underlying rule and prepend an [X].
-         * 
+         *
          * @return the augmented phrase
          */
         @Override
         public int[] getEnglish() {
           return this.englishSupplier.get();
         }
-        
+
         /**
          * Take the French phrase of the underlying rule and prepend an [X].
-         * 
+         *
          * @return the augmented French phrase
          */
         @Override
@@ -866,10 +864,10 @@ public class PackedGrammar extends AbstractGrammar {
           System.arraycopy(src,  0, phrase, 1, src.length);
           return phrase;
         }
-        
+
         /**
          * Similarly the alignment array needs to be shifted over by one.
-         * 
+         *
          * @return the byte[] alignment
          */
         @Override
@@ -967,12 +965,12 @@ public class PackedGrammar extends AbstractGrammar {
         public FeatureVector getFeatureVector() {
           return this.featureVectorSupplier.get();
         }
-        
+
         @Override
         public byte[] getAlignment() {
           return this.alignmentsSupplier.get();
         }
-        
+
         @Override
         public String getAlignmentString() {
             throw new RuntimeException("AlignmentString not implemented for PackedRule!");
@@ -1018,23 +1016,23 @@ public class PackedGrammar extends AbstractGrammar {
   public void addOOVRules(int word, List<FeatureFunction> featureFunctions) {
     throw new RuntimeException("PackedGrammar.addOOVRules(): I can't add OOV rules");
   }
-  
+
   @Override
   public void addRule(Rule rule) {
     throw new RuntimeException("PackedGrammar.addRule(): I can't add rules");
   }
-  
-  /** 
+
+  /**
    * Read the config file
-   * 
+   *
    * TODO: this should be rewritten using typeconfig.
-   * 
+   *
    * @param config
    * @throws IOException
    */
   private void readConfig(String config) throws IOException {
     int version = 0;
-    
+
     for (String line: new LineReader(config)) {
       String[] tokens = line.split(" = ");
       if (tokens[0].equals("max-source-len"))
@@ -1043,7 +1041,7 @@ public class PackedGrammar extends AbstractGrammar {
         version = Integer.parseInt(tokens[1]);
       }
     }
-    
+
     if (version != 3) {
       String message = String.format("The grammar at %s was packed with packer version %d, but the earliest supported version is %d",
           this.grammarDir, version, SUPPORTED_VERSION);

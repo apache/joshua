@@ -23,8 +23,8 @@ import static org.apache.joshua.decoder.ff.tm.OwnerMap.getOwner;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,11 +36,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-import com.google.common.base.Strings;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.PhraseModel;
 import org.apache.joshua.decoder.ff.StatefulFF;
 import org.apache.joshua.decoder.ff.lm.LanguageModelFF;
@@ -60,6 +58,9 @@ import org.apache.joshua.util.Regex;
 import org.apache.joshua.util.io.LineReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
  * This class handles decoder initialization and the complication introduced by multithreading.
@@ -149,7 +150,7 @@ public class Decoder {
     this.joshuaConfiguration = joshuaConfiguration;
     this.grammars = new ArrayList<>();
     this.customPhraseTable = null;
-    
+
     resetGlobalState();
   }
 
@@ -313,7 +314,7 @@ public class Decoder {
   // ===============================================================
 
   /**
-   * Moses requires the pattern .*_.* for sparse features, and prohibits underscores in dense features. 
+   * Moses requires the pattern .*_.* for sparse features, and prohibits underscores in dense features.
    * This conforms to that pattern. We assume non-conforming dense features start with tm_ or lm_,
    * and the only sparse feature that needs converting is OOVPenalty.
    *
@@ -344,8 +345,8 @@ public class Decoder {
        * in the Joshua config file. Config file values take precedent.
        */
       this.readWeights(joshuaConfiguration.weights_file);
-      
-      
+
+
       /* Add command-line-passed weights to the weights array for processing below */
       if (!Strings.isNullOrEmpty(joshuaConfiguration.weight_overwrite)) {
         String[] tokens = joshuaConfiguration.weight_overwrite.split("\\s+");
@@ -485,14 +486,14 @@ public class Decoder {
       glueGrammar.addGlueRules(featureFunctions);
       this.grammars.add(glueGrammar);
     }
-    
+
     /* Add the grammar for custom entries */
     if (joshuaConfiguration.search_algorithm.equals("stack"))
       this.customPhraseTable = new PhraseTable(null, "custom", "phrase", joshuaConfiguration);
     else
       this.customPhraseTable = new MemoryBasedBatchGrammar("custom", joshuaConfiguration, 20);
     this.grammars.add(this.customPhraseTable);
-    
+
     /* Create an epsilon-deleting grammar */
     if (joshuaConfiguration.lattice_decoding) {
       LOG.info("Creating an epsilon-deleting grammar");
@@ -553,7 +554,7 @@ public class Decoder {
   /*
    * This function reads the weights for the model. Feature names and their weights are listed one
    * per line in the following format:
-   * 
+   *
    * FEATURE_NAME WEIGHT
    */
   private void readWeights(String fileName) {
@@ -562,9 +563,7 @@ public class Decoder {
     if (fileName.equals(""))
       return;
 
-    try {
-      LineReader lineReader = new LineReader(fileName);
-
+    try (LineReader lineReader = new LineReader(fileName);) {
       for (String line : lineReader) {
         line = line.replaceAll("\\s+", " ");
 
@@ -619,17 +618,17 @@ public class Decoder {
 
       String fields[] = featureLine.split("\\s+");
       String featureName = fields[0];
-      
+
       try {
-        
+
         Class<?> clas = getFeatureFunctionClass(featureName);
         Constructor<?> constructor = clas.getConstructor(FeatureVector.class,
             String[].class, JoshuaConfiguration.class);
         FeatureFunction feature = (FeatureFunction) constructor.newInstance(weights, fields, joshuaConfiguration);
         this.featureFunctions.add(feature);
-        
+
       } catch (Exception e) {
-        throw new RuntimeException(String.format("Unable to instantiate feature function '%s'!", featureLine), e); 
+        throw new RuntimeException(String.format("Unable to instantiate feature function '%s'!", featureLine), e);
       }
     }
 
@@ -667,10 +666,10 @@ public class Decoder {
     }
     return clas;
   }
-  
+
   /**
-   * Adds a rule to the custom grammar.  
-   * 
+   * Adds a rule to the custom grammar.
+   *
    * @param rule the rule to add
    */
   public void addCustomRule(Rule rule) {

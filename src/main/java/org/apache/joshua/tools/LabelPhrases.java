@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Finds labeling for a set of phrases.
- * 
+ *
  * @author Juri Ganitkevitch
  */
 public class LabelPhrases {
@@ -37,7 +37,7 @@ public class LabelPhrases {
 
   /**
    * Main method.
-   * 
+   *
    * @param args names of the two grammars to be compared
    * @throws IOException if there is an error reading the input grammars
    */
@@ -60,52 +60,52 @@ public class LabelPhrases {
       System.exit(-1);
     }
 
-    LineReader phrase_reader = new LineReader(phrase_file_name);
+    try (LineReader phrase_reader = new LineReader(phrase_file_name);) {
+      while (phrase_reader.ready()) {
+        String line = phrase_reader.readLine();
 
-    while (phrase_reader.ready()) {
-      String line = phrase_reader.readLine();
+        String[] fields = line.split("\\t");
+        if (fields.length != 3 || fields[2].equals("()")) {
+          System.err.println("[FAIL] Empty parse in line:\t" + line);
+          continue;
+        }
 
-      String[] fields = line.split("\\t");
-      if (fields.length != 3 || fields[2].equals("()")) {
-        System.err.println("[FAIL] Empty parse in line:\t" + line);
-        continue;
-      }
+        String[] phrase_strings = fields[0].split("\\s");
+        int[] phrase_ids = new int[phrase_strings.length];
+        for (int i = 0; i < phrase_strings.length; i++)
+          phrase_ids[i] = Vocabulary.id(phrase_strings[i]);
 
-      String[] phrase_strings = fields[0].split("\\s");
-      int[] phrase_ids = new int[phrase_strings.length];
-      for (int i = 0; i < phrase_strings.length; i++)
-        phrase_ids[i] = Vocabulary.id(phrase_strings[i]);
+        ArraySyntaxTree syntax = new ArraySyntaxTree(fields[2]);
+        int[] sentence_ids = syntax.getTerminals();
 
-      ArraySyntaxTree syntax = new ArraySyntaxTree(fields[2]);
-      int[] sentence_ids = syntax.getTerminals();
-
-      int match_start = -1;
-      int match_end = -1;
-      for (int i = 0; i < sentence_ids.length; i++) {
-        if (phrase_ids[0] == sentence_ids[i]) {
-          match_start = i;
-          int j = 0;
-          while (j < phrase_ids.length && phrase_ids[j] == sentence_ids[i + j]) {
-            j++;
-          }
-          if (j == phrase_ids.length) {
-            match_end = i + j;
-            break;
+        int match_start = -1;
+        int match_end = -1;
+        for (int i = 0; i < sentence_ids.length; i++) {
+          if (phrase_ids[0] == sentence_ids[i]) {
+            match_start = i;
+            int j = 0;
+            while (j < phrase_ids.length && phrase_ids[j] == sentence_ids[i + j]) {
+              j++;
+            }
+            if (j == phrase_ids.length) {
+              match_end = i + j;
+              break;
+            }
           }
         }
-      }
 
-      int label = syntax.getOneConstituent(match_start, match_end);
-      if (label == 0) label = syntax.getOneSingleConcatenation(match_start, match_end);
-      if (label == 0) label = syntax.getOneRightSideCCG(match_start, match_end);
-      if (label == 0) label = syntax.getOneLeftSideCCG(match_start, match_end);
-      if (label == 0) label = syntax.getOneDoubleConcatenation(match_start, match_end);
-      if (label == 0) {
-        System.err.println("[FAIL] No label found in line:\t" + line);
-        continue;
-      }
+        int label = syntax.getOneConstituent(match_start, match_end);
+        if (label == 0) label = syntax.getOneSingleConcatenation(match_start, match_end);
+        if (label == 0) label = syntax.getOneRightSideCCG(match_start, match_end);
+        if (label == 0) label = syntax.getOneLeftSideCCG(match_start, match_end);
+        if (label == 0) label = syntax.getOneDoubleConcatenation(match_start, match_end);
+        if (label == 0) {
+          System.err.println("[FAIL] No label found in line:\t" + line);
+          continue;
+        }
 
-      System.out.println(Vocabulary.word(label) + "\t" + line);
+        System.out.println(Vocabulary.word(label) + "\t" + line);
+      }
     }
   }
 }

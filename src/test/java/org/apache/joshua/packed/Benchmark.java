@@ -18,9 +18,6 @@
  */
 package org.apache.joshua.packed;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -30,30 +27,33 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This program runs a little benchmark to check reading speed on various data
  * representations.
- * 
+ *
  * Usage: java Benchmark PACKED_GRAMMAR_DIR TIMES
  */
 
-public class Benchmark {
+public class Benchmark implements AutoCloseable{
 
-  
   private static final Logger LOG = LoggerFactory.getLogger(Benchmark.class);
 
   private IntBuffer intBuffer;
   private MappedByteBuffer byteBuffer;
   private int[] intArray;
+  private final FileInputStream fin;
 
   public Benchmark(String dir) throws IOException {
     File file = new File(dir + "/slice_00000.source");
-
-    FileChannel source_channel = new FileInputStream(file).getChannel();
+    this.fin = new FileInputStream(file);
+    FileChannel source_channel = this.fin.getChannel();
     int byte_size = (int) source_channel.size();
     int int_size = byte_size / 4;
 
-    byteBuffer = source_channel.map(MapMode.READ_ONLY, 0, byte_size); 
+    byteBuffer = source_channel.map(MapMode.READ_ONLY, 0, byte_size);
     intBuffer = byteBuffer.asIntBuffer();
 
     intArray = new int[int_size];
@@ -120,7 +120,13 @@ public class Benchmark {
   }
 
   public static void main(String args[]) throws IOException {
-    Benchmark pr = new Benchmark(args[0]);
-    pr.benchmark( Integer.parseInt(args[1]));
+    try (Benchmark pr = new Benchmark(args[0]);) {
+      pr.benchmark( Integer.parseInt(args[1]));
+    }
+  }
+
+  @Override
+  public void close() throws IOException {
+    this.fin.close();
   }
 }

@@ -54,13 +54,13 @@ public class GrammarPacker {
   /**
    * The packed grammar version number. Increment this any time you add new features, and update
    * the documentation.
-   * 
+   *
    * Version history:
-   * 
+   *
    * - 3 (May 2016). This was the first version that was marked. It removed the special phrase-
    * table packing that packed phrases without the [X,1] on the source and target sides, which
    * then required special handling in the decoder to use for phrase-based decoding.
-   * 
+   *
    * - 4 (August 2016). Phrase-based decoding rewritten to represent phrases without a builtin
    * nonterminal. Instead, cost-less glue rules are used in phrase-based decoding. This eliminates
    * the need for special handling of phrase grammars (except for having to add a LHS), and lets
@@ -68,7 +68,7 @@ public class GrammarPacker {
    *
    */
   public static final int VERSION = 4;
-  
+
   // Size limit for slice in bytes.
   private static int DATA_SIZE_LIMIT = (int) (Integer.MAX_VALUE * 0.8);
   // Estimated average number of feature entries for one rule.
@@ -145,30 +145,30 @@ public class GrammarPacker {
   }
 
   private void readConfig(String config_filename) throws IOException {
-    LineReader reader = new LineReader(config_filename);
-    while (reader.hasNext()) {
-      // Clean up line, chop comments off and skip if the result is empty.
-      String line = reader.next().trim();
-      if (line.indexOf('#') != -1)
-        line = line.substring(0, line.indexOf('#'));
-      if (line.isEmpty())
-        continue;
-      String[] fields = line.split("[\\s]+");
+    try(LineReader reader = new LineReader(config_filename);) {
+      while (reader.hasNext()) {
+        // Clean up line, chop comments off and skip if the result is empty.
+        String line = reader.next().trim();
+        if (line.indexOf('#') != -1)
+          line = line.substring(0, line.indexOf('#'));
+        if (line.isEmpty())
+          continue;
+        String[] fields = line.split("[\\s]+");
 
-      if (fields.length < 2) {
-        throw new RuntimeException("Incomplete line in config.");
-      }
-      if ("slice_size".equals(fields[0])) {
-        // Number of records to concurrently load into memory for sorting.
-        approximateMaximumSliceSize = Integer.parseInt(fields[1]);
+        if (fields.length < 2) {
+          throw new RuntimeException("Incomplete line in config.");
+        }
+        if ("slice_size".equals(fields[0])) {
+          // Number of records to concurrently load into memory for sorting.
+          approximateMaximumSliceSize = Integer.parseInt(fields[1]);
+        }
       }
     }
-    reader.close();
   }
 
   /**
    * Executes the packing.
-   * 
+   *
    * @throws IOException if there is an error reading the grammar
    */
   public void pack() throws IOException {
@@ -226,23 +226,24 @@ public class GrammarPacker {
 
   /**
    * Returns a reader that turns whatever file format is found into Hiero grammar rules.
-   * 
+   *
    * @param grammarFile
    * @return
    * @throws IOException
    */
   private HieroFormatReader getGrammarReader() throws IOException {
-    LineReader reader = new LineReader(grammar);
-    String line = reader.next();
-    if (line.startsWith("[")) {
-      return new HieroFormatReader(grammar);
-    } else {
-      return new MosesFormatReader(grammar);
+    try (LineReader reader = new LineReader(grammar);) {
+      String line = reader.next();
+      if (line.startsWith("[")) {
+        return new HieroFormatReader(grammar);
+      } else {
+        return new MosesFormatReader(grammar);
+      }
     }
   }
 
   /**
-   * This first pass over the grammar 
+   * This first pass over the grammar
    * @param reader
    */
   private void explore(HieroFormatReader reader) {
@@ -258,9 +259,9 @@ public class GrammarPacker {
       /* Add symbols to vocabulary.
        * NOTE: In case of nonterminals, we add both stripped versions ("[X]")
        * and "[X,1]" to the vocabulary.
-       * 
+       *
        * TODO: MJP May 2016: Is it necessary to add [X,1]? This is currently being done in
-       * {@link HieroFormatReader}, which is called by {@link MosesFormatReader}. 
+       * {@link HieroFormatReader}, which is called by {@link MosesFormatReader}.
        */
 
       // Add feature names to vocabulary and pass the value through the
@@ -438,7 +439,7 @@ public class GrammarPacker {
    * written simultaneously. The source structure is written into a downward-pointing trie and
    * stores the rule's lhs as well as links to the target and feature stream. The feature stream is
    * prompted to write out a block
-   * 
+   *
    * @param source_trie
    * @param target_trie
    * @param feature_buffer
@@ -580,9 +581,9 @@ public class GrammarPacker {
 
   /**
    * Integer-labeled, doubly-linked trie with some provisions for packing.
-   * 
+   *
    * @author Juri Ganitkevitch
-   * 
+   *
    * @param <D> The trie's value type.
    */
   class PackingTrie<D extends PackingTrieValue> {
@@ -632,10 +633,10 @@ public class GrammarPacker {
      * points to children) from upwards pointing (children point to parent) tries, as well as
      * skeletal (no data, just the labeled links) and non-skeletal (nodes have a data block)
      * packing.
-     * 
+     *
      * @param downwards Are we packing into a downwards-pointing trie?
      * @param skeletal Are we packing into a skeletal trie?
-     * 
+     *
      * @return Number of bytes the trie node would occupy.
      */
     int size(boolean downwards, boolean skeletal) {
@@ -684,6 +685,7 @@ public class GrammarPacker {
       this.target = target;
     }
 
+    @Override
     public int size() {
       return 3;
     }
@@ -696,6 +698,7 @@ public class GrammarPacker {
       this.parent = parent;
     }
 
+    @Override
     public int size() {
       return 0;
     }
@@ -753,7 +756,7 @@ public class GrammarPacker {
 
     /**
      * Enqueue a data block for later writing.
-     * 
+     *
      * @param block_index The index of the data block to add to writing queue.
      * @return The to-be-written block's output index.
      */
@@ -765,7 +768,7 @@ public class GrammarPacker {
     /**
      * Performs the actual writing to disk in the order specified by calls to write() since the last
      * call to initialize().
-     * 
+     *
      * @param out
      * @throws IOException
      */
@@ -828,10 +831,11 @@ public class GrammarPacker {
 
     /**
      * Add a block of features to the buffer.
-     * 
+     *
      * @param features TreeMap with the features for one rule.
      * @return The index of the resulting data block.
      */
+    @Override
     int add(TreeMap<Integer, Float> features) {
       int data_position = buffer.position();
 
@@ -871,10 +875,11 @@ public class GrammarPacker {
 
     /**
      * Add a rule alignments to the buffer.
-     * 
+     *
      * @param alignments a byte array with the alignment points for one rule.
      * @return The index of the resulting data block.
      */
+    @Override
     int add(byte[] alignments) {
       int data_position = buffer.position();
       int size_estimate = alignments.length + 1;

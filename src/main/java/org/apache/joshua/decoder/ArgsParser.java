@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author orluke
- * 
+ *
  */
 public class ArgsParser {
 
@@ -40,7 +40,7 @@ public class ArgsParser {
   /**
    * Parse the arguments passed from the command line when the JoshuaDecoder application was
    * executed from the command line.
-   * 
+   *
    * @param args string array of input arguments
    * @param config the {@link org.apache.joshua.decoder.JoshuaConfiguration}
    * @throws IOException if there is an error wit the input arguments
@@ -49,8 +49,8 @@ public class ArgsParser {
 
     /*
      * Look for a verbose flag, -v.
-     * 
-     * Look for an argument to the "-config" flag to find the config file, if any. 
+     *
+     * Look for an argument to the "-config" flag to find the config file, if any.
      */
     if (args.length >= 1) {
       // Search for a verbose flag
@@ -59,15 +59,15 @@ public class ArgsParser {
           Decoder.VERBOSE = Integer.parseInt(args[i + 1].trim());
           config.setVerbosity(Decoder.VERBOSE);
         }
-      
-        if (args[i].equals("-version")) {
-          LineReader reader = new LineReader(String.format("%s/VERSION", System.getenv("JOSHUA")));
-          reader.readLine();
-          String version = reader.readLine().split("\\s+")[2];
-          System.out.println(String.format("The Apache Joshua machine translator, version %s", version));
-          System.out.println("joshua.incubator.apache.org");
-          System.exit(0);
 
+        if (args[i].equals("-version")) {
+          try (LineReader reader = new LineReader(String.format("%s/VERSION", System.getenv("JOSHUA")));) {
+            reader.readLine();
+            String version = reader.readLine().split("\\s+")[2];
+            System.out.println(String.format("The Apache Joshua machine translator, version %s", version));
+            System.out.println("joshua.incubator.apache.org");
+            System.exit(0);
+          }
         } else if (args[i].equals("-license")) {
           try {
             Files.readAllLines(Paths.get(String.format("%s/../LICENSE",

@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -361,6 +360,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    *
    * @return An iterator over the nodes in this lattice.
    */
+  @Override
   public Iterator<Node<Value>> iterator() {
     return nodes.iterator();
   }
@@ -471,56 +471,10 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
   }
 
   /**
-   * Topologically sorts the nodes and reassigns their numbers. Assumes that the first node is the
-   * source, but otherwise assumes nothing about the input.
+   * Constructs a lattice from a given string representation.
    *
-   * Probably correct, but untested.
-   */
-  @SuppressWarnings("unused")
-  private void topologicalSort() {
-    HashMap<Node<Value>, List<Arc<Value>>> outgraph = new HashMap<Node<Value>, List<Arc<Value>>>();
-    HashMap<Node<Value>, List<Arc<Value>>> ingraph = new HashMap<Node<Value>, List<Arc<Value>>>();
-    for (Node<Value> node: nodes) {
-      ArrayList<Arc<Value>> arcs = new ArrayList<Arc<Value>>();
-      for (Arc<Value> arc: node.getOutgoingArcs()) {
-        arcs.add(arc);
-
-        if (! ingraph.containsKey(arc.getHead()))
-          ingraph.put(arc.getHead(), new ArrayList<Arc<Value>>());
-        ingraph.get(arc.getHead()).add(arc);
-
-        outgraph.put(node, arcs);
-      }
-    }
-
-    ArrayList<Node<Value>> sortedNodes = new ArrayList<Node<Value>>();
-    Stack<Node<Value>> stack = new Stack<Node<Value>>();
-    stack.push(nodes.get(0));
-
-    while (! stack.empty()) {
-      Node<Value> node = stack.pop();
-      sortedNodes.add(node);
-      for (Arc<Value> arc: outgraph.get(node)) {
-        outgraph.get(node).remove(arc);
-        ingraph.get(arc.getHead()).remove(arc);
-
-        if (ingraph.get(arc.getHead()).size() == 0)
-          sortedNodes.add(arc.getHead());
-      }
-    }
-
-    int id = 0;
-    for (Node<Value> node : sortedNodes)
-      node.setID(id++);
-
-    this.nodes = sortedNodes;
-  }
-
-  /**
-   * Constructs a lattice from a given string representation. 
-   *
-   * @param data String representation of a lattice. 
-   * @return A lattice that corresponds to the given string. 
+   * @param data String representation of a lattice.
+   * @return A lattice that corresponds to the given string.
    */
   public static Lattice<String> createFromString(String data) {
 
