@@ -56,12 +56,14 @@ public class Distortion extends StatelessFF {
   public DPState compute(Rule rule, List<HGNode> tailNodes, int i, int j, SourcePath sourcePath,
       Sentence sentence, Accumulator acc) {
 
-    if (rule != Hypothesis.BEGIN_RULE && rule != Hypothesis.END_RULE) {
-        int start_point = j - rule.getFrench().length + rule.getArity();
+    if (rule == Hypothesis.MONO_RULE || rule == Hypothesis.SWAP_RULE) {
+//        int start_point = j - rule.getFrench().length + rule.getArity();
+//        int jump_size = Math.abs(tailNodes.get(0).j - start_point);
 
-        int jump_size = Math.abs(tailNodes.get(0).j - start_point);
-//        acc.add(name, -jump_size);
-        acc.add(denseFeatureIndex, -jump_size); 
+      int start_point = tailNodes.get(rule == Hypothesis.MONO_RULE ? 0 : 1).j;
+      int jump_size = Math.abs(j - start_point);
+
+      acc.add(denseFeatureIndex, -jump_size); 
     }
     
 //    System.err.println(String.format("DISTORTION(%d, %d) from %d = %d", i, j, tailNodes != null ? tailNodes.get(0).j : -1, jump_size));
