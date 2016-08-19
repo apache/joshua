@@ -42,6 +42,7 @@ import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.hypergraph.HyperEdge;
 import org.apache.joshua.decoder.segment_file.Sentence;
 
 public class Candidate {
@@ -119,7 +120,7 @@ public class Candidate {
   public String toString() {
     return String.format("CANDIDATE(hyp %d/%d, phr %d/%d) [%s] phrase=[%s] span=%s",
         ranks[0], hypotheses.size(), ranks[1], phrases.size(),
-        getHypothesis(), getRule().getEnglishWords().replaceAll("\\[.*?\\] ",""), getSpan());
+        getHypothesis(), getPhraseNode(), getSpan());
   }
 
   public Candidate(List<FeatureFunction> featureFunctions, Sentence sentence, 
@@ -131,13 +132,13 @@ public class Candidate {
     this.span = span;
     this.future_delta = delta;
     this.ranks = ranks;
-    this.rule = isMonotonic() ? Hypothesis.MONO_RULE : Hypothesis.END_RULE;
+    this.rule = isMonotonic() ? Hypothesis.MONO_RULE : Hypothesis.SWAP_RULE;
 //    this.score = hypotheses.get(ranks[0]).score + phrases.get(ranks[1]).getEstimatedCost();
-    
+
     // TODO: compute this proactively or lazily according to a parameter
-    getResult();
+    computeResult();
 //    this.phraseNode = null;
-//    this.computedResult = null; 
+//    this.computedResult = null;
   }
   
   /**
@@ -206,13 +207,23 @@ public class Candidate {
   }
   
   /**
+   * A candidate is a (hypothesis, target phrase) pairing. The hypothesis and target phrase are
+   * drawn from a list that is indexed by (ranks[0], ranks[1]), respectively. This is a shortcut
+   * to return the rule representing the terminal phrase production of the candidate pair.
+   * 
+   * @return the phrase rule at position ranks[1]
+   */
+  public Rule getPhraseRule() {
+    return this.phrases.get(ranks[1]);
+  }
+  
+  /**
    * This returns a new Hypothesis (HGNode) representing the phrase being added, i.e., a terminal
    * production in the hypergraph. The score and DP state are computed only here on demand.
    * 
    * @return a new hypergraph node representing the phrase translation
    */
   public HGNode getPhraseNode() {
-    getResult();
     return phraseNode;
   }
   
@@ -222,10 +233,16 @@ public class Candidate {
    * 
    * @return
    */
-  public ComputeNodeResult getResult() {
+  public ComputeNodeResult computeResult() {
     if (computedResult == null) {
-      computedResult = new ComputeNodeResult(featureFunctions, getRule(), null, span.start, span.end, null, sentence);
-      phraseNode = new HGNode(-1, span.end, rule.getLHS(), computedResult.getDPStates(), null, computedResult.getPruningEstimate());
+      // add the phrase node
+      ComputeNodeResult phraseResult = new ComputeNodeResult(featureFunctions, getPhraseRule(), null, span.start, span.end, null, sentence);
+      HyperEdge edge = new HyperEdge(getPhraseRule(), phraseResult.getViterbiCost(), phraseResult.getTransitionCost(), null, null);
+      phraseNode = new HGNode(-1, span.end, rule.getLHS(), phraseResult.getDPStates(), edge, phraseResult.getPruningEstimate());
+
+      // add the rule
+      // TODO: sourcepath
+      computedResult = new ComputeNodeResult(featureFunctions, getRule(), getTailNodes(), -1, span.end, null, sentence);
     }
     
     return computedResult;
@@ -296,6 +313,6 @@ public class Candidate {
   }
   
   public List<DPState> getStates() {
-    return getResult().getDPStates();
+    return computeResult().getDPStates();
   }
 }

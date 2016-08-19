@@ -215,12 +215,12 @@ public class Stack extends ArrayList<Hypothesis> {
 
     if (LOG.isDebugEnabled()) {
       LOG.debug("{} from ( ... {} )", taskName, complete.getHypothesis().getRule().getEnglishWords());
-      LOG.debug("        base score {}", complete.getResult().getBaseCost());
+      LOG.debug("        base score {}", complete.computeResult().getBaseCost());
       LOG.debug("        covering {}-{}", complete.getSpan().start - 1, complete.getSpan().end - 2);
-      LOG.debug("        translated as: {}", complete.getRule().getEnglishWords());
+      LOG.debug("        translated as: {}", complete.getPhraseRule().getEnglishWords());
       LOG.debug("        score {} + future cost {} = {}",
-          complete.getResult().getTransitionCost(), complete.getFutureEstimate(),
-          complete.getResult().getTransitionCost() + complete.getFutureEstimate());
+          complete.computeResult().getTransitionCost(), complete.getFutureEstimate(),
+          complete.computeResult().getTransitionCost() + complete.getFutureEstimate());
     }
   }
 }
