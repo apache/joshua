@@ -64,7 +64,7 @@ public class PhraseDecodingTest {
   public void givenInput_whenPhraseDecoding_thenOutputIsAsExpected() throws IOException {
     final String translation = decode(INPUT).toString();
     final String gold = new String(readAllBytes(GOLD_PATH), UTF_8);
-    assertEquals(gold, translation);
+    assertEquals(translation, gold);
   }
 
   private Translation decode(String input) {
