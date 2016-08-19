@@ -58,3 +58,5 @@ build
 /target/
 .project
 /doc/
+/ext.bak/
+/ext/
