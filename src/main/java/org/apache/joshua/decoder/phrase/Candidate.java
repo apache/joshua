@@ -296,12 +296,12 @@ public class Candidate {
    * @return the sum of two costs: the HypoState cost + the transition cost
    */
   public float score() {
-    float score = getHypothesis().getScore() + future_delta;
-    /* 
-     * TODO: you can add this if it's been computed.
-     */
-    if (computedResult != null)
-      score += computedResult.getTransitionCost();
+    float score = computedResult.getPruningEstimate();
+
+//    float score = getHypothesis().getScore() + future_delta;
+//    if (computedResult != null)
+//      score += computedResult.getTransitionCost();
+    
     return score;
   }
   
