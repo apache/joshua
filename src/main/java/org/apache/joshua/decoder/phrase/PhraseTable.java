@@ -126,7 +126,7 @@ public class PhraseTable implements Grammar {
         : sourceWord;   
 
     int nt_i = Vocabulary.id("[X]");
-    Rule oovRule = new Rule(nt_i, new int[] { nt_i, sourceWord }, new int[] { -1, targetWord }, "", 1);
+    Rule oovRule = new Rule(nt_i, new int[] { sourceWord }, new int[] { targetWord }, "", 0, "0-0");
     addRule(oovRule);
     oovRule.estimateRuleCost(featureFunctions);
         
