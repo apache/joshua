@@ -68,7 +68,7 @@ public class Future {
 
     // All the phrases are in, now do minimum dynamic programming.  Lengths 0 and 1 were already handled above.
     for (int length = 2; length <= chart.SentenceLength(); length++) {
-      for (int begin = 1; begin < chart.SentenceLength() - length; begin++) {
+      for (int begin = 1; begin <= chart.SentenceLength() - length; begin++) {
         for (int division = begin + 1; division < begin + length; division++) {
           setEntry(begin, begin + length, Math.max(getEntry(begin, begin + length), getEntry(begin, division) + getEntry(division, begin + length)));
         }
