@@ -60,14 +60,27 @@ public class Distortion extends StatelessFF {
 //        int start_point = j - rule.getFrench().length + rule.getArity();
 //        int jump_size = Math.abs(tailNodes.get(0).j - start_point);
 
-      int start_point = tailNodes.get(rule == Hypothesis.MONO_RULE ? 0 : 1).j;
-      int jump_size = Math.abs(j - start_point);
+      if (rule == Hypothesis.MONO_RULE) {
+        int start_point = j - tailNodes.get(1).getHyperEdges().get(0).getRule().getFrench().length;
+        int last_point = tailNodes.get(0).j;
+        int jump_size = Math.abs(start_point - last_point);
+      
+//        System.err.println(String.format("DISTORTION_mono(%d -> %d) = %d", 
+//            last_point, start_point, jump_size));
 
-      acc.add(denseFeatureIndex, -jump_size); 
+        acc.add(denseFeatureIndex, -jump_size);
+      } else {
+        int start_point = j - tailNodes.get(0).getHyperEdges().get(0).getRule().getFrench().length;
+        int last_point = tailNodes.get(1).j;
+        int jump_size = Math.abs(start_point - last_point);
+      
+//        System.err.println(String.format("DISTORTION_swap(%d -> %d) = %d", 
+//            last_point, start_point, jump_size));
+
+        acc.add(denseFeatureIndex, -jump_size);    
+      }
     }
     
-//    System.err.println(String.format("DISTORTION(%d, %d) from %d = %d", i, j, tailNodes != null ? tailNodes.get(0).j : -1, jump_size));
-
     return null;
   }
 }
