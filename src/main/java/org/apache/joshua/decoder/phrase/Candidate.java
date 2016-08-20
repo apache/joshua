@@ -320,4 +320,9 @@ public class Candidate {
   public int getPhraseEnd() {
     return phrases.j;
   }
+
+  @Override
+  public int compareTo(Candidate other) {
+    return Float.compare(other.score(), score());
+  }
 }
