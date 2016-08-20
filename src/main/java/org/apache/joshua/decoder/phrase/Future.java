@@ -99,8 +99,9 @@ public class Future {
   public float Change(Coverage coverage, int begin, int end) {
     int left = coverage.leftOpening(begin);
     int right = coverage.rightOpening(end, sentlen);
-    //    System.err.println(String.format("Future::Change(%s, %d, %d) left %d right %d %.3f %.3f %.3f", coverage, begin, end, left, right,
-    //        Entry(left, begin), Entry(end, right), Entry(left, right)));
+//        System.err.println(String.format("Future.Change(%s, %d, %d) left %d right %d %.3f %.3f %.3f", 
+//            coverage, begin, end, left, right,
+//            getEntry(left, begin), getEntry(end, right), getEntry(left, right)));
     return getEntry(left, begin) + getEntry(end, right) - getEntry(left, right);
   }
 
@@ -113,6 +114,7 @@ public class Future {
   private void setEntry(int begin, int end, float value) {
     assert end >= begin;
     assert end <= this.sentlen;
+//    System.err.println(String.format("Future.setEntry(%d, %d) = %f", begin, end, value));
     entries.set(begin, end, value);
   }
 }

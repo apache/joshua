@@ -37,9 +37,15 @@ import org.apache.joshua.decoder.ff.tm.Rule;
 public class TargetPhrases extends ArrayList<Rule> {
 
   private static final long serialVersionUID = 1L;
+  
+  public int i = -2;
+  public int j = -2;
 
-  public TargetPhrases() {
+  public TargetPhrases(int i, int j) {
     super();
+    
+    this.i = i;
+    this.j = j;
   }
   
   /**

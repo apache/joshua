@@ -193,7 +193,7 @@ public class Stacks {
              * phrases from that span. The hypotheses are wrapped in HypoState objects, which
              * augment the hypothesis score with a future cost.
              */
-            Candidate cand = new Candidate(featureFunctions, sentence, hypotheses, phrases, span, future_delta, new int[] {0, 0});
+            Candidate cand = new Candidate(featureFunctions, sentence, hypotheses, phrases, future_delta, new int[] {0, 0});
             targetStack.addCandidate(cand);
           }
         }
@@ -267,6 +267,8 @@ public class Stacks {
       
       float finalTransitionScore = ComputeNodeResult.computeFinalCost(featureFunctions, tailNodes, 0, sentence.length(), null, sentence);
 
+      System.err.println(String.format("createGoalNode: final score: %f -> %f", score, finalTransitionScore));
+      
       if (null == this.end)
         this.end = new Hypothesis(null, score + finalTransitionScore, hyp, sentence.length(), null);
 

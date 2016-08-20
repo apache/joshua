@@ -50,9 +50,6 @@ public class Candidate {
   private List<FeatureFunction> featureFunctions;
   private Sentence sentence;
   
-  // source span of new phrase
-  public Span span;
-  
   // the set of hypotheses that can be paired with phrases from this span 
   private List<Hypothesis> hypotheses;
 
@@ -92,7 +89,7 @@ public class Candidate {
   public boolean equals(Object obj) {
     if (obj instanceof Candidate) {
       Candidate other = (Candidate) obj;
-      if (hypotheses != other.hypotheses || phrases != other.phrases || span != other.span)
+      if (hypotheses != other.hypotheses || phrases != other.phrases)
         return false;
       
       if (ranks.length != other.ranks.length)
@@ -111,7 +108,6 @@ public class Candidate {
   public int hashCode() {
     return 17 * hypotheses.size() 
         + 23 * phrases.size() 
-        + 57 * span.hashCode() 
         + 117 * Arrays.hashCode(ranks);
 //    return hypotheses.hashCode() * phrases.hashCode() * span.hashCode() * Arrays.hashCode(ranks);
   }
@@ -124,12 +120,11 @@ public class Candidate {
   }
 
   public Candidate(List<FeatureFunction> featureFunctions, Sentence sentence, 
-      List<Hypothesis> hypotheses, TargetPhrases phrases, Span span, float delta, int[] ranks) {
+      List<Hypothesis> hypotheses, TargetPhrases phrases, float delta, int[] ranks) {
     this.featureFunctions = featureFunctions;
     this.sentence = sentence;
     this.hypotheses = hypotheses;
     this.phrases = phrases;
-    this.span = span;
     this.future_delta = delta;
     this.ranks = ranks;
     this.rule = isMonotonic() ? Hypothesis.MONO_RULE : Hypothesis.SWAP_RULE;
@@ -148,7 +143,9 @@ public class Candidate {
    * @return
    */
   private boolean isMonotonic() {
-    return getHypothesis().getLastSourceIndex() < span.start;
+//    System.err.println(String.format("isMonotonic(); %d < %d -> %s", 
+//        getLastCovered(), getPhraseEnd(), getLastCovered() < getPhraseEnd()));
+    return getLastCovered() < getPhraseEnd();
   }
   
   /**
@@ -168,7 +165,7 @@ public class Candidate {
    */
   public Candidate extendHypothesis() {
     if (ranks[0] < hypotheses.size() - 1) {
-      return new Candidate(featureFunctions, sentence, hypotheses, phrases, span, future_delta, new int[] { ranks[0] + 1, ranks[1] });
+      return new Candidate(featureFunctions, sentence, hypotheses, phrases, future_delta, new int[] { ranks[0] + 1, ranks[1] });
     }
     return null;
   }
@@ -180,7 +177,7 @@ public class Candidate {
    */
   public Candidate extendPhrase() {
     if (ranks[1] < phrases.size() - 1) {
-      return new Candidate(featureFunctions, sentence, hypotheses, phrases, span, future_delta, new int[] { ranks[0], ranks[1] + 1 });
+      return new Candidate(featureFunctions, sentence, hypotheses, phrases, future_delta, new int[] { ranks[0], ranks[1] + 1 });
     }
     
     return null;
@@ -192,7 +189,7 @@ public class Candidate {
    * @return the span object
    */
   public Span getSpan() {
-    return this.span;
+    return new Span(this.phrases.i, this.phrases.j);
   }
   
   /**
@@ -236,13 +233,13 @@ public class Candidate {
   public ComputeNodeResult computeResult() {
     if (computedResult == null) {
       // add the phrase node
-      ComputeNodeResult phraseResult = new ComputeNodeResult(featureFunctions, getPhraseRule(), null, span.start, span.end, null, sentence);
+      ComputeNodeResult phraseResult = new ComputeNodeResult(featureFunctions, getPhraseRule(), null, phrases.i, phrases.j, null, sentence);
       HyperEdge edge = new HyperEdge(getPhraseRule(), phraseResult.getViterbiCost(), phraseResult.getTransitionCost(), null, null);
-      phraseNode = new HGNode(-1, span.end, rule.getLHS(), phraseResult.getDPStates(), edge, phraseResult.getPruningEstimate());
+      phraseNode = new HGNode(phrases.i, phrases.j, rule.getLHS(), phraseResult.getDPStates(), edge, phraseResult.getPruningEstimate());
 
       // add the rule
       // TODO: sourcepath
-      computedResult = new ComputeNodeResult(featureFunctions, getRule(), getTailNodes(), -1, span.end, null, sentence);
+      computedResult = new ComputeNodeResult(featureFunctions, getRule(), getTailNodes(), getLastCovered(), getPhraseEnd(), null, sentence);
     }
     
     return computedResult;
@@ -314,5 +311,13 @@ public class Candidate {
   
   public List<DPState> getStates() {
     return computeResult().getDPStates();
+  }
+  
+  public int getLastCovered() {
+    return getHypothesis().getLastSourceIndex();
+  }
+  
+  public int getPhraseEnd() {
+    return phrases.j;
   }
 }

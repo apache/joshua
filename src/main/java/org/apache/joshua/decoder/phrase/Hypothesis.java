@@ -70,7 +70,7 @@ public class Hypothesis extends HGNode implements Comparable<Hypothesis> {
    */
   public Hypothesis(Candidate cand) {
     // TODO: sourcepath
-    super(-1, cand.span.end, cand.getRule().getLHS(), cand.getStates(), 
+    super(cand.getLastCovered(), cand.getPhraseEnd(), cand.getRule().getLHS(), cand.getStates(), 
         new HyperEdge(cand.getRule(), cand.computeResult().getViterbiCost(), 
             cand.computeResult().getTransitionCost(),
             cand.getTailNodes(), null), cand.score());
@@ -82,10 +82,6 @@ public class Hypothesis extends HGNode implements Comparable<Hypothesis> {
   public Hypothesis(List<DPState> states, float score, Hypothesis previous, int source_end, Rule target) {
     super(-1, source_end, -1, null, null, score);
     this.coverage = previous.coverage;
-  }
-
-  public Hypothesis(int lastSourceIndex, int lhs, List<DPState> states) {
-    super(-1, lastSourceIndex, lhs, states, null, 0.0f);
   }
 
   public Coverage getCoverage() {
