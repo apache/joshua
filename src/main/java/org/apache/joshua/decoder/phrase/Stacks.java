@@ -267,7 +267,7 @@ public class Stacks {
       
       float finalTransitionScore = ComputeNodeResult.computeFinalCost(featureFunctions, tailNodes, 0, sentence.length(), null, sentence);
 
-      System.err.println(String.format("createGoalNode: final score: %f -> %f", score, finalTransitionScore));
+//      System.err.println(String.format("createGoalNode: final score: %f -> %f", score, finalTransitionScore));
       
       if (null == this.end)
         this.end = new Hypothesis(null, score + finalTransitionScore, hyp, sentence.length(), null);
