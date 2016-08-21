@@ -45,7 +45,7 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.hypergraph.HyperEdge;
 import org.apache.joshua.decoder.segment_file.Sentence;
 
-public class Candidate {
+public class Candidate implements Comparable<Candidate> {
   
   private List<FeatureFunction> featureFunctions;
   private Sentence sentence;
@@ -76,6 +76,7 @@ public class Candidate {
    * as part of its constructor, so we delay computing it unless needed.
    */
   private HGNode phraseNode;
+  private ComputeNodeResult phraseResult;
   
   /**
    * When candidate objects are extended, the new one is initialized with the same underlying
@@ -114,9 +115,9 @@ public class Candidate {
   
   @Override
   public String toString() {
-    return String.format("CANDIDATE(hyp %d/%d, phr %d/%d) [%s] phrase=[%s] span=%s",
-        ranks[0], hypotheses.size(), ranks[1], phrases.size(),
-        getHypothesis(), getPhraseNode(), getSpan());
+    return String.format("CANDIDATE(hyp %d/%d, phr %d/%d) %.3f [%s] phrase=[%s] span=%s",
+        ranks[0], hypotheses.size(), ranks[1], phrases.size(), score(),
+        getHypothesis(), getPhraseNode().bestHyperedge.getRule().getEnglishWords(), getSpan());
   }
 
   public Candidate(List<FeatureFunction> featureFunctions, Sentence sentence, 
@@ -130,10 +131,11 @@ public class Candidate {
     this.rule = isMonotonic() ? Hypothesis.MONO_RULE : Hypothesis.SWAP_RULE;
 //    this.score = hypotheses.get(ranks[0]).score + phrases.get(ranks[1]).getEstimatedCost();
 
+    this.phraseNode = null;
+    this.computedResult = null;
+    
     // TODO: compute this proactively or lazily according to a parameter
     computeResult();
-//    this.phraseNode = null;
-//    this.computedResult = null;
   }
   
   /**
@@ -233,9 +235,9 @@ public class Candidate {
   public ComputeNodeResult computeResult() {
     if (computedResult == null) {
       // add the phrase node
-      ComputeNodeResult phraseResult = new ComputeNodeResult(featureFunctions, getPhraseRule(), null, phrases.i, phrases.j, null, sentence);
+      phraseResult = new ComputeNodeResult(featureFunctions, getPhraseRule(), null, phrases.i, phrases.j, null, sentence);
       HyperEdge edge = new HyperEdge(getPhraseRule(), phraseResult.getViterbiCost(), phraseResult.getTransitionCost(), null, null);
-      phraseNode = new HGNode(phrases.i, phrases.j, rule.getLHS(), phraseResult.getDPStates(), edge, phraseResult.getPruningEstimate());
+      phraseNode = new HGNode(phrases.i, phrases.j, getPhraseRule().getLHS(), phraseResult.getDPStates(), edge, phraseResult.getPruningEstimate());
 
       // add the rule
       // TODO: sourcepath
@@ -284,24 +286,20 @@ public class Candidate {
   }
 
   /**
-   * This returns the sum of two costs: the HypoState cost + the transition cost. The HypoState cost
-   * is in turn the sum of two costs: the Viterbi cost of the underlying hypothesis, and the adjustment
-   * to the future score incurred by translating the words under the source phrase being added.
-   * The transition cost is the sum of new features incurred along the transition (mostly, the
-   * language model costs).
+   * This returns the sum of two costs: the Viterbi cost of the edge represented by the current
+   * cube pruning state, plus the difference to the future cost incurred by translating the
+   * current phrase.
    * 
-   * The Future Cost item should probably just be implemented as another kind of feature function,
-   * but it would require some reworking of that interface, which isn't worth it. 
+   * Note that in phrase-based decoding, the Hypothesis scores include the future cost estimate,
+   * which means that the Viterbi cost (which includes only the inside estimates) is not the complete
+   * cost; instead, you have to chain the calls to the hypothesis. This should be fixed and cleaned
+   * up to formally separate the "inside" and "outside" costs.
    * 
-   * @return the sum of two costs: the HypoState cost + the transition cost
+   * @return the inside + outside cost
    */
   public float score() {
-    float score = computedResult.getPruningEstimate();
-
-//    float score = getHypothesis().getScore() + future_delta;
-//    if (computedResult != null)
-//      score += computedResult.getTransitionCost();
-    
+//    float score = computedResult.getViterbiCost() + future_delta;
+    float score = getHypothesis().getScore() + future_delta + phraseResult.getTransitionCost() + computedResult.getTransitionCost();
     return score;
   }
   
