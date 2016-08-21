@@ -31,9 +31,9 @@ import java.util.List;
  */
 public class ContiguousPhrase extends AbstractPhrase {
 
-  protected int startIndex;
-  protected int endIndex;
-  protected Corpus corpusArray;
+  protected final int startIndex;
+  protected final int endIndex;
+  protected final Corpus corpusArray;
 
   public ContiguousPhrase(int startIndex, int endIndex, Corpus corpusArray) {
     this.startIndex = startIndex;
@@ -94,7 +94,7 @@ public class ContiguousPhrase extends AbstractPhrase {
    */
   public List<Phrase> getSubPhrases(int maxLength) {
     if (maxLength > size()) return getSubPhrases(size());
-    List<Phrase> phrases = new ArrayList<Phrase>();
+    List<Phrase> phrases = new ArrayList<>();
     for (int i = 0; i < size(); i++) {
       for (int j = i + 1; (j <= size()) && (j - i <= maxLength); j++) {
         Phrase subPhrase = subPhrase(i, j);

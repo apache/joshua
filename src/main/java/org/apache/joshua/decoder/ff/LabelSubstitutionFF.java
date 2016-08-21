@@ -56,21 +56,21 @@ public class LabelSubstitutionFF extends StatelessFF {
     return substitutionNonterminal + "_substitutes_" + ruleNonterminal;
   }
 
-  private final String computeLabelMatchingFeature(String ruleNonterminal,
+  private String computeLabelMatchingFeature(String ruleNonterminal,
       String substitutionNonterminal) {
     String result = getLowerCasedFeatureName() + "_";
     result += getMatchFeatureSuffix(ruleNonterminal, substitutionNonterminal);
     return result;
   }
 
-  private final String computeLabelSubstitutionFeature(String ruleNonterminal,
+  private String computeLabelSubstitutionFeature(String ruleNonterminal,
       String substitutionNonterminal) {
     String result = getLowerCasedFeatureName() + "_";
     result += getSubstitutionSuffix(ruleNonterminal, substitutionNonterminal);
     return result;
   }
 
-  private static final String getRuleLabelsDescriptorString(Rule rule) {
+  private static String getRuleLabelsDescriptorString(Rule rule) {
     String result = "";
     String leftHandSide = RulePropertiesQuerying.getLHSAsString(rule);
     List<String> ruleSourceNonterminals = RulePropertiesQuerying
@@ -92,7 +92,7 @@ public class LabelSubstitutionFF extends StatelessFF {
     return result;
   }
 
-  private static final String getSubstitutionsDescriptorString(List<HGNode> tailNodes) {
+  private static String getSubstitutionsDescriptorString(List<HGNode> tailNodes) {
     String result = "_<Subst>";
     List<String> substitutionNonterminals = RulePropertiesQuerying
         .getSourceNonterminalStrings(tailNodes);

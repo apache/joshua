@@ -116,7 +116,7 @@ public interface SymbolTable {
    * then the value returned must be {@link #X}. 
    *  
    * Otherwise, the value returned must be a negative number  
-   * whose value is less than {@link X}. 
+   * whose value is less than {@link #X}.
    *  
    * @param nonterminal Nonterminal symbol 
    * @return a unique integer identifier for the nonterminal 

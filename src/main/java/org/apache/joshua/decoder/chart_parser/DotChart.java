@@ -71,7 +71,7 @@ class DotChart {
    * Two-dimensional chart of cells. Some cells might be null. This could definitely be represented
    * more efficiently, since only the upper half of this triangle is every used.
    */
-  private ChartSpan<DotCell> dotcells;
+  private final ChartSpan<DotCell> dotcells;
 
   public DotCell getDotCell(int i, int j) {
     return dotcells.get(i, j);
@@ -84,12 +84,12 @@ class DotChart {
   /**
    * CKY+ style parse chart in which completed span entries are stored.
    */
-  private Chart dotChart;
+  private final Chart dotChart;
 
   /**
    * Translation grammar which contains the translation rules.
    */
-  private Grammar pGrammar;
+  private final Grammar pGrammar;
 
   /* Length of input sentence. */
   private final int sentLen;
@@ -119,7 +119,7 @@ class DotChart {
     this.pGrammar = grammar;
     this.input = input;
     this.sentLen = input.size();
-    this.dotcells = new ChartSpan<DotCell>(sentLen, null);
+    this.dotcells = new ChartSpan<>(sentLen, null);
 
     seed();
   }
@@ -243,8 +243,7 @@ class DotChart {
     }
 
     // complete super-items (items over the same span with different LHSs)
-    List<SuperNode> superNodes = new ArrayList<SuperNode>(this.dotChart.getCell(k, j)
-        .getSortedSuperItems().values());
+    List<SuperNode> superNodes = new ArrayList<>(this.dotChart.getCell(k, j).getSortedSuperItems().values());
 
     /* For every partially complete item over (i,k) */
     for (DotNode dotNode : dotcells.get(i, k).dotNodes) {
@@ -319,7 +318,7 @@ class DotChart {
    */
   private void addDotItem(Trie tnode, int i, int j, ArrayList<SuperNode> antSuperNodesIn,
       SuperNode curSuperNode, SourcePath srcPath) {
-    ArrayList<SuperNode> antSuperNodes = new ArrayList<SuperNode>();
+    ArrayList<SuperNode> antSuperNodes = new ArrayList<>();
     if (antSuperNodesIn != null) {
       antSuperNodes.addAll(antSuperNodesIn);
     }
@@ -360,7 +359,7 @@ class DotChart {
   static class DotCell {
 
     // Package-protected fields
-    private List<DotNode> dotNodes = new ArrayList<DotNode>();
+    private final List<DotNode> dotNodes = new ArrayList<>();
 
     public List<DotNode> getDotNodes() {
       return dotNodes;
@@ -380,14 +379,15 @@ class DotChart {
    */
   static class DotNode {
 
-    private int i, j;
+    private final int i;
+    private final int j;
     private Trie trieNode = null;
     
     /* A list of grounded (over a span) nonterminals that have been crossed in traversing the rule */
     private ArrayList<SuperNode> antSuperNodes = null;
     
     /* The source lattice cost of applying the rule */
-    private SourcePath srcPath;
+    private final SourcePath srcPath;
 
     @Override
     public String toString() {
@@ -430,10 +430,8 @@ class DotChart {
       // if (this.i != state.i || this.j != state.j)
       // return false;
 
-      if (this.trieNode != state.trieNode)
-        return false;
+      return this.trieNode == state.trieNode;
 
-      return true;
     }
 
     /**

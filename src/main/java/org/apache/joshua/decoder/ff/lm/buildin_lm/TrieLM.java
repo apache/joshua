@@ -23,6 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -94,14 +95,14 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
    * @throws FileNotFoundException if the input file cannot be located
    */
   public TrieLM(ArpaFile arpaFile) throws FileNotFoundException {
-    super(arpaFile.getVocab().size(), arpaFile.getOrder());
+    super(Vocabulary.size(), arpaFile.getOrder());
 
     int ngramCounts = arpaFile.size();
     LOG.debug("ARPA file contains {} n-grams", ngramCounts);
 
-    this.children = new HashMap<Long,Integer>(ngramCounts);
-    this.logProbs = new HashMap<Long,Float>(ngramCounts);
-    this.backoffs = new HashMap<Integer,Float>(ngramCounts);
+    this.children = new HashMap<>(ngramCounts);
+    this.logProbs = new HashMap<>(ngramCounts);
+    this.backoffs = new HashMap<>(ngramCounts);
 
     int nodeCounter = 0;
 
@@ -265,8 +266,8 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
 
     Scanner scanner = new Scanner(new File(args[1]));
 
-    LinkedList<String> wordList = new LinkedList<String>();
-    LinkedList<String> window = new LinkedList<String>();
+    LinkedList<String> wordList = new LinkedList<>();
+    LinkedList<String> window = new LinkedList<>();
 
     LOG.info("Starting to scan {}", args[1]);
     while (scanner.hasNext()) {
@@ -279,15 +280,13 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
       wordList.clear();
 
       wordList.add("<s>");
-      for (String word : words) {
-        wordList.add(word);
-      }
+      Collections.addAll(wordList, words);
       wordList.add("</s>");
 
-      ArrayList<Integer> sentence = new ArrayList<Integer>();
+      ArrayList<Integer> sentence = new ArrayList<>();
       //        int[] ids = new int[wordList.size()];
-      for (int i=0, size=wordList.size(); i<size; i++) {
-        sentence.add(vocab.id(wordList.get(i)));
+      for (String aWordList : wordList) {
+        sentence.add(Vocabulary.id(aWordList));
         //          ids[i] = ;
       }
 
@@ -310,7 +309,7 @@ public class TrieLM extends AbstractLM { //DefaultNGramLanguageModel {
           int i=0;
           int[] wordIDs = new int[window.size()];
           for (String word : window) {
-            wordIDs[i] = vocab.id(word);
+            wordIDs[i] = Vocabulary.id(word);
             i++;
           }
 

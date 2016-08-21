@@ -48,7 +48,7 @@ public class CreateGlueGrammar {
   private String grammarPath;
   
   @Option(name = "--goal", aliases = {"-goal"}, required = false, usage = "specify custom GOAL symbol. Default: 'GOAL'")
-  private String goalSymbol = cleanNonTerminal(new JoshuaConfiguration().goal_symbol);
+  private final String goalSymbol = cleanNonTerminal(new JoshuaConfiguration().goal_symbol);
 
   /* Rule templates */
   // [GOAL] ||| <s> ||| <s> ||| 0

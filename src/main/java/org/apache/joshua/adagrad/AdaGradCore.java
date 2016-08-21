@@ -33,6 +33,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,6 +41,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -49,7 +51,6 @@ import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.metrics.EvaluationMetric;
 import org.apache.joshua.util.StreamGobbler;
 
-import EDU.oswego.cs.dl.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,9 +133,9 @@ public class AdaGradCore {
   /* *********************************************************** */
 
   // private double[] lambda;
-  private ArrayList<Double> lambda = new ArrayList<Double>();
+  private ArrayList<Double> lambda = new ArrayList<>();
   // the current weight vector. NOTE: indexing starts at 1.
-  private ArrayList<Double> bestLambda = new ArrayList<Double>();
+  private final ArrayList<Double> bestLambda = new ArrayList<>();
   // the best weight vector across all iterations
 
   private boolean[] isOptimizable;
@@ -341,8 +342,8 @@ public class AdaGradCore {
     // and one line for the normalization method
     // indexing starts at 1 in these arrays
     for (int p = 0; p <= numParams; ++p)
-      lambda.add(new Double(0));
-    bestLambda.add(new Double(0));
+      lambda.add(0d);
+    bestLambda.add(0d);
     // why only lambda is a list? because the size of lambda
     // may increase over time, but other arrays are specified in
     // the param config file, only used for initialization
@@ -497,7 +498,7 @@ public class AdaGradCore {
     indicesOfInterest_all = temp_TSA;
 
     for (int i = 0; i < numSentences; ++i) {
-      indicesOfInterest_all[i] = new TreeSet<Integer>();
+      indicesOfInterest_all[i] = new TreeSet<>();
     }
   } // void initialize(...)
 
@@ -522,9 +523,9 @@ public class AdaGradCore {
     if (folder.exists()) {
       File[] listOfFiles = folder.listFiles();
 
-      for (int i = 0; i < listOfFiles.length; i++) {
-        if (listOfFiles[i].isFile()) {
-          files = listOfFiles[i].getName();
+      for (File listOfFile : listOfFiles) {
+        if (listOfFile.isFile()) {
+          files = listOfFile.getName();
           if (files.startsWith("AdaGrad.temp")) {
             deleteFile(files);
           }
@@ -627,11 +628,11 @@ public class AdaGradCore {
     // save feats and stats for all candidates(old & new)
     HashMap<String, String>[] feat_hash = new HashMap[numSentences];
     for (int i = 0; i < numSentences; i++)
-      feat_hash[i] = new HashMap<String, String>();
+      feat_hash[i] = new HashMap<>();
 
     HashMap<String, String>[] stats_hash = new HashMap[numSentences];
     for (int i = 0; i < numSentences; i++)
-      stats_hash[i] = new HashMap<String, String>();
+      stats_hash[i] = new HashMap<>();
 
     while (!done) { // NOTE: this "loop" will only be carried out once
       println("--- Starting AdaGrad iteration #" + iteration + " @ " + (new Date()) + " ---", 1);
@@ -719,7 +720,7 @@ public class AdaGradCore {
         candCount[i] = 0;
         lastUsedIndex[i] = -1;
         // suffStats_array[i].clear();
-        suffStats_array[i] = new ConcurrentHashMap();
+        suffStats_array[i] = new ConcurrentHashMap<>();
       }
 
       // initLambda[0] is not used!
@@ -848,7 +849,7 @@ public class AdaGradCore {
         // (It's not actually a bug, but only because existingCandStats gets
         // cleared before moving to the next source sentence.)
         // FIX: should be made an array, indexed by i
-        HashMap<String, String> existingCandStats = new HashMap<String, String>();
+        HashMap<String, String> existingCandStats = new HashMap<>();
         // VERY IMPORTANT:
         // A CANDIDATE X MAY APPEARED IN ITER 1, ITER 3
         // BUT IF THE USER SPECIFIED TO CONSIDER ITERATIONS FROM ONLY ITER 2, THEN
@@ -943,7 +944,7 @@ public class AdaGradCore {
 
           String[] sentsCurrIt_currSrcSent = new String[sizeOfNBest + 1];
 
-          Vector<String> unknownCands_V = new Vector<String>();
+          Vector<String> unknownCands_V = new Vector<>();
           // which candidates (of the i'th source sentence) have not been seen before
           // this iteration?
 
@@ -1122,7 +1123,7 @@ public class AdaGradCore {
                   // initialized as zero anyway
                   if (featId > numParams) {
                     ++numParams;
-                    lambda.add(new Double(0));
+                    lambda.add(0d);
                   }
                 }
               }
@@ -1236,7 +1237,7 @@ public class AdaGradCore {
               lambda.set(p, bestLambda.get(p));
             // and set the rest of lambda to be 0
             for (int p = 0; p < lambda.size() - bestLambda.size(); ++p)
-              lambda.set(p + bestLambda.size(), new Double(0));
+              lambda.set(p + bestLambda.size(), 0d);
           }
 
           return null; // this means that the old values should be kept by the caller
@@ -1284,7 +1285,7 @@ public class AdaGradCore {
         }
       }
 
-      Vector<String> output = new Vector<String>();
+      Vector<String> output = new Vector<>();
 
       // note: initialLambda[] has length = numParamsOld
       // augmented with new feature weights, initial values are 0
@@ -1328,8 +1329,8 @@ public class AdaGradCore {
 
       /************* end optimization **************/
 
-      for (int i = 0; i < output.size(); i++)
-        println(output.get(i));
+      for (String anOutput : output)
+        println(anOutput);
 
       // check if any parameter has been updated
       boolean anyParamChanged = false;
@@ -1407,7 +1408,7 @@ public class AdaGradCore {
       // (interpolation with previous wt vector)
       double interCoef = 1.0; // no interpolation for now
       for (int i = 1; i <= numParams; i++)
-        lambda.set(i, interCoef * finalLambda[i] + (1 - interCoef) * lambda.get(i).doubleValue());
+        lambda.set(i, interCoef * finalLambda[i] + (1 - interCoef) * lambda.get(i));
 
       println("Next iteration will decode with lambda: " + lambdaToString(lambda), 1);
       println("", 1);
@@ -1441,9 +1442,9 @@ public class AdaGradCore {
 
     retStr += "(listing the first " + featToPrint + " lambdas)";
     for (int c = 1; c <= featToPrint - 1; ++c) {
-      retStr += "" + String.format("%.4f", lambdaA.get(c).doubleValue()) + ", ";
+      retStr += "" + String.format("%.4f", lambdaA.get(c)) + ", ";
     }
-    retStr += "" + String.format("%.4f", lambdaA.get(numParams).doubleValue()) + "}";
+    retStr += "" + String.format("%.4f", lambdaA.get(numParams)) + "}";
 
     return retStr;
   }
@@ -1476,7 +1477,7 @@ public class AdaGradCore {
       println("Running external decoder...", 1);
 
       try {
-        ArrayList<String> cmd = new ArrayList<String>();
+        ArrayList<String> cmd = new ArrayList<>();
         cmd.add(decoderCommandFileName);
 
         if (passIterationToDecoder)
@@ -1539,7 +1540,7 @@ public class AdaGradCore {
 
         /*
          * line format:
-         * 
+         *
          * i ||| words of candidate translation . ||| feat-1_val feat-2_val ... feat-numParams_val
          * .*
          */
@@ -1627,7 +1628,7 @@ public class AdaGradCore {
         if (c_match == -1) {
           outFile.println(line);
         } else {
-          if (Math.abs(params.get(c_match).doubleValue()) > 1e-20)
+          if (Math.abs(params.get(c_match)) > 1e-20)
             outFile.println(Vocabulary.word(c_match) + " " + params.get(c_match));
         }
 
@@ -1636,7 +1637,7 @@ public class AdaGradCore {
 
       // now append weights of new features
       for (int c = origFeatNum + 1; c <= numParams; ++c) {
-        if (Math.abs(params.get(c).doubleValue()) > 1e-20)
+        if (Math.abs(params.get(c)) > 1e-20)
           outFile.println(Vocabulary.word(c) + " " + params.get(c));
       }
 
@@ -1667,7 +1668,7 @@ public class AdaGradCore {
 
       // read default value
       lambda.set(c, inFile_init.nextDouble());
-      defaultLambda[c] = lambda.get(c).doubleValue();
+      defaultLambda[c] = lambda.get(c);
 
       // read isOptimizable
       dummy = inFile_init.next();
@@ -1849,7 +1850,7 @@ public class AdaGradCore {
 
           boolean format3 = false;
 
-          HashSet<String> seenStrings = new HashSet<String>();
+          HashSet<String> seenStrings = new HashSet<>();
           BufferedReader inFile = new BufferedReader(new FileReader(docInfoFileName));
           for (int i = 0; i < numSentences; ++i) {
             // set format3 = true if a duplicate is found
@@ -1861,8 +1862,8 @@ public class AdaGradCore {
 
           inFile.close();
 
-          HashSet<String> seenDocNames = new HashSet<String>();
-          HashMap<String, Integer> docOrder = new HashMap<String, Integer>();
+          HashSet<String> seenDocNames = new HashSet<>();
+          HashMap<String, Integer> docOrder = new HashMap<>();
           // maps a document name to the order (0-indexed) in which it was seen
 
           inFile = new BufferedReader(new FileReader(docInfoFileName));
@@ -1922,13 +1923,13 @@ public class AdaGradCore {
       /*
        * InputStream inStream = new FileInputStream(new File(origFileName)); BufferedReader inFile =
        * new BufferedReader(new InputStreamReader(inStream, "utf8"));
-       * 
+       *
        * FileOutputStream outStream = new FileOutputStream(newFileName, false); OutputStreamWriter
        * outStreamWriter = new OutputStreamWriter(outStream, "utf8"); BufferedWriter outFile = new
        * BufferedWriter(outStreamWriter);
-       * 
+       *
        * String line; while(inFile.ready()) { line = inFile.readLine(); writeLine(line, outFile); }
-       * 
+       *
        * inFile.close(); outFile.close();
        */
       return true;
@@ -1989,7 +1990,7 @@ public class AdaGradCore {
       try {
         PrintWriter outFile_lambdas = new PrintWriter(finalLambdaFileName);
         for (int c = 1; c <= numParams; ++c) {
-          outFile_lambdas.println(Vocabulary.word(c) + " ||| " + lambda.get(c).doubleValue());
+          outFile_lambdas.println(Vocabulary.word(c) + " ||| " + lambda.get(c));
         }
         outFile_lambdas.close();
 
@@ -2003,7 +2004,7 @@ public class AdaGradCore {
   private String[] cfgFileToArgsArray(String fileName) {
     checkFile(fileName);
 
-    Vector<String> argsVector = new Vector<String>();
+    Vector<String> argsVector = new Vector<>();
 
     BufferedReader inFile = null;
     try {
@@ -2015,7 +2016,7 @@ public class AdaGradCore {
 
         if (line != null && line.length() > 0 && line.charAt(0) != '#') {
 
-          if (line.indexOf("#") != -1) { // discard comment
+          if (line.contains("#")) { // discard comment
             line = line.substring(0, line.indexOf("#"));
           }
 
@@ -2026,10 +2027,10 @@ public class AdaGradCore {
           /*
            * OBSOLETE MODIFICATION //SPECIAL HANDLING FOR AdaGrad CLASSIFIER PARAMETERS String[]
            * paramA = line.split("\\s+");
-           * 
+           *
            * if( paramA[0].equals("-classifierParams") ) { String classifierParam = ""; for(int p=1;
            * p<=paramA.length-1; p++) classifierParam += paramA[p]+" ";
-           * 
+           *
            * if(paramA.length>=2) { String[] tmpParamA = new String[2]; tmpParamA[0] = paramA[0];
            * tmpParamA[1] = classifierParam; paramA = tmpParamA; } else {
            * println("Malformed line in config file:"); println(origLine); System.exit(70); } }//END
@@ -2038,7 +2039,7 @@ public class AdaGradCore {
 
           // cmu modification(from meteor for zmert)
           // Parse args
-          ArrayList<String> argList = new ArrayList<String>();
+          ArrayList<String> argList = new ArrayList<>();
           StringBuilder arg = new StringBuilder();
           boolean quoted = false;
           for (int i = 0; i < line.length(); i++) {
@@ -2071,9 +2072,7 @@ public class AdaGradCore {
             argsVector.add(paramA[1]);
           } else if (paramA.length > 2 && (paramA[0].equals("-m") || paramA[0].equals("-docSet"))) {
             // -m (metricName), -docSet are allowed to have extra optinos
-            for (int opt = 0; opt < paramA.length; ++opt) {
-              argsVector.add(paramA[opt]);
-            }
+            Collections.addAll(argsVector, paramA);
           } else {
             String msg = "Malformed line in config file:" + origLine;
             throw new RuntimeException(msg);
@@ -2413,7 +2412,7 @@ public class AdaGradCore {
         if (val < 0 || val > 1) {
           throw new RuntimeException("passIterationToDecoder should be either 0 or 1");
         }
-        passIterationToDecoder = (val == 1) ? true : false;
+        passIterationToDecoder = (val == 1);
       } else if (option.equals("-decOut")) {
         decoderOutFileName = args[i + 1];
       } else if (option.equals("-decExit")) {
@@ -2572,12 +2571,12 @@ public class AdaGradCore {
     /*
      * 1: -docSet bottom 8d 2: -docSet bottom 25% the bottom ceil(0.20*numDocs) documents 3: -docSet
      * top 8d 4: -docSet top 25% the top ceil(0.20*numDocs) documents
-     * 
+     *
      * 5: -docSet window 11d around 90percentile 11 docs centered around 80th percentile (complain
      * if not enough docs; don't adjust) 6: -docSet window 11d around 40rank 11 docs centered around
      * doc ranked 50 (complain if not enough docs; don't adjust)
-     * 
-     * 
+     *
+     *
      * [0]: method (0-6) [1]: first (1-indexed) [2]: last (1-indexed) [3]: size [4]: center [5]:
      * arg1 (-1 for method 0) [6]: arg2 (-1 for methods 0-4)
      */
@@ -2808,7 +2807,7 @@ public class AdaGradCore {
     str = " " + str + " ";
     str = str.replaceAll("\\s+", " ");
 
-    TreeSet<Integer> splitIndices = new TreeSet<Integer>();
+    TreeSet<Integer> splitIndices = new TreeSet<>();
 
     for (int i = 0; i < str.length(); ++i) {
       char ch = str.charAt(i);
@@ -2855,7 +2854,7 @@ public class AdaGradCore {
     // remove spaces around dashes
     if (normMethod == 2 || normMethod == 4) {
 
-      TreeSet<Integer> skipIndices = new TreeSet<Integer>();
+      TreeSet<Integer> skipIndices = new TreeSet<>();
       str = " " + str + " ";
 
       for (int i = 0; i < str.length(); ++i) {
@@ -3031,7 +3030,7 @@ public class AdaGradCore {
   }
 
   private ArrayList<Double> randomLambda() {
-    ArrayList<Double> retLambda = new ArrayList<Double>(1 + numParams);
+    ArrayList<Double> retLambda = new ArrayList<>(1 + numParams);
 
     for (int c = 1; c <= numParams; ++c) {
       if (isOptimizable[c]) {
@@ -3092,8 +3091,8 @@ public class AdaGradCore {
     // print("discarding: ",4);
 
     int numCandidates = slope.length;
-    HashSet<Integer> discardedIndices = new HashSet<Integer>();
-    HashMap<Double, Integer> indicesOfSlopes = new HashMap<Double, Integer>();
+    HashSet<Integer> discardedIndices = new HashSet<>();
+    HashMap<Double, Integer> indicesOfSlopes = new HashMap<>();
     // maps slope to index of best candidate that has that slope.
     // ("best" as in the one with the highest offset)
 

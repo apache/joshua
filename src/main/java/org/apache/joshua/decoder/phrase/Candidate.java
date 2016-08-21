@@ -51,7 +51,7 @@ public class Candidate implements Comparable<Candidate> {
   private Sentence sentence;
   
   // the set of hypotheses that can be paired with phrases from this span 
-  private List<Hypothesis> hypotheses;
+  private final List<Hypothesis> hypotheses;
 
   // the list of target phrases gathered from a span of the input
   private TargetPhrases phrases;
@@ -60,7 +60,7 @@ public class Candidate implements Comparable<Candidate> {
   private float future_delta;
   
   // indices into the hypotheses and phrases arrays (used for cube pruning)
-  private int[] ranks;
+  private final int[] ranks;
   
   // the reordering rule used by an instantiated Candidate
   private Rule rule;

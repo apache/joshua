@@ -62,11 +62,10 @@ public class StateConstraint {
         int leftPos = this.target.indexOf(leftWords);
         int rightPos = this.target.lastIndexOf(rightWords);
 
-        boolean legal = (leftPos != -1 && leftPos <= rightPos);
-//        System.err.println(String.format("  isLegal(%s @ %d,%s @ %d) = %s", leftWords, leftPos,
+        //        System.err.println(String.format("  isLegal(%s @ %d,%s @ %d) = %s", leftWords, leftPos,
 //         rightWords, rightPos, legal));
 
-        return legal;
+        return (leftPos != -1 && leftPos <= rightPos);
       }
     }
 

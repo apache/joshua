@@ -46,7 +46,7 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
 
   private ArrayList<Integer> terminals;
 
-  private boolean useBackwardLattice = true;
+  private final boolean useBackwardLattice = true;
 
   private static final int MAX_CONCATENATIONS = 3;
   private static final int MAX_LABELS = 100;
@@ -72,7 +72,7 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
    * lattice.
    */
   public Collection<Integer> getConstituentLabels(int from, int to) {
-    Collection<Integer> labels = new HashSet<Integer>();
+    Collection<Integer> labels = new HashSet<>();
     int span_length = to - from;
     for (int i = forwardIndex.get(from); i < forwardIndex.get(from + 1); i += 2) {
       int current_span = forwardLattice.get(i + 1);
@@ -86,7 +86,7 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
 
   public int getOneConstituent(int from, int to) {
     int spanLength = to - from;
-    Stack<Integer> stack = new Stack<Integer>();
+    Stack<Integer> stack = new Stack<>();
 
     for (int i = forwardIndex.get(from); i < forwardIndex.get(from + 1); i += 2) {
       int currentSpan = forwardLattice.get(i + 1);
@@ -168,12 +168,12 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
    * the total number of labels returned is bounded by MAX_LABELS.
    */
   public Collection<Integer> getConcatenatedLabels(int from, int to) {
-    Collection<Integer> labels = new HashSet<Integer>();
+    Collection<Integer> labels = new HashSet<>();
 
     int span_length = to - from;
-    Stack<Integer> nt_stack = new Stack<Integer>();
-    Stack<Integer> pos_stack = new Stack<Integer>();
-    Stack<Integer> depth_stack = new Stack<Integer>();
+    Stack<Integer> nt_stack = new Stack<>();
+    Stack<Integer> pos_stack = new Stack<>();
+    Stack<Integer> depth_stack = new Stack<>();
 
     // seed stacks (reverse order to save on iterations, longer spans)
     for (int i = forwardIndex.get(from + 1) - 2; i >= forwardIndex.get(from); i -= 2) {
@@ -217,14 +217,14 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
 
   // TODO: can pre-comupute all that in top-down fashion.
   public Collection<Integer> getCcgLabels(int from, int to) {
-    Collection<Integer> labels = new HashSet<Integer>();
+    Collection<Integer> labels = new HashSet<>();
 
     int span_length = to - from;
     // TODO: range checks on the to and from
 
     boolean is_prefix = (forwardLattice.get(forwardIndex.get(from) + 1) > span_length);
     if (is_prefix) {
-      Map<Integer, Set<Integer>> main_constituents = new HashMap<Integer, Set<Integer>>();
+      Map<Integer, Set<Integer>> main_constituents = new HashMap<>();
       // find missing to the right
       for (int i = forwardIndex.get(from); i < forwardIndex.get(from + 1); i += 2) {
         int current_span = forwardLattice.get(i + 1);
@@ -233,7 +233,7 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
         else {
           int end_pos = forwardLattice.get(i + 1) + from;
           Set<Integer> nts = main_constituents.get(end_pos);
-          if (nts == null) main_constituents.put(end_pos, new HashSet<Integer>());
+          if (nts == null) main_constituents.put(end_pos, new HashSet<>());
           main_constituents.get(end_pos).add(forwardLattice.get(i));
         }
       }
@@ -255,7 +255,7 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
         // check longest span ending in to..
         if (backwardLattice.get(to_end - 1) <= span_length) return labels;
 
-        Map<Integer, Set<Integer>> main_constituents = new HashMap<Integer, Set<Integer>>();
+        Map<Integer, Set<Integer>> main_constituents = new HashMap<>();
         // find missing to the left
         for (int i = to_end - 2; i >= backwardIndex.get(to); i -= 2) {
           int current_span = backwardLattice.get(i + 1);
@@ -264,7 +264,7 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
           else {
             int start_pos = to - backwardLattice.get(i + 1);
             Set<Integer> nts = main_constituents.get(start_pos);
-            if (nts == null) main_constituents.put(start_pos, new HashSet<Integer>());
+            if (nts == null) main_constituents.put(start_pos, new HashSet<>());
             main_constituents.get(start_pos).add(backwardLattice.get(i));
           }
         }
@@ -326,40 +326,41 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < forwardIndex.size(); i++)
-      sb.append("FI[" + i + "] =\t" + forwardIndex.get(i) + "\n");
+      sb.append("FI[").append(i).append("] =\t").append(forwardIndex.get(i)).append("\n");
     sb.append("\n");
     for (int i = 0; i < forwardLattice.size(); i += 2)
-      sb.append("F[" + i + "] =\t" + Vocabulary.word(forwardLattice.get(i)) + " , "
-          + forwardLattice.get(i + 1) + "\n");
+      sb.append("F[").append(i).append("] =\t").append(Vocabulary.word(forwardLattice.get(i)))
+          .append(" , ").append(forwardLattice.get(i + 1)).append("\n");
 
     sb.append("\n");
     for (int i = 0; i < terminals.size(); i += 1)
-      sb.append("T[" + i + "] =\t" + Vocabulary.word(terminals.get(i)) + " , 1 \n");
+      sb.append("T[").append(i).append("] =\t").append(Vocabulary.word(terminals.get(i)))
+          .append(" , 1 \n");
 
     if (this.useBackwardLattice) {
       sb.append("\n");
       for (int i = 0; i < backwardIndex.size(); i++)
-        sb.append("BI[" + i + "] =\t" + backwardIndex.get(i) + "\n");
+        sb.append("BI[").append(i).append("] =\t").append(backwardIndex.get(i)).append("\n");
       sb.append("\n");
       for (int i = 0; i < backwardLattice.size(); i += 2)
-        sb.append("B[" + i + "] =\t" + Vocabulary.word(backwardLattice.get(i)) + " , "
-            + backwardLattice.get(i + 1) + "\n");
+        sb.append("B[").append(i).append("] =\t").append(Vocabulary.word(backwardLattice.get(i)))
+            .append(" , ").append(backwardLattice.get(i + 1)).append("\n");
     }
     return sb.toString();
   }
 
 
   private void initialize() {
-    forwardIndex = new ArrayList<Integer>();
+    forwardIndex = new ArrayList<>();
     forwardIndex.add(0);
-    forwardLattice = new ArrayList<Integer>();
+    forwardLattice = new ArrayList<>();
     if (this.useBackwardLattice) {
-      backwardIndex = new ArrayList<Integer>();
+      backwardIndex = new ArrayList<>();
       backwardIndex.add(0);
-      backwardLattice = new ArrayList<Integer>();
+      backwardLattice = new ArrayList<>();
     }
 
-    terminals = new ArrayList<Integer>();
+    terminals = new ArrayList<>();
   }
 
 
@@ -369,7 +370,7 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
 
     boolean next_nt = false;
     int current_id = 0;
-    Stack<Integer> stack = new Stack<Integer>();
+    Stack<Integer> stack = new Stack<>();
 
     for (String token : tokens) {
       if ("(".equals(token)) {

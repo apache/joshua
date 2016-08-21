@@ -45,31 +45,31 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
   // inferred from model file (may be larger than ngramOrder)
   private final int N;
 
-  private final static native long construct(String file_name);
+  private static native long construct(String file_name);
 
-  private final static native void destroy(long ptr);
+  private static native void destroy(long ptr);
 
-  private final static native int order(long ptr);
+  private static native int order(long ptr);
 
-  private final static native boolean registerWord(long ptr, String word, int id);
+  private static native boolean registerWord(long ptr, String word, int id);
 
-  private final static native float prob(long ptr, int words[]);
+  private static native float prob(long ptr, int words[]);
 
-  private final static native float probForString(long ptr, String[] words);
+  private static native float probForString(long ptr, String[] words);
 
-  private final static native boolean isKnownWord(long ptr, String word);
+  private static native boolean isKnownWord(long ptr, String word);
   
-  private final static native boolean isLmOov(long ptr, int word);
+  private static native boolean isLmOov(long ptr, int word);
 
-  private final static native StateProbPair probRule(long ptr, long pool, long words[]);
+  private static native StateProbPair probRule(long ptr, long pool, long words[]);
   
-  private final static native float estimateRule(long ptr, long words[]);
+  private static native float estimateRule(long ptr, long words[]);
 
-  private final static native float probString(long ptr, int words[], int start);
+  private static native float probString(long ptr, int words[], int start);
 
-  private final static native long createPool();
+  private static native long createPool();
 
-  private final static native void destroyPool(long pointer);
+  private static native void destroyPool(long pointer);
 
   public KenLM(int order, String file_name) {
     pointer = initializeSystemLibrary(file_name);

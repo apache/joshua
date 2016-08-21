@@ -158,8 +158,8 @@ $('#add_rule').click(function() {
     var ruleStr = "add_rule [X] ||| " + sourcePhrase + " ||| " + targetPhrase;
 
     // Add word-word alignment if unambiguous
-    // if (sourcePhrase.split().length == 1 && targetPhrase.split().length == 1)
-    //     ruleStr += " |||   ||| 0-0";
+    if (sourcePhrase.split().length == 1 && targetPhrase.split().length == 1)
+        ruleStr += " |||   ||| 0-0";
 
     sendMeta(ruleStr);
 
@@ -212,20 +212,27 @@ function record_results(data, status) {
     /* This version outputs the 1-best candidate of multiple input sentences */
     $(data.data.translations).each(function(i, item) {
         // result += item.totalScore + " " + item.hyp + "<br/>\n";
-        result += "<li class=\"list-group-item\"><span class=\"badge\">" + (i + 1) + "</span>" + clean_oovs(item.translatedText) + "</li>";
-        // result += "<li class=\"list-group-item\">" + clean_oovs(item.translatedText) + "</li>";
+        // result += "<li class=\"list-group-item\"><span class=\"badge\">" + (i + 1) + "</span>" + clean(item.translatedText) + "</li>";
+        result += "<li class=\"list-group-item\">" + clean(item.translatedText) + "</li>";
     });
 
     result += "</ul>";
     $("#output").html(result);
+
+    $(".oov").click(function(e) {
+        var oov = e.target.innerHTML;
+        $("#addPhrase_source").val(oov.toLowerCase());
+        $("#addPhrase_target").select();
+    });
 };
 
 /**
  * Cleans out OOVs
  */
-function clean_oovs(str) {
-    str = str.replace(/(\S+)_OOV/g, "<span style='color:red'>$1</span>");
+function clean(str) {
+    str = str.replace(/(\S+?)_OOV/g, "<span class='oov'>$1</span>");
     str = str.replace(/ ([\.\?,])/g, "$1");
+    str = str.replace(/" (.*?) "/g, "\"$1\"");
     return str;
 }
     

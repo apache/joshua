@@ -91,7 +91,7 @@ public class Sentence {
     
     config = joshuaConfiguration;
     
-    this.constraints = new LinkedList<ConstraintSpan>();
+    this.constraints = new LinkedList<>();
 
     // Check if the sentence has SGML markings denoting the
     // sentence ID; if so, override the id passed in to the
@@ -103,7 +103,7 @@ public class Sentence {
       this.id = Integer.parseInt(idstr);
 
     } else {
-      if (inputString.indexOf(" ||| ") != -1) {
+      if (inputString.contains(" ||| ")) {
         /* Target-side given; used for parsing and forced decoding */
         String[] pieces = inputString.split("\\s?\\|{3}\\s?");
         source = pieces[0];
@@ -178,7 +178,7 @@ public class Sentence {
     Lattice<Token> oldLattice = this.getLattice();
 
     /* Build a list of terminals across all grammars */
-    HashSet<Integer> vocabulary = new HashSet<Integer>();
+    HashSet<Integer> vocabulary = new HashSet<>();
     for (Grammar grammar : grammars) {
       Iterator<Integer> iterator = grammar.getTrieRoot().getTerminalExtensionIterator();
       while (iterator.hasNext())
@@ -197,11 +197,11 @@ public class Sentence {
           List<Arc<Token>> savedArcs = oldNodes.get(nodeid).getOutgoingArcs();
 
           char[] chars = word.toCharArray();
-          ChartSpan<Boolean> wordChart = new ChartSpan<Boolean>(chars.length + 1, false);
-          ArrayList<Node<Token>> nodes = new ArrayList<Node<Token>>(chars.length + 1);
+          ChartSpan<Boolean> wordChart = new ChartSpan<>(chars.length + 1, false);
+          ArrayList<Node<Token>> nodes = new ArrayList<>(chars.length + 1);
           nodes.add(oldNodes.get(nodeid));
           for (int i = 1; i < chars.length; i++)
-            nodes.add(new Node<Token>(i));
+            nodes.add(new Node<>(i));
           nodes.add(oldNodes.get(nodeid + 1));
           for (int width = 1; width <= chars.length; width++) {
             for (int i = 0; i <= chars.length - width; i++) {
@@ -228,7 +228,7 @@ public class Sentence {
           /* If there's a path from beginning to end */
           if (wordChart.get(0, chars.length)) {
             // Remove nodes not part of a complete path
-            HashSet<Node<Token>> deletedNodes = new HashSet<Node<Token>>();
+            HashSet<Node<Token>> deletedNodes = new HashSet<>();
             for (int k = 1; k < nodes.size() - 1; k++)
               if (!(wordChart.get(0, k) && wordChart.get(k, chars.length)))
                 nodes.set(k, null);
@@ -382,7 +382,7 @@ public class Sentence {
    */
   public List<Token> getTokens() {
     assert isLinearChain();
-    List<Token> tokens = new ArrayList<Token>();
+    List<Token> tokens = new ArrayList<>();
     for (Node<Token> node: getLattice().getNodes())
       if (node != null && node.getOutgoingArcs().size() > 0) 
         tokens.add(node.getOutgoingArcs().get(0).getLabel());
@@ -435,7 +435,7 @@ public class Sentence {
   public String toString() {
     StringBuilder sb = new StringBuilder(source());
     if (target() != null) {
-      sb.append(" ||| " + target());
+      sb.append(" ||| ").append(target());
     }
     return sb.toString();
   }

@@ -27,9 +27,9 @@ public class Future {
   private static final Logger LOG = LoggerFactory.getLogger(Future.class);
 
   // Square matrix with half the values ignored.
-  private ChartSpan<Float> entries;
+  private final ChartSpan<Float> entries;
 
-  private int sentlen;
+  private final int sentlen;
 
   /**
    * Computes bottom-up the best way to cover all spans of the input sentence, using the phrases

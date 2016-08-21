@@ -165,10 +165,12 @@ public abstract class AbstractGrammar implements Grammar {
         if (LOG.isDebugEnabled()) {
           StringBuilder s = new StringBuilder();
           for (Rule r : rules.getSortedRules(models)) {
-            s.append("\n\t" + r.getLHS() + " ||| " + Arrays.toString(r.getFrench()) + " ||| "
-                + Arrays.toString(r.getEnglish()) + " ||| " + r.getFeatureVector() + " ||| "
-                + r.getEstimatedCost() + "  " + r.getClass().getName() + "@"
-                + Integer.toHexString(System.identityHashCode(r)));
+            s.append("\n\t").append(r.getLHS()).append(" ||| ")
+                .append(Arrays.toString(r.getFrench())).append(" ||| ")
+                .append(Arrays.toString(r.getEnglish())).append(" ||| ")
+                .append(r.getFeatureVector()).append(" ||| ").append(r.getEstimatedCost())
+                .append("  ").append(r.getClass().getName()).append("@")
+                .append(Integer.toHexString(System.identityHashCode(r)));
           }
           LOG.debug("{}", s);
         }
@@ -203,7 +205,7 @@ public abstract class AbstractGrammar implements Grammar {
      * Add OOV rules; This should be called after the manual constraints have
      * been set up.
      */
-    HashSet<Integer> words = new HashSet<Integer>();
+    HashSet<Integer> words = new HashSet<>();
     for (Node<Token> node : inputLattice) {
       for (Arc<Token> arc : node.getOutgoingArcs()) {
         // create a rule, but do not add into the grammar trie

@@ -57,13 +57,13 @@ class Cell {
   private Chart chart = null;
 
   // The top-level (goal) symbol
-  private int goalSymbol;
+  private final int goalSymbol;
 
   // to maintain uniqueness of nodes
-  private HashMap<HGNode.Signature, HGNode> nodesSigTbl = new LinkedHashMap<HGNode.Signature, HGNode>();
+  private final HashMap<HGNode.Signature, HGNode> nodesSigTbl = new LinkedHashMap<>();
 
   // signature by lhs
-  private Map<Integer, SuperNode> superNodesTbl = new HashMap<Integer, SuperNode>();
+  private final Map<Integer, SuperNode> superNodesTbl = new HashMap<>();
 
   /**
    * sort values in nodesSigTbl, we need this list when necessary
@@ -104,19 +104,19 @@ class Cell {
    */
   // note that the input bin is bin[0][n], not the goal bin
   boolean transitToGoal(Cell bin, List<FeatureFunction> featureFunctions, int sentenceLength) {
-    this.sortedNodes = new ArrayList<HGNode>();
+    this.sortedNodes = new ArrayList<>();
     HGNode goalItem = null;
 
     for (HGNode antNode : bin.getSortedNodes()) {
       if (antNode.lhs == this.goalSymbol) {
         float logP = antNode.bestHyperedge.getBestDerivationScore();
-        List<HGNode> antNodes = new ArrayList<HGNode>();
+        List<HGNode> antNodes = new ArrayList<>();
         antNodes.add(antNode);
 
         float finalTransitionLogP = ComputeNodeResult.computeFinalCost(featureFunctions, antNodes,
             0, sentenceLength, null, this.chart.getSentence());
 
-        List<HGNode> previousItems = new ArrayList<HGNode>();
+        List<HGNode> previousItems = new ArrayList<>();
         previousItems.add(antNode);
 
         HyperEdge dt = new HyperEdge(null, logP + finalTransitionLogP, finalTransitionLogP,

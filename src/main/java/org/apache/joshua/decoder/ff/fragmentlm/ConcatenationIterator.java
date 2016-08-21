@@ -33,14 +33,12 @@ import java.util.NoSuchElementException;
  */
 public class ConcatenationIterator<E> implements Iterator<E> {
 
-  Iterator<Iterator<E>> sourceIterators;
+  final Iterator<Iterator<E>> sourceIterators;
   Iterator<E> currentIterator;
   Iterator<E> lastIteratorToReturn;
 
   public boolean hasNext() {
-    if (currentIterator.hasNext())
-      return true;
-    return false;
+    return currentIterator.hasNext();
   }
 
   public E next() {
@@ -80,12 +78,12 @@ public class ConcatenationIterator<E> implements Iterator<E> {
     List<String> list0 = Collections.emptyList();
     List<String> list1 = Arrays.asList("a b c d".split(" "));
     List<String> list2 = Arrays.asList("e f".split(" "));
-    List<Iterator<String>> iterators = new ArrayList<Iterator<String>>();
+    List<Iterator<String>> iterators = new ArrayList<>();
     iterators.add(list1.iterator());
     iterators.add(list0.iterator());
     iterators.add(list2.iterator());
     iterators.add(list0.iterator());
-    Iterator<String> iterator = new ConcatenationIterator<String>(iterators);
+    Iterator<String> iterator = new ConcatenationIterator<>(iterators);
     while (iterator.hasNext()) {
       System.out.println(iterator.next());
     }

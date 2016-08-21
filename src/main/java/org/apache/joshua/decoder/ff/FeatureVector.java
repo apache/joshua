@@ -46,7 +46,7 @@ public class FeatureVector {
   /*
    * A list of the dense feature names. Increased via calls to registerDenseFeatures()
    */
-  public static ArrayList<String> DENSE_FEATURE_NAMES = new ArrayList<String>();
+  public static final ArrayList<String> DENSE_FEATURE_NAMES = new ArrayList<>();
 
   /*
    * The values of each of the dense features, defaulting to 0.
@@ -56,11 +56,11 @@ public class FeatureVector {
   /*
    * Value of sparse features.
    */
-  private HashMap<String, Float> sparseFeatures;
+  private final HashMap<String, Float> sparseFeatures;
 
   public FeatureVector() {
-    sparseFeatures = new HashMap<String, Float>();
-    denseFeatures = new ArrayList<Float>(DENSE_FEATURE_NAMES.size());
+    sparseFeatures = new HashMap<>();
+    denseFeatures = new ArrayList<>(DENSE_FEATURE_NAMES.size());
     for (int i = 0; i < denseFeatures.size(); i++)
       denseFeatures.set(i, 0.0f);
   }
@@ -334,7 +334,7 @@ public class FeatureVector {
   public String mosesString() {
     StringBuilder outputString = new StringBuilder();
 
-    HashSet<String> printed_keys = new HashSet<String>();
+    HashSet<String> printed_keys = new HashSet<>();
 
     // First print all the dense feature names in order
     for (int i = 0; i < DENSE_FEATURE_NAMES.size(); i++) {
@@ -343,7 +343,7 @@ public class FeatureVector {
     }
 
     // Now print the sparse features
-    ArrayList<String> keys = new ArrayList<String>(sparseFeatures.keySet());
+    ArrayList<String> keys = new ArrayList<>(sparseFeatures.keySet());
     Collections.sort(keys);
     for (String key: keys) {
       if (! printed_keys.contains(key)) {
@@ -365,7 +365,7 @@ public class FeatureVector {
   public String toString() {
     StringBuilder outputString = new StringBuilder();
 
-    HashSet<String> printed_keys = new HashSet<String>();
+    HashSet<String> printed_keys = new HashSet<>();
 
     // First print all the dense feature names in order
     for (int i = 0; i < DENSE_FEATURE_NAMES.size(); i++) {
@@ -374,11 +374,10 @@ public class FeatureVector {
     }
 
     // Now print the rest of the features
-    ArrayList<String> keys = new ArrayList<String>(sparseFeatures.keySet());
+    ArrayList<String> keys = new ArrayList<>(sparseFeatures.keySet());
     Collections.sort(keys);
-    for (String key: keys)
-      if (! printed_keys.contains(key))
-        outputString.append(String.format("%s=%.3f ", key, sparseFeatures.get(key)));
+    keys.stream().filter(key -> !printed_keys.contains(key)).forEach(
+        key -> outputString.append(String.format("%s=%.3f ", key, sparseFeatures.get(key))));
 
     return outputString.toString().trim();
   }

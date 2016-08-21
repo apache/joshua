@@ -45,11 +45,11 @@ public class SourcePath {
   }
 
   public SourcePath extend(Arc<Token> srcEdge) {
-    float tcost = (float) srcEdge.getCost();
+    float tcost = srcEdge.getCost();
     if (tcost == 0.0)
       return this;
     else
-      return new SourcePath(pathCost + (float) srcEdge.getCost());
+      return new SourcePath(pathCost + srcEdge.getCost());
   }
 
   public SourcePath extendNonTerminal() {

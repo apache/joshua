@@ -38,15 +38,15 @@ public class PhraseChart {
 
   private static final Logger LOG = LoggerFactory.getLogger(PhraseChart.class);
 
-  private int sentence_length;
+  private final int sentence_length;
   private int max_source_phrase_length;
 
   // Banded array: different source lengths are next to each other.
-  private List<TargetPhrases> entries;
+  private final List<TargetPhrases> entries;
 
   // number of translation options
   int numOptions = 20;
-  private List<FeatureFunction> features;
+  private final List<FeatureFunction> features;
 
   /**
    * Create a new PhraseChart object, which represents all phrases that are
@@ -67,16 +67,16 @@ public class PhraseChart {
     this.features = features;
 
     max_source_phrase_length = 0;
-    for (int i = 0; i < tables.length; i++)
-      max_source_phrase_length = Math.max(max_source_phrase_length,
-          tables[i].getMaxSourcePhraseLength());
+    for (PhraseTable table1 : tables)
+      max_source_phrase_length = Math
+          .max(max_source_phrase_length, table1.getMaxSourcePhraseLength());
     sentence_length = source.length();
 
 //    System.err.println(String.format(
 //        "PhraseChart()::Initializing chart for sentlen %d max %d from %s", sentence_length,
 //        max_source_phrase_length, source));
 
-    entries = new ArrayList<TargetPhrases>();
+    entries = new ArrayList<>();
     for (int i = 0; i < sentence_length * max_source_phrase_length; i++)
       entries.add(null);
 
@@ -93,10 +93,8 @@ public class PhraseChart {
       }
     }
 
-    for (TargetPhrases phrases : entries) {
-      if (phrases != null)
-        phrases.finish(features, Decoder.weights, num_options);
-    }
+    entries.stream().filter(phrases -> phrases != null)
+        .forEach(phrases -> phrases.finish(features, Decoder.weights, num_options));
 
     LOG.info("Input {}: Collecting options took {} seconds", source.id(),
         (System.currentTimeMillis() - startTime) / 1000.0f);

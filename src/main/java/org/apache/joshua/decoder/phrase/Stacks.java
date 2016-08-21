@@ -63,14 +63,14 @@ public class Stacks {
   // The end state
   private Hypothesis end;
   
-  List<FeatureFunction> featureFunctions;
+  final List<FeatureFunction> featureFunctions;
 
-  private Sentence sentence;
+  private final Sentence sentence;
 
-  private JoshuaConfiguration config;
+  private final JoshuaConfiguration config;
 
   /* Contains all the phrase tables */
-  private PhraseChart chart;
+  private final PhraseChart chart;
   
   /**
    * Entry point. Initialize everything. Create pass-through (OOV) phrase table and glue phrase
@@ -89,8 +89,8 @@ public class Stacks {
     this.config = config;
     
     int num_phrase_tables = 0;
-    for (int i = 0; i < grammars.length; i++)
-      if (grammars[i] instanceof PhraseTable)
+    for (Grammar grammar : grammars)
+      if (grammar instanceof PhraseTable)
         ++num_phrase_tables;
     
     PhraseTable[] phraseTables = new PhraseTable[num_phrase_tables + 2];
@@ -118,7 +118,7 @@ public class Stacks {
     long startTime = System.currentTimeMillis();
     
     Future future = new Future(chart);
-    stacks = new ArrayList<Stack>();
+    stacks = new ArrayList<>();
     
     // <s> counts as the first word. Pushing null lets us count from one.
     stacks.add(null);
@@ -239,11 +239,8 @@ public class Stacks {
     /* If a gap is created by applying this phrase, make sure that you can reach the first
      * zero later on without violating the distortion constraint.
      */
-    if (end - firstZero > config.reordering_limit) {
-      return false;
-    }
-    
-    return true;
+    return end - firstZero <= config.reordering_limit;
+
   }
 
 
@@ -260,7 +257,7 @@ public class Stacks {
     
     for (Hypothesis hyp: lastStack) {
       float score = hyp.getScore();
-      List<HGNode> tailNodes = new ArrayList<HGNode>();
+      List<HGNode> tailNodes = new ArrayList<>();
       tailNodes.add(hyp);
       
       float finalTransitionScore = ComputeNodeResult.computeFinalCost(featureFunctions, tailNodes, 0, sentence.length(), null, sentence);

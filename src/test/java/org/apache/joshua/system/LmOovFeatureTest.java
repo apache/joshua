@@ -55,7 +55,7 @@ public class LmOovFeatureTest {
   }
 
   @Test
-  public void givenInputWithDifferntOovTypes_whenDecode_thenFeaturesAreAsExpected() throws IOException {
+  public void givenInputWithDifferentOovTypes_whenDecode_thenFeaturesAreAsExpected() throws IOException {
     final String translation = decode(INPUT).toString().trim();
     System.out.println(translation);
     assertEquals(translation, EXPECTED_FEATURES);
@@ -65,5 +65,12 @@ public class LmOovFeatureTest {
     final Sentence sentence = new Sentence(input, 0, joshuaConfig);
     return decoder.decode(sentence);
   }
-
+  
+  public static void main(String[] args) throws Exception {
+    
+    LmOovFeatureTest test = new LmOovFeatureTest();
+    test.setUp();
+    test.givenInputWithDifferentOovTypes_whenDecode_thenFeaturesAreAsExpected();
+    test.tearDown();
+  }
 }

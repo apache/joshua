@@ -70,11 +70,9 @@ public class ArgsParser {
 
         } else if (args[i].equals("-license")) {
           try {
-            for (String line: Files.readAllLines(Paths.get(String.format("%s/../LICENSE", 
-                JoshuaConfiguration.class.getProtectionDomain().getCodeSource().getLocation().getPath())), 
-                Charset.defaultCharset())) {
-              System.out.println(line);
-            }
+            Files.readAllLines(Paths.get(String.format("%s/../LICENSE",
+                JoshuaConfiguration.class.getProtectionDomain().getCodeSource().getLocation()
+                    .getPath())), Charset.defaultCharset()).forEach(System.out::println);
           } catch (IOException e) {
             throw new RuntimeException("FATAL: missing license file!", e);
           }

@@ -72,6 +72,16 @@ public class PhraseDecodingTest {
     final String gold = OUTPUT_WITH_ALIGNMENTS;
     assertEquals(translation, gold);
   }
+  
+  @Test(enabled = true)
+  public void givenInput_whenPhraseDecoding_thenInputCanBeRetrieved() throws IOException {
+    String outputFormat = joshuaConfig.outputFormat;
+    joshuaConfig.outputFormat = "%e";
+    final String translation = decode(INPUT).toString().trim();
+    joshuaConfig.outputFormat = outputFormat;
+    final String gold = INPUT;
+    assertEquals(translation, gold);
+  }
 
   private Translation decode(String input) {
     final Sentence sentence = new Sentence(input, 0, joshuaConfig);

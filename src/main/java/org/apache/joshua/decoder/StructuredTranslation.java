@@ -21,8 +21,6 @@ package org.apache.joshua.decoder;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.joshua.decoder.ff.FeatureVector;
-import org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationState;
 import org.apache.joshua.decoder.io.DeNormalize;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.apache.joshua.decoder.segment_file.Token;
@@ -88,7 +86,7 @@ public class StructuredTranslation {
    * @return the formatted string
    */
   public String getFormattedTranslationString() {
-    throw new RuntimeException("Not yet implemented");
+    return DeNormalize.processSingleLine(maybeProjectCase(getTranslationString()));
   }
 
   public List<String> getTranslationTokens() {
@@ -124,9 +122,8 @@ public class StructuredTranslation {
    * If requested, projects source-side lettercase to target, and appends the alignment from
    * to the source-side sentence in ||s.
    * 
-   * @param hypothesis todo
-   * @param state todo
-   * @return source-side lettercase to target, and appends the alignment from to the source-side sentence in ||s
+   * @param hypothesis the string hypothesis
+   * @return source-side lettercase to target, and appends the alignment from to the source-side sentence
    */
   private String maybeProjectCase(String hypothesis) {
     String output = hypothesis;

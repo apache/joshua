@@ -74,7 +74,7 @@ public class PhraseModel extends StatelessFF {
   public ArrayList<String> reportDenseFeatures(int index) {
     denseFeatureIndex = index;
 
-    ArrayList<String> names = new ArrayList<String>();
+    ArrayList<String> names = new ArrayList<>();
     for (int i = 0; i < phrase_weights.length; i++)
       names.add(String.format("tm_%s_%d", owner, i));
     return names;
