@@ -167,15 +167,13 @@ public class Stacks {
               continue;
             }
 
-            /* We have found a permissible phrase start point and length, that fits with the current
-             * coverage vector. Record that in a Span.
-             */
-            Span span = new Span(begin, begin + phrase_length);
-
             // Don't append </s> until the end
             if (begin == sentence.length() - 1 && source_words != sentence.length()) 
               continue;            
 
+            /* We have found a permissible phrase start point and length for the current coverage
+             * vector. Find all the phrases over that span.
+             */
             TargetPhrases phrases = chart.getRange(begin, begin + phrase_length);
             if (phrases == null)
               continue;
