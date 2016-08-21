@@ -18,8 +18,6 @@
  */
  package org.apache.joshua.decoder.phrase.decode;
 
-import static com.google.common.base.Charsets.UTF_8;
-import static java.nio.file.Files.readAllBytes;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
@@ -42,8 +40,9 @@ public class PhraseDecodingTest {
 
   private static final String CONFIG = "resources/phrase_decoder/config";
   private static final String INPUT = "una estrategia republicana para obstaculizar la reelección de Obama";
-  private static final Path GOLD_PATH = Paths.get("resources/phrase_decoder/output.gold");
-
+  private static final String OUTPUT = "0 ||| a strategy republican to hinder reelection Obama ||| tm_pt_0=-9.702 tm_pt_1=-10.800 tm_pt_2=-7.543 tm_pt_3=-8.555 lm_0=-19.117 OOVPenalty=0.000 WordPenalty=-3.040 Distortion=0.000 PhrasePenalty=5.000 ||| -7.496";
+  private static final String OUTPUT_WITH_ALIGNMENTS = "0 ||| a strategy |0-1| republican |2-2| to hinder |3-4| reelection |5-6| Obama |7-8| ||| tm_pt_0=-9.702 tm_pt_1=-10.800 tm_pt_2=-7.543 tm_pt_3=-8.555 lm_0=-19.117 OOVPenalty=0.000 WordPenalty=-3.040 Distortion=0.000 PhrasePenalty=5.000 ||| -7.496";
+  
   private JoshuaConfiguration joshuaConfig = null;
   private Decoder decoder = null;
 
@@ -62,14 +61,21 @@ public class PhraseDecodingTest {
 
   @Test(enabled = true)
   public void givenInput_whenPhraseDecoding_thenOutputIsAsExpected() throws IOException {
-    final String translation = decode(INPUT).toString();
-    final String gold = new String(readAllBytes(GOLD_PATH), UTF_8);
+    final String translation = decode(INPUT).toString().trim();
+    final String gold = OUTPUT;
+    assertEquals(translation, gold);
+  }
+  
+  @Test(enabled = false)
+  public void givenInput_whenPhraseDecodingWithAlignments_thenOutputHasAlignments() throws IOException {
+    final String translation = decode(INPUT).toString().trim();
+    final String gold = OUTPUT_WITH_ALIGNMENTS;
     assertEquals(translation, gold);
   }
 
   private Translation decode(String input) {
     final Sentence sentence = new Sentence(input, 0, joshuaConfig);
-    joshuaConfig.setVerbosity(2);
+//    joshuaConfig.setVerbosity(2);
     return decoder.decode(sentence);
   }
 
