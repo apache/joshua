@@ -126,13 +126,13 @@ public class Stacks {
     // Initialize root hypothesis with <s> context and future cost for everything.
     ComputeNodeResult result = new ComputeNodeResult(this.featureFunctions, Hypothesis.BEGIN_RULE,
         null, -1, 1, null, this.sentence);
-    Stack firstStack = new Stack(featureFunctions, sentence, config);
+    Stack firstStack = new Stack(sentence, config);
     firstStack.add(new Hypothesis(result.getDPStates(), future.Full()));
     stacks.add(firstStack);
     
     // Decode with increasing numbers of source words. 
     for (int source_words = 2; source_words <= sentence.length(); ++source_words) {
-      Stack targetStack = new Stack(featureFunctions, sentence, config);
+      Stack targetStack = new Stack(sentence, config);
       stacks.add(targetStack);
 
       // Iterate over stacks to continue from.
@@ -144,7 +144,13 @@ public class Stacks {
         LOG.debug("WORDS {} MAX {} (STACK {} phrase_length {})", source_words,
             chart.MaxSourcePhraseLength(), from_stack, phrase_length);
         
-        // Iterate over antecedents in this stack.
+        /* Each from stack groups together lots of different coverage vectors that all cover the
+         * same number of words. We have the number of covered words from from_stack, and the length
+         * of the phrases we are going to add from (source_words - from_stack). We now iterate over
+         * all coverage vectors, finding the set of phrases that can extend each of them, given
+         * the two constraints: the phrase length, and the current coverage vector. These will all
+         * be grouped under the same target stack.
+         */
         for (Coverage coverage: tailStack.getCoverages()) {
           ArrayList<Hypothesis> hypotheses = tailStack.get(coverage); 
           
@@ -161,16 +167,16 @@ public class Stacks {
               continue;
             }
 
-            Span span = new Span(begin, begin + phrase_length);
-
             // Don't append </s> until the end
             if (begin == sentence.length() - 1 && source_words != sentence.length()) 
               continue;            
 
-            TargetPhrases phrases = chart.getRange(begin, begin + phrase_length);
+            /* We have found a permissible phrase start point and length for the current coverage
+             * vector. Find all the phrases over that span.
+             */
+            PhraseNodes phrases = chart.getRange(begin, begin + phrase_length);
             if (phrases == null)
               continue;
-
 
             LOG.debug("Applying {} target phrases over [{}, {}]",
                 phrases.size(), begin, begin + phrase_length);
@@ -185,7 +191,7 @@ public class Stacks {
              * phrases from that span. The hypotheses are wrapped in HypoState objects, which
              * augment the hypothesis score with a future cost.
              */
-            Candidate cand = new Candidate(hypotheses, phrases, span, future_delta);
+            Candidate cand = new Candidate(featureFunctions, sentence, hypotheses, phrases, future_delta, new int[] {0, 0});
             targetStack.addCandidate(cand);
           }
         }
@@ -256,6 +262,8 @@ public class Stacks {
       
       float finalTransitionScore = ComputeNodeResult.computeFinalCost(featureFunctions, tailNodes, 0, sentence.length(), null, sentence);
 
+//      System.err.println(String.format("createGoalNode: final score: %f -> %f", score, finalTransitionScore));
+      
       if (null == this.end)
         this.end = new Hypothesis(null, score + finalTransitionScore, hyp, sentence.length(), null);
 

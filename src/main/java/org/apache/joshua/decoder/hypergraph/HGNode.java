@@ -246,12 +246,11 @@ public class HGNode {
    */
   // sort by estTotalLogP: for pruning purpose
   public int compareTo(HGNode anotherItem) {
-    throw new RuntimeException("HGNode, compare functiuon should never be called");
+    throw new RuntimeException("HGNode.compareTo(HGNode) is not implemented");
     /*
      * if (this.estTotalLogP > anotherItem.estTotalLogP) { return -1; } else if (this.estTotalLogP
      * == anotherItem.estTotalLogP) { return 0; } else { return 1; }
      */
-
   }
 
   /**
@@ -282,21 +281,6 @@ public class HGNode {
       return 0;
     } else {
       return 1;
-    }
-  };
-
-  /**
-   * natural order
-   * */
-  public static Comparator<HGNode> logPComparator = (item1, item2) -> {
-    float logp1 = item1.score;
-    float logp2 = item2.score;
-    if (logp1 > logp2) {
-      return 1;
-    } else if (logp1 == logp2) {
-      return 0;
-    } else {
-      return -1;
     }
   };
 

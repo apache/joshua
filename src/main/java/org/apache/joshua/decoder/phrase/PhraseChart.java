@@ -22,10 +22,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.RuleCollection;
+import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.hypergraph.HyperEdge;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,11 +44,16 @@ public class PhraseChart {
   private int max_source_phrase_length;
 
   // Banded array: different source lengths are next to each other.
-  private final List<TargetPhrases> entries;
+  private final List<PhraseNodes> entries;
 
   // number of translation options
-  int numOptions = 20;
+  private int numOptions = 20;
+  
+  // The feature functions
   private final List<FeatureFunction> features;
+  
+  // The input sentence
+  private Sentence sentence;
 
   /**
    * Create a new PhraseChart object, which represents all phrases that are
@@ -65,6 +72,7 @@ public class PhraseChart {
 
     this.numOptions = num_options;
     this.features = features;
+    this.sentence = source;
 
     max_source_phrase_length = 0;
     for (PhraseTable table1 : tables)
@@ -93,8 +101,10 @@ public class PhraseChart {
       }
     }
 
-    entries.stream().filter(phrases -> phrases != null)
-        .forEach(phrases -> phrases.finish(features, Decoder.weights, num_options));
+    /* 
+     * Sort all of the HGNodes that were added.
+     */
+    entries.stream().filter(phrases -> phrases != null).forEach(phrases -> phrases.finish());
 
     LOG.info("Input {}: Collecting options took {} seconds", source.id(),
         (System.currentTimeMillis() - startTime) / 1000.0f);
@@ -103,11 +113,13 @@ public class PhraseChart {
       for (int i = 1; i < sentence_length - 1; i++) {
         for (int j = i + 1; j < sentence_length && j <= i + max_source_phrase_length; j++) {
           if (source.hasPath(i, j)) {
-            TargetPhrases phrases = getRange(i, j);
+            PhraseNodes phrases = getRange(i, j);
             if (phrases != null) {
               LOG.debug("{} ({}-{})", source.source(i,j), i, j);
-              for (Rule rule: phrases)
+              for (HGNode node: phrases) {
+                Rule rule = node.bestHyperedge.getRule();
                 LOG.debug("    {} :: est={}", rule.getEnglishWords(), rule.getEstimatedCost());
+              }
             }
           }
         }
@@ -140,9 +152,9 @@ public class PhraseChart {
    * 
    * @param begin beginning of span
    * @param end end of span
-   * @return the {@link org.apache.joshua.decoder.phrase.TargetPhrases} at the specified position in this list.
+   * @return the {@link org.apache.joshua.decoder.phrase.PhraseNodes} at the specified position in this list.
    */
-  public TargetPhrases getRange(int begin, int end) {
+  public PhraseNodes getRange(int begin, int end) {
     int index = offset(begin, end);
     // System.err.println(String.format("PhraseChart::Range(%d,%d): found %d entries",
     // begin, end,
@@ -153,6 +165,8 @@ public class PhraseChart {
 
     if (index < 0 || index >= entries.size() || entries.get(index) == null)
       return null;
+    
+    // Produce the nodes for each of the features
 
     return entries.get(index);
   }
@@ -160,11 +174,11 @@ public class PhraseChart {
   /**
    * Add a set of phrases from a grammar to the current span.
    * 
-   * @param begin beginning of span
-   * @param end end of span
+   * @param i beginning of span
+   * @param j end of span
    * @param to a {@link org.apache.joshua.decoder.ff.tm.RuleCollection} to be used in scoring and sorting.
    */
-  private void addToRange(int begin, int end, RuleCollection to) {
+  private void addToRange(int i, int j, RuleCollection to) {
     if (to != null) {
       /*
        * This first call to getSortedRules() is important, because it is what
@@ -176,18 +190,28 @@ public class PhraseChart {
        * likely to have (often into the tens of thousands).
        */
       List<Rule> rules = to.getSortedRules(features);
+      
+      // TODO: I think this is a race condition
       if (numOptions > 0 && rules.size() > numOptions)
-        rules = rules.subList(0,  numOptions);
+        rules = rules.subList(0,  numOptions - 1);
 //        to.getRules().subList(numOptions, to.getRules().size()).clear();
 
       try {
-        int offset = offset(begin, end);
+        int offset = offset(i, j);
         if (entries.get(offset) == null)
-          entries.set(offset, new TargetPhrases(rules));
-        else
-          entries.get(offset).addAll(rules);
+          entries.set(offset, new PhraseNodes(i, j, numOptions));
+        PhraseNodes nodes = entries.get(offset);
+
+        // Turn each rule into an HGNode, add them one by one 
+        for (Rule rule: rules) {
+          ComputeNodeResult result = new ComputeNodeResult(features, rule, null, i, j, null, sentence);
+          HyperEdge edge = new HyperEdge(rule, result.getViterbiCost(), result.getTransitionCost(), null, null);
+          HGNode phraseNode = new HGNode(i, j, rule.getLHS(), result.getDPStates(), edge, result.getPruningEstimate());
+          nodes.add(phraseNode);
+        }
+//        entries.get(offset).addAll(rules);
       } catch (java.lang.IndexOutOfBoundsException e) {
-        LOG.error("Whoops! {} [{}-{}] too long ({})", to, begin, end, entries.size());
+        LOG.error("Whoops! {} [{}-{}] too long ({})", to, i, j, entries.size());
         LOG.error(e.getMessage(), e);
       }
     }

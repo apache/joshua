@@ -46,14 +46,14 @@ public class ComputeNodeResult {
   private static final Logger LOG = LoggerFactory.getLogger(ComputeNodeResult.class);
 
   // The cost incurred by the rule itself (and all associated feature functions)
-  private final float transitionCost;
+  private float transitionCost;
 
   // transitionCost + the Viterbi costs of the tail nodes.
-  private final float viterbiCost;
+  private float viterbiCost;
 
-  // viterbiCost + a future estimate (outside cost estimate).
-  private final float pruningCostEstimate;
-
+  // The future or outside cost (estimated)
+  private float futureCostEstimate;
+  
   // The StateComputer objects themselves serve as keys.
   private final List<DPState> dpStates;
 
@@ -76,7 +76,7 @@ public class ComputeNodeResult {
 
     // The total Viterbi cost of this edge. This is the Viterbi cost of the tail nodes, plus
     // whatever costs we incur applying this rule to create a new hyperedge.
-    float viterbiCost = 0.0f;
+    this.viterbiCost = 0.0f;
     
     if (LOG.isDebugEnabled()) {
       LOG.debug("ComputeNodeResult():");
@@ -102,10 +102,10 @@ public class ComputeNodeResult {
     List<DPState> allDPStates = new ArrayList<>();
 
     // The transition cost is the new cost incurred by applying this rule
-    float transitionCost = 0.0f;
+    this.transitionCost = 0.0f;
 
     // The future cost estimate is a heuristic estimate of the outside cost of this edge.
-    float futureCostEstimate = 0.0f;
+    this.futureCostEstimate = 0.0f;
 
     /*
      * We now iterate over all the feature functions, computing their cost and their expected future
@@ -115,7 +115,7 @@ public class ComputeNodeResult {
       FeatureFunction.ScoreAccumulator acc = feature.new ScoreAccumulator(); 
 
       DPState newState = feature.compute(rule, tailNodes, i, j, sourcePath, sentence, acc);
-      transitionCost += acc.getScore();
+      this.transitionCost += acc.getScore();
 
 
       if (LOG.isDebugEnabled()) {
@@ -129,13 +129,10 @@ public class ComputeNodeResult {
         allDPStates.add(((StatefulFF)feature).getStateIndex(), newState);
       }
     }
-    viterbiCost += transitionCost;
+    this.viterbiCost += transitionCost;
     if (LOG.isDebugEnabled())
       LOG.debug("-> COST = {}", transitionCost);
-    // Set the final results.
-    this.pruningCostEstimate = viterbiCost + futureCostEstimate;
-    this.viterbiCost = viterbiCost;
-    this.transitionCost = transitionCost;
+
     this.dpStates = allDPStates;
   }
 
@@ -189,12 +186,17 @@ public class ComputeNodeResult {
     return featureDelta;
   }
 
+  public float getFutureEstimate() {
+    return this.futureCostEstimate;
+  }
+  
   public float getPruningEstimate() {
-    return this.pruningCostEstimate;
+    return getViterbiCost() + getFutureEstimate();
   }
 
   /**
-   *  The complete cost of the Viterbi derivation at this point
+   *  The complete cost of the Viterbi derivation at this point.
+   *  
    *  @return float representing cost
    */
   public float getViterbiCost() {
@@ -216,10 +218,5 @@ public class ComputeNodeResult {
 
   public List<DPState> getDPStates() {
     return this.dpStates;
-  }
-
-  public void printInfo() {
-    System.out.println("scores: " + transitionCost + "; " + viterbiCost + "; "
-        + pruningCostEstimate);
   }
 }

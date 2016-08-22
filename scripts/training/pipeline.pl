@@ -1123,7 +1123,7 @@ if (! defined $GRAMMAR_FILE) {
 
     # Convert the model to Joshua format
     $cachepipe->cmd("convert-moses-to-joshua",
-                    "$CAT model/phrase-table.gz | $SCRIPTDIR/support/phrase2hiero.py | gzip -9n > grammar.gz",
+                    "$CAT model/phrase-table.gz | $SCRIPTDIR/support/phrase2hiero.py -moses | gzip -9n > grammar.gz",
                     "model/phrase-table.gz",
                     "grammar.gz",
         );
@@ -1165,10 +1165,6 @@ if (! defined $GRAMMAR_FILE) {
 
     $GRAMMAR_FILE = "grammar.gz";
 
-    # Convert phrase model to hiero format (Thrax should do this!)
-    if ($GRAMMAR_TYPE eq "phrase") {
-        system("mv grammar.gz grammar.tmp.gz; gzip -cd grammar.tmp.gz | $SCRIPTDIR/support/phrase2hiero.py | gzip -9n > grammar.gz; rm -rf grammar.tmp.gz");
-     }
   } else {
 
     print STDERR "* FATAL: There was no way to build a grammar, and none was passed in\n";
@@ -1181,7 +1177,7 @@ if (! defined $GRAMMAR_FILE) {
 }
 
 # Pack the entire model! Saves filtering and repacking of tuning and test sets
-if ($DO_PACK_GRAMMARS and ! $DO_FILTER_TM) {
+if ($DO_PACK_GRAMMARS and ! $DO_FILTER_TM and ! -e "grammar.packed") {
   $cachepipe->cmd("pack-grammar",
                   "$SCRIPTDIR/support/grammar-packer.pl -a -T $TMPDIR -m $PACKER_MEM -g $GRAMMAR_FILE -o $RUNDIR/grammar.packed",
                   "$RUNDIR/grammar.packed/vocabulary",

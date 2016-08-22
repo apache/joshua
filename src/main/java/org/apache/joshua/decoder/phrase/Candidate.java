@@ -19,9 +19,17 @@
 package org.apache.joshua.decoder.phrase;
 
 /*** 
- * A candidate is basically a cube prune state. It contains a list of hypotheses and target
- * phrases, and an instantiated candidate is a pair of indices that index these two lists. This
- * is the "cube prune" position.
+ * A candidate represents a translation hypothesis that may possibly be added to the translation
+ * hypergraph. It groups together (a) a set of translation hypotheses all having the same coverage
+ * vector and (b) a set of compatible phrase extensions that all cover the same source span. A 
+ * Candidate object therefore denotes a particular precise coverage vector. When a Candidate is
+ * instantiated, it has values in ranks[] that are indices into these two lists representing
+ * the current cube prune state.
+ * 
+ * For any particular (previous hypothesis) x (translation option) combination (a selection from
+ * both lists), there is no guarantee about whether this is a (m)onotonic, (s)wap, or (d)iscontinuous
+ * rule application. This must be inferred from the span (recording the portion of the input being
+ * translated) and the last index of the previous hypothesis under consideration.
  */
 
 import java.util.ArrayList;
@@ -30,30 +38,38 @@ import java.util.List;
 
 import org.apache.joshua.corpus.Span;
 import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
+import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
+import org.apache.joshua.decoder.segment_file.Sentence;
 
-public class Candidate {
-
+public class Candidate implements Comparable<Candidate> {
+  
+  private List<FeatureFunction> featureFunctions;
+  private Sentence sentence;
+  
   // the set of hypotheses that can be paired with phrases from this span 
   private final List<Hypothesis> hypotheses;
 
   // the list of target phrases gathered from a span of the input
-  private final TargetPhrases phrases;
-
-  // source span of new phrase
-  public final Span span;
+  private PhraseNodes phrases;
   
   // future cost of applying phrases to hypotheses
-  final float future_delta;
+  private float future_delta;
   
   // indices into the hypotheses and phrases arrays (used for cube pruning)
   private final int[] ranks;
   
-  // scoring and state information 
-  private ComputeNodeResult result;
+  // the reordering rule used by an instantiated Candidate
+  private Rule rule;
   
+  /* 
+   * Stores the inside cost of the current phrase, as well as the computed dynamic programming
+   * state. Expensive to compute so there is an option of delaying it.
+   */
+  private ComputeNodeResult computedResult;
+
   /**
    * When candidate objects are extended, the new one is initialized with the same underlying
    * "phrases" and "hypotheses" and "span" objects. So these all have to be equal, as well as
@@ -66,7 +82,7 @@ public class Candidate {
   public boolean equals(Object obj) {
     if (obj instanceof Candidate) {
       Candidate other = (Candidate) obj;
-      if (hypotheses != other.hypotheses || phrases != other.phrases || span != other.span)
+      if (hypotheses != other.hypotheses || phrases != other.phrases)
         return false;
       
       if (ranks.length != other.ranks.length)
@@ -85,33 +101,44 @@ public class Candidate {
   public int hashCode() {
     return 17 * hypotheses.size() 
         + 23 * phrases.size() 
-        + 57 * span.hashCode() 
         + 117 * Arrays.hashCode(ranks);
 //    return hypotheses.hashCode() * phrases.hashCode() * span.hashCode() * Arrays.hashCode(ranks);
   }
   
   @Override
   public String toString() {
-    return String.format("CANDIDATE(hyp %d/%d, phr %d/%d) [%s] phrase=[%s] span=%s",
-        ranks[0], hypotheses.size(), ranks[1], phrases.size(),
-        getHypothesis(), getRule().getEnglishWords().replaceAll("\\[.*?\\] ",""), getSpan());
-  }
-  
-  public Candidate(List<Hypothesis> hypotheses, TargetPhrases phrases, Span span, float delta) {
-    this.hypotheses = hypotheses;
-    this.phrases = phrases;
-    this.span = span;
-    this.future_delta = delta;
-    this.ranks = new int[] { 0, 0 };
+    return String.format("CANDIDATE(hyp %d/%d, phr %d/%d) %.3f [%s] phrase=[%s] span=%s",
+        ranks[0], hypotheses.size(), ranks[1], phrases.size(), score(),
+        getHypothesis(), getPhraseNode().bestHyperedge.getRule().getEnglishWords(), getSpan());
   }
 
-  public Candidate(List<Hypothesis> hypotheses, TargetPhrases phrases, Span span, float delta, int[] ranks) {
+  public Candidate(List<FeatureFunction> featureFunctions, Sentence sentence, 
+      List<Hypothesis> hypotheses, PhraseNodes phrases, float delta, int[] ranks) {
+    this.featureFunctions = featureFunctions;
+    this.sentence = sentence;
     this.hypotheses = hypotheses;
     this.phrases = phrases;
-    this.span = span;
     this.future_delta = delta;
     this.ranks = ranks;
+    this.rule = isMonotonic() ? Hypothesis.MONO_RULE : Hypothesis.SWAP_RULE;
 //    this.score = hypotheses.get(ranks[0]).score + phrases.get(ranks[1]).getEstimatedCost();
+
+    this.computedResult = null;
+    
+    // TODO: compute this proactively or lazily according to a parameter
+    computeResult();
+  }
+  
+  /**
+   * Determines whether the current previous hypothesis extended with the currently selected
+   * phrase represents a straight or inverted rule application.
+   * 
+   * @return
+   */
+  private boolean isMonotonic() {
+//    System.err.println(String.format("isMonotonic(); %d < %d -> %s", 
+//        getLastCovered(), getPhraseEnd(), getLastCovered() < getPhraseEnd()));
+    return getLastCovered() < getPhraseEnd();
   }
   
   /**
@@ -131,7 +158,7 @@ public class Candidate {
    */
   public Candidate extendHypothesis() {
     if (ranks[0] < hypotheses.size() - 1) {
-      return new Candidate(hypotheses, phrases, span, future_delta, new int[] { ranks[0] + 1, ranks[1] });
+      return new Candidate(featureFunctions, sentence, hypotheses, phrases, future_delta, new int[] { ranks[0] + 1, ranks[1] });
     }
     return null;
   }
@@ -143,7 +170,7 @@ public class Candidate {
    */
   public Candidate extendPhrase() {
     if (ranks[1] < phrases.size() - 1) {
-      return new Candidate(hypotheses, phrases, span, future_delta, new int[] { ranks[0], ranks[1] + 1 });
+      return new Candidate(featureFunctions, sentence, hypotheses, phrases, future_delta, new int[] { ranks[0], ranks[1] + 1 });
     }
     
     return null;
@@ -155,7 +182,7 @@ public class Candidate {
    * @return the span object
    */
   public Span getSpan() {
-    return this.span;
+    return new Span(this.phrases.i, this.phrases.j);
   }
   
   /**
@@ -170,13 +197,50 @@ public class Candidate {
   }
   
   /**
-   * This returns the target side {@link org.apache.joshua.corpus.Phrase}, which is a {@link org.apache.joshua.decoder.ff.tm.Rule} object. This is just a
-   * convenience function that works by returning the phrase indexed in ranks[1].
+   * A candidate is a (hypothesis, target phrase) pairing. The hypothesis and target phrase are
+   * drawn from a list that is indexed by (ranks[0], ranks[1]), respectively. This is a shortcut
+   * to return the rule representing the terminal phrase production of the candidate pair.
+   * 
+   * @return the phrase rule at position ranks[1]
+   */
+  public Rule getPhraseRule() {
+    Rule rule = getPhraseNode().bestHyperedge.getRule();
+    return rule;
+  }
+  
+  /**
+   * This returns a new Hypothesis (HGNode) representing the phrase being added, i.e., a terminal
+   * production in the hypergraph. The score and DP state are computed only here on demand.
+   * 
+   * @return a new hypergraph node representing the phrase translation
+   */
+  public HGNode getPhraseNode() {
+    return this.phrases.get(ranks[1]);
+  }
+  
+  /**
+   * Ensures that the cost of applying the edge has been computed. This is tucked away in an
+   * accessor so that we can do it lazily if we wish.
+   * 
+   * @return
+   */
+  public ComputeNodeResult computeResult() {
+    if (computedResult == null) {
+      // add the rule
+      // TODO: sourcepath
+      computedResult = new ComputeNodeResult(featureFunctions, getRule(), getTailNodes(), getLastCovered(), getPhraseEnd(), null, sentence);
+    }
+    
+    return computedResult;
+  }
+    
+  /**
+   * This returns the rule being applied (straight or inverted)
    * 
    * @return the phrase at position ranks[1]
    */
   public Rule getRule() {
-    return phrases.get(ranks[1]);
+    return this.rule;
   }
   
   /**
@@ -186,8 +250,14 @@ public class Candidate {
    * @return a list of size one, wrapping the tail node pointer
    */
   public List<HGNode> getTailNodes() {
-    List<HGNode> tailNodes = new ArrayList<>();
-    tailNodes.add(getHypothesis());
+    List<HGNode> tailNodes = new ArrayList<HGNode>();
+    if (isMonotonic()) {
+      tailNodes.add(getHypothesis());
+      tailNodes.add(getPhraseNode());
+    } else {
+      tailNodes.add(getPhraseNode());
+      tailNodes.add(getHypothesis());
+    }
     return tailNodes;
   }
   
@@ -203,28 +273,21 @@ public class Candidate {
   }
 
   /**
-   * Sets the result of a candidate (TODO should just be moved to the constructor).
+   * This returns the sum of two costs: the Viterbi cost of the edge represented by the current
+   * cube pruning state, plus the difference to the future cost incurred by translating the
+   * current phrase.
    * 
-   * @param result todo
-   */
-  public void setResult(ComputeNodeResult result) {
-    this.result = result;
-  }
-
-  /**
-   * This returns the sum of two costs: the HypoState cost + the transition cost. The HypoState cost
-   * is in turn the sum of two costs: the Viterbi cost of the underlying hypothesis, and the adjustment
-   * to the future score incurred by translating the words under the source phrase being added.
-   * The transition cost is the sum of new features incurred along the transition (mostly, the
-   * language model costs).
+   * Note that in phrase-based decoding, the Hypothesis scores include the future cost estimate,
+   * which means that the Viterbi cost (which includes only the inside estimates) is not the complete
+   * cost; instead, you have to chain the calls to the hypothesis. This should be fixed and cleaned
+   * up to formally separate the "inside" and "outside" costs.
    * 
-   * The Future Cost item should probably just be implemented as another kind of feature function,
-   * but it would require some reworking of that interface, which isn't worth it. 
-   * 
-   * @return the sum of two costs: the HypoState cost + the transition cost
+   * @return the inside + outside cost
    */
   public float score() {
-    return getHypothesis().getScore() + future_delta + result.getTransitionCost();
+//    float score = computedResult.getViterbiCost() + future_delta;
+    float score = getHypothesis().getScore() + getPhraseNode().getScore() + future_delta + computedResult.getTransitionCost();
+    return score;
   }
   
   public float getFutureEstimate() {
@@ -232,10 +295,19 @@ public class Candidate {
   }
   
   public List<DPState> getStates() {
-    return result.getDPStates();
+    return computeResult().getDPStates();
+  }
+  
+  public int getLastCovered() {
+    return getHypothesis().getLastSourceIndex();
+  }
+  
+  public int getPhraseEnd() {
+    return phrases.j;
   }
 
-  public ComputeNodeResult getResult() {
-    return result;
+  @Override
+  public int compareTo(Candidate other) {
+    return Float.compare(other.score(), score());
   }
 }

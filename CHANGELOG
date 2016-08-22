@@ -1,3 +1,10 @@
+6.1 (TBD)
+=========
+
+- Phrase-based decoder has been rewritten to use glue rules, instead of adding a preterminal
+  to all phrase-based rules. This means that phrase-based grammars can be used directly out
+  of Thrax.
+
 6.0.5 (October 23, 2015)
 ========================
 

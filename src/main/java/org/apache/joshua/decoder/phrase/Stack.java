@@ -22,13 +22,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
 import org.apache.joshua.decoder.JoshuaConfiguration;
-import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
-import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,9 +42,8 @@ public class Stack extends ArrayList<Hypothesis> {
 
   private final HashMap<Coverage, ArrayList<Hypothesis>> coverages;
   
-  private final Sentence sentence;
-  private final List<FeatureFunction> featureFunctions;
-  private final JoshuaConfiguration config;
+  private Sentence sentence;
+  private JoshuaConfiguration config;
 
   /* The list of states we've already visited. */
   private final HashSet<Candidate> visitedStates;
@@ -65,15 +61,14 @@ public class Stack extends ArrayList<Hypothesis> {
    * @param sentence input for a {@link org.apache.joshua.lattice.Lattice}
    * @param config populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
-  public Stack(List<FeatureFunction> featureFunctions, Sentence sentence, JoshuaConfiguration config) {
-    this.featureFunctions = featureFunctions;
+  public Stack(Sentence sentence, JoshuaConfiguration config) {
     this.sentence = sentence;
     this.config = config;
     
-    this.candidates = new PriorityQueue<>(1, new CandidateComparator());
-    this.coverages = new HashMap<>();
-    this.visitedStates = new HashSet<>();
-    this.deduper = new HashMap<>();
+    this.candidates = new PriorityQueue<Candidate>(1);
+    this.coverages = new HashMap<Coverage, ArrayList<Hypothesis>>();
+    this.visitedStates = new HashSet<Candidate>();
+    this.deduper = new HashMap<Hypothesis,Hypothesis>();
   }
 
   /**
@@ -149,6 +144,9 @@ public class Stack extends ArrayList<Hypothesis> {
 
     // Constrained decoding
     if (sentence.target() != null) {
+      throw new RuntimeException("* FATAL! Constrained decoding no longer works for the new phrase format");
+      // TODO: fix constrained decoding
+      /*
       String oldWords = cand.getHypothesis().bestHyperedge.getRule().getEnglishWords().replace("[X,1] ",  "");
       String newWords = cand.getRule().getEnglishWords().replace("[X,1] ",  "");
           
@@ -159,12 +157,10 @@ public class Stack extends ArrayList<Hypothesis> {
           addCandidate(next); 
         return;
       }
+      */
     }
 
     // TODO: sourcepath
-    ComputeNodeResult result = new ComputeNodeResult(this.featureFunctions, cand.getRule(),
-        cand.getTailNodes(), -1, cand.getSpan().end, null, this.sentence);
-    cand.setResult(result);
     
     candidates.add(cand);
   }
@@ -199,6 +195,7 @@ public class Stack extends ArrayList<Hypothesis> {
   /**
    * Adds a popped candidate to the chart / main stack. This is a candidate we have decided to
    * keep around.
+   * 
    * @param complete a completely-initialized translation {@link org.apache.joshua.decoder.phrase.Candidate}
    * 
    */
@@ -218,12 +215,12 @@ public class Stack extends ArrayList<Hypothesis> {
 
     if (LOG.isDebugEnabled()) {
       LOG.debug("{} from ( ... {} )", taskName, complete.getHypothesis().getRule().getEnglishWords());
-      LOG.debug("        base score {}", complete.getResult().getBaseCost());
+      LOG.debug("        base score {}", complete.computeResult().getBaseCost());
       LOG.debug("        covering {}-{}", complete.getSpan().start - 1, complete.getSpan().end - 2);
-      LOG.debug("        translated as: {}", complete.getRule().getEnglishWords());
+      LOG.debug("        translated as: {}", complete.getPhraseRule().getEnglishWords());
       LOG.debug("        score {} + future cost {} = {}",
-          complete.getResult().getTransitionCost(), complete.getFutureEstimate(),
-          complete.getResult().getTransitionCost() + complete.getFutureEstimate());
+          complete.computeResult().getTransitionCost(), complete.getFutureEstimate(),
+          complete.computeResult().getTransitionCost() + complete.getFutureEstimate());
     }
   }
 }

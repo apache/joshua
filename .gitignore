@@ -57,3 +57,6 @@ build
 .classpath
 /target/
 .project
+/doc/
+/ext.bak/
+/ext/

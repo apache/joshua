@@ -375,10 +375,10 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
     if (this.estimatedCost <= Float.NEGATIVE_INFINITY) {
       this.estimatedCost = 0.0f; // weights.innerProduct(computeFeatures());
 
-      LOG.debug("estimateCost({} ;; {})", getFrenchWords(), getEnglishWords());
+//      LOG.debug("estimateCost({} ;; {})", getFrenchWords(), getEnglishWords());
       for (FeatureFunction ff : models) {
         float val = ff.estimateCost(this, null);
-        LOG.debug("  FEATURE {} -> {}", ff.getName(), val);
+//        LOG.debug("  FEATURE {} -> {}", ff.getName(), val);
         this.estimatedCost += val; 
       }
     }

@@ -18,13 +18,10 @@
  */
 package org.apache.joshua.decoder.phrase;
 
-import java.util.ArrayList;	
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
-import org.apache.joshua.decoder.ff.FeatureFunction;
-import org.apache.joshua.decoder.ff.FeatureVector;
-import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.hypergraph.HGNode;
 
 /**
  * Represents a sorted collection of target-side phrases. Typically, these are phrases
@@ -34,47 +31,33 @@ import org.apache.joshua.decoder.ff.tm.Rule;
  * @author Matt Post
  */
 
-public class TargetPhrases extends ArrayList<Rule> {
+public class PhraseNodes extends ArrayList<HGNode> {
 
   private static final long serialVersionUID = 1L;
-
-  public TargetPhrases() {
-    super();
-  }
   
-  /**
-   * Initialize with a collection of rules.
-   * 
-   * @param list a {@link java.util.List} of {@link org.apache.joshua.decoder.ff.tm.Rule}'s
-   */
-  public TargetPhrases(List<Rule> list) {
-    super();
-    
-    for (Rule rule: list) {
-      add(rule);
-    }
+  public int i = -2;
+  public int j = -2;
+
+  public PhraseNodes(int i, int j, int initialSize) {
+    super(initialSize);
+    this.i = i;
+    this.j = j;
   }
   
   /**
    * Score the rules and sort them. Scoring is necessary because rules are only scored if they
    * are used, in an effort to make reading in rules more efficient. This is starting to create
    * some trouble and should probably be reworked.
+   * 
    * @param features a {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    * @param weights a populated {@link org.apache.joshua.decoder.ff.FeatureVector}
    * @param num_options the number of options
    */
-  public void finish(List<FeatureFunction> features, FeatureVector weights, int num_options) {
-    for (Rule rule: this) { 
-      rule.estimateRuleCost(features);
-//      System.err.println("TargetPhrases:finish(): " + rule);
-    }
-    Collections.sort(this, Rule.EstimatedCostComparator);
-    
-    if (this.size() > num_options)
-      this.removeRange(num_options, this.size());
-    
+  public void finish() {
+    Collections.sort(this, HGNode.inverseLogPComparator);    
 //    System.err.println("TargetPhrases::finish()");
 //    for (Rule rule: this) 
 //      System.err.println("  " + rule);
   }
+
 }

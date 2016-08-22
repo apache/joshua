@@ -42,8 +42,8 @@ public class Future {
   public Future(PhraseChart chart) {
 
     sentlen = chart.SentenceLength();
-    entries = new ChartSpan<>(sentlen + 1, Float.NEGATIVE_INFINITY);
-
+    entries = new ChartSpan<Float>(sentlen + 1, Float.NEGATIVE_INFINITY);
+    
     /*
      * The sentence is represented as a sequence of words, with the first and last words set
      * to <s> and </s>. We start indexing at 1 because the first word (<s>) is always covered.
@@ -59,9 +59,9 @@ public class Future {
         if (begin == sentlen - 1 && end == sentlen) 
           setEntry(begin, end, 0.0f);
         else {
-          TargetPhrases phrases = chart.getRange(begin, end);
+          PhraseNodes phrases = chart.getRange(begin, end);
           if (phrases != null)
-            setEntry(begin, end, phrases.get(0).getEstimatedCost());
+            setEntry(begin, end, phrases.get(0).bestHyperedge.getRule().getEstimatedCost());
         }
       }
     }
@@ -99,21 +99,22 @@ public class Future {
   public float Change(Coverage coverage, int begin, int end) {
     int left = coverage.leftOpening(begin);
     int right = coverage.rightOpening(end, sentlen);
-    //    System.err.println(String.format("Future::Change(%s, %d, %d) left %d right %d %.3f %.3f %.3f", coverage, begin, end, left, right,
-    //        Entry(left, begin), Entry(end, right), Entry(left, right)));
+//        System.err.println(String.format("Future.Change(%s, %d, %d) left %d right %d %.3f %.3f %.3f", 
+//            coverage, begin, end, left, right,
+//            getEntry(left, begin), getEntry(end, right), getEntry(left, right)));
     return getEntry(left, begin) + getEntry(end, right) - getEntry(left, right);
   }
 
   private float getEntry(int begin, int end) {
     assert end >= begin;
-    assert end < this.sentlen;
+    assert end <= this.sentlen;
     return entries.get(begin, end);
   }
 
   private void setEntry(int begin, int end, float value) {
     assert end >= begin;
-    assert end < this.sentlen;
-    //    System.err.println(String.format("future cost from %d to %d is %.5f", begin, end, value));
+    assert end <= this.sentlen;
+//    System.err.println(String.format("Future.setEntry(%d, %d) = %f", begin, end, value));
     entries.set(begin, end, value);
   }
 }
