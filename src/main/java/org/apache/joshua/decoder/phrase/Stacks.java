@@ -174,7 +174,7 @@ public class Stacks {
             /* We have found a permissible phrase start point and length for the current coverage
              * vector. Find all the phrases over that span.
              */
-            TargetPhrases phrases = chart.getRange(begin, begin + phrase_length);
+            PhraseNodes phrases = chart.getRange(begin, begin + phrase_length);
             if (phrases == null)
               continue;
 

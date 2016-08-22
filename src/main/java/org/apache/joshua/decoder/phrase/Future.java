@@ -59,9 +59,9 @@ public class Future {
         if (begin == sentlen - 1 && end == sentlen) 
           setEntry(begin, end, 0.0f);
         else {
-          TargetPhrases phrases = chart.getRange(begin, end);
+          PhraseNodes phrases = chart.getRange(begin, end);
           if (phrases != null)
-            setEntry(begin, end, phrases.get(0).getEstimatedCost());
+            setEntry(begin, end, phrases.get(0).bestHyperedge.getRule().getEstimatedCost());
         }
       }
     }
