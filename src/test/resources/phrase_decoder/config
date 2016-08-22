@@ -1,15 +1,16 @@
-tm = moses pt 0 resources/phrase_decoder/rules.1.gz
+tm = moses -owner pt -maxspan 0 -path src/test/resources/phrase_decoder/rules.1.gz -max-source-len 5
+feature-function = StateMinimizingLanguageModel -lm_order 5 -lm_file src/test/resources/phrase_decoder/lm.1.gz
 
-lm = kenlm 5 true false 100 resources/phrase_decoder/lm.1.gz
+search = stack
 
 mark-oovs = false
 pop-limit = 10
-top-n = 5
+top-n = 1
 
 output-format = %i ||| %s ||| %f ||| %c
 
 include-align-index = true
-reordering-limit = 10
+reordering-limit = 6
 
 # And these are the feature functions to activate.
 feature-function = OOVPenalty
