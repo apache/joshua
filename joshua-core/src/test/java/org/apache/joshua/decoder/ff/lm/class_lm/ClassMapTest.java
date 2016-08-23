@@ -45,7 +45,7 @@ public class ClassMapTest {
   @Test
   public void givenClassMapFile_whenClassMapRead_thenEntriesAreRead() {
     // GIVEN
-    final String classMapFile = "./src/test/resources/lm/class_lm/class.map";
+    final String classMapFile = "src/test/resources/lm/class_lm/class.map";
 
     // WHEN
     final ClassMap classMap = new ClassMap(classMapFile);
