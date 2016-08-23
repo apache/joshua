@@ -149,6 +149,8 @@ public class Decoder {
     this.grammars = new ArrayList<>();
     this.threadPool = new ArrayBlockingQueue<>(this.joshuaConfiguration.num_parallel_decoders, true);
     this.customPhraseTable = null;
+    
+    resetGlobalState();
   }
 
   /**
