@@ -57,7 +57,6 @@ public class Stack extends ArrayList<Hypothesis> {
   /**
    * Create a new stack. Stacks are organized one for each number of source words that are covered.
    * 
-   * @param featureFunctions {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    * @param sentence input for a {@link org.apache.joshua.lattice.Lattice}
    * @param config populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */

@@ -45,19 +45,14 @@ public class PhraseNodes extends ArrayList<HGNode> {
   }
   
   /**
-   * Score the rules and sort them. Scoring is necessary because rules are only scored if they
-   * are used, in an effort to make reading in rules more efficient. This is starting to create
-   * some trouble and should probably be reworked.
-   * 
-   * @param features a {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
-   * @param weights a populated {@link org.apache.joshua.decoder.ff.FeatureVector}
-   * @param num_options the number of options
+   * Score the rules and sort them. Scoring is necessary 
+   * because rules are only scored if they are used, in an 
+   * effort to make reading in rules more efficient. 
+   * This is starting to create some trouble and should 
+   * probably be reworked.
    */
   public void finish() {
     Collections.sort(this, HGNode.inverseLogPComparator);    
-//    System.err.println("TargetPhrases::finish()");
-//    for (Rule rule: this) 
-//      System.err.println("  " + rule);
   }
 
 }

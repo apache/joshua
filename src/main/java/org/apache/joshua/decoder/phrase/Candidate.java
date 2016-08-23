@@ -219,10 +219,11 @@ public class Candidate implements Comparable<Candidate> {
   }
   
   /**
-   * Ensures that the cost of applying the edge has been computed. This is tucked away in an
-   * accessor so that we can do it lazily if we wish.
+   * Ensures that the cost of applying the edge has been 
+   * computed. This is tucked away in an accessor so that 
+   * we can do it lazily if we wish.
    * 
-   * @return
+   * @return the computed result.
    */
   public ComputeNodeResult computeResult() {
     if (computedResult == null) {
