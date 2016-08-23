@@ -34,7 +34,7 @@ public class OutputStringExtractor implements WalkerFunction, DerivationVisitor 
     this.extractSource = extractSource;
   }
   
-  private Stack<OutputString> outputStringStack = new Stack<>();
+  private final Stack<OutputString> outputStringStack = new Stack<>();
   private final boolean extractSource;
 
   @Override
@@ -103,7 +103,7 @@ public class OutputStringExtractor implements WalkerFunction, DerivationVisitor 
   private static String arrayToString(int[] ids) {
     StringBuilder sb = new StringBuilder();
     for (int i : ids) {
-      sb.append(i + " ");
+      sb.append(i).append(" ");
     }
     return sb.toString().trim();
   }
@@ -180,8 +180,8 @@ public class OutputStringExtractor implements WalkerFunction, DerivationVisitor 
       for (int i = 0; i < position; i++) {
         result[resultIndex++] = this.words[i];
       }
-      for (int i = 0; i < words.length; i++) {
-        result[resultIndex++] = words[i];
+      for (int word : words) {
+        result[resultIndex++] = word;
       }
       for (int i = position + 1; i < this.words.length; i++) {
         result[resultIndex++] = this.words[i];

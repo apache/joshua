@@ -45,9 +45,9 @@ import static org.testng.Assert.assertEquals;
 
 public class KBestExtractionTest {
 
-  private static final String CONFIG = "resources/kbest_extraction/joshua.config";
+  private static final String CONFIG = "src/test/resources/kbest_extraction/joshua.config";
   private static final String INPUT = "a b c d e";
-  private static final Path GOLD_PATH = Paths.get("resources/kbest_extraction/output.scores.gold");
+  private static final Path GOLD_PATH = Paths.get("src/test/resources/kbest_extraction/output.scores.gold");
 
   private JoshuaConfiguration joshuaConfig = null;
   private Decoder decoder = null;

@@ -203,7 +203,7 @@ public abstract class AbstractGrammar implements Grammar {
      * Add OOV rules; This should be called after the manual constraints have
      * been set up.
      */
-    HashSet<Integer> words = new HashSet<Integer>();
+    HashSet<Integer> words = new HashSet<>();
     for (Node<Token> node : inputLattice) {
       for (Arc<Token> arc : node.getOutgoingArcs()) {
         // create a rule, but do not add into the grammar trie

@@ -76,7 +76,7 @@ public class BloomFilter implements Externalizable {
   /**
    * A random number generator for building hash functions.
    */
-  transient private Random RANDOM = new Random();
+  final transient private Random RANDOM = new Random();
 
   /**
    * Builds an empty Bloom filter, ready to build hash functions and store objects.

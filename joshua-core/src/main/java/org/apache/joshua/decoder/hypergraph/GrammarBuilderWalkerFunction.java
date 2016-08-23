@@ -58,7 +58,7 @@ public class GrammarBuilderWalkerFunction implements WalkerFunction {
     grammar = new MemoryBasedBatchGrammar(owner, joshuaConfiguration, 1000);
     outStream = null;
     goalSymbol = Vocabulary.id(goal);
-    rules = new HashSet<Rule>();
+    rules = new HashSet<>();
   }
 
   public void apply(HGNode node, int index) {

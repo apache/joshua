@@ -227,15 +227,18 @@ public class ServerThread extends Thread implements HttpHandler {
       String source = argTokens[1];
       String target = argTokens[2];
       String featureStr = "";
+      String alignmentStr = "";
       if (argTokens.length > 3) 
         featureStr = argTokens[3];
-          
+      if (argTokens.length > 4)
+        alignmentStr = " ||| " + argTokens[4];
+      
       /* Prepend source and target side nonterminals for phrase-based decoding. Probably better
        * handled in each grammar type's addRule() function.
        */
       String ruleString = (joshuaConfiguration.search_algorithm.equals("stack"))
-          ? String.format("%s ||| [X,1] %s ||| [X,1] %s ||| custom=1 %s", lhs, source, target, featureStr)
-          : String.format("%s ||| %s ||| %s ||| custom=1 %s", lhs, source, target, featureStr);
+          ? String.format("%s ||| [X,1] %s ||| [X,1] %s ||| -1 %s %s", lhs, source, target, featureStr, alignmentStr)
+          : String.format("%s ||| %s ||| %s ||| -1 %s %s", lhs, source, target, featureStr, alignmentStr);
       
       Rule rule = new HieroFormatReader(decoder.getCustomPhraseTable().getOwner()).parseLine(ruleString);
       decoder.addCustomRule(rule);

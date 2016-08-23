@@ -83,7 +83,7 @@ public class Tree implements Serializable {
    * hand, we can iterate through our store of language model fragments to match them against this,
    * following tail nodes if necessary.
    */
-  public static HashMap<String, String> rulesToFragmentStrings = new HashMap<String, String>();
+  public static final HashMap<String, String> rulesToFragmentStrings = new HashMap<>();
 
   public Tree(String label, List<Tree> children) {
     setLabel(label);
@@ -153,19 +153,19 @@ public class Tree implements Serializable {
   }
 
   public List<Tree> getNonterminalYield() {
-    List<Tree> yield = new ArrayList<Tree>();
+    List<Tree> yield = new ArrayList<>();
     appendNonterminalYield(this, yield);
     return yield;
   }
 
   public List<Tree> getYield() {
-    List<Tree> yield = new ArrayList<Tree>();
+    List<Tree> yield = new ArrayList<>();
     appendYield(this, yield);
     return yield;
   }
 
   public List<Tree> getTerminals() {
-    List<Tree> yield = new ArrayList<Tree>();
+    List<Tree> yield = new ArrayList<>();
     appendTerminals(this, yield);
     return yield;
   }
@@ -186,7 +186,7 @@ public class Tree implements Serializable {
    * @return a cloned tree
    */
   public Tree shallowClone() {
-    ArrayList<Tree> newChildren = new ArrayList<Tree>(children.size());
+    ArrayList<Tree> newChildren = new ArrayList<>(children.size());
     for (Tree child : children) {
       newChildren.add(child.shallowClone());
     }
@@ -222,7 +222,7 @@ public class Tree implements Serializable {
   }
 
   public List<Tree> getPreTerminalYield() {
-    List<Tree> yield = new ArrayList<Tree>();
+    List<Tree> yield = new ArrayList<>();
     appendPreTerminalYield(this, yield);
     return yield;
   }
@@ -250,9 +250,8 @@ public class Tree implements Serializable {
         this.numLexicalItems = 1;
       else {
         this.numLexicalItems = 0;
-        for (Tree child : children)
-          if (child.isLexicalized())
-            this.numLexicalItems += 1;
+        children.stream().filter(child -> child.isLexicalized())
+            .forEach(child -> this.numLexicalItems += 1);
       }
     }
 
@@ -283,7 +282,7 @@ public class Tree implements Serializable {
   }
 
   public List<Tree> getAtDepth(int depth) {
-    List<Tree> yield = new ArrayList<Tree>();
+    List<Tree> yield = new ArrayList<>();
     appendAtDepth(depth, this, yield);
     return yield;
   }
@@ -354,7 +353,7 @@ public class Tree implements Serializable {
    * @return the <code>Set</code> of all subtrees in the tree.
    */
   public Set<Tree> subTrees() {
-    return (Set<Tree>) subTrees(new HashSet<Tree>());
+    return (Set<Tree>) subTrees(new HashSet<>());
   }
 
   /**
@@ -364,7 +363,7 @@ public class Tree implements Serializable {
    * @return the <code>List</code> of all subtrees in the tree.
    */
   public List<Tree> subTreeList() {
-    return (List<Tree>) subTrees(new ArrayList<Tree>());
+    return (List<Tree>) subTrees(new ArrayList<>());
   }
 
   /**
@@ -397,10 +396,10 @@ public class Tree implements Serializable {
 
   private class TreeIterator implements Iterator<Tree> {
 
-    private List<Tree> treeStack;
+    private final List<Tree> treeStack;
 
     private TreeIterator() {
-      treeStack = new ArrayList<Tree>();
+      treeStack = new ArrayList<>();
       treeStack.add(Tree.this);
     }
 
@@ -499,8 +498,7 @@ public class Tree implements Serializable {
    */
   public static Tree fromString(String ptbStr) {
     PennTreeReader reader = new PennTreeReader(new StringReader(ptbStr));
-    Tree fragment = reader.next();
-    return fragment;
+    return reader.next();
   }
 
   public static Tree getFragmentFromYield(String yield) {
@@ -644,10 +642,10 @@ public class Tree implements Serializable {
        * the incoming DerivationState items, which are ordered by the source side.
        */
       ArrayList<Integer> tailIndices = new ArrayList<Integer>();
-      int[] englishInts = rule.getTarget();
-      for (int i = 0; i < englishInts.length; i++)
-        if (englishInts[i] < 0)
-          tailIndices.add(-(englishInts[i] + 1));
+      int[] targetInts = rule.getTarget();
+      for (int i = 0; i < targetInts.length; i++)
+        if (targetInts[i] < 0)
+          tailIndices.add(-(targetInts[i] + 1));
 
       /*
        * We now have the tree's yield. The substitution points on the yield should match the
@@ -703,10 +701,10 @@ public class Tree implements Serializable {
       List<Tree> frontier = tree.getNonterminalYield();
 
       ArrayList<Integer> tailIndices = new ArrayList<Integer>();
-      int[] englishInts = rule.getTarget();
-      for (int i = 0; i < englishInts.length; i++)
-        if (englishInts[i] < 0)
-          tailIndices.add(-1 * englishInts[i] - 1);
+      int[] targetInts = rule.getTarget();
+      for (int i = 0; i < targetInts.length; i++)
+        if (targetInts[i] < 0)
+          tailIndices.add(-1 * targetInts[i] - 1);
 
       /*
        * We now have the tree's yield. The substitution points on the yield should match the
@@ -720,7 +718,7 @@ public class Tree implements Serializable {
         // String lhs = tailNodes.get(i).getLHS().replaceAll("[\\[\\]]", "");
         // System.err.println(String.format("  %d: %s", i, lhs));
         try {
-          Tree frontierTree = frontier.get(tailIndices.get(i).intValue());
+          Tree frontierTree = frontier.get(tailIndices.get(i));
           frontierTree.setBoundary(true);
 
           HyperEdge edge = tailNodes.get(i).bestHyperedge;

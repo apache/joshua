@@ -33,7 +33,7 @@ public class LMBerkeleySentenceProbablityTest {
 
   @Test
   public void verifySentenceLogProbability() {
-    LMGrammarBerkeley grammar = new LMGrammarBerkeley(2, "resources/berkeley_lm/lm");
+    LMGrammarBerkeley grammar = new LMGrammarBerkeley(2, "src/test/resources/berkeley_lm/lm");
     grammar.registerWord("the", 2);
     grammar.registerWord("chat-rooms", 3);
     grammar.registerWord("<unk>", 0);
@@ -52,7 +52,7 @@ public class LMBerkeleySentenceProbablityTest {
   
   @Test
   public void givenUnknownWord_whenIsOov_thenCorrectlyDetected() {
-    LMGrammarBerkeley lm = new LMGrammarBerkeley(2, "resources/berkeley_lm/lm");
+    LMGrammarBerkeley lm = new LMGrammarBerkeley(2, "src/test/resources/berkeley_lm/lm");
     assertTrue(lm.isOov(Vocabulary.id("UNKNOWN_WORD")));
     assertFalse(lm.isOov(Vocabulary.id("chat-rooms")));
   }

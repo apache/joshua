@@ -29,6 +29,7 @@ import static org.apache.joshua.util.FormatUtils.removeSentenceMarkers;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.joshua.decoder.ff.FeatureFunction;
@@ -52,7 +53,7 @@ import org.slf4j.LoggerFactory;
 
 public class Translation {
   private static final Logger LOG = LoggerFactory.getLogger(Translation.class);
-  private Sentence source;
+  private final Sentence source;
 
   /**
    * This stores the output of the translation so we don't have to hold onto the hypergraph while we
@@ -83,7 +84,7 @@ public class Translation {
          */
         StructuredTranslation translation = fromViterbiDerivation(source, hypergraph, featureFunctions);
         this.output = translation.getTranslationString();
-        structuredTranslations = asList(translation);
+        structuredTranslations = Collections.singletonList(translation);
         
       } else {
         /*
@@ -92,7 +93,8 @@ public class Translation {
         final KBestExtractor kBestExtractor = new KBestExtractor(source, featureFunctions, Decoder.weights, false, joshuaConfiguration);
         structuredTranslations = kBestExtractor.KbestExtractOnHG(hypergraph, joshuaConfiguration.topN);
         if (structuredTranslations.isEmpty()) {
-            structuredTranslations = asList(StructuredTranslationFactory.fromEmptyOutput(source));
+            structuredTranslations = Collections
+                .singletonList(StructuredTranslationFactory.fromEmptyOutput(source));
             this.output = "";
         } else {
             this.output = structuredTranslations.get(0).getTranslationString();

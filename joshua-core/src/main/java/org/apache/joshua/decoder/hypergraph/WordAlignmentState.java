@@ -42,7 +42,7 @@ public class WordAlignmentState {
    * rule. The values of the elements correspond to the aligned source token on
    * the source side of the rule.
    */
-  private List<AlignedSourceTokens> trgPoints;
+  private final List<AlignedSourceTokens> trgPoints;
   private final int srcStart;
   /** number of NTs we need to substitute. */
   private int numNT;
@@ -123,7 +123,7 @@ public class WordAlignmentState {
    * @return a final alignment list
    */
   public List<List<Integer>> toFinalList() {
-    final List<List<Integer>> alignment = new ArrayList<List<Integer>>(trgPoints.size());
+    final List<List<Integer>> alignment = new ArrayList<>(trgPoints.size());
     if (trgPoints.isEmpty()) {
       return alignment;
     }
@@ -132,7 +132,7 @@ public class WordAlignmentState {
     while (it.hasNext()) {
       final AlignedSourceTokens alignedSourceTokens = it.next();
       if (it.hasNext()) { // if not last element in trgPoints
-        final List<Integer> newAlignedSourceTokens = new ArrayList<Integer>();
+        final List<Integer> newAlignedSourceTokens = new ArrayList<>();
         for (Integer sourceIndex : alignedSourceTokens) {
           newAlignedSourceTokens.add(sourceIndex - 1); // shift by one to disregard sentence marker
         }

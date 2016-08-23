@@ -96,7 +96,7 @@ public class LanguageModelFF extends StatefulFF {
    * We cache the weight of the feature since there is only one.
    */
   protected String type;
-  protected String path;
+  protected final String path;
 
   /** Whether this is a class-based LM */
   protected boolean isClassLM;
@@ -130,13 +130,16 @@ public class LanguageModelFF extends StatefulFF {
    * Initializes the underlying language model.
    */
   protected void initializeLM() {
-    if (type.equals("kenlm")) {
+    switch (type) {
+    case "kenlm":
       this.languageModel = new KenLM(ngramOrder, path);
 
-    } else if (type.equals("berkeleylm")) {
+      break;
+    case "berkeleylm":
       this.languageModel = new LMGrammarBerkeley(ngramOrder, path);
 
-    } else {
+      break;
+    default:
       String msg = String.format("* FATAL: Invalid backend lm_type '%s' for LanguageModel", type)
           + "*        Permissible values for 'lm_type' are 'kenlm' and 'berkeleylm'";
       throw new RuntimeException(msg);
@@ -310,15 +313,14 @@ public class LanguageModelFF extends StatefulFF {
 
     int[] enWords = getRuleIds(rule);
 
-    List<Integer> words = new ArrayList<Integer>();
+    List<Integer> words = new ArrayList<>();
     boolean skipStart = (enWords[0] == startSymbolId); 
 
     /*
      * Move through the words, accumulating language model costs each time we have an n-gram (n >=
      * 2), and resetting the series of words when we hit a nonterminal.
      */
-    for (int c = 0; c < enWords.length; c++) {
-      int currentWord = enWords[c];
+    for (int currentWord : enWords) {
       if (FormatUtils.isNonterminal(currentWord)) {
         lmEstimate += scoreChunkLogP(words, considerIncompleteNgrams, skipStart);
         words.clear();
@@ -377,9 +379,7 @@ public class LanguageModelFF extends StatefulFF {
     float transitionLogP = 0.0f;
     int[] left_context = null;
 
-    for (int c = 0; c < enWords.length; c++) {
-      int curID = enWords[c];
-
+    for (int curID : enWords) {
       if (FormatUtils.isNonterminal(curID)) {
         int index = -(curID + 1);
 
@@ -388,8 +388,8 @@ public class LanguageModelFF extends StatefulFF {
         int[] right = state.getRightLMStateWords();
 
         // Left context.
-        for (int i = 0; i < left.length; i++) {
-          current[ccount++] = left[i];
+        for (int aLeft : left) {
+          current[ccount++] = aLeft;
 
           if (left_context == null && ccount == this.ngramOrder - 1)
             left_context = Arrays.copyOf(current, ccount);
@@ -451,17 +451,16 @@ public class LanguageModelFF extends StatefulFF {
     //    System.err.println(String.format("LanguageModel::computeFinalTransition()"));
 
     float res = 0.0f;
-    LinkedList<Integer> currentNgram = new LinkedList<Integer>();
+    LinkedList<Integer> currentNgram = new LinkedList<>();
     int[] leftContext = state.getLeftLMStateWords();
     int[] rightContext = state.getRightLMStateWords();
 
-    for (int i = 0; i < leftContext.length; i++) {
-      int t = leftContext[i];
+    for (int t : leftContext) {
       currentNgram.add(t);
 
       if (currentNgram.size() >= 2) { // start from bigram
-        float prob = this.languageModel.ngramLogProbability(Support.toArray(currentNgram),
-            currentNgram.size());
+        float prob = this.languageModel
+            .ngramLogProbability(Support.toArray(currentNgram), currentNgram.size());
         res += prob;
       }
       if (currentNgram.size() == this.ngramOrder)

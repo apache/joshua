@@ -70,7 +70,7 @@ public class DecoderThread extends Thread {
     this.joshuaConfiguration = joshuaConfiguration;
     this.allGrammars = grammars;
 
-    this.featureFunctions = new ArrayList<FeatureFunction>();
+    this.featureFunctions = new ArrayList<>();
     for (FeatureFunction ff : featureFunctions) {
       if (ff instanceof SourceDependentFF) {
         this.featureFunctions.add(((SourceDependentFF) ff).clone());

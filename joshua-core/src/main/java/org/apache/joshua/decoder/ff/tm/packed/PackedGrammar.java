@@ -122,7 +122,7 @@ public class PackedGrammar extends AbstractGrammar {
   // Testing shows there's up to ~95% hit rate when cache size is 5000 Trie nodes.
   private final Cache<Trie, List<Rule>> cached_rules;
 
-  private String grammarDir;
+  private final String grammarDir;
 
   public PackedGrammar(String grammar_dir, int span_limit, String owner, String type,
       JoshuaConfiguration joshuaConfiguration) throws IOException {
@@ -151,7 +151,7 @@ public class PackedGrammar extends AbstractGrammar {
 
     final List<String> listing = Arrays.asList(new File(grammar_dir).list());
     sort(listing); // File.list() has arbitrary sort order
-    slices = new ArrayList<PackedSlice>();
+    slices = new ArrayList<>();
     for (String prefix : listing) {
       if (prefix.startsWith("slice_") && prefix.endsWith(".source"))
         slices.add(new PackedSlice(grammar_dir + File.separator + prefix.substring(0, 11)));
@@ -206,8 +206,8 @@ public class PackedGrammar extends AbstractGrammar {
     byte[] digest = md.digest();
     // convert the byte to hex format
     StringBuffer sb = new StringBuffer("");
-    for (int i = 0; i < digest.length; i++) {
-      sb.append(Integer.toString((digest[i] & 0xff) + 0x100, 16).substring(1));
+    for (byte aDigest : digest) {
+      sb.append(Integer.toString((aDigest & 0xff) + 0x100, 16).substring(1));
     }
     return sb.toString();
   }
@@ -259,7 +259,7 @@ public class PackedGrammar extends AbstractGrammar {
            * packedRoot.match() thus can directly return the result of lookup.get(id);
            */
           if (!childTries.containsKey(id)) {
-            childTries.put(id, new ArrayList<Trie>(1));
+            childTries.put(id, new ArrayList<>(1));
           }
           final Trie trie = packedSlice.root().match(id);
           childTries.get(id).add(trie);
@@ -371,7 +371,7 @@ public class PackedGrammar extends AbstractGrammar {
         alignments = null;
       }
 
-      tries = new HashMap<Integer, PackedTrie>();
+      tries = new HashMap<>();
     }
 
     /**
@@ -418,8 +418,7 @@ public class PackedGrammar extends AbstractGrammar {
       try(FileInputStream fileInputStream = new FileInputStream(file)) {
         FileChannel fileChannel = fileInputStream.getChannel();
         int size = (int) fileChannel.size();
-        MappedByteBuffer result = fileChannel.map(MapMode.READ_ONLY, 0, size);
-        return result;
+        return fileChannel.map(MapMode.READ_ONLY, 0, size);
       }
     }
 
@@ -494,7 +493,7 @@ public class PackedGrammar extends AbstractGrammar {
      * getAlignments calls to PackedRule objects they could alter each other's positions within the
      * buffer before calling read on the buffer.
      */
-    private synchronized final byte[] getAlignmentArray(int block_id) {
+    private synchronized byte[] getAlignmentArray(int block_id) {
       if (alignments == null)
         throw new RuntimeException("No alignments available.");
       int alignment_position = getIntFromByteBuffer(block_id, alignments);
@@ -516,7 +515,7 @@ public class PackedGrammar extends AbstractGrammar {
       return alignment;
     }
 
-    private final PackedTrie root() {
+    private PackedTrie root() {
       return getTrie(0);
     }
 
@@ -537,7 +536,7 @@ public class PackedGrammar extends AbstractGrammar {
 
       private boolean sorted = false;
 
-      private int[] src;
+      private final int[] src;
       private int arity;
 
       private PackedTrie(int position) {
@@ -585,7 +584,7 @@ public class PackedGrammar extends AbstractGrammar {
 
       @Override
       public HashMap<Integer, ? extends Trie> getChildren() {
-        HashMap<Integer, Trie> children = new HashMap<Integer, Trie>();
+        HashMap<Integer, Trie> children = new HashMap<>();
         int num_children = source[position];
         for (int i = 0; i < num_children; i++) {
           int symbol = source[position + 1 + 2 * i];
@@ -603,7 +602,7 @@ public class PackedGrammar extends AbstractGrammar {
       @Override
       public ArrayList<? extends Trie> getExtensions() {
         int num_children = source[position];
-        ArrayList<PackedTrie> tries = new ArrayList<PackedTrie>(num_children);
+        ArrayList<PackedTrie> tries = new ArrayList<>(num_children);
 
         for (int i = 0; i < num_children; i++) {
           int symbol = source[position + 1 + 2 * i];
@@ -636,7 +635,7 @@ public class PackedGrammar extends AbstractGrammar {
         int rule_position = position + 2 * (num_children + 1);
         int num_rules = source[rule_position - 1];
 
-        rules = new ArrayList<Rule>(num_rules);
+        rules = new ArrayList<>(num_rules);
         for (int i = 0; i < num_rules; i++) {
           rules.add(new PackedRule(rule_position + 3 * i));
         }
@@ -685,26 +684,22 @@ public class PackedGrammar extends AbstractGrammar {
           estimated[block_id] = rule.estimateRuleCost(featureFunctions);
         }
 
-        Arrays.sort(rules, new Comparator<Integer>() {
-          public int compare(Integer a, Integer b) {
-            float a_cost = estimated[source[a]];
-            float b_cost = estimated[source[b]];
-            if (a_cost == b_cost)
-              return 0;
-            return (a_cost > b_cost ? -1 : 1);
-          }
+        Arrays.sort(rules, (a, b) -> {
+          float a_cost = estimated[source[a]];
+          float b_cost = estimated[source[b]];
+          if (a_cost == b_cost)
+            return 0;
+          return (a_cost > b_cost ? -1 : 1);
         });
 
         int[] sorted = new int[3 * num_rules];
         int j = 0;
-        for (int i = 0; i < rules.length; i++) {
-          int address = rules[i];
+        for (Integer address : rules) {
           sorted[j++] = source[address - 2];
           sorted[j++] = source[address - 1];
           sorted[j++] = source[address];
         }
-        for (int i = 0; i < sorted.length; i++)
-          source[rule_position + i] = sorted[i];
+        System.arraycopy(sorted, 0, source, rule_position + 0, sorted.length);
 
         // Replace rules in cache with their sorted values on next getRules()
         cached_rules.invalidate(this);
@@ -741,7 +736,7 @@ public class PackedGrammar extends AbstractGrammar {
       public final class PackedChildIterator implements Iterator<Integer> {
 
         private int current;
-        private boolean terminal;
+        private final boolean terminal;
         private boolean done;
         private int last;
 
@@ -819,7 +814,6 @@ public class PackedGrammar extends AbstractGrammar {
          * Guava's implementation makes sure only one read of a volatile variable occurs per get.
          * This means this implementation should be as thread-safe and performant as possible.
          */
-
         private Supplier<int[]> initializeTargetSupplier(){
           Supplier<int[]> result = Suppliers.memoize(() ->{
             int[] phrase = getTargetArray(source[address + 1]);
@@ -833,7 +827,7 @@ public class PackedGrammar extends AbstractGrammar {
         }
 
         private Supplier<byte[]> initializeAlignmentSupplier(){
-          Supplier<byte[]> result = Suppliers.memoize(() ->{
+          return Suppliers.memoize(() ->{
             byte[] raw_alignment = getAlignmentArray(source[address + 2]);
             byte[] points = new byte[raw_alignment.length + 2];
             points[0] = points[1] = 0;
@@ -841,7 +835,6 @@ public class PackedGrammar extends AbstractGrammar {
               points[i + 2] = (byte) (raw_alignment[i] + 1);
             return points;
           });
-          return result;
         }
 
         /**
@@ -913,14 +906,13 @@ public class PackedGrammar extends AbstractGrammar {
         }
 
         private Supplier<byte[]> initializeAlignmentsSupplier(){
-          Supplier<byte[]> result = Suppliers.memoize(()->{
+          return Suppliers.memoize(()->{
             // if no alignments in grammar do not fail
             if (alignments == null){
               return null;
             }
             return getAlignmentArray(source[address + 2]);
           });
-          return result;
         }
 
         @Override

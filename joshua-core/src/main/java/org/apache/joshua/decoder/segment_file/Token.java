@@ -42,10 +42,9 @@ public class Token {
 
   // The token without the annotations
   private String token; 
-  private int tokenID;
+  private final int tokenID;
 
   private HashMap<String,String> annotations = null;
-  private JoshuaConfiguration joshuaConfiguration;
 
   /**
    * <p>Constructor : Creates a Token object from a raw word
@@ -75,10 +74,10 @@ public class Token {
    *  
    */
   public Token(String rawWord, JoshuaConfiguration config) {
+
+    JoshuaConfiguration joshuaConfiguration = config;
     
-    this.joshuaConfiguration = config;
-    
-    annotations = new HashMap<String,String>();
+    annotations = new HashMap<>();
     
     // Matches a word with an annotation
     // Check guidelines in constructor description

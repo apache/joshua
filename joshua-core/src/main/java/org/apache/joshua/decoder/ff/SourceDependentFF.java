@@ -22,8 +22,8 @@ import org.apache.joshua.decoder.segment_file.Sentence;
 
 public interface SourceDependentFF extends Cloneable {
 
-  public void setSource(Sentence sentence);
+  void setSource(Sentence sentence);
 
-  public FeatureFunction clone();
+  FeatureFunction clone();
 
 }

@@ -31,10 +31,10 @@ import java.util.NoSuchElementException;
 public class Span implements Iterable<Integer>, Comparable<Span> {
 
   /** Inclusive starting index of this span. */
-  public int start;
+  public final int start;
 
   /** Exclusive ending index of this span. */
-  public int end;
+  public final int end;
 
 
   /**
@@ -75,7 +75,7 @@ public class Span implements Iterable<Integer>, Comparable<Span> {
    */
   public List<Span> getSubSpans(int max) {
     int spanSize = size();
-    ArrayList<Span> result = new ArrayList<Span>(max * spanSize);
+    ArrayList<Span> result = new ArrayList<>(max * spanSize);
     for (int len = max; len > 0; len--) {
       for (int i = start; i < end - len + 1; i++) {
         result.add(new Span(i, i + len));

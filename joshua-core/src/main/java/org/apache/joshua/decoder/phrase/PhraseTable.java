@@ -42,7 +42,7 @@ import org.apache.joshua.decoder.ff.tm.packed.PackedGrammar;
  */
 public class PhraseTable implements Grammar {
   
-  private JoshuaConfiguration config;
+  private final JoshuaConfiguration config;
   private Grammar backend;
   
   /**
@@ -79,14 +79,13 @@ public class PhraseTable implements Grammar {
   }
       
   /**
-   * Returns the longest source phrase read. Because phrases have a dummy nonterminal prepended to
-   * them, we need to subtract 1.
+   * Returns the longest source phrase read.
    * 
    * @return the longest source phrase read.
    */
   @Override
   public int getMaxSourcePhraseLength() {
-    return this.backend.getMaxSourcePhraseLength() - 1;
+    return this.backend.getMaxSourcePhraseLength();
   }
 
   /**
@@ -98,7 +97,6 @@ public class PhraseTable implements Grammar {
   public RuleCollection getPhrases(int[] sourceWords) {
     if (sourceWords.length != 0) {
       Trie pointer = getTrieRoot();
-      pointer = pointer.match(Vocabulary.id("[X]"));
       int i = 0;
       while (pointer != null && i < sourceWords.length)
         pointer = pointer.match(sourceWords[i++]);
@@ -117,7 +115,7 @@ public class PhraseTable implements Grammar {
    * @param rule the rule to add
    */
   public void addRule(Rule rule) {
-    ((MemoryBasedBatchGrammar)backend).addRule(rule);
+    backend.addRule(rule);
   }
   
   @Override

@@ -44,10 +44,10 @@ public class LMGrammarBerkeleyTest {
 
   @DataProvider(name = "languageModelFiles")
   public Object[][] lmFiles() {
-    return new Object[][]{{"resources/berkeley_lm/lm"},
-            {"resources/berkeley_lm/lm.gz"},
-            {"resources/berkeley_lm/lm.berkeleylm"},
-            {"resources/berkeley_lm/lm.berkeleylm.gz"}};
+    return new Object[][]{{"src/test/resources/berkeley_lm/lm"},
+            {"src/test/resources/berkeley_lm/lm.gz"},
+            {"src/test/resources/berkeley_lm/lm.berkeleylm"},
+            {"src/test/resources/berkeley_lm/lm.berkeleylm.gz"}};
   }
 
   @AfterMethod
@@ -74,7 +74,7 @@ public class LMGrammarBerkeleyTest {
   public void givenLmWithOovFeature_whenDecoder_thenCorrectFeaturesReturned() {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.processCommandLineOptions(OPTIONS);
-    joshuaConfig.features.add("LanguageModel -lm_type berkeleylm -oov_feature -lm_order 2 -lm_file resources/berkeley_lm/lm");
+    joshuaConfig.features.add("LanguageModel -lm_type berkeleylm -oov_feature -lm_order 2 -lm_file src/test/resources/berkeley_lm/lm");
     decoder = new Decoder(joshuaConfig, null);
     final String translation = decode(INPUT).toString();
     assertEquals(translation, EXPECTED_OUTPUT_WITH_OOV);

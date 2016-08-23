@@ -92,11 +92,6 @@ public class FragmentLMFF extends StatefulFF {
   private int MIN_LEX_DEPTH = 1;
 
   /*
-   * Set to true to activate meta-features.
-   */
-  private boolean OPTS_DEPTH = false;
-
-  /*
    * This contains a list of the language model fragments, indexed by LHS.
    */
   private HashMap<String, ArrayList<Tree>> lmFragments = null;
@@ -114,7 +109,7 @@ public class FragmentLMFF extends StatefulFF {
   public FragmentLMFF(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, "FragmentLMFF", args, config);
 
-    lmFragments = new HashMap<String, ArrayList<Tree>>();
+    lmFragments = new HashMap<>();
 
     fragmentLMFile = parsedArgs.get("lm");
     BUILD_DEPTH = Integer.parseInt(parsedArgs.get("build-depth"));
@@ -124,12 +119,9 @@ public class FragmentLMFF extends StatefulFF {
     /* Read in the language model fragments */
     try {
       Collection<Tree> trees = PennTreebankReader.readTrees(fragmentLMFile);
-      for (Tree fragment : trees) {
-        addLMFragment(fragment);
-
-        // System.err.println(String.format("Read fragment: %s",
-        // lmFragments.get(lmFragments.size()-1)));
-      }
+      // System.err.println(String.format("Read fragment: %s",
+      // lmFragments.get(lmFragments.size()-1)));
+      trees.forEach(this::addLMFragment);
     } catch (IOException e) {
       throw new RuntimeException(String.format("* WARNING: couldn't read fragment LM file '%s'",
           fragmentLMFile), e);
@@ -159,7 +151,7 @@ public class FragmentLMFF extends StatefulFF {
     }
 
     if (lmFragments.get(fragment.getRule()) == null) {
-      lmFragments.put(fragment.getRule(), new ArrayList<Tree>());
+      lmFragments.put(fragment.getRule(), new ArrayList<>());
     }
     lmFragments.get(fragment.getRule()).add(fragment);
     numFragments++;
@@ -193,7 +185,7 @@ public class FragmentLMFF extends StatefulFF {
      */
     Tree baseTree = Tree.buildTree(rule, tailNodes, BUILD_DEPTH);
 
-    Stack<Tree> nodeStack = new Stack<Tree>();
+    Stack<Tree> nodeStack = new Stack<>();
     nodeStack.add(baseTree);
     while (!nodeStack.empty()) {
       Tree tree = nodeStack.pop();
@@ -208,6 +200,7 @@ public class FragmentLMFF extends StatefulFF {
           if (fragment.getLabel() == tree.getLabel() && match(fragment, tree)) {
 //             System.err.println(String.format("  FIRING: matched %s against %s", fragment, tree));
             acc.add(hashFeature(fragment.escapedString()), 1);
+            boolean OPTS_DEPTH = false;
             if (OPTS_DEPTH)
               if (fragment.isLexicalized())
                 acc.add(hashFeature(String.format("FragmentFF_lexdepth%d", fragment.getDepth())), 1);

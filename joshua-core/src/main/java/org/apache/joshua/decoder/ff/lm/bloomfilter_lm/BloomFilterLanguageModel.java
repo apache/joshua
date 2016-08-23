@@ -365,7 +365,7 @@ public class BloomFilterLanguageModel extends DefaultNGramLanguageModel implemen
    * @param filename path to the statistics file
    */
   private void populateBloomFilter(int bloomFilterSize, String filename) {
-    HashMap<String, Long> typesAfter = new HashMap<String, Long>();
+    HashMap<String, Long> typesAfter = new HashMap<>();
     try {
       FileInputStream file_in = new FileInputStream(filename);
       FileInputStream file_in_copy = new FileInputStream(filename);
@@ -396,7 +396,6 @@ public class BloomFilterLanguageModel extends DefaultNGramLanguageModel implemen
         hist[i] = Vocabulary.id(toks[i]);
       add(hist, typesAfter.get(history), typesFuncs);
     }
-    return;
   }
 
   /**
@@ -460,11 +459,10 @@ public class BloomFilterLanguageModel extends DefaultNGramLanguageModel implemen
       if (types.get(history) == null)
         types.put(history.toString(), 1L);
       else {
-        long x = (Long) types.get(history);
+        long x = types.get(history);
         types.put(history.toString(), x + 1);
       }
     }
-    return;
   }
 
   /**
@@ -527,14 +525,14 @@ public class BloomFilterLanguageModel extends DefaultNGramLanguageModel implemen
     }
     out.writeDouble(numTokens);
     out.writeInt(countFuncs.length);
-    for (int i = 0; i < countFuncs.length; i++) {
-      out.writeLong(countFuncs[i][0]);
-      out.writeLong(countFuncs[i][1]);
+    for (long[] countFunc : countFuncs) {
+      out.writeLong(countFunc[0]);
+      out.writeLong(countFunc[1]);
     }
     out.writeInt(typesFuncs.length);
-    for (int i = 0; i < typesFuncs.length; i++) {
-      out.writeLong(typesFuncs[i][0]);
-      out.writeLong(typesFuncs[i][1]);
+    for (long[] typesFunc : typesFuncs) {
+      out.writeLong(typesFunc[0]);
+      out.writeLong(typesFunc[1]);
     }
     out.writeDouble(quantizationBase);
     bf.writeExternal(out);

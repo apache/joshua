@@ -22,7 +22,6 @@ import static org.apache.joshua.decoder.ff.tm.OwnerMap.UNKNOWN_OWNER_ID;
 
 import java.util.List;
 
-import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
@@ -30,10 +29,12 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.hypergraph.HyperEdge;
 
 /**
- * Represents a hypothesis, a translation of some coverage of the input. Extends {@link org.apache.joshua.decoder.hypergraph.HGNode}, 
- * through a bit of a hack. Whereas (i,j) represents the span of an {@link org.apache.joshua.decoder.hypergraph.HGNode}, i here is not used,
- * and j is overloaded to denote the span of the phrase being applied. The complete coverage vector 
- * can be obtained by looking at the tail pointer and casting it.
+ * Represents a hypothesis, a translation of some subset of the input sentence. Extends 
+ * {@link org.apache.joshua.decoder.hypergraph.HGNode}, through a bit of a hack. Whereas (i,j) 
+ * represents the span of an {@link org.apache.joshua.decoder.hypergraph.HGNode}, i here is not used,
+ * and j is overloaded to denote the index into the source string of the end of the last phrase that 
+ * was applied. The complete coverage vector can be obtained by looking at the tail pointer and 
+ * casting it.
  * 
  * @author Kenneth Heafield
  * @author Matt Post post@cs.jhu.edu
@@ -41,33 +42,43 @@ import org.apache.joshua.decoder.hypergraph.HyperEdge;
 public class Hypothesis extends HGNode implements Comparable<Hypothesis> {
 
   // The hypothesis' coverage vector
-  private Coverage coverage;
-  public static Rule BEGIN_RULE = new HieroFormatReader(UNKNOWN_OWNER_ID).parseLine("[X] ||| <s> ||| <s> |||   ||| 0-0");
-  public static Rule END_RULE = new HieroFormatReader(UNKNOWN_OWNER_ID).parseLine("[GOAL] ||| [X,1] </s> ||| [X,1] </s> |||   ||| 0-0 1-1");
+  private final Coverage coverage;
 
+  public static Rule BEGIN_RULE = new HieroFormatReader(UNKNOWN_OWNER_ID).parseLine("[GOAL] ||| <s> ||| <s> ||| ");
+  public static Rule END_RULE   = new HieroFormatReader(UNKNOWN_OWNER_ID).parseLine("[GOAL] ||| </s> ||| </s> ||| ");
+  public static Rule MONO_RULE  = new HieroFormatReader(UNKNOWN_OWNER_ID).parseLine("[GOAL] ||| [GOAL,1] [X,2] ||| [GOAL,1] [X,2] |||   ||| 0-0 1-1");
+  public static Rule SWAP_RULE  = new HieroFormatReader(UNKNOWN_OWNER_ID).parseLine("[GOAL] ||| [X,1] [GOAL,2] ||| [GOAL,2] [X,1] |||   ||| 0-1 1-0");
+  
   public String toString() {
     StringBuffer sb = new StringBuffer();
-    for (DPState state: getDPStates())
-      sb.append(state);
+    getDPStates().forEach(sb::append);
     String words = bestHyperedge.getRule().getTargetWords();
+
 //  return String.format("HYP[%s] %.5f j=%d words=%s state=%s", coverage, score, j, words, sb);
     return String.format("HYP[%s] j=%d words=[%s] state=%s", coverage, j, words, sb);
   }
 
   // Initialize root hypothesis. Provide the LM's BeginSentence.
   public Hypothesis(List<DPState> states, float futureCost) {
-    super(0, 1, Vocabulary.id("[X]"), states,
+    super(0, 1, BEGIN_RULE.getLHS(), states,
         new HyperEdge(BEGIN_RULE, 0.0f, 0.0f, null, null), futureCost);
     this.coverage = new Coverage(1);
   }
 
+  /**
+   * This creates a hypothesis from a Candidate object
+   * 
+   * @param cand the candidate
+   */
   public Hypothesis(Candidate cand) {
     // TODO: sourcepath
-    super(-1, cand.span.end, Vocabulary.id("[X]"), cand.getStates(), new HyperEdge(
-        cand.getRule(), cand.getResult().getViterbiCost(), cand.getResult().getTransitionCost(),
-        cand.getTailNodes(), null), cand.score());
+    super(cand.getLastCovered(), cand.getPhraseEnd(), cand.getRule().getLHS(), cand.getStates(), 
+        new HyperEdge(cand.getRule(), cand.computeResult().getViterbiCost(), 
+            cand.computeResult().getTransitionCost(),
+            cand.getTailNodes(), null), cand.score());
     this.coverage = cand.getCoverage();
   }
+
   
   // Extend a previous hypothesis.
   public Hypothesis(List<DPState> states, float score, Hypothesis previous, int source_end, Rule target) {
@@ -87,16 +98,16 @@ public class Hypothesis extends HGNode implements Comparable<Hypothesis> {
    * HGNodes (designed for chart parsing) maintain a span (i,j). We overload j
    * here to record the index of the last translated source word.
    * 
-   * @return the int 'j' which is overloaded to denote the span of the phrase being applied
+   * @return the index of the last translated source word
    */
-  public int LastSourceIndex() {
+  public int getLastSourceIndex() {
     return j;
   }
 
   @Override
   public int hashCode() {
     int hash = 0;
-    hash = 31 * LastSourceIndex() + 19 * getCoverage().hashCode();
+    hash = 31 * getLastSourceIndex() + 19 * getCoverage().hashCode();
     if (null != dpStates && dpStates.size() > 0)
       for (DPState dps: dpStates)
         hash *= 57 + dps.hashCode();
@@ -113,7 +124,7 @@ public class Hypothesis extends HGNode implements Comparable<Hypothesis> {
     if (obj instanceof Hypothesis) {
       Hypothesis other = (Hypothesis) obj;
 
-      if (LastSourceIndex() != other.LastSourceIndex() || ! getCoverage().equals(other.getCoverage()))
+      if (getLastSourceIndex() != other.getLastSourceIndex() || ! getCoverage().equals(other.getCoverage()))
         return false;
       
       if (dpStates == null)

@@ -32,10 +32,10 @@ import org.apache.joshua.corpus.Span;
  */
 
 public class AllSpansWalker {
-  private Set<Span> visitedSpans;
+  private final Set<Span> visitedSpans;
 
   public AllSpansWalker() {
-    visitedSpans = new HashSet<Span>();
+    visitedSpans = new HashSet<>();
   }
 
   /**
@@ -47,15 +47,12 @@ public class AllSpansWalker {
    * implementation to do the walking
    */
   public void walk(HGNode node, final WalkerFunction walker) {
-    new ForestWalker().walk(node, new org.apache.joshua.decoder.hypergraph.WalkerFunction() {
-      @Override
-      public void apply(HGNode node, int index) {
-        if (node != null) {
-          Span span = new Span(node.i, node.j);
-          if (!visitedSpans.contains(span)) {
-            walker.apply(node, 0);
-            visitedSpans.add(span);
-          }
+    new ForestWalker().walk(node, (node1, index) -> {
+      if (node1 != null) {
+        Span span = new Span(node1.i, node1.j);
+        if (!visitedSpans.contains(span)) {
+          walker.apply(node1, 0);
+          visitedSpans.add(span);
         }
       }
     });

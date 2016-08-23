@@ -30,13 +30,13 @@ public class PennTreebankReader {
 
   static class TreeCollection extends AbstractCollection<Tree> {
 
-    List<File> files;
-    Charset charset;
+    final List<File> files;
+    final Charset charset;
 
     static class TreeIteratorIterator implements Iterator<Iterator<Tree>> {
-      Iterator<File> fileIterator;
+      final Iterator<File> fileIterator;
       Iterator<Tree> nextTreeIterator;
-      Charset charset;
+      final Charset charset;
 
       public boolean hasNext() {
         return nextTreeIterator != null;
@@ -75,7 +75,7 @@ public class PennTreebankReader {
     }
 
     public Iterator<Tree> iterator() {
-      return new ConcatenationIterator<Tree>(new TreeIteratorIterator(files, this.charset));
+      return new ConcatenationIterator<>(new TreeIteratorIterator(files, this.charset));
     }
 
     public int size() {
@@ -91,7 +91,7 @@ public class PennTreebankReader {
     @SuppressWarnings("unused")
     private List<File> getFilesUnder(String path, FileFilter fileFilter) {
       File root = new File(path);
-      List<File> files = new ArrayList<File>();
+      List<File> files = new ArrayList<>();
       addFilesUnder(root, files, fileFilter);
       return files;
     }
@@ -105,15 +105,14 @@ public class PennTreebankReader {
       }
       if (root.isDirectory()) {
         File[] children = root.listFiles();
-        for (int i = 0; i < children.length; i++) {
-          File child = children[i];
+        for (File child : children) {
           addFilesUnder(child, files, fileFilter);
         }
       }
     }
 
     public TreeCollection(String file) throws FileNotFoundException, IOException {
-      this.files = new ArrayList<File>();
+      this.files = new ArrayList<>();
       this.files.add(new File(file));
       this.charset = Charset.defaultCharset();
     }

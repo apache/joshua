@@ -31,7 +31,7 @@ import org.apache.joshua.corpus.Vocabulary;
  */
 public class HyperGraphPruning extends TrivialInsideOutside {
 
-  HashMap<HGNode, Boolean> processedNodesTbl = new HashMap<HGNode, Boolean>();
+  final HashMap<HGNode, Boolean> processedNodesTbl = new HashMap<>();
   double bestLogProb;// viterbi unnormalized log prob in the hypergraph
 
   boolean ViterbiPruning = false;// Viterbi or Posterior pruning
@@ -147,10 +147,9 @@ public class HyperGraphPruning extends TrivialInsideOutside {
 
     // ### still survive, recursive call all my ant-items
     if (null != dt.getTailNodes()) {
-      for (HGNode ant_it : dt.getTailNodes()) {
-        pruningNode(ant_it); // recursive call on each ant item, note: the ant_it will not be pruned
-                             // as I need it
-      }
+      // recursive call on each ant item, note: the ant_it will not be pruned
+      // as I need it
+      dt.getTailNodes().forEach(this::pruningNode);
     }
 
     // ### if get to here, then survive; remember: if I survive, then my upper-item must survive

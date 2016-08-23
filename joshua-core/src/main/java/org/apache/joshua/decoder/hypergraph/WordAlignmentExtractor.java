@@ -38,7 +38,7 @@ import org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationVisitor;
  */
 public class WordAlignmentExtractor implements WalkerFunction, DerivationVisitor {
   
-  private final Stack<WordAlignmentState> stack = new Stack<WordAlignmentState>();
+  private final Stack<WordAlignmentState> stack = new Stack<>();
 
   /**
    * Merges a state with the top of the stack if applicable or places it on top of the stack.

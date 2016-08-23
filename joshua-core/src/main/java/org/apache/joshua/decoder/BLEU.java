@@ -69,7 +69,7 @@ public class BLEU {
 
     // === hyp tbl
     String[] hypWrds = Regex.spaces.split(hypSent);
-    HashMap<String, Integer> hypNgramTbl = new HashMap<String, Integer>();
+    HashMap<String, Integer> hypNgramTbl = new HashMap<>();
     Ngram.getNgrams(hypNgramTbl, 1, bleuOrder, hypWrds);
     return computeSentenceBleu(effectiveRefLen, maxRefCountTbl, hypWrds.length, hypNgramTbl,
         doNgramClip, bleuOrder);
@@ -78,14 +78,14 @@ public class BLEU {
   public static float computeEffectiveLen(int[] refLens, boolean useShortestRef) {
     if (useShortestRef) {
       int res = Integer.MAX_VALUE;
-      for (int i = 0; i < refLens.length; i++)
-        if (refLens[i] < res)
-          res = refLens[i];
+      for (int refLen : refLens)
+        if (refLen < res)
+          res = refLen;
       return res;
     } else {// default is average length
       float res = 0;
-      for (int i = 0; i < refLens.length; i++)
-        res += refLens[i];
+      for (int refLen : refLens)
+        res += refLen;
       return res * 1.0f / refLens.length;
     }
   }
@@ -98,13 +98,13 @@ public class BLEU {
    * */
   public static HashMap<String, Integer> constructMaxRefCountTable(String[] refSents, int bleuOrder) {
 
-    List<HashMap<String, Integer>> listRefNgramTbl = new ArrayList<HashMap<String, Integer>>();
-    for (int i = 0; i < refSents.length; i++) {
+    List<HashMap<String, Integer>> listRefNgramTbl = new ArrayList<>();
+    for (String refSent : refSents) {
       // if(refSents[i]==null){System.out.println("null ref sent"); System.exit(1);}
       // String[] refWords = refSents[i].split("\\s+");
-      String[] refWords = Regex.spaces.split(refSents[i]);
+      String[] refWords = Regex.spaces.split(refSent);
 
-      HashMap<String, Integer> refNgramTbl = new HashMap<String, Integer>();
+      HashMap<String, Integer> refNgramTbl = new HashMap<>();
       Ngram.getNgrams(refNgramTbl, 1, bleuOrder, refWords);
       listRefNgramTbl.add(refNgramTbl);
     }
@@ -120,7 +120,7 @@ public class BLEU {
   public static HashMap<String, Integer> computeMaxRefCountTbl(
       List<HashMap<String, Integer>> listRefNgramTbl) {
 
-    HashMap<String, Integer> merged = new HashMap<String, Integer>();
+    HashMap<String, Integer> merged = new HashMap<>();
 
     // == get merged key set
     for (HashMap<String, Integer> tbl : listRefNgramTbl) {
@@ -180,9 +180,9 @@ public class BLEU {
       int bleuOrder) {
     String[] refWrds = Regex.spaces.split(refSent);
     String[] hypWrds = Regex.spaces.split(hypSent);
-    HashMap<String, Integer> refNgramTbl = new HashMap<String, Integer>();
+    HashMap<String, Integer> refNgramTbl = new HashMap<>();
     Ngram.getNgrams(refNgramTbl, 1, bleuOrder, refWrds);
-    HashMap<String, Integer> hypNgramTbl = new HashMap<String, Integer>();
+    HashMap<String, Integer> hypNgramTbl = new HashMap<>();
     Ngram.getNgrams(hypNgramTbl, 1, bleuOrder, hypWrds);
     return computeSentenceBleu(refWrds.length, refNgramTbl, hypWrds.length, hypNgramTbl,
         doNgramClip, bleuOrder);
@@ -237,7 +237,7 @@ public class BLEU {
   }
 
   public static HashMap<String, Integer> constructNgramTable(String sentence, int bleuOrder) {
-    HashMap<String, Integer> ngramTable = new HashMap<String, Integer>();
+    HashMap<String, Integer> ngramTable = new HashMap<>();
     String[] refWrds = Regex.spaces.split(sentence);
     Ngram.getNgrams(ngramTable, 1, bleuOrder, refWrds);
     return ngramTable;
@@ -371,22 +371,22 @@ public class BLEU {
 
 //      System.err.println(String.format("compute(%s)", rule));
       
-      ArrayList<Integer> currentNgram = new ArrayList<Integer>();
+      ArrayList<Integer> currentNgram = new ArrayList<>();
       int boundary = -1;
       int tailIndex = -1;
-      for (int i = 0; i < symbols.length; i++) {
-        if (symbols[i] < 0) {
+      for (int symbol : symbols) {
+        if (symbol < 0) {
           tailIndex++;
 
           NgramDPState ngramState = null;
           try {
             ngramState = (NgramDPState) edge.getTailNodes().get(tailIndex).getDPState(0);
           } catch (ClassCastException e) {
-            throw new RuntimeException(String.format(
-                "* FATAL: first state needs to be NgramDPState (found %s)", edge.getTailNodes()
-                    .get(tailIndex).getDPState(0).getClass()));
+            throw new RuntimeException(String
+                .format("* FATAL: first state needs to be NgramDPState (found %s)",
+                    edge.getTailNodes().get(tailIndex).getDPState(0).getClass()));
           }
-          
+
           // Compute ngrams overlapping with left context of tail node
           if (currentNgram.size() > 0) {
             boundary = currentNgram.size();
@@ -394,15 +394,15 @@ public class BLEU {
               currentNgram.add(id);
 
             // Compute the BLEU statistics
-            BLEU.Stats partStats = computeOverDivide(currentNgram, references, boundary);
+            Stats partStats = computeOverDivide(currentNgram, references, boundary);
             stats.add(partStats);
-            
-//            System.err.println("    " + Vocabulary.getWords(ngramState.getLeftLMStateWords()));
+
+            //            System.err.println("    " + Vocabulary.getWords(ngramState.getLeftLMStateWords()));
 
             currentNgram.clear();
           }
-          
-//          System.err.println("    " + Vocabulary.getWords(ngramState.getRightLMStateWords()));
+
+          //          System.err.println("    " + Vocabulary.getWords(ngramState.getRightLMStateWords()));
 
           // Accumulate ngrams from right context of tail node
           for (int id : ngramState.getRightLMStateWords())
@@ -411,13 +411,13 @@ public class BLEU {
           boundary = currentNgram.size();
 
         } else { // terminal symbol
-          currentNgram.add(symbols[i]);
+          currentNgram.add(symbol);
           stats.len++;
 
-//          System.err.println("    " + Vocabulary.word(symbols[i]));
-          
+          //          System.err.println("    " + Vocabulary.word(symbols[i]));
+
           if (boundary != -1) {
-            BLEU.Stats partStats = computeOverDivide(currentNgram, references, boundary);
+            Stats partStats = computeOverDivide(currentNgram, references, boundary);
             stats.add(partStats);
 
             // Shift off the context from the nonterminal's righthand side
@@ -433,7 +433,7 @@ public class BLEU {
          * nonterminal's righthand context and from the rule
          */
         if (currentNgram.size() > 0 && currentNgram.size() != boundary) { // skip cases (a) and (b)
-          BLEU.Stats partStats = computeOverDivide(currentNgram, references, boundary);
+          Stats partStats = computeOverDivide(currentNgram, references, boundary);
           stats.add(partStats);
         }
       }
@@ -456,7 +456,7 @@ public class BLEU {
     
 //    System.err.print(String.format("      BOUNDARY(%s, %d)", Vocabulary.getWords(ngram), boundary));
 
-    HashMap<String, Integer> boundaryNgrams = new HashMap<String, Integer>();
+    HashMap<String, Integer> boundaryNgrams = new HashMap<>();
     for (int width = 1; width <= Math.min(maxOrder, ngram.size()); width++) {
       for (int i = 0; i < ngram.size() - width + 1; i++) {
         int j = i + width;
@@ -501,10 +501,10 @@ public class BLEU {
     }
 
     private void fill(String[] references) {
-      ngramCounts = new HashMap<String, Integer>();
+      ngramCounts = new HashMap<>();
       reflen = 0.0f;
-      for (int i = 0; i < references.length; i++) {
-        String[] ref = references[i].split(" ");
+      for (String reference : references) {
+        String[] ref = reference.split(" ");
         Ngram.getNgrams(ngramCounts, 1, maxOrder, ref);
         reflen += ref.length;
       }
@@ -536,7 +536,7 @@ public class BLEU {
    * Accumulated sufficient statistics for computing BLEU.
    */
   public static class Stats {
-    public int[] counts;
+    public final int[] counts;
     public float len;
     public float reflen;
 

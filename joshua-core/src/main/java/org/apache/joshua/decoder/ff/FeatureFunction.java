@@ -92,7 +92,7 @@ public abstract class FeatureFunction {
   protected final FeatureVector weights;
 
   /* The config */
-  protected JoshuaConfiguration config;
+  protected final JoshuaConfiguration config;
 
   public String getName() {
     return name;
@@ -259,13 +259,13 @@ public abstract class FeatureFunction {
    * @return A hash with the keys and the values of the string
    */
   public static HashMap<String, String> parseArgs(String[] args) {
-    HashMap<String, String> parsedArgs = new HashMap<String, String>();
+    HashMap<String, String> parsedArgs = new HashMap<>();
     boolean lookingForValue = false;
     String currentKey = null;
-    for (int i = 0; i < args.length; i++) {
+    for (String arg : args) {
 
       Pattern argKeyPattern = Pattern.compile("^-[a-zA-Z]\\S+");
-      Matcher argKey = argKeyPattern.matcher(args[i]);
+      Matcher argKey = argKeyPattern.matcher(arg);
       if (argKey.find()) {
         // This is a key
         // First check to see if there is a key that is waiting to be written
@@ -274,12 +274,12 @@ public abstract class FeatureFunction {
           parsedArgs.put(currentKey, "");
         }
         // Now store the new key and look for its value
-        currentKey = args[i].substring(1);
+        currentKey = arg.substring(1);
         lookingForValue = true;
       } else {
         // This is a value
         if (lookingForValue) {
-          parsedArgs.put(currentKey, args[i]);
+          parsedArgs.put(currentKey, arg);
           lookingForValue = false;
         }
       }
@@ -321,7 +321,7 @@ public abstract class FeatureFunction {
   }
 
   public class FeatureAccumulator implements Accumulator {
-    private FeatureVector features;
+    private final FeatureVector features;
 
     public FeatureAccumulator() {
       this.features = new FeatureVector(10);

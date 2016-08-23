@@ -81,7 +81,7 @@ public class HyperGraph {
       this.hg = hg;
       this.hg.numNodes = 0;
       this.hg.numEdges = 0;
-      this.nodesVisited = new HashSet<HGNode>();
+      this.nodesVisited = new HashSet<>();
     }
     
     @Override
@@ -102,12 +102,12 @@ public class HyperGraph {
     private List<FeatureFunction> model = null;
     private PrintWriter out = null;
     
-    private HashMap<HGNode, Integer> nodeMap;
+    private final HashMap<HGNode, Integer> nodeMap;
     
     public HyperGraphDumper(PrintWriter out, List<FeatureFunction> model) {
       this.out = out;
       this.model = model;
-      this.nodeMap = new HashMap<HGNode, Integer>();
+      this.nodeMap = new HashMap<>();
     }
     
     @Override
@@ -117,21 +117,19 @@ public class HyperGraph {
 
         if (node.hyperedges.size() != 0 && node.bestHyperedge.getRule() != null) {
           out.println(this.node_number);
-          for (HyperEdge e: node.hyperedges) {
-            if (e.getRule() != null) {
-              for (int id: e.getRule().getTarget()) {
-                if (id < 0) {
-                  out.print(String.format("[%d] ", nodeMap.get(e.getTailNodes().get(-id-1))));
-                } else {
-                  out.print(String.format("%s ", Vocabulary.word(id)));
-                }
+          node.hyperedges.stream().filter(e -> e.getRule() != null).forEach(e -> {
+            for (int id : e.getRule().getTarget()) {
+              if (id < 0) {
+                out.print(String.format("[%d] ", nodeMap.get(e.getTailNodes().get(-id - 1))));
+              } else {
+                out.print(String.format("%s ", Vocabulary.word(id)));
               }
-
-              FeatureVector edgeFeatures = ComputeNodeResult.computeTransitionFeatures(
-                  model, e, node.i, node.j, sentence);
-              out.println(String.format("||| %s", edgeFeatures));
             }
-          }
+
+            FeatureVector edgeFeatures = ComputeNodeResult
+                .computeTransitionFeatures(model, e, node.i, node.j, sentence);
+            out.println(String.format("||| %s", edgeFeatures));
+          });
         }
         
         this.node_number++;

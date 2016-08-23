@@ -43,7 +43,7 @@ import org.apache.joshua.decoder.segment_file.Sentence;
 public class PhrasePenalty extends StatelessFF {
 
   private final OwnerId owner;
-  private float value = 1.0f;
+  private final float value = 1.0f;
   
   public PhrasePenalty(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, "PhrasePenalty", args, config);

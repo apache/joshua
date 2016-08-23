@@ -37,7 +37,9 @@
 
   <properties>
     <slf4j.version>1.7.21</slf4j.version>
+    <findbugs.version>3.0.4</findbugs.version>
   </properties>
+
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -161,5 +163,4 @@
       </plugins>
     </pluginManagement>
   </build>
-
 </project>

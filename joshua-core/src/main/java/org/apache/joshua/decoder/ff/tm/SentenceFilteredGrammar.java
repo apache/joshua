@@ -40,10 +40,10 @@ public class SentenceFilteredGrammar extends MemoryBasedBatchGrammar {
 
   private static final Logger LOG = LoggerFactory.getLogger(SentenceFilteredGrammar.class);
 
-  private AbstractGrammar baseGrammar;
-  private SentenceFilteredTrie filteredTrie;
-  private int[] tokens;
-  private Sentence sentence;
+  private final AbstractGrammar baseGrammar;
+  private final SentenceFilteredTrie filteredTrie;
+  private final int[] tokens;
+  private final Sentence sentence;
 
   /**
    * Construct a new sentence-filtered grammar. The main work is done in the enclosed trie (obtained
@@ -283,7 +283,7 @@ public class SentenceFilteredGrammar extends MemoryBasedBatchGrammar {
   public class SentenceFilteredTrie implements Trie {
 
     /* The underlying unfiltered trie node. */
-    private Trie unfilteredTrieNode;
+    private final Trie unfilteredTrieNode;
 
     /* The child nodes in the filtered trie. */
     private HashMap<Integer, SentenceFilteredTrie> children = null;
@@ -295,7 +295,7 @@ public class SentenceFilteredGrammar extends MemoryBasedBatchGrammar {
      */
     public SentenceFilteredTrie(Trie unfilteredTrieNode) {
       this.unfilteredTrieNode = unfilteredTrieNode;
-      this.children = new HashMap<Integer, SentenceFilteredTrie>();
+      this.children = new HashMap<>();
     }
 
     @Override

@@ -151,6 +151,9 @@ public class Decoder {
     this.joshuaConfiguration = joshuaConfiguration;
     this.threadPool = new ArrayBlockingQueue<DecoderThread>(
         this.joshuaConfiguration.num_parallel_decoders, true);
+    this.customPhraseTable = null;
+    
+    resetGlobalState();
   }
 
   /**
@@ -360,7 +363,7 @@ public class Decoder {
       try {
         for (String line : reader) {
           line = line.trim();
-          if (Regex.commentOrEmptyLine.matches(line) || line.indexOf("=") != -1) {
+          if (Regex.commentOrEmptyLine.matches(line) || line.contains("=")) {
             // comment, empty line, or parameter lines: just copy
             writer.write(line);
             writer.newLine();
@@ -450,13 +453,12 @@ public class Decoder {
 
         /* Sanity check for old-style unsupported feature invocations. */
         if (pair.length != 2) {
-          StringBuilder errMsg = new StringBuilder();
-          errMsg.append("FATAL: Invalid feature weight line found in config file.\n");
-          errMsg.append(String.format("The line was '%s'\n", pairStr));
-          errMsg.append("You might be using an old version of the config file that is no longer supported\n");
-          errMsg.append("Check joshua.apache.org or email dev@joshua.apache.org for help\n");
-          errMsg.append("Code = " + 17);
-          throw new RuntimeException(errMsg.toString());
+          String errMsg = "FATAL: Invalid feature weight line found in config file.\n" +
+              String.format("The line was '%s'\n", pairStr) +
+              "You might be using an old version of the config file that is no longer supported\n" +
+              "Check joshua.apache.org or email dev@joshua.apache.org for help\n" +
+              "Code = " + 17;
+          throw new RuntimeException(errMsg);
         }
 
         weights.add(hashFeature(pair[0]), Float.parseFloat(pair[1]));
@@ -598,7 +600,7 @@ public class Decoder {
     }
 
     /* Now create a feature function for each owner */
-    final Set<OwnerId> ownersSeen = new HashSet<OwnerId>();
+    final Set<OwnerId> ownersSeen = new HashSet<>();
 
     for (Grammar grammar: this.grammars) {
       OwnerId owner = grammar.getOwner();

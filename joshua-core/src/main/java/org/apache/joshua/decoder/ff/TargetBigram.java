@@ -79,7 +79,7 @@ public class TargetBigram extends StatefulFF {
    * @param filename
    */
   private void loadVocab(String filename) {
-    this.vocab = new HashSet<String>();
+    this.vocab = new HashSet<>();
     this.vocab.add("<s>");
     this.vocab.add("</s>");
     try {
@@ -111,10 +111,8 @@ public class TargetBigram extends StatefulFF {
     int left = -1;
     int right = -1;
 
-    List<String> currentNgram = new LinkedList<String>();
-    for (int c = 0; c < enWords.length; c++) {
-      int curID = enWords[c];
-
+    List<String> currentNgram = new LinkedList<>();
+    for (int curID : enWords) {
       if (FormatUtils.isNonterminal(curID)) {
         int index = -(curID + 1);
         NgramDPState state = (NgramDPState) tailNodes.get(index).getDPState(stateIndex);
@@ -153,9 +151,8 @@ public class TargetBigram extends StatefulFF {
       }
     }
 
-    NgramDPState state = new NgramDPState(new int[] { left }, new int[] { right });
     //    System.err.println(String.format("RULE %s -> state %s", rule.getRuleString(), state));
-    return state;
+    return new NgramDPState(new int[] { left }, new int[] { right });
   }
 
   /**
@@ -210,7 +207,7 @@ public class TargetBigram extends StatefulFF {
   private String join(List<String> list) {
     StringBuilder sb = new StringBuilder();
     for (String item : list) {
-      sb.append(item.toString() + "_");
+      sb.append(item).append("_");
     }
 
     return sb.substring(0, sb.length() - 1);

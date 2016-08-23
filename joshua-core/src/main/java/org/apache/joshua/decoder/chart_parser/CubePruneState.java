@@ -30,10 +30,10 @@ import org.apache.joshua.decoder.ff.tm.Rule;
 // CubePruneState class
 // ===============================================================
 public class CubePruneState implements Comparable<CubePruneState> {
-  int[] ranks;
-  ComputeNodeResult computeNodeResult;
-  List<HGNode> antNodes;
-  List<Rule> rules;
+  final int[] ranks;
+  final ComputeNodeResult computeNodeResult;
+  final List<HGNode> antNodes;
+  final List<Rule> rules;
   private DotNode dotNode;
 
   public CubePruneState(ComputeNodeResult score, int[] ranks, List<Rule> rules, List<HGNode> antecedents, DotNode dotNode) {
@@ -58,10 +58,10 @@ public class CubePruneState implements Comparable<CubePruneState> {
   }
 
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("STATE ||| rule=" + getRule() + " inside cost = " + computeNodeResult.getViterbiCost()
-        + " estimate = " + computeNodeResult.getPruningEstimate());
-    return sb.toString();
+    String sb = "STATE ||| rule=" + getRule() + " inside cost = " +
+        computeNodeResult.getViterbiCost() + " estimate = " +
+        computeNodeResult.getPruningEstimate();
+    return sb;
   }
 
   public void setDotNode(DotNode node) {
@@ -83,10 +83,8 @@ public class CubePruneState implements Comparable<CubePruneState> {
     for (int i = 0; i < ranks.length; i++)
       if (state.ranks[i] != ranks[i])
         return false;
-    if (getDotNode() != state.getDotNode())
-      return false;
+    return getDotNode() == state.getDotNode();
 
-    return true;
   }
 
   public int hashCode() {

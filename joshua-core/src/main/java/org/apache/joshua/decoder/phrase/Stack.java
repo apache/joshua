@@ -22,13 +22,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
 import org.apache.joshua.decoder.JoshuaConfiguration;
-import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
-import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,34 +40,31 @@ public class Stack extends ArrayList<Hypothesis> {
 
   private static final long serialVersionUID = 7885252799032416068L;
 
-  private HashMap<Coverage, ArrayList<Hypothesis>> coverages;
+  private final HashMap<Coverage, ArrayList<Hypothesis>> coverages;
   
   private Sentence sentence;
-  private List<FeatureFunction> featureFunctions;
   private JoshuaConfiguration config;
 
   /* The list of states we've already visited. */
-  private HashSet<Candidate> visitedStates;
+  private final HashSet<Candidate> visitedStates;
   
   /* A list of candidates sorted for consideration for entry to the chart (for cube pruning) */
-  private PriorityQueue<Candidate> candidates;
+  private final PriorityQueue<Candidate> candidates;
   
   /* Short-circuits adding a cube-prune state more than once */
-  private HashMap<Hypothesis, Hypothesis> deduper;
+  private final HashMap<Hypothesis, Hypothesis> deduper;
   
   /**
    * Create a new stack. Stacks are organized one for each number of source words that are covered.
    * 
-   * @param featureFunctions {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    * @param sentence input for a {@link org.apache.joshua.lattice.Lattice}
    * @param config populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
-  public Stack(List<FeatureFunction> featureFunctions, Sentence sentence, JoshuaConfiguration config) {
-    this.featureFunctions = featureFunctions;
+  public Stack(Sentence sentence, JoshuaConfiguration config) {
     this.sentence = sentence;
     this.config = config;
     
-    this.candidates = new PriorityQueue<Candidate>(1, new CandidateComparator());
+    this.candidates = new PriorityQueue<Candidate>(1);
     this.coverages = new HashMap<Coverage, ArrayList<Hypothesis>>();
     this.visitedStates = new HashSet<Candidate>();
     this.deduper = new HashMap<Hypothesis,Hypothesis>();
@@ -86,7 +80,7 @@ public class Stack extends ArrayList<Hypothesis> {
   public boolean add(Hypothesis hyp) {
     
     if (! coverages.containsKey((hyp.getCoverage())))
-      coverages.put(hyp.getCoverage(), new ArrayList<Hypothesis>()); 
+      coverages.put(hyp.getCoverage(), new ArrayList<>());
     coverages.get(hyp.getCoverage()).add(hyp);
     
     return super.add(hyp);
@@ -149,22 +143,24 @@ public class Stack extends ArrayList<Hypothesis> {
 
     // Constrained decoding
     if (sentence.target() != null) {
+      throw new RuntimeException("* FATAL! Constrained decoding no longer works for the new phrase format");
+      // TODO: fix constrained decoding
+
+      /*
       String oldWords = cand.getHypothesis().bestHyperedge.getRule().getTargetWords().replace("[X,1] ",  "");
       String newWords = cand.getRule().getTargetWords().replace("[X,1] ",  "");
-          
+
       // If the string is not found in the target sentence, explore the cube neighbors
-      if (sentence.fullTarget().indexOf(oldWords + " " + newWords) == -1) {
+      if (!sentence.fullTarget().contains(oldWords + " " + newWords)) {
         Candidate next = cand.extendPhrase();
         if (next != null)
           addCandidate(next); 
         return;
       }
+      */
     }
 
     // TODO: sourcepath
-    ComputeNodeResult result = new ComputeNodeResult(this.featureFunctions, cand.getRule(),
-        cand.getTailNodes(), -1, cand.getSpan().end, null, this.sentence);
-    cand.setResult(result);
     
     candidates.add(cand);
   }
@@ -199,6 +195,7 @@ public class Stack extends ArrayList<Hypothesis> {
   /**
    * Adds a popped candidate to the chart / main stack. This is a candidate we have decided to
    * keep around.
+   * 
    * @param complete a completely-initialized translation {@link org.apache.joshua.decoder.phrase.Candidate}
    * 
    */
@@ -218,12 +215,12 @@ public class Stack extends ArrayList<Hypothesis> {
 
     if (LOG.isDebugEnabled()) {
       LOG.debug("{} from ( ... {} )", taskName, complete.getHypothesis().getRule().getTargetWords());
-      LOG.debug("        base score {}", complete.getResult().getBaseCost());
+      LOG.debug("        base score {}", complete.computeResult().getBaseCost());
       LOG.debug("        covering {}-{}", complete.getSpan().start - 1, complete.getSpan().end - 2);
       LOG.debug("        translated as: {}", complete.getRule().getTargetWords());
       LOG.debug("        score {} + future cost {} = {}",
-          complete.getResult().getTransitionCost(), complete.getFutureEstimate(),
-          complete.getResult().getTransitionCost() + complete.getFutureEstimate());
+          complete.computeResult().getTransitionCost(), complete.getFutureEstimate(),
+          complete.computeResult().getTransitionCost() + complete.getFutureEstimate());
     }
   }
 }

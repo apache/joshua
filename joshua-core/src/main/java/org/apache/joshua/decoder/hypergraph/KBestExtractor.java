@@ -98,7 +98,7 @@ import org.apache.joshua.util.FormatUtils;
 public class KBestExtractor {
   private final JoshuaConfiguration joshuaConfiguration;
   private final String outputFormat;
-  private final HashMap<HGNode, VirtualNode> virtualNodesTable = new HashMap<HGNode, VirtualNode>();
+  private final HashMap<HGNode, VirtualNode> virtualNodesTable = new HashMap<>();
 
   // static final String rootSym = JoshuaConfiguration.goal_symbol;
   static final String rootSym = "ROOT";
@@ -106,7 +106,7 @@ public class KBestExtractor {
 
   private enum Side {
     SOURCE, TARGET
-  };
+  }
 
   /* Whether to extract only unique strings */
   private final boolean extractUniqueNbest;
@@ -387,7 +387,7 @@ public class KBestExtractor {
     HGNode node = null;
 
     // sorted ArrayList of DerivationState, in the paper is: D(^) [v]
-    public List<DerivationState> nbests = new ArrayList<DerivationState>();
+    public final List<DerivationState> nbests = new ArrayList<>();
 
     // remember frontier states, best-first; in the paper, it is called cand[v]
     private PriorityQueue<DerivationState> candHeap = null;
@@ -492,13 +492,11 @@ public class KBestExtractor {
       /* For each tail node, create a new state candidate by "sliding" that item one position. */
       for (int i = 0; i < previousState.edge.getTailNodes().size(); i++) {
         /* Create a new virtual node that is a copy of the current node */
-        HGNode tailNode = (HGNode) previousState.edge.getTailNodes().get(i);
+        HGNode tailNode = previousState.edge.getTailNodes().get(i);
         VirtualNode virtualTailNode = kbestExtractor.getVirtualNode(tailNode);
         // Copy over the ranks.
         int[] newRanks = new int[previousState.ranks.length];
-        for (int c = 0; c < newRanks.length; c++) {
-          newRanks[c] = previousState.ranks[c];
-        }
+        System.arraycopy(previousState.ranks, 0, newRanks, 0, newRanks.length);
         // Now increment/slide the current tail node by one
         newRanks[i] = previousState.ranks[i] + 1;
 
@@ -540,7 +538,7 @@ public class KBestExtractor {
      */
     private void getCandidates(KBestExtractor kbestExtractor) {
       /* The list of candidates extending from this (virtual) node. */
-      candHeap = new PriorityQueue<DerivationState>(11, new DerivationStateComparator());
+      candHeap = new PriorityQueue<>(11, new DerivationStateComparator());
 
       /*
        * When exploring the cube frontier, there are multiple paths to each candidate. For example,
@@ -551,14 +549,14 @@ public class KBestExtractor {
        * TODO: these should really be keyed on the states themselves instead of a string
        * representation of them.
        */
-      derivationTable = new HashSet<DerivationState>();
+      derivationTable = new HashSet<>();
 
       /*
        * A Joshua configuration option allows the decoder to output only unique strings. In that
        * case, we keep an list of the frontiers of derivation states extending from this node.
        */
       if (extractUniqueNbest) {
-        uniqueStringsTable = new HashSet<String>();
+        uniqueStringsTable = new HashSet<>();
       }
 
       /*
@@ -631,7 +629,7 @@ public class KBestExtractor {
           childVirtualNode.lazyKBestExtractOnNode(kbestExtractor, ranks[i]);
         }
       }
-      cost = (float) hyperEdge.getBestDerivationScore();
+      cost = hyperEdge.getBestDerivationScore();
 
       DerivationState state = new DerivationState(parentNode, hyperEdge, ranks, cost, edgePos);
       if (joshuaConfiguration.rescoreForest)
@@ -639,7 +637,7 @@ public class KBestExtractor {
 
       return state;
     }
-  };
+  }
 
   /**
    * A DerivationState describes which path to follow through the hypergraph. For example, it
@@ -653,22 +651,22 @@ public class KBestExtractor {
   // each DerivationState roughly corresponds to a hypothesis
   public class DerivationState {
     /* The edge ("e" in the paper) */
-    public HyperEdge edge;
+    public final HyperEdge edge;
 
     /* The edge's parent node */
-    public HGNode parentNode;
+    public final HGNode parentNode;
 
     /*
      * This state's position in its parent node's list of incoming hyperedges (used in signature
      * calculation)
      */
-    public int edgePos;
+    public final int edgePos;
 
     /*
      * The rank item to select from each of the incoming tail nodes ("j" in the paper, an ArrayList
      * of size |e|)
      */
-    public int[] ranks;
+    public final int[] ranks;
 
     /*
      * The cost of the hypothesis, including a weighted BLEU score, if any.
@@ -748,9 +746,9 @@ public class KBestExtractor {
           Vocabulary.word(parentNode.lhs), parentNode.i, parentNode.j, edgePos));
       sb.append("ranks=[ ");
       if (ranks != null)
-        for (int i = 0; i < ranks.length; i++)
-          sb.append(ranks[i] + " ");
-      sb.append("] ||| " + String.format("%.5f ]]", cost));
+        for (int rank : ranks)
+          sb.append(rank + " ");
+      sb.append("] ||| ").append(String.format("%.5f ]]", cost));
       return sb.toString();
     }
 
@@ -1004,7 +1002,7 @@ public class KBestExtractor {
    */
   public class DerivationExtractor implements DerivationVisitor {
 
-    StringBuffer sb;
+    final StringBuffer sb;
 
     public DerivationExtractor() {
       sb = new StringBuffer();
@@ -1032,13 +1030,12 @@ public class KBestExtractor {
             + Vocabulary.getWords(rule.getSource()) + " /// " + rule.getTargetWords());
         sb.append(" |||");
         for (DPState dpState : state.parentNode.getDPStates()) {
-          sb.append(" " + dpState);
+          sb.append(" ").append(dpState);
         }
-        sb.append(" ||| " + transitionFeatures.textFormat());
-        sb.append(" ||| " + weights.innerProduct(transitionFeatures));
+        sb.append(" ||| ").append(transitionFeatures);
+        sb.append(" ||| ").append(weights.innerProduct(transitionFeatures));
         if (rule.getAlignment() != null)
-          sb.append(" ||| " + Arrays.toString(rule.getAlignment()));
-        sb.append(" ||| " + OwnerMap.getOwner(rule.getOwner()));
+          sb.append(" ||| ").append(Arrays.toString(rule.getAlignment()));
         sb.append("\n");
       }
     }

@@ -57,7 +57,7 @@ public class NgramDPState extends DPState {
     return right;
   }
 
-  private final void assertLengths() {
+  private void assertLengths() {
     if (left.length != right.length)
       throw new RuntimeException("Unequal lengths in left and right state: < "
           + Vocabulary.getWords(left) + " | " + Vocabulary.getWords(right) + " >");
@@ -90,10 +90,10 @@ public class NgramDPState extends DPState {
     StringBuilder sb = new StringBuilder();
     sb.append("<");
     for (int id : left)
-      sb.append(" " + Vocabulary.word(id));
+      sb.append(" ").append(Vocabulary.word(id));
     sb.append(" |");
     for (int id : right)
-      sb.append(" " + Vocabulary.word(id));
+      sb.append(" ").append(Vocabulary.word(id));
     sb.append(" >");
     return sb.toString();
   }
