@@ -18,8 +18,8 @@
  */
 package org.apache.joshua.decoder.ff;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
@@ -32,52 +32,23 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
 
 /**
- * This feature handles the list of features that are found with grammar rules in the grammar file.
- * dense features that may be associated with the rules in a grammar file. The feature names of
- * these dense rules are a function of the phrase model owner. When the feature is loaded, it
- * queries the weights for the set of features that are active for this grammar, storing them in an
- * array.
+ * This feature handles the list of features that are stored with grammar rules in the grammar file.
+ * These are by convention bound to the PhraseModel feature function and will be prepended by the owner of this
+ * PhraseModel instance, i.e. 'p_e_given_f' will be hashed as '<owner>_p_e_given_f'.
+ * If multiple grammars exist and feature sharing is needed, one must implement a separate feature function for this.
  * 
  * @author Matt Post post@cs.jhu.edu
  * @author Zhifei Li zhifei.work@gmail.com
  */
 
 public class PhraseModel extends StatelessFF {
-
-  /* The owner of the grammar. */
-  private final OwnerId ownerID;
-  private final String owner;
-
-  private float[] phrase_weights = null;
+  
+  private final OwnerId owner;
 
   public PhraseModel(FeatureVector weights, String[] args, JoshuaConfiguration config, Grammar g) {
-    super(weights, "tm_", args, config);
-
-    // Store the owner and name
-    this.owner = parsedArgs.get("owner");
-    this.ownerID = OwnerMap.register(owner);
-    this.name = String.format("tm_%s", this.owner);
-
-    /*
-     * Determine the number of features by querying the example grammar that was passed in.
-     */
-    phrase_weights = new float[g.getNumDenseFeatures()];
-    for (int i = 0; i < phrase_weights.length; i++)
-      phrase_weights[i] = weights.getSparse(String.format("tm_%s_%d", owner, i));
-    
-  }
-
-  /**
-   * Just register a single weight, tm_OWNER, and use that to set its precomputed cost
-   */
-  @Override
-  public ArrayList<String> reportDenseFeatures(int index) {
-    denseFeatureIndex = index;
-
-    ArrayList<String> names = new ArrayList<String>();
-    for (int i = 0; i < phrase_weights.length; i++)
-      names.add(String.format("tm_%s_%d", owner, i));
-    return names;
+    // name of this feature is the owner of the grammar
+    super(weights, OwnerMap.getOwner(g.getOwner()), args, config);
+    this.owner = g.getOwner();
   }
 
   /**
@@ -86,45 +57,27 @@ public class PhraseModel extends StatelessFF {
    */
   @Override
   public float estimateCost(final Rule rule, Sentence sentence) {
-
-    if (rule != null && rule.getOwner().equals(ownerID)) {
-      if (rule.getPrecomputableCost() <= Float.NEGATIVE_INFINITY)
-        rule.setPrecomputableCost(phrase_weights, weights);
-
-      return rule.getPrecomputableCost();
+    // check if the rule belongs to this PhraseModel
+    if (rule != null && rule.getOwner().equals(owner)) {
+      return rule.getFeatureVector().innerProduct(weights);
     }
-
     return 0.0f;
   }
 
   /**
-   * Just chain to computeFeatures(rule), since this feature doesn't use the sourcePath or sentID. *
+   * Accumulates the cost of applying this rule if it belongs to the owner.
    */
   @Override
   public DPState compute(Rule rule, List<HGNode> tailNodes, int i, int j, SourcePath sourcePath,
       Sentence sentence, Accumulator acc) {
 
-    if (rule != null && rule.getOwner().equals(ownerID)) {
-      /*
-       * Here, we peak at the Accumulator object. If it's asking for scores, then we don't bother to
-       * add each feature, but rather compute the inner product and add *that*. This is totally
-       * cheating; the Accumulator is supposed to be a generic object. But without this cheat
-       */
-      if (rule.getPrecomputableCost() <= Float.NEGATIVE_INFINITY) {
-        // float score = rule.getFeatureVector().innerProduct(weights);
-        rule.setPrecomputableCost(phrase_weights, weights);
+    if (rule != null && rule.getOwner().equals(owner)) {
+      for (Entry<Integer, Float> entry : rule.getFeatureVector().entrySet()) {
+        final int featureId = entry.getKey();
+        final float featureValue = entry.getValue();
+        acc.add(featureId, featureValue);
       }
-      
-//      System.err.println(String.format("RULE = %s / %f", rule.getEnglishWords(), rule.getPrecomputableCost()));
-      for (int k = 0; k < phrase_weights.length; k++) {
-//        System.err.println(String.format("k = %d, denseFeatureIndex = %d, owner = %s, ownerID = %d", k, denseFeatureIndex, owner, ownerID));
-        acc.add(k + denseFeatureIndex, rule.getDenseFeature(k));
-      }
-      
-      for (String key: rule.getFeatureVector().keySet())
-        acc.add(key, rule.getFeatureVector().getSparse(key));
     }
-
     return null;
   }
 

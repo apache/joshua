@@ -18,12 +18,13 @@
  */
 package org.apache.joshua.decoder;
 
+import static java.util.Arrays.asList;
+import static org.apache.joshua.decoder.StructuredTranslationFactory.fromViterbiDerivation;
+import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
 import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiFeatures;
 import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiString;
 import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiWordAlignments;
-import static org.apache.joshua.decoder.StructuredTranslationFactory.fromViterbiDerivation;
 import static org.apache.joshua.util.FormatUtils.removeSentenceMarkers;
-import static java.util.Arrays.asList;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -110,10 +111,6 @@ public class Translation {
           
           long startTime = System.currentTimeMillis();
 
-          // We must put this weight as zero, otherwise we get an error when we try to retrieve it
-          // without checking
-          Decoder.weights.increment("BLEU", 0);
-
           if (joshuaConfiguration.topN == 0) {
 
             /* construct Viterbi output */
@@ -138,7 +135,7 @@ public class Translation {
 
             if (joshuaConfiguration.outputFormat.contains("%f")) {
               final FeatureVector features = getViterbiFeatures(hypergraph, featureFunctions, source);
-              translation = translation.replace("%f", joshuaConfiguration.moses ? features.mosesString() : features.toString());
+              translation = translation.replace("%f", features.textFormat());
             }
 
             out.write(translation);
@@ -151,10 +148,11 @@ public class Translation {
             kBestExtractor.lazyKBestExtractOnHG(hypergraph, joshuaConfiguration.topN, out);
 
             if (joshuaConfiguration.rescoreForest) {
-              Decoder.weights.increment("BLEU", joshuaConfiguration.rescoreForestWeight);
+              final int bleuFeatureHash = hashFeature("BLEU");
+              Decoder.weights.add(bleuFeatureHash, joshuaConfiguration.rescoreForestWeight);
               kBestExtractor.lazyKBestExtractOnHG(hypergraph, joshuaConfiguration.topN, out);
 
-              Decoder.weights.increment("BLEU", -joshuaConfiguration.rescoreForestWeight);
+              Decoder.weights.add(bleuFeatureHash, -joshuaConfiguration.rescoreForestWeight);
               kBestExtractor.lazyKBestExtractOnHG(hypergraph, joshuaConfiguration.topN, out);
             }
           }

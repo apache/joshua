@@ -18,13 +18,12 @@
  */
 package org.apache.joshua.decoder.ff;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
-import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.phrase.Hypothesis;
 import org.apache.joshua.decoder.segment_file.Sentence;
@@ -56,7 +55,7 @@ public final class WordPenalty extends StatelessFF {
       // TODO: this is an inefficient way to do this. Find a better way to not apply this rule
       // to start and stop glue rules when phrase-based decoding.
       if (isCky || (rule != Hypothesis.BEGIN_RULE && rule != Hypothesis.END_RULE)) {
-        acc.add(denseFeatureIndex, OMEGA * (rule.getEnglish().length - rule.getArity()));
+        acc.add(featureId, OMEGA * (rule.getTarget().length - rule.getArity()));
       }
     }
       
@@ -64,17 +63,9 @@ public final class WordPenalty extends StatelessFF {
   }
 
   @Override
-  public ArrayList<String> reportDenseFeatures(int index) {
-    denseFeatureIndex = index;
-    ArrayList<String> names = new ArrayList<>(1);
-    names.add(name);
-    return names;
-  }
-
-  @Override
   public float estimateCost(Rule rule, Sentence sentence) {
     if (rule != null)
-      return weights.getDense(denseFeatureIndex) * OMEGA * (rule.getEnglish().length - rule.getArity());
+      return weights.getOrDefault(featureId) * OMEGA * (rule.getTarget().length - rule.getArity());
     return 0.0f;
   }
 }

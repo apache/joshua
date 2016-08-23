@@ -18,6 +18,8 @@
  */
 package org.apache.joshua.decoder.ff.tm.hash_based;
 
+import static org.apache.joshua.decoder.ff.tm.GrammarReader.createReader;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,13 +29,11 @@ import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.JoshuaConfiguration.OOVItem;
 import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.tm.AbstractGrammar;
-import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
-import org.apache.joshua.decoder.ff.tm.GrammarReader;
 import org.apache.joshua.decoder.ff.tm.Trie;
 import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
-import org.apache.joshua.decoder.ff.tm.format.MosesFormatReader;
 import org.apache.joshua.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,15 +58,11 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
   /* The number of distinct source sides. */
   private int qtyRuleBins = 0;
 
-  private int numDenseFeatures = 0;
-
   /* The trie root. */
   private MemoryBasedTrie root = new MemoryBasedTrie();
 
   /* The file containing the grammar. */
   private String grammarFile;
-
-  private GrammarReader<Rule> modelReader;
 
   /**
    * Constructor used by Decoder mostly. Default spanLimit of 20
@@ -78,18 +74,6 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
     super(owner, config, spanLimit);
   }
 
-  /**
-   * Constructor to initialize a GrammarReader (unowned)
-   * @param reader the GrammarReader used for storing ASCII line-based grammars on disk.
-   * @param config a {@link org.apache.joshua.decoder.JoshuaConfiguration} object
-   * @param spanLimit the maximum span of the input grammar rule(s) can be applied to.
-   */
-  public MemoryBasedBatchGrammar(
-      final GrammarReader<Rule> reader, final JoshuaConfiguration config, final int spanLimit) {
-    super(OwnerMap.UNKNOWN_OWNER, config, spanLimit);
-    modelReader = reader;
-  }
-
   public MemoryBasedBatchGrammar(String formatKeyword, String grammarFile, String owner,
       String defaultLHSSymbol, int spanLimit, JoshuaConfiguration joshuaConfiguration)
       throws IOException {
@@ -99,32 +83,12 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
     this.grammarFile = grammarFile;
 
     // ==== loading grammar
-    this.modelReader = createReader(formatKeyword, grammarFile);
-    if (modelReader != null) {
-      for (Rule rule : modelReader)
-        if (rule != null) {
-          addRule(rule);
-        }
-    } else {
-      LOG.info("Couldn't create a GrammarReader for file {} with format {}",
-          grammarFile, formatKeyword);
-    }
+    for (Rule rule : createReader(formatKeyword, grammarFile, getOwner()))
+      if (rule != null) {
+        addRule(rule);
+      }
 
     this.printGrammar();
-  }
-
-  protected GrammarReader<Rule> createReader(String format, String grammarFile) throws IOException {
-
-    if (grammarFile != null) {
-      if ("hiero".equals(format) || "thrax".equals(format)) {
-        return new HieroFormatReader(grammarFile);
-      } else if ("moses".equals(format)) {
-        return new MosesFormatReader(grammarFile);
-      } else {
-        throw new RuntimeException(String.format("* FATAL: unknown grammar format '%s'", format));
-      }
-    }
-    return null;
   }
 
   // ===============================================================
@@ -160,14 +124,9 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
 
     this.qtyRulesRead++;
 
-    rule.setOwner(owner);
-
-    if (numDenseFeatures == 0)
-      numDenseFeatures = rule.getFeatureVector().getDenseFeatures().size();
-
     // === identify the position, and insert the trie nodes as necessary
     MemoryBasedTrie pos = root;
-    int[] french = rule.getFrench();
+    int[] french = rule.getSource();
 
     maxSourcePhraseLength = Math.max(maxSourcePhraseLength, french.length);
 
@@ -195,7 +154,7 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
 
     // === add the rule into the trie node
     if (!pos.hasRules()) {
-      pos.ruleBin = new MemoryBasedRuleBin(rule.getArity(), rule.getFrench());
+      pos.ruleBin = new MemoryBasedRuleBin(rule.getArity(), rule.getSource());
       this.qtyRuleBins++;
     }
     pos.ruleBin.addRule(rule);
@@ -221,22 +180,39 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
     final int targetWord = this.joshuaConfiguration.mark_oovs ? Vocabulary.id(Vocabulary
         .word(sourceWord) + "_OOV") : sourceWord;
 
-    int[] sourceWords = { sourceWord };
-    int[] targetWords = { targetWord };
-    final String oovAlignment = "0-0";
+    final int[] sourceWords = { sourceWord };
+    final int[] targetWords = { targetWord };
+    final byte[] alignment = { 0, 0 };
+    final FeatureVector features = new FeatureVector(0);
 
     if (this.joshuaConfiguration.oovList != null && this.joshuaConfiguration.oovList.size() != 0) {
+      
       for (OOVItem item : this.joshuaConfiguration.oovList) {
-        Rule oovRule = new Rule(Vocabulary.id(item.label), sourceWords, targetWords, "", 0,
-            oovAlignment);
+        final Rule oovRule = new Rule(
+            Vocabulary.id(item.label),
+            sourceWords,
+            targetWords,
+            0,
+            features,
+            alignment,
+            getOwner());
         addRule(oovRule);
         oovRule.estimateRuleCost(featureFunctions);
       }
+      
     } else {
-      int nt_i = Vocabulary.id(this.joshuaConfiguration.default_non_terminal);
-      Rule oovRule = new Rule(nt_i, sourceWords, targetWords, "", 0, oovAlignment);
+      
+      final Rule oovRule = new Rule(
+          Vocabulary.id(this.joshuaConfiguration.default_non_terminal),
+          sourceWords,
+          targetWords,
+          0,
+          features,
+          alignment,
+          getOwner());
       addRule(oovRule);
       oovRule.estimateRuleCost(featureFunctions);
+      
     }
   }
 
@@ -246,7 +222,7 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
    * @param featureFunctions an {@link java.util.ArrayList} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    */
   public void addGlueRules(ArrayList<FeatureFunction> featureFunctions) {
-    HieroFormatReader reader = new HieroFormatReader();
+    final HieroFormatReader reader = new HieroFormatReader(getOwner());
 
     String goalNT = FormatUtils.cleanNonTerminal(joshuaConfiguration.goal_symbol);
     String defaultNT = FormatUtils.cleanNonTerminal(joshuaConfiguration.default_non_terminal);
@@ -266,8 +242,4 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
     }
   }
 
-  @Override
-  public int getNumDenseFeatures() {
-    return numDenseFeatures;
-  }
 }

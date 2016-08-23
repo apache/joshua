@@ -18,6 +18,8 @@
  */
 package org.apache.joshua.server;
 
+import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,10 +34,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-
-import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Translation;
@@ -47,6 +45,9 @@ import org.apache.joshua.decoder.io.JSONMessage;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
 /**
  * This class handles a concurrent request for translations from a newly opened socket, for
@@ -195,17 +196,18 @@ public class ServerThread extends Thread implements HttpHandler {
     
     if (type.equals("get_weight")) {
       String weight = tokens[1];
-      LOG.info("WEIGHT: %s = %.3f", weight, Decoder.weights.getWeight(weight));
+      LOG.info("WEIGHT: %s = %.3f", weight, Decoder.weights.getOrDefault(hashFeature(weight)));
 
     } else if (type.equals("set_weights")) {
       // Change a decoder weight
       String[] argTokens = args.split("\\s+");
       for (int i = 0; i < argTokens.length; i += 2) {
         String feature = argTokens[i];
+        int featureId = hashFeature(feature);
         String newValue = argTokens[i+1];
-        float old_weight = Decoder.weights.getWeight(feature);
-        Decoder.weights.set(feature, Float.parseFloat(newValue));
-        LOG.info("set_weights: {} {} -> {}", feature, old_weight, Decoder.weights.getWeight(feature));
+        float old_weight = Decoder.weights.getOrDefault(featureId);
+        Decoder.weights.put(featureId, Float.parseFloat(newValue));
+        LOG.info("set_weights: {} {} -> {}", feature, old_weight, Decoder.weights.getOrDefault(featureId));
       }
       
       message.addMetaData("weights " + Decoder.weights.toString());
@@ -235,7 +237,7 @@ public class ServerThread extends Thread implements HttpHandler {
           ? String.format("%s ||| [X,1] %s ||| [X,1] %s ||| custom=1 %s", lhs, source, target, featureStr)
           : String.format("%s ||| %s ||| %s ||| custom=1 %s", lhs, source, target, featureStr);
       
-      Rule rule = new HieroFormatReader().parseLine(ruleString);
+      Rule rule = new HieroFormatReader(decoder.getCustomPhraseTable().getOwner()).parseLine(ruleString);
       decoder.addCustomRule(rule);
       
       LOG.info("Added custom rule {}", rule.toString());
@@ -267,12 +269,12 @@ public class ServerThread extends Thread implements HttpHandler {
   
     } else if (type.equals("remove_rule")) {
       
-      Rule rule = new HieroFormatReader().parseLine(args);
+      Rule rule = new HieroFormatReader(decoder.getCustomPhraseTable().getOwner()).parseLine(args);
       
       LOG.info("remove_rule " + rule);
   
       Trie trie = decoder.getCustomPhraseTable().getTrieRoot();
-      int[] sourceTokens = rule.getFrench();
+      int[] sourceTokens = rule.getSource();
       for (int i = 0; i < sourceTokens.length; i++) {
         Trie nextTrie = trie.match(sourceTokens[i]);
         if (nextTrie == null)
@@ -283,7 +285,7 @@ public class ServerThread extends Thread implements HttpHandler {
 
       if (trie.hasRules()) {
         for (Rule ruleCand: trie.getRuleCollection().getRules()) {
-          if (Arrays.equals(rule.getEnglish(), ruleCand.getEnglish())) {
+          if (Arrays.equals(rule.getTarget(), ruleCand.getTarget())) {
             trie.getRuleCollection().getRules().remove(ruleCand);
             break;
           }

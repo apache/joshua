@@ -193,7 +193,7 @@ public class DecoderThread extends Thread {
   }
 
   private Grammar getGrammarFromHyperGraph(String goal, HyperGraph hg) {
-    GrammarBuilderWalkerFunction f = new GrammarBuilderWalkerFunction(goal,joshuaConfiguration);
+    GrammarBuilderWalkerFunction f = new GrammarBuilderWalkerFunction(goal, joshuaConfiguration, "pt");
     ForestWalker walker = new ForestWalker();
     walker.walk(hg.goalNode, f);
     return f.getGrammar();

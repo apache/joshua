@@ -18,6 +18,8 @@
  */
 package org.apache.joshua.decoder.ff;
 
+import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -104,7 +106,7 @@ public class TargetBigram extends StatefulFF {
   public DPState compute(Rule rule, List<HGNode> tailNodes, int spanStart, int spanEnd,
       SourcePath sourcePath, Sentence sentence, Accumulator acc) {
 
-    int[] enWords = rule.getEnglish();
+    int[] enWords = rule.getTarget();
 
     int left = -1;
     int right = -1;
@@ -127,7 +129,7 @@ public class TargetBigram extends StatefulFF {
           right = token;
           if (currentNgram.size() == 2) {
             String ngram = join(currentNgram);
-            acc.add(String.format("%s_%s", name, ngram), 1);
+            acc.add(hashFeature(String.format("%s_%s", name, ngram)), 1);
             //            System.err.println(String.format("ADDING %s_%s", name, ngram));
             currentNgram.remove(0);
           }
@@ -144,7 +146,7 @@ public class TargetBigram extends StatefulFF {
         right = curID;
         if (currentNgram.size() == 2) {
           String ngram = join(currentNgram);
-          acc.add(String.format("%s_%s", name, ngram), 1);
+          acc.add(hashFeature(String.format("%s_%s", name, ngram)), 1);
           //          System.err.println(String.format("ADDING %s_%s", name, ngram));
           currentNgram.remove(0);
         }

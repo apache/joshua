@@ -23,9 +23,10 @@ import java.util.HashSet;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.tm.Grammar;
+import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
-import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
 import org.apache.joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
 import org.apache.joshua.util.FormatUtils;
 import org.slf4j.Logger;
@@ -48,22 +49,16 @@ public class GrammarBuilderWalkerFunction implements WalkerFunction {
 
   private static final Logger LOG = LoggerFactory.getLogger(GrammarBuilderWalkerFunction.class);
 
-  private MemoryBasedBatchGrammar grammar;
-  private static HieroFormatReader reader = new HieroFormatReader();
-  private PrintStream outStream;
-  private int goalSymbol;
-  private HashSet<Rule> rules;
+  private final MemoryBasedBatchGrammar grammar;
+  private final PrintStream outStream;
+  private final int goalSymbol;
+  private final HashSet<Rule> rules;
 
-  public GrammarBuilderWalkerFunction(String goal,JoshuaConfiguration joshuaConfiguration) {
-    grammar = new MemoryBasedBatchGrammar(reader, joshuaConfiguration, 1000);
+  public GrammarBuilderWalkerFunction(String goal, JoshuaConfiguration joshuaConfiguration, String owner) {
+    grammar = new MemoryBasedBatchGrammar(owner, joshuaConfiguration, 1000);
     outStream = null;
     goalSymbol = Vocabulary.id(goal);
     rules = new HashSet<Rule>();
-  }
-
-  public GrammarBuilderWalkerFunction(String goal, PrintStream out,JoshuaConfiguration joshuaConfiguration) {
-    this(goal,joshuaConfiguration);
-    outStream = out;
   }
 
   public void apply(HGNode node, int index) {
@@ -104,15 +99,19 @@ public class GrammarBuilderWalkerFunction implements WalkerFunction {
     // if this would be unary abstract, getNewSource will be null
     if (source == null) return null;
     int[] target = getNewTargetFromSource(source);
-    Rule result =
-        new Rule(headLabel, source, target, edgeRule.getFeatureString(), edgeRule.getArity());
-    // System.err.printf("new rule is %s\n", result);
-    return result;
+    return new Rule(
+        headLabel,
+        source,
+        target,
+        edgeRule.getArity(),
+        new FeatureVector(edgeRule.getFeatureVector()),
+        edgeRule.getAlignment(),
+        OwnerMap.UNKNOWN_OWNER_ID);
   }
 
   private static int[] getNewSource(boolean isGlue, HyperEdge edge) {
     Rule rule = edge.getRule();
-    int[] english = rule.getEnglish();
+    int[] english = rule.getTarget();
     // if this is a unary abstract rule, just return null
     // TODO: except glue rules!
     if (english.length == 1 && english[0] < 0 && !isGlue) return null;

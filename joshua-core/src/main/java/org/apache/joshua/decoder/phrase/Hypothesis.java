@@ -18,7 +18,9 @@
  */
 package org.apache.joshua.decoder.phrase;
 
-import java.util.List;	
+import static org.apache.joshua.decoder.ff.tm.OwnerMap.UNKNOWN_OWNER_ID;
+
+import java.util.List;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
@@ -40,15 +42,14 @@ public class Hypothesis extends HGNode implements Comparable<Hypothesis> {
 
   // The hypothesis' coverage vector
   private Coverage coverage;
-
-  public static Rule BEGIN_RULE = new HieroFormatReader().parseLine("[X] ||| <s> ||| <s> |||   ||| 0-0");
-  public static Rule END_RULE = new HieroFormatReader().parseLine("[GOAL] ||| [X,1] </s> ||| [X,1] </s> |||   ||| 0-0 1-1");
+  public static Rule BEGIN_RULE = new HieroFormatReader(UNKNOWN_OWNER_ID).parseLine("[X] ||| <s> ||| <s> |||   ||| 0-0");
+  public static Rule END_RULE = new HieroFormatReader(UNKNOWN_OWNER_ID).parseLine("[GOAL] ||| [X,1] </s> ||| [X,1] </s> |||   ||| 0-0 1-1");
 
   public String toString() {
     StringBuffer sb = new StringBuffer();
     for (DPState state: getDPStates())
       sb.append(state);
-    String words = bestHyperedge.getRule().getEnglishWords();
+    String words = bestHyperedge.getRule().getTargetWords();
 //  return String.format("HYP[%s] %.5f j=%d words=%s state=%s", coverage, score, j, words, sb);
     return String.format("HYP[%s] j=%d words=[%s] state=%s", coverage, j, words, sb);
   }

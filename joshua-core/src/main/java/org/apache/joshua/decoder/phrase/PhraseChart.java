@@ -109,7 +109,7 @@ public class PhraseChart {
             if (phrases != null) {
               LOG.debug("{} ({}-{})", source.source(i,j), i, j);
               for (Rule rule: phrases)
-                LOG.debug("    {} :: est={}", rule.getEnglishWords(), rule.getEstimatedCost());
+                LOG.debug("    {} :: est={}", rule.getTargetWords(), rule.getEstimatedCost());
             }
           }
         }

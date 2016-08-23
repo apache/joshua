@@ -18,20 +18,19 @@
  */
 package org.apache.joshua.decoder.ff;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.JoshuaConfiguration.OOVItem;
+import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.OwnerId;
 import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
-import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.chart_parser.SourcePath;
 
 /**
  * This feature is fired when an out-of-vocabulary word (with respect to the translation model) is
@@ -52,7 +51,6 @@ public class OOVPenalty extends StatelessFF {
 
   public OOVPenalty(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, "OOVPenalty", args, config);
-
     ownerID = OwnerMap.register("oov");
     oovWeights = new HashMap<Integer,Float>();
     
@@ -63,15 +61,6 @@ public class OOVPenalty extends StatelessFF {
     }
   }
   
-  @Override
-  public ArrayList<String> reportDenseFeatures(int index) {
-    denseFeatureIndex = index;
-    
-    ArrayList<String> names = new ArrayList<>(1);
-    names.add(name);
-    return names;
-  }
-
   /**
    * OOV rules cover exactly one word, and such rules belong to a grammar whose owner is "oov". Each
    * OOV fires the OOVPenalty feature with a value of 1, so the cost is simply the weight, which was
@@ -82,7 +71,7 @@ public class OOVPenalty extends StatelessFF {
       Sentence sentence, Accumulator acc) {
     
     if (rule != null && this.ownerID.equals(rule.getOwner())) {
-      acc.add(denseFeatureIndex, getValue(rule.getLHS()));
+      acc.add(featureId, getValue(rule.getLHS()));
     }
 
     return null;
@@ -97,8 +86,9 @@ public class OOVPenalty extends StatelessFF {
    */
   @Override
   public float estimateCost(Rule rule, Sentence sentence) {
-    if (rule != null && this.ownerID.equals(rule.getOwner()))
-      return weights.getDense(denseFeatureIndex) * getValue(rule.getLHS());
+    if (rule != null && this.ownerID.equals(rule.getOwner())) {
+      return weights.getOrDefault(featureId) * getValue(rule.getLHS());
+    }
     return 0.0f;
   }
   

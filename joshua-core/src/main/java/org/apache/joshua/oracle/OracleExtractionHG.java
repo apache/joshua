@@ -360,7 +360,7 @@ public class OracleExtractionHG extends SplitHg {
     // computed
     int total_hyp_len = 0;
     int[] num_ngram_match = new int[g_bleu_order];
-    int[] en_words = dt.getRule().getEnglish();
+    int[] en_words = dt.getRule().getTarget();
 
     // ####calulate new and old ngram counts, and len
 

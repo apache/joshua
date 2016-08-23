@@ -43,7 +43,7 @@ public class FeatureVectorExtractor implements WalkerFunction, DerivationVisitor
   public FeatureVectorExtractor(
       final List<FeatureFunction> featureFunctions,
       final Sentence sourceSentence) {
-    this.features = new FeatureVector();
+    this.features = new FeatureVector(10);
     this.featureFunctions = featureFunctions;
     this.sourceSentence = sourceSentence;
   }
@@ -51,7 +51,7 @@ public class FeatureVectorExtractor implements WalkerFunction, DerivationVisitor
   /** Accumulate edge features from Viterbi path */
   @Override
   public void apply(HGNode node, int nodeIndex) {
-    features.add(
+    features.addInPlace(
         computeTransitionFeatures(
           featureFunctions,
           node.bestHyperedge,
@@ -62,7 +62,7 @@ public class FeatureVectorExtractor implements WalkerFunction, DerivationVisitor
   /** Accumulate edge features for that DerivationState */
   @Override
   public void before(DerivationState state, int level, int tailNodeIndex) {
-    features.add(
+    features.addInPlace(
         computeTransitionFeatures(
           featureFunctions,
           state.edge,

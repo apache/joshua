@@ -18,6 +18,7 @@
  */
 package org.apache.joshua.tools;
 
+import static org.apache.joshua.decoder.ff.tm.OwnerMap.UNKNOWN_OWNER_ID;
 import static org.apache.joshua.decoder.ff.tm.packed.PackedGrammar.VOCABULARY_FILENAME;
 
 import java.io.BufferedOutputStream;
@@ -31,11 +32,13 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.TreeMap;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.RuleFactory;
 import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
 import org.apache.joshua.decoder.ff.tm.format.MosesFormatReader;
 import org.apache.joshua.util.FormatUtils;
@@ -221,19 +224,20 @@ public class GrammarPacker {
   }
 
   /**
-   * Returns a reader that turns whatever file format is found into Hiero grammar rules.
+   * Returns a reader that turns whatever file format is found into unowned Hiero grammar rules.
+   * This means, features are NOT prepended with an owner string at packing time.
    * 
    * @param grammarFile
-   * @return
+   * @return GrammarReader of correct Format
    * @throws IOException
    */
   private HieroFormatReader getGrammarReader() throws IOException {
     LineReader reader = new LineReader(grammar);
     String line = reader.next();
     if (line.startsWith("[")) {
-      return new HieroFormatReader(grammar);
+      return new HieroFormatReader(grammar, UNKNOWN_OWNER_ID);
     } else {
-      return new MosesFormatReader(grammar);
+      return new MosesFormatReader(grammar, UNKNOWN_OWNER_ID);
     }
   }
 
@@ -247,9 +251,9 @@ public class GrammarPacker {
     // appear in the same order. They are assigned numeric names in order of appearance.
     this.types.setLabeled(true);
 
-    for (Rule rule: reader) {
+    for (Rule rule : reader) {
 
-      max_source_len = Math.max(max_source_len, rule.getFrench().length);
+      max_source_len = Math.max(max_source_len, rule.getSource().length);
 
       /* Add symbols to vocabulary.
        * NOTE: In case of nonterminals, we add both stripped versions ("[X]")
@@ -259,20 +263,9 @@ public class GrammarPacker {
        * {@link HieroFormatReader}, which is called by {@link MosesFormatReader}. 
        */
 
-      // Add feature names to vocabulary and pass the value through the
-      // appropriate encoder.
-      int feature_counter = 0;
-      String[] features = rule.getFeatureString().split("\\s+");
-      for (int f = 0; f < features.length; ++f) {
-        if (features[f].contains("=")) {
-          String[] fe = features[f].split("=");
-          if (fe[0].equals("Alignment"))
-            continue;
-          types.observe(Vocabulary.id(fe[0]), Float.parseFloat(fe[1]));
-        } else {
-          types.observe(Vocabulary.id(String.valueOf(feature_counter++)),
-              Float.parseFloat(features[f]));
-        }
+      // pass the value through the appropriate encoder.
+      for (final Entry<Integer, Float> entry : rule.getFeatureVector().entrySet()) {
+        types.observe(entry.getKey(), entry.getValue());
       }
     }
   }
@@ -303,14 +296,13 @@ public class GrammarPacker {
       alignment_buffer = new AlignmentBuffer();
 
     TreeMap<Integer, Float> features = new TreeMap<Integer, Float>();
-    for (Rule rule: grammarReader) {
+    for (Rule rule : grammarReader) {
       counter++;
       slice_counter++;
 
       String lhs_word = Vocabulary.word(rule.getLHS());
-      String[] source_words = rule.getFrenchWords().split("\\s+");
-      String[] target_words = rule.getEnglishWords().split("\\s+");
-      String[] feature_entries = rule.getFeatureString().split("\\s+");
+      String[] source_words = rule.getSourceWords().split("\\s+");
+      String[] target_words = rule.getTargetWords().split("\\s+");
 
       // Reached slice limit size, indicate that we're closing up.
       if (!ready_to_flush
@@ -347,24 +339,15 @@ public class GrammarPacker {
       int alignment_index = -1;
       // If present, process alignments.
       if (packAlignments) {
-        String alignment_line;
+        byte[] alignments = null;
         if (grammarAlignments) {
-          alignment_line = rule.getAlignmentString();
+          alignments = rule.getAlignment();
         } else {
           if (!alignment_reader.hasNext()) {
             LOG.error("No more alignments starting in line {}", counter);
             throw new RuntimeException("No more alignments starting in line " + counter);
           }
-          alignment_line = alignment_reader.next().trim();
-        }
-        String[] alignment_entries = alignment_line.split("\\s");
-        byte[] alignments = new byte[alignment_entries.length * 2];
-        if (alignment_line.length() > 0) {
-          for (int i = 0; i < alignment_entries.length; i++) {
-            String[] parts = alignment_entries[i].split("-");
-            alignments[2 * i] = Byte.parseByte(parts[0]);
-            alignments[2 * i + 1] = Byte.parseByte(parts[1]);
-          }
+          alignments = RuleFactory.parseAlignmentString(alignment_reader.next().trim());
         }
         alignment_index = alignment_buffer.add(alignments);
       }
@@ -373,24 +356,14 @@ public class GrammarPacker {
       // Implicitly sort via TreeMap, write to data buffer, remember position
       // to pass on to the source trie node.
       features.clear();
-      int feature_count = 0;
-      for (int f = 0; f < feature_entries.length; ++f) {
-        String feature_entry = feature_entries[f];
-        int feature_id;
-        float feature_value;
-        if (feature_entry.contains("=")) {
-          String[] parts = feature_entry.split("=");
-          if (parts[0].equals("Alignment"))
-            continue;
-          feature_id = Vocabulary.id(parts[0]);
-          feature_value = Float.parseFloat(parts[1]);
-        } else {
-          feature_id = Vocabulary.id(String.valueOf(feature_count++));
-          feature_value = Float.parseFloat(feature_entry);
+      for (Entry<Integer, Float> entry : rule.getFeatureVector().entrySet()) {
+        int featureId = entry.getKey();
+        float featureValue = entry.getValue();
+        if (featureValue != 0f) {
+          features.put(encoderConfig.innerId(featureId), featureValue);
         }
-        if (feature_value != 0)
-          features.put(encoderConfig.innerId(feature_id), feature_value);
       }
+
       int features_index = feature_buffer.add(features);
 
       // Sanity check on the data block index.

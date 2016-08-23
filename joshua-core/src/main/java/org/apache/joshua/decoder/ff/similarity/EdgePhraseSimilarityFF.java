@@ -84,7 +84,7 @@ public class EdgePhraseSimilarityFF extends StatefulFF implements SourceDependen
       Sentence sentence, Accumulator acc) {
 
     float value = computeScore(rule, tailNodes);
-    acc.add(name, value);
+    acc.add(featureId, value);
 
     // TODO 07/2013: EdgePhraseSimilarity needs to know its order rather than inferring it from tail
     // nodes.
@@ -102,7 +102,7 @@ public class EdgePhraseSimilarityFF extends StatefulFF implements SourceDependen
 
     // System.err.println("RULE [" + spanStart + ", " + spanEnd + "]: " + rule.toString());
 
-    int[] target = rule.getEnglish();
+    int[] target = rule.getTarget();
     int lm_state_size = 0;
     for (HGNode node : tailNodes) {
       NgramDPState state = (NgramDPState) node.getDPState(stateIndex);

@@ -149,8 +149,8 @@ public class Stack extends ArrayList<Hypothesis> {
 
     // Constrained decoding
     if (sentence.target() != null) {
-      String oldWords = cand.getHypothesis().bestHyperedge.getRule().getEnglishWords().replace("[X,1] ",  "");
-      String newWords = cand.getRule().getEnglishWords().replace("[X,1] ",  "");
+      String oldWords = cand.getHypothesis().bestHyperedge.getRule().getTargetWords().replace("[X,1] ",  "");
+      String newWords = cand.getRule().getTargetWords().replace("[X,1] ",  "");
           
       // If the string is not found in the target sentence, explore the cube neighbors
       if (sentence.fullTarget().indexOf(oldWords + " " + newWords) == -1) {
@@ -217,10 +217,10 @@ public class Stack extends ArrayList<Hypothesis> {
     }
 
     if (LOG.isDebugEnabled()) {
-      LOG.debug("{} from ( ... {} )", taskName, complete.getHypothesis().getRule().getEnglishWords());
+      LOG.debug("{} from ( ... {} )", taskName, complete.getHypothesis().getRule().getTargetWords());
       LOG.debug("        base score {}", complete.getResult().getBaseCost());
       LOG.debug("        covering {}-{}", complete.getSpan().start - 1, complete.getSpan().end - 2);
-      LOG.debug("        translated as: {}", complete.getRule().getEnglishWords());
+      LOG.debug("        translated as: {}", complete.getRule().getTargetWords());
       LOG.debug("        score {} + future cost {} = {}",
           complete.getResult().getTransitionCost(), complete.getFutureEstimate(),
           complete.getResult().getTransitionCost() + complete.getFutureEstimate());

@@ -31,6 +31,14 @@ public final class Constants {
   public static final String STOP_SYM = "</s>";
   public static final String UNKNOWN_WORD = "<unk>";
   
-  public static final String fieldDelimiter = "\\s\\|{3}\\s";
+  public static final String fieldDelimiterPattern = "\\s\\|{3}\\s";
+  public static final String fieldDelimiter = " ||| ";
   public static final String spaceSeparator = "\\s+";
+  
+  public static final String NT_REGEX = "\\[[^\\]]+?\\]";
+  
+  public static final String TM_PREFIX = "tm";
+  
+  public static final String labeledFeatureSeparator = "=";
+  
 }

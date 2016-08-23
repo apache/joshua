@@ -18,7 +18,6 @@
  */
 package org.apache.joshua.decoder.ff;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.joshua.decoder.JoshuaConfiguration;
@@ -59,18 +58,11 @@ public class PhrasePenalty extends StatelessFF {
       Sentence sentence, Accumulator acc) {
 
     if (rule != null && rule != Hypothesis.BEGIN_RULE && rule != Hypothesis.END_RULE 
-        && (rule.getOwner().equals(owner)))
-      acc.add(denseFeatureIndex, value);
+        && (rule.getOwner().equals(owner))) {
+      acc.add(featureId, value);
+    }
 
     return null;
-  }
-    
-  @Override
-  public ArrayList<String> reportDenseFeatures(int index) {
-    denseFeatureIndex = index;
-    ArrayList<String> names = new ArrayList<String>();
-    names.add(name);
-    return names;
   }
   
   /**
@@ -80,8 +72,9 @@ public class PhrasePenalty extends StatelessFF {
   @Override
   public float estimateCost(Rule rule, Sentence sentence) {
     if (rule != null && rule != Hypothesis.BEGIN_RULE && rule != Hypothesis.END_RULE 
-        && (rule.getOwner().equals(owner)))
-      return weights.getDense(denseFeatureIndex) * value;
+        && (rule.getOwner().equals(owner))) {
+      return weights.getOrDefault(featureId) * value;
+    }
     return 0.0f;
   }
 }

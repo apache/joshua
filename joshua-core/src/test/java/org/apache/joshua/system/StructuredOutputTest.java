@@ -67,13 +67,13 @@ public class StructuredOutputTest {
     joshuaConfig.goal_symbol = "[GOAL]";
     joshuaConfig.default_non_terminal = "[X]";
     joshuaConfig.features.add("OOVPenalty");
-    joshuaConfig.weights.add("tm_pt_0 1");
-    joshuaConfig.weights.add("tm_pt_1 1");
-    joshuaConfig.weights.add("tm_pt_2 1");
-    joshuaConfig.weights.add("tm_pt_3 1");
-    joshuaConfig.weights.add("tm_pt_4 1");
-    joshuaConfig.weights.add("tm_pt_5 1");
-    joshuaConfig.weights.add("tm_glue_0 1");
+    joshuaConfig.weights.add("pt_0 -1");
+    joshuaConfig.weights.add("pt_1 -1");
+    joshuaConfig.weights.add("pt_2 -1");
+    joshuaConfig.weights.add("pt_3 -1");
+    joshuaConfig.weights.add("pt_4 -1");
+    joshuaConfig.weights.add("pt_5 -1");
+    joshuaConfig.weights.add("glue_0 -1");
     joshuaConfig.weights.add("OOVPenalty 2");
     decoder = new Decoder(joshuaConfig, ""); // second argument (configFile
                                              // is not even used by the
@@ -99,18 +99,15 @@ public class StructuredOutputTest {
     joshuaConfig.use_structured_output = false;
     joshuaConfig.outputFormat = "%s | %a ";
     translation = decode(input);
-    Assert.assertEquals(expectedTranslation + " | "
-        + expectedWordAlignmentString, translation.toString().trim());
+    Assert.assertEquals(translation.toString().trim(), expectedTranslation + " | " + expectedWordAlignmentString);
 
     // test structured output
     joshuaConfig.use_structured_output = true; // set structured output creation to true
     translation = decode(input);
-    Assert.assertEquals(expectedTranslation, translation.getStructuredTranslations().get(0).getTranslationString());
-    Assert.assertEquals(Arrays.asList(expectedTranslation.split("\\s+")),
-        translation.getStructuredTranslations().get(0).getTranslationTokens());
-    Assert.assertEquals(expectedScore, translation.getStructuredTranslations().get(0).getTranslationScore(),
-        0.00001);
-    Assert.assertEquals(expectedWordAlignment, translation.getStructuredTranslations().get(0).getTranslationWordAlignments());
+    Assert.assertEquals(translation.getStructuredTranslations().get(0).getTranslationString(), expectedTranslation);
+    Assert.assertEquals(translation.getStructuredTranslations().get(0).getTranslationTokens(), Arrays.asList(expectedTranslation.split("\\s+")));
+    Assert.assertEquals(translation.getStructuredTranslations().get(0).getTranslationScore(), expectedScore, 0.00001);
+    Assert.assertEquals(translation.getStructuredTranslations().get(0).getTranslationWordAlignments(), expectedWordAlignment);
     Assert.assertEquals(translation.getStructuredTranslations().get(0).getTranslationWordAlignments().size(), translation
         .getStructuredTranslations().get(0).getTranslationTokens().size());
   }

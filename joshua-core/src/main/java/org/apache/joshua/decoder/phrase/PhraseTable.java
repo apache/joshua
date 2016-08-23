@@ -18,8 +18,6 @@
  */
 package org.apache.joshua.decoder.phrase;
 
-import static org.apache.joshua.decoder.ff.tm.OwnerMap.UNKNOWN_OWNER;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -27,6 +25,7 @@ import java.util.List;
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.tm.Grammar;
 import org.apache.joshua.decoder.ff.tm.OwnerId;
 import org.apache.joshua.decoder.ff.tm.Rule;
@@ -130,16 +129,15 @@ public class PhraseTable implements Grammar {
         : sourceWord;   
 
     int nt_i = Vocabulary.id("[X]");
-    Rule oovRule = new Rule(nt_i, new int[] { nt_i, sourceWord }, new int[] { -1, targetWord }, "0-0", 1);
+    Rule oovRule = new Rule(
+        nt_i,
+        new int[] { nt_i, sourceWord },
+        new int[] { -1, targetWord },
+        1,
+        new FeatureVector(0),
+        new byte[] {0,0}, backend.getOwner());
     addRule(oovRule);
     oovRule.estimateRuleCost(featureFunctions);
-        
-//    String ruleString = String.format("[X] ||| [X,1] %s ||| [X,1] %s", 
-//        Vocabulary.word(sourceWord), Vocabulary.word(targetWord));
-//    Rule oovRule = new HieroFormatReader().parseLine(ruleString);
-//    oovRule.setOwner(Vocabulary.id("oov"));
-//    addRule(oovRule);
-//    oovRule.estimateRuleCost(featureFunctions);
   }
 
   @Override
@@ -173,10 +171,5 @@ public class PhraseTable implements Grammar {
   @Override
   public OwnerId getOwner() {
     return backend.getOwner();
-  }
-
-  @Override
-  public int getNumDenseFeatures() {
-    return backend.getNumDenseFeatures();
   }
 }

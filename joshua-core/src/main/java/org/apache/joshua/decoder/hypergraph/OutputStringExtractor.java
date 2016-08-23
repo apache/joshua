@@ -54,7 +54,7 @@ public class OutputStringExtractor implements WalkerFunction, DerivationVisitor 
   
   private void apply(Rule rule, int nodeIndex) {
     if (rule != null) {
-      final int[] words = extractSource ? rule.getFrench() : rule.getEnglish();
+      final int[] words = extractSource ? rule.getSource() : rule.getTarget();
       merge(new OutputString(words, rule.getArity(), nodeIndex));
     }
   }

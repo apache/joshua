@@ -65,9 +65,11 @@ public class PackedGrammarServer {
       return null;
     
     int[] tgt = Vocabulary.addAll(target);
-    for (Rule r : rules)
-      if (Arrays.equals(tgt, r.getEnglish()))
-        return r.getFeatureVector().getMap();
+    for (Rule r : rules) {
+      if (Arrays.equals(tgt, r.getTarget())) {
+        return r.getFeatureVector().toStringMap();
+      }
+    }
     
     return null;
   }

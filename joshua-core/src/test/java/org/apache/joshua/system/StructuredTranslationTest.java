@@ -61,15 +61,14 @@ public class StructuredTranslationTest {
   private static final Map<String,Float> EXPECTED_FEATURES = new HashMap<>();
   private static final int EXPECTED_NBEST_LIST_SIZE = 8;
   static {
-    EXPECTED_FEATURES.put("tm_glue_0", 1.0f);
-    EXPECTED_FEATURES.put("tm_pt_0", -3.0f);
-    EXPECTED_FEATURES.put("tm_pt_1", -3.0f);
-    EXPECTED_FEATURES.put("tm_pt_2", -3.0f);
-    EXPECTED_FEATURES.put("tm_pt_3", -3.0f);
-    EXPECTED_FEATURES.put("tm_pt_4", -3.0f);
-    EXPECTED_FEATURES.put("tm_pt_5", -3.0f);
-    EXPECTED_FEATURES.put("OOV", 7.0f);
-    EXPECTED_FEATURES.put("OOVPenalty", 0.0f);
+    EXPECTED_FEATURES.put("glue_0", -1.0f);
+    EXPECTED_FEATURES.put("pt_0", 3.0f);
+    EXPECTED_FEATURES.put("pt_1", 3.0f);
+    EXPECTED_FEATURES.put("pt_2", 3.0f);
+    EXPECTED_FEATURES.put("pt_3", 3.0f);
+    EXPECTED_FEATURES.put("pt_4", 3.0f);
+    EXPECTED_FEATURES.put("pt_5", 3.0f);
+    EXPECTED_FEATURES.put("pt_OOV", 7.0f);
   }
 
   @BeforeMethod
@@ -86,13 +85,13 @@ public class StructuredTranslationTest {
     joshuaConfig.goal_symbol = "[GOAL]";
     joshuaConfig.default_non_terminal = "[X]";
     joshuaConfig.features.add("OOVPenalty");
-    joshuaConfig.weights.add("tm_pt_0 1");
-    joshuaConfig.weights.add("tm_pt_1 1");
-    joshuaConfig.weights.add("tm_pt_2 1");
-    joshuaConfig.weights.add("tm_pt_3 1");
-    joshuaConfig.weights.add("tm_pt_4 1");
-    joshuaConfig.weights.add("tm_pt_5 1");
-    joshuaConfig.weights.add("tm_glue_0 1");
+    joshuaConfig.weights.add("pt_0 -1");
+    joshuaConfig.weights.add("pt_1 -1");
+    joshuaConfig.weights.add("pt_2 -1");
+    joshuaConfig.weights.add("pt_3 -1");
+    joshuaConfig.weights.add("pt_4 -1");
+    joshuaConfig.weights.add("pt_5 -1");
+    joshuaConfig.weights.add("glue_0 -1");
     joshuaConfig.weights.add("OOVPenalty 1");
     decoder = new Decoder(joshuaConfig, ""); // second argument (configFile
                                              // is not even used by the
@@ -120,7 +119,7 @@ public class StructuredTranslationTest {
     final String translation = decode(INPUT).toString().trim();
 
     // THEN
-    assertEquals(EXPECTED_TRANSLATION + " | " + EXPECTED_WORD_ALIGNMENT_STRING, translation);
+    assertEquals(translation, EXPECTED_TRANSLATION + " | " + EXPECTED_WORD_ALIGNMENT_STRING);
   }
 
   @Test
@@ -134,8 +133,8 @@ public class StructuredTranslationTest {
     final String translation = decode(INPUT).toString().trim();
 
     // THEN
-    assertEquals(EXPECTED_TRANSLATION + " | " + INPUT + " | " + EXPECTED_WORD_ALIGNMENT_STRING + String.format(" | %.3f", EXPECTED_SCORE),
-        translation);
+    assertEquals(translation,
+        EXPECTED_TRANSLATION + " | " + INPUT + " | " + EXPECTED_WORD_ALIGNMENT_STRING + String.format(" | %.3f", EXPECTED_SCORE));
   }
 
   @Test
@@ -155,12 +154,12 @@ public class StructuredTranslationTest {
 
     // THEN
     assertTrue(translation.getStructuredTranslations().size() == 1);
-    assertEquals(EXPECTED_TRANSLATION, translationString);
-    assertEquals(EXPECTED_TRANSLATED_TOKENS, translatedTokens);
-    assertEquals(EXPECTED_SCORE, translationScore, 0.00001);
-    assertEquals(EXPECTED_WORD_ALIGNMENT, wordAlignment);
-    assertEquals(wordAlignment.size(), translatedTokens.size());
-    assertEquals(EXPECTED_FEATURES.entrySet(), translationFeatures.entrySet());
+    assertEquals(translationString, EXPECTED_TRANSLATION);
+    assertEquals(translatedTokens, EXPECTED_TRANSLATED_TOKENS);
+    assertEquals(translationScore, EXPECTED_SCORE, 0.00001);
+    assertEquals(wordAlignment, EXPECTED_WORD_ALIGNMENT);
+    assertEquals(translatedTokens.size(), wordAlignment.size());
+    assertEquals(translationFeatures.entrySet(), EXPECTED_FEATURES.entrySet());
   }
 
   @Test
@@ -179,14 +178,14 @@ public class StructuredTranslationTest {
     final List<List<Integer>> wordAlignment = structuredTranslation.getTranslationWordAlignments();
     final Map<String,Float> translationFeatures = structuredTranslation.getTranslationFeatures();
 
-    // THEN
+    // THEN   
     assertTrue(structuredTranslations.size() == 1);
-    assertEquals(EXPECTED_TRANSLATION, translationString);
-    assertEquals(EXPECTED_TRANSLATED_TOKENS, translatedTokens);
-    assertEquals(EXPECTED_SCORE, translationScore, 0.00001);
-    assertEquals(EXPECTED_WORD_ALIGNMENT, wordAlignment);
-    assertEquals(wordAlignment.size(), translatedTokens.size());
-    assertEquals(EXPECTED_FEATURES.entrySet(), translationFeatures.entrySet());
+    assertEquals(translationString, EXPECTED_TRANSLATION);
+    assertEquals(translatedTokens, EXPECTED_TRANSLATED_TOKENS);
+    assertEquals(translationScore, EXPECTED_SCORE, 0.00001);
+    assertEquals(wordAlignment, EXPECTED_WORD_ALIGNMENT);
+    assertEquals(translatedTokens.size(), wordAlignment.size());
+    assertEquals(translationFeatures.entrySet(), EXPECTED_FEATURES.entrySet());
   }
 
   @Test
@@ -204,14 +203,14 @@ public class StructuredTranslationTest {
     // THEN
     assertEquals(structuredTranslations.size(), EXPECTED_NBEST_LIST_SIZE);
     assertTrue(structuredTranslations.size() > 1);
-    assertEquals(EXPECTED_TRANSLATION, viterbiTranslation.getTranslationString());
-    assertEquals(EXPECTED_TRANSLATED_TOKENS, viterbiTranslation.getTranslationTokens());
-    assertEquals(EXPECTED_SCORE, viterbiTranslation.getTranslationScore(), 0.00001);
-    assertEquals(EXPECTED_WORD_ALIGNMENT, viterbiTranslation.getTranslationWordAlignments());
-    assertEquals(EXPECTED_FEATURES.entrySet(), viterbiTranslation.getTranslationFeatures().entrySet());
+    assertEquals(viterbiTranslation.getTranslationString(), EXPECTED_TRANSLATION);
+    assertEquals(viterbiTranslation.getTranslationTokens(), EXPECTED_TRANSLATED_TOKENS);
+    assertEquals(viterbiTranslation.getTranslationScore(), EXPECTED_SCORE, 0.00001);
+    assertEquals(viterbiTranslation.getTranslationWordAlignments(), EXPECTED_WORD_ALIGNMENT);
+    assertEquals(viterbiTranslation.getTranslationFeatures().entrySet(), EXPECTED_FEATURES.entrySet());
     // last entry in KBEST is all input words untranslated, should have 8 OOVs.
-    assertEquals(INPUT, lastKBest.getTranslationString());
-    assertEquals(-800.0, lastKBest.getTranslationFeatures().get("OOVPenalty"), 0.0001);
+    assertEquals(lastKBest.getTranslationString(), INPUT);
+    assertEquals(lastKBest.getTranslationFeatures().get("OOVPenalty"), -800.0, 0.0001);
 
   }
 

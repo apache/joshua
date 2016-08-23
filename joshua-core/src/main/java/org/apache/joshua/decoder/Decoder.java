@@ -18,27 +18,28 @@
  */
 package org.apache.joshua.decoder;
 
-import static org.apache.joshua.decoder.ff.FeatureVector.DENSE_FEATURE_NAMES;
+import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
 import static org.apache.joshua.decoder.ff.tm.OwnerMap.getOwner;
+import static org.apache.joshua.util.Constants.spaceSeparator;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import com.google.common.base.Strings;
-
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.FeatureFunction;
+import org.apache.joshua.decoder.ff.FeatureMap;
+import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.PhraseModel;
 import org.apache.joshua.decoder.ff.StatefulFF;
 import org.apache.joshua.decoder.ff.lm.LanguageModelFF;
@@ -58,6 +59,8 @@ import org.apache.joshua.util.Regex;
 import org.apache.joshua.util.io.LineReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
 
 /**
  * This class handles decoder initialization and the complication introduced by multithreading.
@@ -100,9 +103,9 @@ public class Decoder {
    * overhead, but it can be problematic because of unseen dependencies (for example, in the
    * Vocabulary shared by language model, translation grammar, etc).
    */
-  private List<Grammar> grammars;
-  private ArrayList<FeatureFunction> featureFunctions;
-  private Grammar customPhraseTable;
+  private final List<Grammar> grammars = new ArrayList<Grammar>();
+  private final ArrayList<FeatureFunction> featureFunctions = new ArrayList<>();
+  private Grammar customPhraseTable = null;
 
   /* The feature weights. */
   public static FeatureVector weights;
@@ -146,10 +149,8 @@ public class Decoder {
    */
   private Decoder(JoshuaConfiguration joshuaConfiguration) {
     this.joshuaConfiguration = joshuaConfiguration;
-    this.grammars = new ArrayList<Grammar>();
     this.threadPool = new ArrayBlockingQueue<DecoderThread>(
         this.joshuaConfiguration.num_parallel_decoders, true);
-    this.customPhraseTable = null;
   }
 
   /**
@@ -211,32 +212,6 @@ public class Decoder {
       }
     }
 
-    /**
-     * Strips the nonterminals from the lefthand side of the rule.
-     *
-     * @param rule
-     * @return
-     */
-    private String formatRule(Rule rule) {
-      String ruleString = "";
-      boolean first = true;
-      for (int word: rule.getFrench()) {
-        if (!first)
-          ruleString += " " + Vocabulary.word(word);
-        first = false;
-      }
-
-      ruleString += " |||"; // space will get added with first English word
-      first = true;
-      for (int word: rule.getEnglish()) {
-        if (!first)
-          ruleString += " " + Vocabulary.word(word);
-        first = false;
-      }
-
-      // strip of the leading space
-      return ruleString.substring(1);
-    }
   }
 
   /**
@@ -368,7 +343,7 @@ public class Decoder {
   public static void resetGlobalState() {
     // clear/reset static variables
     OwnerMap.clear();
-    DENSE_FEATURE_NAMES.clear();
+    FeatureMap.clear();
     Vocabulary.clear();
     Vocabulary.unregisterLanguageModels();
     LanguageModelFF.resetLmIndex();
@@ -438,23 +413,6 @@ public class Decoder {
   // ===============================================================
 
   /**
-   * Moses requires the pattern .*_.* for sparse features, and prohibits underscores in dense features. 
-   * This conforms to that pattern. We assume non-conforming dense features start with tm_ or lm_,
-   * and the only sparse feature that needs converting is OOVPenalty.
-   *
-   * @param feature
-   * @return the feature in Moses format
-   */
-  private String mosesize(String feature) {
-    if (joshuaConfiguration.moses) {
-      if (feature.startsWith("tm_") || feature.startsWith("lm_"))
-        return feature.replace("_", "-");
-    }
-
-    return feature;
-  }
-
-  /**
    * Initialize all parts of the JoshuaDecoder.
    *
    * @param configFile File containing configuration options
@@ -501,13 +459,13 @@ public class Decoder {
           throw new RuntimeException(errMsg.toString());
         }
 
-        weights.set(pair[0], Float.parseFloat(pair[1]));
+        weights.add(hashFeature(pair[0]), Float.parseFloat(pair[1]));
       }
 
-      LOG.info("Read {} weights ({} of them dense)", weights.size(), DENSE_FEATURE_NAMES.size());
+      LOG.info("Read {} weights", weights.size());
 
       // Do this before loading the grammars and the LM.
-      this.featureFunctions = new ArrayList<FeatureFunction>();
+      this.featureFunctions.clear();
 
       // Initialize and load grammars. This must happen first, since the vocab gets defined by
       // the packed grammar (if any)
@@ -520,13 +478,10 @@ public class Decoder {
 
       // This is mostly for compatibility with the Moses tuning script
       if (joshuaConfiguration.show_weights_and_quit) {
-        for (int i = 0; i < DENSE_FEATURE_NAMES.size(); i++) {
-          String name = DENSE_FEATURE_NAMES.get(i);
-          if (joshuaConfiguration.moses)
-            System.out.println(String.format("%s= %.5f", mosesize(name), weights.getDense(i)));
-          else
-            System.out.println(String.format("%s %.5f", name, weights.getDense(i)));
+        for (Entry<Integer, Float> entry : weights.entrySet()) {
+          System.out.println(String.format("%s=%.5f", FeatureMap.getFeature(entry.getKey()), entry.getValue()));
         }
+        // TODO (fhieber): this functionality should not be in main Decoder class and simply exit.
         System.exit(0);
       }
 
@@ -617,7 +572,7 @@ public class Decoder {
     
     /* Add the grammar for custom entries */
     if (joshuaConfiguration.search_algorithm.equals("stack"))
-      this.customPhraseTable = new PhraseTable(null, "custom", "phrase", joshuaConfiguration);
+      this.customPhraseTable = new PhraseTable("custom", joshuaConfiguration);
     else
       this.customPhraseTable = new MemoryBasedBatchGrammar("custom", joshuaConfiguration, 20);
     this.grammars.add(this.customPhraseTable);
@@ -626,7 +581,7 @@ public class Decoder {
     if (joshuaConfiguration.lattice_decoding) {
       LOG.info("Creating an epsilon-deleting grammar");
       MemoryBasedBatchGrammar latticeGrammar = new MemoryBasedBatchGrammar("lattice", joshuaConfiguration, -1);
-      HieroFormatReader reader = new HieroFormatReader();
+      HieroFormatReader reader = new HieroFormatReader(OwnerMap.register("lattice"));
 
       String goalNT = FormatUtils.cleanNonTerminal(joshuaConfiguration.goal_symbol);
       String defaultNT = FormatUtils.cleanNonTerminal(joshuaConfiguration.default_non_terminal);
@@ -686,7 +641,7 @@ public class Decoder {
    * FEATURE_NAME WEIGHT
    */
   private void readWeights(String fileName) {
-    Decoder.weights = new FeatureVector();
+    Decoder.weights = new FeatureVector(5);
 
     if (fileName.equals(""))
       return;
@@ -695,13 +650,13 @@ public class Decoder {
       LineReader lineReader = new LineReader(fileName);
 
       for (String line : lineReader) {
-        line = line.replaceAll("\\s+", " ");
+        line = line.replaceAll(spaceSeparator, " ");
 
         if (line.equals("") || line.startsWith("#") || line.startsWith("//")
             || line.indexOf(' ') == -1)
           continue;
 
-        String tokens[] = line.split("\\s+");
+        String tokens[] = line.split(spaceSeparator);
         String feature = tokens[0];
         Float value = Float.parseFloat(tokens[1]);
 
@@ -710,7 +665,7 @@ public class Decoder {
           feature = demoses(feature);
         }
 
-        weights.increment(feature, value);
+        weights.add(hashFeature(feature), value);
       }
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
@@ -765,8 +720,6 @@ public class Decoder {
     for (FeatureFunction feature : featureFunctions) {
       LOG.info("FEATURE: {}", feature.logString());
     }
-
-    weights.registerDenseFeatures(featureFunctions);
   }
 
   /**

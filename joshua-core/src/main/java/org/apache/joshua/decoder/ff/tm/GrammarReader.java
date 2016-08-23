@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
+import org.apache.joshua.decoder.ff.tm.format.MosesFormatReader;
 import org.apache.joshua.util.io.LineReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,26 +38,51 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
 
   private static final Logger LOG = LoggerFactory.getLogger(GrammarReader.class);
 
-  protected static String fieldDelimiter;
   protected static String description;
 
-  protected String fileName;
-  protected LineReader reader;
+  protected final String fileName;
+  protected final LineReader reader;
   protected String lookAhead;
   protected int numRulesRead;
+  
+  /** A grammar reader requires an owner to correctly parse and hash the rule's feature values (prepended by the ownwer string) */
+  protected final OwnerId owner;
 
-
-  // dummy constructor for
-  public GrammarReader() {
+  /**
+   * Constructor for in-memory grammars where rules are added later
+   * @param ownerId the owner of the resulting grammar
+   */
+  public GrammarReader(OwnerId ownerId) {
+    this.owner = ownerId;
     this.fileName = null;
+    this.reader = null;
   }
 
-  public GrammarReader(String fileName) throws IOException {
+  /**
+   * Constructor for in-memory grammars read from a text file.
+   * @param fileName
+   * @param ownerId
+   * @throws IOException
+   */
+  public GrammarReader(String fileName, OwnerId ownerId) throws IOException {
     this.fileName = fileName;
+    this.owner = ownerId;
     this.reader = new LineReader(fileName);
     LOG.info("Reading grammar from file {}...", fileName);
     numRulesRead = 0;
     advanceReader();
+  }
+  
+  /**
+   * Given a grammar format, returns the appropriate GrammarReader implementation. 
+   */
+  public static GrammarReader<Rule> createReader(String format, String grammarFile, OwnerId ownerId) throws IOException {
+    if ("hiero".equals(format) || "thrax".equals(format)) {
+      return new HieroFormatReader(grammarFile, ownerId);
+    } else if ("moses".equals(format)) {
+      return new MosesFormatReader(grammarFile, ownerId);
+    }
+    throw new RuntimeException(String.format("* FATAL: unknown grammar format '%s'", format));
   }
 
   // the reader is the iterator itself
@@ -74,9 +101,8 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
         this.reader.close();
       } catch (IOException e) {
         LOG.warn(e.getMessage(), e);
-        LOG.error("Error closing grammar file stream: {}",  this.fileName);
+        LOG.error("Error closing grammar file stream: {}", this.fileName);
       }
-      this.reader = null;
     }
   }
 

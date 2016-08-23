@@ -119,7 +119,7 @@ public class HyperGraph {
           out.println(this.node_number);
           for (HyperEdge e: node.hyperedges) {
             if (e.getRule() != null) {
-              for (int id: e.getRule().getEnglish()) {
+              for (int id: e.getRule().getTarget()) {
                 if (id < 0) {
                   out.print(String.format("[%d] ", nodeMap.get(e.getTailNodes().get(-id-1))));
                 } else {

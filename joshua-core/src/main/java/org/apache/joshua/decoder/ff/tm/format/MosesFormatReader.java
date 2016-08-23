@@ -21,10 +21,12 @@ package org.apache.joshua.decoder.ff.tm.format;
 import java.io.IOException;
 
 import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.tm.OwnerId;
+import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
-import org.apache.joshua.util.io.LineReader;
 import org.apache.joshua.util.Constants;
 import org.apache.joshua.util.FormatUtils;
+import org.apache.joshua.util.io.LineReader;
 
 /***
  * This class reads in the Moses phrase table format, with support for the source and target side,
@@ -46,13 +48,13 @@ import org.apache.joshua.util.FormatUtils;
 
 public class MosesFormatReader extends HieroFormatReader {
 
-  public MosesFormatReader(String grammarFile) throws IOException {
-    super(grammarFile);
+  public MosesFormatReader(String grammarFile, OwnerId ownerId) throws IOException {
+    super(grammarFile, ownerId);
     Vocabulary.id(Constants.defaultNT);
   }
   
-  public MosesFormatReader() {
-    super();
+  public MosesFormatReader(OwnerId ownerId) {
+    super(ownerId);
     Vocabulary.id(Constants.defaultNT);
   }
   
@@ -75,7 +77,7 @@ public class MosesFormatReader extends HieroFormatReader {
    */
   @Override
   public Rule parseLine(String line) {
-    String[] fields = line.split(Constants.fieldDelimiter);
+    String[] fields = line.split(Constants.fieldDelimiterPattern);
     
     String nt = FormatUtils.cleanNonTerminal(Constants.defaultNT);
     StringBuffer hieroLine = new StringBuffer(Constants.defaultNT + " ||| [" + nt + ",1] " + fields[0] + " ||| [" + nt + ",1] " + fields[1] + " |||");
@@ -89,7 +91,7 @@ public class MosesFormatReader extends HieroFormatReader {
     // alignments
     if (fields.length >= 4)
       hieroLine.append(" ||| " + fields[3]);
-
+    
     return super.parseLine(hieroLine.toString());
   }
   
@@ -99,7 +101,7 @@ public class MosesFormatReader extends HieroFormatReader {
    * @param args the command-line arguments
    */
   public static void main(String[] args) {
-    MosesFormatReader reader = new MosesFormatReader();
+    MosesFormatReader reader = new MosesFormatReader(OwnerMap.UNKNOWN_OWNER_ID);
     for (String line: new LineReader(System.in)) {
       Rule rule = reader.parseLine(line);
       System.out.println(rule.textFormat());

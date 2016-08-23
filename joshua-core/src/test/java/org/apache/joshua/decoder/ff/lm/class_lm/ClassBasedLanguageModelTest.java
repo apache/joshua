@@ -24,6 +24,7 @@ import static org.testng.Assert.assertTrue;
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.ff.FeatureMap;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.lm.LanguageModelFF;
 import org.apache.joshua.decoder.ff.tm.OwnerMap;
@@ -46,8 +47,8 @@ public class ClassBasedLanguageModelTest {
   public void setUp() {
     Decoder.resetGlobalState();
 
-    FeatureVector weights = new FeatureVector();
-    weights.set("lm_0", WEIGHT);
+    FeatureVector weights = new FeatureVector(1);
+    weights.put(FeatureMap.hashFeature("lm_0"), WEIGHT);
     String[] args = { "-lm_type", "kenlm", "-lm_order", "9",
       "-lm_file", "./src/test/resources/lm/class_lm/class_lm_9gram.gz",
       "-class_map", "./src/test/resources/lm/class_lm/class.map" };
@@ -70,7 +71,7 @@ public class ClassBasedLanguageModelTest {
   @Test
   public void givenRuleWithSingleWord_whenGetRuleId_thenIsMappedToClass() {
     final int[] target = Vocabulary.addAll(new String[] { "professionalism" });
-    final Rule rule = new Rule(0, null, target, new FeatureVector(), 0, OwnerMap.register(OwnerMap.UNKNOWN_OWNER));
+    final Rule rule = new Rule(0, null, target, 0, new FeatureVector(0), null, OwnerMap.register(OwnerMap.UNKNOWN_OWNER));
     assertEquals(Vocabulary.word(ff.getRuleIds(rule)[0]), "13");
   }
 }

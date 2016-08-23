@@ -21,8 +21,11 @@ package org.apache.joshua.decoder.ff.tm.format;
 import java.io.IOException;
 
 import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.tm.GrammarReader;
+import org.apache.joshua.decoder.ff.tm.OwnerId;
 import org.apache.joshua.decoder.ff.tm.Rule;
+import org.apache.joshua.decoder.ff.tm.RuleFactory;
 import org.apache.joshua.util.Constants;
 import org.apache.joshua.util.FormatUtils;
 
@@ -37,18 +40,18 @@ public class HieroFormatReader extends GrammarReader<Rule> {
   static {
     description = "Original Hiero format";
   }
-
-  public HieroFormatReader() {
-    super();
+  
+  public HieroFormatReader(OwnerId ownerId) {
+    super(ownerId);
   }
 
-  public HieroFormatReader(String grammarFile) throws IOException {
-    super(grammarFile);
+  public HieroFormatReader(String grammarFile, OwnerId ownerId) throws IOException {
+    super(grammarFile, ownerId);
   }
 
   @Override
   public Rule parseLine(String line) {
-    String[] fields = line.split(Constants.fieldDelimiter);
+    String[] fields = line.split(Constants.fieldDelimiterPattern);
     if (fields.length < 3) {
       throw new RuntimeException(String.format("Rule '%s' does not have four fields", line));
     }
@@ -94,10 +97,17 @@ public class HieroFormatReader extends GrammarReader<Rule> {
       }
     }
 
-    String sparse_features = (fields.length > 3 ? fields[3] : "");
-    String alignment = (fields.length > 4) ? fields[4] : null;
+    FeatureVector features = new FeatureVector(0);
+    if (fields.length > 3) {
+      features = RuleFactory.parseFeatureString(fields[3], owner);
+    }
+    
+    byte[] alignments = new byte[] {};
+    if (fields.length > 4) {
+      alignments = RuleFactory.parseAlignmentString(fields[4]);
+    }
 
-    return new Rule(lhs, sourceIDs, targetIDs, sparse_features, arity, alignment);
+    return new Rule(lhs, sourceIDs, targetIDs, arity, features, alignments, owner);
   }
   
   public static boolean isNonTerminal(final String word) {

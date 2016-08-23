@@ -18,7 +18,8 @@
  */
 package org.apache.joshua.decoder.ff;
 
-import java.util.ArrayList;
+import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -73,27 +74,22 @@ public abstract class FeatureFunction {
    * names, for templates that define multiple features.
    */
   protected String name = null;
-
+  
   /*
-   * The list of features each function can contribute, along with the dense feature IDs.
+   * The hashed feature id correspondig to name. This can be changed if name is changed as well
+   * but provides a good default id for most cases. 
    */
-  protected String[] denseFeatureNames = null;
-  protected int[] denseFeatureIDs = null;
-
-  /*
-   * The first dense feature index
-   */
-  protected int denseFeatureIndex = -1; 
+  protected int featureId;
 
   // The list of arguments passed to the feature, and the hash for the parsed args
-  protected String[] args;
-  protected HashMap<String, String> parsedArgs = null; 
+  protected final String[] args;
+  protected final HashMap<String, String> parsedArgs; 
 
   /*
    * The global weight vector used by the decoder, passed it when the feature is
    * instantiated
    */
-  protected FeatureVector weights;
+  protected final FeatureVector weights;
 
   /* The config */
   protected JoshuaConfiguration config;
@@ -108,30 +104,14 @@ public abstract class FeatureFunction {
   public FeatureFunction(FeatureVector weights, String name, String[] args, JoshuaConfiguration config) {
     this.weights = weights;
     this.name = name;
+    this.featureId = FeatureMap.hashFeature(this.name);
     this.args = args;
     this.config = config;
-
     this.parsedArgs = FeatureFunction.parseArgs(args);
   }
 
-  /**
-   * Any feature function can use this to report dense features names to the master code. The 
-   * parameter tells the feature function the index of the first available dense feature ID; the feature
-   * function will then use IDs (id..id+names.size()-1).
-   * 
-   * @param id the id of the first dense feature id to use
-   * @return a list of dense feature names
-   */
-  public ArrayList<String> reportDenseFeatures(int id) {
-    return new ArrayList<String>();
-  }
-
   public String logString() {
-    try {
-      return String.format("%s (weight %.3f)", name, weights.getSparse(name));
-    } catch (RuntimeException e) {
-      return name;
-    }
+    return String.format("%s (weight %.3f)", name, weights.getOrDefault(hashFeature(name)));
   }
 
   /**
@@ -320,8 +300,7 @@ public abstract class FeatureFunction {
    * (for k-best extraction).
    */
   public interface Accumulator {
-    public void add(String name, float value);
-    public void add(int id, float value);
+    public void add(int featureId, float value);
   }
 
   public class ScoreAccumulator implements Accumulator {
@@ -332,13 +311,8 @@ public abstract class FeatureFunction {
     }
 
     @Override
-    public void add(String name, float value) {
-      score += value * weights.getSparse(name);
-    }
-
-    @Override
-    public void add(int id, float value) {
-      score += value * weights.getDense(id);
+    public void add(int featureId, float value) {
+      score += value * weights.getOrDefault(featureId);
     }
 
     public float getScore() {
@@ -350,17 +324,12 @@ public abstract class FeatureFunction {
     private FeatureVector features;
 
     public FeatureAccumulator() {
-      this.features = new FeatureVector();
-    }
-
-    @Override
-    public void add(String name, float value) {
-      features.increment(name, value);
+      this.features = new FeatureVector(10);
     }
 
     @Override
     public void add(int id, float value) {
-      features.increment(id,  value);
+      features.add(id, value);
     }
 
     public FeatureVector getFeatures() {
