@@ -40,7 +40,7 @@ import static org.testng.AssertJUnit.assertFalse;
 
 public class KenLmTest {
 
-  private static final String LANGUAGE_MODEL_PATH = "resources/kenlm/oilers.kenlm";
+  private static final String LANGUAGE_MODEL_PATH = "src/test/resources/kenlm/oilers.kenlm";
   private KenLM kenLm;
 
   @Test
