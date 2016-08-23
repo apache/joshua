@@ -81,8 +81,8 @@ public class StructuredTranslationTest {
     joshuaConfig.use_unique_nbest = false;
     joshuaConfig.include_align_index = false;
     joshuaConfig.topN = 0;
-    joshuaConfig.tms.add("thrax -owner pt -maxspan 20 -path resources/wa_grammar");
-    joshuaConfig.tms.add("thrax -owner glue -maxspan -1 -path resources/grammar.glue");
+    joshuaConfig.tms.add("thrax -owner pt -maxspan 20 -path src/test/resources/wa_grammar");
+    joshuaConfig.tms.add("thrax -owner glue -maxspan -1 -path src/test/resources/grammar.glue");
     joshuaConfig.goal_symbol = "[GOAL]";
     joshuaConfig.default_non_terminal = "[X]";
     joshuaConfig.features.add("OOVPenalty");
