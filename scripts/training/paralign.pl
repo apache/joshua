@@ -78,7 +78,7 @@ sub run_berkeley_aligner {
 
   # run the job
   $cachepipe->cmd("berkeley-aligner-chunk-$chunkno",
-                  "java -d64 -Xmx$args{aligner_mem} -jar $JOSHUA/lib/berkeleyaligner.jar ++alignments/$chunkno/word-align.conf",
+                  "java -d64 -Xmx$args{aligner_mem} -jar $JOSHUA/ext/berkeleyaligner/distribution/berkeleyaligner.jar ++alignments/$chunkno/word-align.conf",
                   "alignments/$chunkno/word-align.conf",
                   "$args{train_dir}/splits/corpus.$args{source}.$chunkno",
                   "$args{train_dir}/splits/corpus.$args{target}.$chunkno",
