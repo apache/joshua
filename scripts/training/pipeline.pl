@@ -797,8 +797,11 @@ if (! defined $ALIGNMENT) {
 		if ($chunk != $lastchunk) {
 			close CHUNK_SOURCE;
 			close CHUNK_TARGET;
-			open CHUNK_SOURCE, ">", "$DATA_DIRS{train}/splits/corpus.$SOURCE.$chunk" or die;
-			open CHUNK_TARGET, ">", "$DATA_DIRS{train}/splits/corpus.$TARGET.$chunk" or die;
+
+      mkdir("$DATA_DIRS{train}/splits/$chunk");
+
+			open CHUNK_SOURCE, ">", "$DATA_DIRS{train}/splits/$chunk/corpus.$SOURCE" or die;
+			open CHUNK_TARGET, ">", "$DATA_DIRS{train}/splits/$chunk/corpus.$TARGET" or die;
 
 			$lastchunk = $chunk;
 		}
@@ -817,13 +820,7 @@ if (! defined $ALIGNMENT) {
   #   $max_aligner_threads /= 2;
   # }
 
-  # # With multi-threading, we can use a pool to set up concurrent GIZA jobs on the chunks.
-  #
-  # TODO: implement this.  There appears to be a problem with calling system() in threads.
-  #
-  # my $pool = new Thread::Pool(Min => 1, Max => $max_aligner_threads);
-
-  system("mkdir alignments") unless -d "alignments";
+  mkdir("alignments") unless -d "alignments";
 
   my $aligner_cmd = (
     "$SCRIPTDIR/training/paralign.pl "
@@ -875,7 +872,7 @@ if (! defined $ALIGNMENT) {
   if ($ALIGNER eq "giza") {
     @aligned_files = map { "alignments/$_/model/aligned.$GIZA_MERGE" } (0..$lastchunk);
   } elsif ($ALIGNER eq "berkeley") {
-    @aligned_files = map { "alignments/$_/training.align" } (0..$lastchunk);
+    @aligned_files = map { "alignments/$_/training.$TARGET-$SOURCE.align" } (0..$lastchunk);
   } elsif ($ALIGNER eq "jacana") {
     @aligned_files = map { "alignments/$_/training.align" } (0..$lastchunk);
   }
