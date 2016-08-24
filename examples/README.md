@@ -32,11 +32,11 @@ C) Train the model:
 ```
 $ mkdir -p $HOME/expts/joshua && cd $HOME/expts/joshua
 $ $JOSHUA/bin/pipeline.pl \
+        --type hiero \
         --rundir 1 \
         --readme "Baseline Hiero run" \
         --source es \
         --target en \
-        --lm-gen srilm \
         --witten-bell \
         --corpus $SPANISH/corpus/asr/callhome_train \
         --corpus $SPANISH/corpus/asr/fisher_train \
