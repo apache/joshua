@@ -86,17 +86,17 @@ public abstract class FeatureFunction {
   protected int denseFeatureIndex = -1; 
 
   // The list of arguments passed to the feature, and the hash for the parsed args
-  protected String[] args;
+  protected final String[] args;
   protected HashMap<String, String> parsedArgs = null; 
 
   /*
    * The global weight vector used by the decoder, passed it when the feature is
    * instantiated
    */
-  protected FeatureVector weights;
+  protected final FeatureVector weights;
 
   /* The config */
-  protected JoshuaConfiguration config;
+  protected final JoshuaConfiguration config;
 
   public String getName() {
     return name;
@@ -123,7 +123,7 @@ public abstract class FeatureFunction {
    * @return a list of dense feature names
    */
   public ArrayList<String> reportDenseFeatures(int id) {
-    return new ArrayList<String>();
+    return new ArrayList<>();
   }
 
   public String logString() {
@@ -279,13 +279,13 @@ public abstract class FeatureFunction {
    * @return A hash with the keys and the values of the string
    */
   public static HashMap<String, String> parseArgs(String[] args) {
-    HashMap<String, String> parsedArgs = new HashMap<String, String>();
+    HashMap<String, String> parsedArgs = new HashMap<>();
     boolean lookingForValue = false;
     String currentKey = null;
-    for (int i = 0; i < args.length; i++) {
+    for (String arg : args) {
 
       Pattern argKeyPattern = Pattern.compile("^-[a-zA-Z]\\S+");
-      Matcher argKey = argKeyPattern.matcher(args[i]);
+      Matcher argKey = argKeyPattern.matcher(arg);
       if (argKey.find()) {
         // This is a key
         // First check to see if there is a key that is waiting to be written
@@ -294,12 +294,12 @@ public abstract class FeatureFunction {
           parsedArgs.put(currentKey, "");
         }
         // Now store the new key and look for its value
-        currentKey = args[i].substring(1);
+        currentKey = arg.substring(1);
         lookingForValue = true;
       } else {
         // This is a value
         if (lookingForValue) {
-          parsedArgs.put(currentKey, args[i]);
+          parsedArgs.put(currentKey, arg);
           lookingForValue = false;
         }
       }
@@ -320,8 +320,8 @@ public abstract class FeatureFunction {
    * (for k-best extraction).
    */
   public interface Accumulator {
-    public void add(String name, float value);
-    public void add(int id, float value);
+    void add(String name, float value);
+    void add(int id, float value);
   }
 
   public class ScoreAccumulator implements Accumulator {
@@ -347,7 +347,7 @@ public abstract class FeatureFunction {
   }
 
   public class FeatureAccumulator implements Accumulator {
-    private FeatureVector features;
+    private final FeatureVector features;
 
     public FeatureAccumulator() {
       this.features = new FeatureVector();

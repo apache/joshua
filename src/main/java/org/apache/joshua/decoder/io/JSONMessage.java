@@ -51,14 +51,14 @@ public class JSONMessage {
   public Data data = null;
   public List<String> metadata = null;
   public JSONMessage() {
-    metadata = new ArrayList<String>();
+    metadata = new ArrayList<>();
   }
   
   public class Data {
-    public List<TranslationItem> translations;
+    public final List<TranslationItem> translations;
     
     public Data() {
-      translations = new ArrayList<TranslationItem>();
+      translations = new ArrayList<>();
     }
   }
 //
@@ -72,7 +72,7 @@ public class JSONMessage {
 //  }
 
   public void addTranslation(Translation translation) {
-    String viterbi = translation.getStructuredTranslations().get(0).getTranslationString();
+    String viterbi = translation.getStructuredTranslations().get(0).getFormattedTranslationString();
     
     TranslationItem item = addTranslation(viterbi);
 
@@ -119,12 +119,12 @@ public class JSONMessage {
   }
 
   public class TranslationItem {
-    public String translatedText;
-    public List<NBestItem> raw_nbest;
+    public final String translatedText;
+    public final List<NBestItem> raw_nbest;
     
     public TranslationItem(String value) {
       this.translatedText = value;
-      this.raw_nbest = new ArrayList<NBestItem>();
+      this.raw_nbest = new ArrayList<>();
     }
     
     /**
@@ -139,8 +139,8 @@ public class JSONMessage {
   }
   
   public class NBestItem {
-    public String hyp;
-    public float totalScore;
+    public final String hyp;
+    public final float totalScore;
     
     public NBestItem(String hyp, float score) {
       this.hyp = hyp;

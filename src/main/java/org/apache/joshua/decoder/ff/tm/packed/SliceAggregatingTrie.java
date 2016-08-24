@@ -194,7 +194,7 @@ public class SliceAggregatingTrie implements Trie, RuleCollection {
   
   @Override
   public boolean hasRules() {
-    return trieWithRules == null ? false : trieWithRules.hasRules();
+    return trieWithRules != null && trieWithRules.hasRules();
   }
   
   @Override
@@ -215,7 +215,7 @@ public class SliceAggregatingTrie implements Trie, RuleCollection {
 
   @Override
   public boolean isSorted() {
-    return !hasRules() ? false : trieWithRules.getRuleCollection().isSorted();
+    return hasRules() && trieWithRules.getRuleCollection().isSorted();
   }
 
   /*

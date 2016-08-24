@@ -21,8 +21,6 @@
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
@@ -38,7 +36,7 @@ import org.testng.annotations.Test;
  */
 public class PhraseDecodingTest {
 
-  private static final String CONFIG = "resources/phrase_decoder/config";
+  private static final String CONFIG = "src/test/resources/phrase_decoder/config";
   private static final String INPUT = "una estrategia republicana para obstaculizar la reelección de Obama";
   private static final String OUTPUT = "0 ||| a strategy republican to hinder reelection Obama ||| tm_pt_0=-9.702 tm_pt_1=-10.800 tm_pt_2=-7.543 tm_pt_3=-8.555 lm_0=-19.117 OOVPenalty=0.000 WordPenalty=-3.040 Distortion=0.000 PhrasePenalty=5.000 ||| -7.496";
   private static final String OUTPUT_WITH_ALIGNMENTS = "0 ||| a strategy |0-1| republican |2-2| to hinder |3-4| reelection |5-6| Obama |7-8| ||| tm_pt_0=-9.702 tm_pt_1=-10.800 tm_pt_2=-7.543 tm_pt_3=-8.555 lm_0=-19.117 OOVPenalty=0.000 WordPenalty=-3.040 Distortion=0.000 PhrasePenalty=5.000 ||| -7.496";
@@ -70,6 +68,16 @@ public class PhraseDecodingTest {
   public void givenInput_whenPhraseDecodingWithAlignments_thenOutputHasAlignments() throws IOException {
     final String translation = decode(INPUT).toString().trim();
     final String gold = OUTPUT_WITH_ALIGNMENTS;
+    assertEquals(translation, gold);
+  }
+  
+  @Test(enabled = true)
+  public void givenInput_whenPhraseDecoding_thenInputCanBeRetrieved() throws IOException {
+    String outputFormat = joshuaConfig.outputFormat;
+    joshuaConfig.outputFormat = "%e";
+    final String translation = decode(INPUT).toString().trim();
+    joshuaConfig.outputFormat = outputFormat;
+    final String gold = INPUT;
     assertEquals(translation, gold);
   }
 

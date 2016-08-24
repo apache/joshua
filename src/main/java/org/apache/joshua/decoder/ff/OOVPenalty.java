@@ -45,16 +45,14 @@ import org.apache.joshua.decoder.chart_parser.SourcePath;
  */
 public class OOVPenalty extends StatelessFF {
   private final OwnerId ownerID;
-  
-  /* The default value returned for OOVs. Can be overridden with -oov-list */
-  private final float defaultValue = -100f;
+
   private final HashMap<Integer,Float> oovWeights;
 
   public OOVPenalty(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, "OOVPenalty", args, config);
 
     ownerID = OwnerMap.register("oov");
-    oovWeights = new HashMap<Integer,Float>();
+    oovWeights = new HashMap<>();
     
     if (config.oovList != null) {
       for (OOVItem item: config.oovList) { 
@@ -103,6 +101,7 @@ public class OOVPenalty extends StatelessFF {
   }
   
   private float getValue(int lhs) {
+    float defaultValue = -100f;
     return oovWeights.containsKey(lhs) ? oovWeights.get(lhs) : defaultValue;
   }
 }

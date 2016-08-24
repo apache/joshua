@@ -49,19 +49,17 @@ public class EdgePhraseSimilarityFF extends StatefulFF implements SourceDependen
 
   private static final Logger LOG = LoggerFactory.getLogger(EdgePhraseSimilarityFF.class);
 
-  private static Cache<String, Float> cache = new Cache<String, Float>(100000000);
+  private static final Cache<String, Float> cache = new Cache<>(100000000);
 
-  private String host;
-  private int port;
+  private final String host;
+  private final int port;
 
-  private Socket socket;
   private PrintWriter serverAsk;
   private BufferedReader serverReply;
 
   private int[] source;
 
   private final int MAX_PHRASE_LENGTH = 4;
-  private final int GAP = 0;
 
   public EdgePhraseSimilarityFF(FeatureVector weights, String[] args, JoshuaConfiguration config) throws NumberFormatException, UnknownHostException, IOException {
     super(weights, "EdgePhraseSimilarity", args, config);
@@ -74,7 +72,7 @@ public class EdgePhraseSimilarityFF extends StatefulFF implements SourceDependen
 
   private void initializeConnection() throws NumberFormatException, IOException {
     LOG.info("Opening connection.");
-    socket = new Socket(host, port);
+    Socket socket = new Socket(host, port);
     serverAsk = new PrintWriter(socket.getOutputStream(), true);
     serverReply = new BufferedReader(new InputStreamReader(socket.getInputStream()));
   }
@@ -109,7 +107,7 @@ public class EdgePhraseSimilarityFF extends StatefulFF implements SourceDependen
       lm_state_size += state.getLeftLMStateWords().length + state.getRightLMStateWords().length;
     }
 
-    ArrayList<int[]> batch = new ArrayList<int[]>();
+    ArrayList<int[]> batch = new ArrayList<>();
 
     // Build joined target string.
     int[] join = new int[target.length + lm_state_size];
@@ -132,6 +130,7 @@ public class EdgePhraseSimilarityFF extends StatefulFF implements SourceDependen
         // System.err.println();
         for (int w : state.getLeftLMStateWords())
           join[idx++] = w;
+        int GAP = 0;
         join[idx++] = GAP;
         gaps[num_gaps++] = idx;
         // System.err.print("RIGHT:  ");
@@ -210,7 +209,7 @@ public class EdgePhraseSimilarityFF extends StatefulFF implements SourceDependen
     return 0.0f;
   }
 
-  private final int[] getSourcePhrase(int anchor) {
+  private int[] getSourcePhrase(int anchor) {
     int idx;
     int length = Math.min(anchor, MAX_PHRASE_LENGTH - 1)
         + Math.min(source.length - anchor, MAX_PHRASE_LENGTH - 1);
@@ -228,7 +227,7 @@ public class EdgePhraseSimilarityFF extends StatefulFF implements SourceDependen
     float similarity = 0.0f;
     int count = 0;
     StringBuilder query = new StringBuilder();
-    List<String> to_cache = new ArrayList<String>();
+    List<String> to_cache = new ArrayList<>();
     query.append("xb");
     for (int i = 0; i < batch.size(); i += 2) {
       int[] source = batch.get(i);

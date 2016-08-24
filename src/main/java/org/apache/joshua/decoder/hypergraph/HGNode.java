@@ -36,10 +36,11 @@ import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 
 public class HGNode {
 
-  public int i, j;
+  public final int i;
+  public final int j;
 
   // this is the symbol like: NP, VP, and so on
-  public int lhs;
+  public final int lhs;
 
   // each hyperedge is an "and" node
   public List<HyperEdge> hyperedges = null;
@@ -49,7 +50,7 @@ public class HGNode {
 
   // the key is the state id; remember the state required by each model, for example, edge-ngrams
   // for LM model
-  protected List<DPState> dpStates;
+  protected final List<DPState> dpStates;
 
   private Signature signature = null;
 //  private int hash = 0;
@@ -99,7 +100,7 @@ public class HGNode {
   public void addHyperedgeInNode(HyperEdge hyperEdge) {
     if (hyperEdge != null) {
       if (null == hyperedges)
-        hyperedges = new ArrayList<HyperEdge>();
+        hyperedges = new ArrayList<>();
       hyperedges.add(hyperEdge);
       // Update the cache of this node's best incoming edge.
       semiringPlus(hyperEdge);
@@ -112,8 +113,7 @@ public class HGNode {
    * to add to the current HGNode.
    */
   public void addHyperedgesInNode(List<HyperEdge> hyperedges) {
-    for (HyperEdge hyperEdge : hyperedges)
-      addHyperedgeInNode(hyperEdge);
+    hyperedges.forEach(this::addHyperedgeInNode);
   }
 
   /**
@@ -246,12 +246,11 @@ public class HGNode {
    */
   // sort by estTotalLogP: for pruning purpose
   public int compareTo(HGNode anotherItem) {
-    throw new RuntimeException("HGNode, compare functiuon should never be called");
+    throw new RuntimeException("HGNode.compareTo(HGNode) is not implemented");
     /*
      * if (this.estTotalLogP > anotherItem.estTotalLogP) { return -1; } else if (this.estTotalLogP
      * == anotherItem.estTotalLogP) { return 0; } else { return 1; }
      */
-
   }
 
   /**
@@ -273,34 +272,15 @@ public class HGNode {
     }
   };
 
-  public static Comparator<HGNode> inverseLogPComparator = new Comparator<HGNode>() {
-    public int compare(HGNode item1, HGNode item2) {
-      float logp1 = item1.score;
-      float logp2 = item2.score;
-      if (logp1 > logp2) {
-        return -1;
-      } else if (logp1 == logp2) {
-        return 0;
-      } else {
-        return 1;
-      }
-    }
-  };
-
-  /**
-   * natural order
-   * */
-  public static Comparator<HGNode> logPComparator = new Comparator<HGNode>() {
-    public int compare(HGNode item1, HGNode item2) {
-      float logp1 = item1.score;
-      float logp2 = item2.score;
-      if (logp1 > logp2) {
-        return 1;
-      } else if (logp1 == logp2) {
-        return 0;
-      } else {
-        return -1;
-      }
+  public static final Comparator<HGNode> inverseLogPComparator = (item1, item2) -> {
+    float logp1 = item1.score;
+    float logp2 = item2.score;
+    if (logp1 > logp2) {
+      return -1;
+    } else if (logp1 == logp2) {
+      return 0;
+    } else {
+      return 1;
     }
   };
 
@@ -311,7 +291,7 @@ public class HGNode {
         bestHyperedge.getBestDerivationScore()));
     if (dpStates != null)
       for (DPState state : dpStates)
-        sb.append(" <" + state + ">");
+        sb.append(" <").append(state).append(">");
 
     // if (this.hyperedges != null) {
     // sb.append(" hyperedges: " + hyperedges.size());

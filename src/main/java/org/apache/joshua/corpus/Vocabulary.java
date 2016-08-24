@@ -262,8 +262,8 @@ public class Vocabulary implements Externalizable {
   public static void clear() {
     long lock_stamp = lock.writeLock();
     try {
-      idToString = new ArrayList<String>();
-      stringToId = new HashMap<String, Integer>();
+      idToString = new ArrayList<>();
+      stringToId = new HashMap<>();
 
       idToString.add(UNKNOWN_ID, UNKNOWN_WORD);
       stringToId.put(UNKNOWN_WORD, UNKNOWN_ID);
@@ -291,11 +291,7 @@ public class Vocabulary implements Externalizable {
 
   @Override
   public boolean equals(Object o) {
-    if(getClass() == o.getClass()) {
-      return true;
-    } else {
-      return false;
-    }
+    return getClass() == o.getClass();
   }
 
 }

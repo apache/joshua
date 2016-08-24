@@ -60,7 +60,7 @@ public class LexicalFeatures extends StatelessFF {
   public LexicalFeatures(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, NAME, args, config);
     
-    ownerRestriction = (parsedArgs.containsKey("owner")) ? true : false;
+    ownerRestriction = (parsedArgs.containsKey("owner"));
     owner = ownerRestriction ? OwnerMap.register(parsedArgs.get("owner")) : OwnerMap.UNKNOWN_OWNER_ID;
     
     useAlignments = parsedArgs.containsKey("alignments");

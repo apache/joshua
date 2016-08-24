@@ -53,7 +53,7 @@ public class Translations implements Iterator<Translation>, Iterable<Translation
 
   public Translations(TranslationRequestStream request) {
     this.request = request;
-    this.translations = new LinkedList<Translation>();
+    this.translations = new LinkedList<>();
   }
 
   /**

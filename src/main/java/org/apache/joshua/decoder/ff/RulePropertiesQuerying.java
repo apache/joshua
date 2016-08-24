@@ -26,12 +26,12 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 
 public class RulePropertiesQuerying {
 
-  public static final String getLHSAsString(Rule rule) {
+  public static String getLHSAsString(Rule rule) {
     return Vocabulary.word(rule.getLHS());
   }
 
   public static List<String> getRuleSourceNonterminalStrings(Rule rule) {
-    List<String> result = new ArrayList<String>();
+    List<String> result = new ArrayList<>();
     for (int nonTerminalIndex : rule.getForeignNonTerminals()) {
       result.add(Vocabulary.word(nonTerminalIndex));
     }
@@ -39,7 +39,7 @@ public class RulePropertiesQuerying {
   }
 
   public static List<String> getSourceNonterminalStrings(List<HGNode> tailNodes) {
-    List<String> result = new ArrayList<String>();
+    List<String> result = new ArrayList<>();
     for (HGNode tailNode : tailNodes) {
       result.add(Vocabulary.word(tailNode.lhs));
     }

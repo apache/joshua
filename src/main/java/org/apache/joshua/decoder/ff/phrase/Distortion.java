@@ -47,7 +47,7 @@ public class Distortion extends StatelessFF {
   public ArrayList<String> reportDenseFeatures(int index) {
     denseFeatureIndex = index;
     
-    ArrayList<String> names = new ArrayList<String>();
+    ArrayList<String> names = new ArrayList<>();
     names.add(name);
     return names;
   }

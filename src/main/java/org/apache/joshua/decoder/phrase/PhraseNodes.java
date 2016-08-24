@@ -16,47 +16,43 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.joshua.decoder.chart_parser;
+package org.apache.joshua.decoder.phrase;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
 import org.apache.joshua.decoder.hypergraph.HGNode;
 
 /**
- * Represents a list of items in the hypergraph that have the same left-hand side but may have
- * different LM states.
+ * Represents a sorted collection of target-side phrases. Typically, these are phrases
+ * generated from the same source word sequence. The list of options is reduced to the number
+ * of translation options.
  * 
- * @author Zhifei Li
+ * @author Matt Post
  */
-class SuperNode {
 
-  /** Common left-hand side state. */
-  final int lhs;
+public class PhraseNodes extends ArrayList<HGNode> {
 
-  /**
-   * List of hypergraph nodes, each of which has its own language model state.
-   */
-  final List<HGNode> nodes;
+  private static final long serialVersionUID = 1L;
+  
+  public int i = -2;
+  public int j = -2;
 
-  /**
-   * All nodes in a SuperNode have the same start and end points, so we pick the first one and
-   * return it.
-   * 
-   * @return
-   */
-  public int end() {
-    return nodes.get(0).j;
+  public PhraseNodes(int i, int j, int initialSize) {
+    super(initialSize);
+    this.i = i;
+    this.j = j;
   }
   
-  
   /**
-   * Constructs a super item defined by a common left-hand side.
-   * 
-   * @param lhs Left-hand side token
+   * Score the rules and sort them. Scoring is necessary 
+   * because rules are only scored if they are used, in an 
+   * effort to make reading in rules more efficient. 
+   * This is starting to create some trouble and should 
+   * probably be reworked.
    */
-  public SuperNode(int lhs) {
-    this.lhs = lhs;
-    this.nodes = new ArrayList<>();
+  public void finish() {
+    Collections.sort(this, HGNode.inverseLogPComparator);    
   }
+
 }

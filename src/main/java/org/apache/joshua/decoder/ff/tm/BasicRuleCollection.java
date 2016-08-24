@@ -56,7 +56,7 @@ public class BasicRuleCollection implements RuleCollection {
    * @param sourceTokens Sequence of terminals and nonterminals in the source pattern
    */
   public BasicRuleCollection(int arity, int[] sourceTokens) {
-    this.rules = new ArrayList<Rule>();
+    this.rules = new ArrayList<>();
     this.sourceTokens = sourceTokens;
     this.arity = arity;
     this.sorted = false;

@@ -81,7 +81,7 @@ public class MosesFormatReader extends HieroFormatReader {
 
     // alignments
     if (fields.length >= 4)
-      hieroLine.append(" ||| " + fields[3]);
+      hieroLine.append(" ||| ").append(fields[3]);
 
     return super.parseLine(hieroLine.toString());
   }

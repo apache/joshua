@@ -55,7 +55,7 @@ public class ComputeNodeResult {
   private float futureCostEstimate;
   
   // The StateComputer objects themselves serve as keys.
-  private List<DPState> dpStates;
+  private final List<DPState> dpStates;
 
   /**
    * Computes the new state(s) that are produced when applying the given rule to the list of tail
@@ -99,7 +99,7 @@ public class ComputeNodeResult {
       }
     }
 
-    List<DPState> allDPStates = new ArrayList<DPState>();
+    List<DPState> allDPStates = new ArrayList<>();
 
     // The transition cost is the new cost incurred by applying this rule
     this.transitionCost = 0.0f;
@@ -115,7 +115,7 @@ public class ComputeNodeResult {
       FeatureFunction.ScoreAccumulator acc = feature.new ScoreAccumulator(); 
 
       DPState newState = feature.compute(rule, tailNodes, i, j, sourcePath, sentence, acc);
-      transitionCost += acc.getScore();
+      this.transitionCost += acc.getScore();
 
 
       if (LOG.isDebugEnabled()) {
@@ -129,7 +129,7 @@ public class ComputeNodeResult {
         allDPStates.add(((StatefulFF)feature).getStateIndex(), newState);
       }
     }
-    viterbiCost += transitionCost;
+    this.viterbiCost += transitionCost;
     if (LOG.isDebugEnabled())
       LOG.debug("-> COST = {}", transitionCost);
 

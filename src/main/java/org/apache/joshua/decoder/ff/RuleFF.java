@@ -42,8 +42,8 @@ import com.google.common.cache.Cache;
  */
 public class RuleFF extends StatelessFF {
 
-  private enum Sides { SOURCE, TARGET, BOTH };
-  
+  private enum Sides { SOURCE, TARGET, BOTH }
+
   private static final String NAME = "RuleFF";
   // value to fire for features
   private static final int VALUE = 1;
@@ -62,7 +62,7 @@ public class RuleFF extends StatelessFF {
   public RuleFF(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, NAME, args, config);
     
-    ownerRestriction = (parsedArgs.containsKey("owner")) ? true : false;
+    ownerRestriction = (parsedArgs.containsKey("owner"));
     owner = ownerRestriction ? OwnerMap.register(parsedArgs.get("owner")) : UNKNOWN_OWNER_ID;
     
     if (parsedArgs.containsKey("sides")) {

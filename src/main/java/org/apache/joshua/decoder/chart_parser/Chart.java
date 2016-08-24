@@ -85,14 +85,14 @@ public class Chart {
   // ===============================================================
   // Private instance fields (maybe could be protected instead)
   // ===============================================================
-  private ChartSpan<Cell> cells; // note that in some cell, it might be null
-  private int sourceLength;
-  private List<FeatureFunction> featureFunctions;
-  private Grammar[] grammars;
-  private DotChart[] dotcharts; // each grammar should have a dotchart associated with it
+  private final ChartSpan<Cell> cells; // note that in some cell, it might be null
+  private final int sourceLength;
+  private final List<FeatureFunction> featureFunctions;
+  private final Grammar[] grammars;
+  private final DotChart[] dotcharts; // each grammar should have a dotchart associated with it
   private Cell goalBin;
   private int goalSymbolID = -1;
-  private Lattice<Token> inputLattice;
+  private final Lattice<Token> inputLattice;
 
   private Sentence sentence = null;
 //  private SyntaxTree parseTree;
@@ -129,15 +129,14 @@ public class Chart {
 //    if (sentence instanceof ParsedSentence)
 //      this.parseTree = ((ParsedSentence) sentence).syntaxTree();
 //
-    this.cells = new ChartSpan<Cell>(sourceLength, null);
+    this.cells = new ChartSpan<>(sourceLength, null);
 
     this.goalSymbolID = Vocabulary.id(goalSymbol);
     this.goalBin = new Cell(this, this.goalSymbolID);
 
     /* Create the grammars, leaving space for the OOV grammar. */
     this.grammars = new Grammar[grammars.length + 1];
-    for (int i = 0; i < grammars.length; i++)
-      this.grammars[i + 1] = grammars[i];
+    System.arraycopy(grammars, 0, this.grammars, 1, grammars.length);
 
     MemoryBasedBatchGrammar oovGrammar = new MemoryBasedBatchGrammar("oov", this.config, 20);
     AbstractGrammar.addOOVRules(oovGrammar, sentence.getLattice(), featureFunctions,
@@ -158,9 +157,8 @@ public class Chart {
           + Vocabulary.STOP_SYM);
 
     /* Find the SourceDependent feature and give it access to the sentence. */
-    for (FeatureFunction ff : this.featureFunctions)
-      if (ff instanceof SourceDependentFF)
-        ((SourceDependentFF) ff).setSource(sentence);
+    this.featureFunctions.stream().filter(ff -> ff instanceof SourceDependentFF)
+        .forEach(ff -> ((SourceDependentFF) ff).setSource(sentence));
 
     LOG.debug("Finished seeding chart.");
   }
@@ -179,7 +177,6 @@ public class Chart {
   public void setGoalSymbolID(int i) {
     this.goalSymbolID = i;
     this.goalBin = new Cell(this, i);
-    return;
   }
 
   // ===============================================================
@@ -204,7 +201,7 @@ public class Chart {
   private void completeSpan(int i, int j) {
 
     /* STEP 1: create the heap, and seed it with all of the candidate states */
-    PriorityQueue<CubePruneState> candidates = new PriorityQueue<CubePruneState>();
+    PriorityQueue<CubePruneState> candidates = new PriorityQueue<>();
 
     /*
      * Look at all the grammars, seeding the chart with completed rules from the
@@ -257,7 +254,7 @@ public class Chart {
 
           Rule bestRule = rules.get(0);
 
-          List<HGNode> currentTailNodes = new ArrayList<HGNode>();
+          List<HGNode> currentTailNodes = new ArrayList<>();
           List<SuperNode> superNodes = dotNode.getAntSuperNodes();
           for (SuperNode si : superNodes) {
             currentTailNodes.add(si.nodes.get(0));
@@ -305,7 +302,7 @@ public class Chart {
      * There are multiple ways to reach each point in the cube, so short-circuit
      * that.
      */
-    HashSet<CubePruneState> visitedStates = new HashSet<CubePruneState>();
+    HashSet<CubePruneState> visitedStates = new HashSet<>();
 
     int popLimit = config.pop_limit;
     int popCount = 0;
@@ -352,7 +349,7 @@ public class Chart {
         /* Use the updated ranks to assign the next rule and tail node. */
         Rule nextRule = rules.get(nextRanks[0] - 1);
         // HGNode[] nextAntNodes = new HGNode[state.antNodes.size()];
-        List<HGNode> nextAntNodes = new ArrayList<HGNode>(state.antNodes.size());
+        List<HGNode> nextAntNodes = new ArrayList<>(state.antNodes.size());
         for (int x = 0; x < state.ranks.length - 1; x++)
           nextAntNodes.add(superNodes.get(x).nodes.get(nextRanks[x + 1] - 1));
 
@@ -387,15 +384,15 @@ public class Chart {
     for (i = sourceLength - 1; i >= 0; i--) {
       allCandidates = new PriorityQueue[sourceLength - i + 2];
       for (int id = 0; id < allCandidates.length; id++)
-        allCandidates[id] = new PriorityQueue<CubePruneState>();
+        allCandidates[id] = new PriorityQueue<>();
 
-      nodeStack = new ArrayList<SuperNode>();
+      nodeStack = new ArrayList<>();
 
       for (int j = i + 1; j <= sourceLength; j++) {
         if (!sentence.hasPath(i, j))
           continue;
 
-        for (int g = 0; g < this.grammars.length; g++) {
+        for (Grammar grammar : this.grammars) {
           // System.err.println(String.format("\n*** I=%d J=%d GRAMMAR=%d", i, j, g));
 
           if (j == i + 1) {
@@ -405,13 +402,13 @@ public class Chart {
               int word = arc.getLabel().getWord();
               // disallow lattice decoding for now
               assert arc.getHead().id() == j;
-              Trie trie = this.grammars[g].getTrieRoot().match(word);
+              Trie trie = grammar.getTrieRoot().match(word);
               if (trie != null && trie.hasRules())
                 addToChart(trie, j, false);
             }
           } else {
             /* Recurse for non-terminal case */
-            consume(this.grammars[g].getTrieRoot(), i, j - 1);
+            consume(grammar.getTrieRoot(), i, j - 1);
           }
         }
 
@@ -508,7 +505,7 @@ public class Chart {
     // isUnary));
 
     if (!isUnary && trie.hasRules()) {
-      DotNode dotNode = new DotNode(i, j, trie, new ArrayList<SuperNode>(nodeStack), null);
+      DotNode dotNode = new DotNode(i, j, trie, new ArrayList<>(nodeStack), null);
 
       addToCandidates(dotNode);
     }
@@ -534,7 +531,7 @@ public class Chart {
     Rule bestRule = rules.get(0);
     List<SuperNode> superNodes = dotNode.getAntSuperNodes();
 
-    List<HGNode> tailNodes = new ArrayList<HGNode>();
+    List<HGNode> tailNodes = new ArrayList<>();
     for (SuperNode superNode : superNodes)
       tailNodes.add(superNode.nodes.get(0));
 
@@ -679,8 +676,8 @@ public class Chart {
       return 0;
     }
     int qtyAdditionsToQueue = 0;
-    ArrayList<HGNode> queue = new ArrayList<HGNode>(chartBin.getSortedNodes());
-    HashSet<Integer> seen_lhs = new HashSet<Integer>();
+    ArrayList<HGNode> queue = new ArrayList<>(chartBin.getSortedNodes());
+    HashSet<Integer> seen_lhs = new HashSet<>();
 
     if (LOG.isDebugEnabled())
       LOG.debug("Adding unary to [{}, {}]", i, j);
@@ -701,7 +698,7 @@ public class Chart {
         if (childNode != null && childNode.getRuleCollection() != null
             && childNode.getRuleCollection().getArity() == 1) {
 
-          ArrayList<HGNode> antecedents = new ArrayList<HGNode>();
+          ArrayList<HGNode> antecedents = new ArrayList<>();
           antecedents.add(node);
 
           List<Rule> rules = childNode.getRuleCollection().getSortedRules(this.featureFunctions);

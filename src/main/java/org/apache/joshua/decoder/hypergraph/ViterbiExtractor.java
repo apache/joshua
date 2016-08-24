@@ -157,7 +157,7 @@ public class ViterbiExtractor {
 
   // TODO: tbl_states
   private static HGNode cloneNodeWithBestHyperedge(HGNode inNode) {
-    List<HyperEdge> hyperedges = new ArrayList<HyperEdge>(1);
+    List<HyperEdge> hyperedges = new ArrayList<>(1);
     HyperEdge cloneEdge = cloneHyperedge(inNode.bestHyperedge);
     hyperedges.add(cloneEdge);
     return new HGNode(inNode.i, inNode.j, inNode.lhs, hyperedges, cloneEdge, inNode.getDPStates());
@@ -167,12 +167,10 @@ public class ViterbiExtractor {
   private static HyperEdge cloneHyperedge(HyperEdge inEdge) {
     List<HGNode> antNodes = null;
     if (null != inEdge.getTailNodes()) {
-      antNodes = new ArrayList<HGNode>(inEdge.getTailNodes());// l_ant_items will be changed in
+      antNodes = new ArrayList<>(inEdge.getTailNodes());// l_ant_items will be changed in
       // get_1best_tree_item
     }
-    HyperEdge res =
-        new HyperEdge(inEdge.getRule(), inEdge.getBestDerivationScore(), inEdge.getTransitionLogP(false),
-            antNodes, inEdge.getSourcePath());
-    return res;
+    return new HyperEdge(inEdge.getRule(), inEdge.getBestDerivationScore(), inEdge.getTransitionLogP(false),
+        antNodes, inEdge.getSourcePath());
   }
 }

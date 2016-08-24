@@ -58,7 +58,7 @@ public class BasicPhrase extends AbstractPhrase {
 
   /* See Javadoc for Phrase interface. */
   public ArrayList<Phrase> getSubPhrases(int maxLength) {
-    ArrayList<Phrase> phrases = new ArrayList<Phrase>();
+    ArrayList<Phrase> phrases = new ArrayList<>();
     int len = this.size();
     for (int n = 1; n <= maxLength; n++)
       for (int i = 0; i <= len - n; i++)

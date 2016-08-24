@@ -40,7 +40,7 @@ import org.apache.joshua.decoder.hypergraph.HyperEdge;
 public class Hypothesis extends HGNode implements Comparable<Hypothesis> {
 
   // The hypothesis' coverage vector
-  private Coverage coverage;
+  private final Coverage coverage;
 
   public static Rule BEGIN_RULE = new HieroFormatReader().parseLine("[GOAL] ||| <s> ||| <s> |||   ||| 0-0");
   public static Rule END_RULE   = new HieroFormatReader().parseLine("[GOAL] ||| </s> ||| </s> |||   ||| 0-0");
@@ -49,8 +49,7 @@ public class Hypothesis extends HGNode implements Comparable<Hypothesis> {
   
   public String toString() {
     StringBuffer sb = new StringBuffer();
-    for (DPState state: getDPStates())
-      sb.append(state);
+    getDPStates().forEach(sb::append);
     String words = bestHyperedge.getRule().getEnglishWords();
 //  return String.format("HYP[%s] %.5f j=%d words=%s state=%s", coverage, score, j, words, sb);
     return String.format("HYP[%s] j=%d words=[%s] state=%s", coverage, j, words, sb);

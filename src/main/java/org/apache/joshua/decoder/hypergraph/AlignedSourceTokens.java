@@ -65,7 +65,7 @@ class AlignedSourceTokens extends LinkedList<Integer> {
    * returns true if element was added.
    */
   public boolean add(Integer x) {
-    return isNull ? false : super.add(x);
+    return !isNull && super.add(x);
   }
 
   public boolean isNonTerminal() {

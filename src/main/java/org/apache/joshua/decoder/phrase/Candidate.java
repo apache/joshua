@@ -42,7 +42,6 @@ import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
-import org.apache.joshua.decoder.hypergraph.HyperEdge;
 import org.apache.joshua.decoder.segment_file.Sentence;
 
 public class Candidate implements Comparable<Candidate> {
@@ -51,16 +50,16 @@ public class Candidate implements Comparable<Candidate> {
   private Sentence sentence;
   
   // the set of hypotheses that can be paired with phrases from this span 
-  private List<Hypothesis> hypotheses;
+  private final List<Hypothesis> hypotheses;
 
   // the list of target phrases gathered from a span of the input
-  private TargetPhrases phrases;
+  private PhraseNodes phrases;
   
   // future cost of applying phrases to hypotheses
   private float future_delta;
   
   // indices into the hypotheses and phrases arrays (used for cube pruning)
-  private int[] ranks;
+  private final int[] ranks;
   
   // the reordering rule used by an instantiated Candidate
   private Rule rule;
@@ -70,14 +69,7 @@ public class Candidate implements Comparable<Candidate> {
    * state. Expensive to compute so there is an option of delaying it.
    */
   private ComputeNodeResult computedResult;
-  
-  /*
-   * This is the HGNode built over the current target side phrase. It requires the computed results
-   * as part of its constructor, so we delay computing it unless needed.
-   */
-  private HGNode phraseNode;
-  private ComputeNodeResult phraseResult;
-  
+
   /**
    * When candidate objects are extended, the new one is initialized with the same underlying
    * "phrases" and "hypotheses" and "span" objects. So these all have to be equal, as well as
@@ -121,7 +113,7 @@ public class Candidate implements Comparable<Candidate> {
   }
 
   public Candidate(List<FeatureFunction> featureFunctions, Sentence sentence, 
-      List<Hypothesis> hypotheses, TargetPhrases phrases, float delta, int[] ranks) {
+      List<Hypothesis> hypotheses, PhraseNodes phrases, float delta, int[] ranks) {
     this.featureFunctions = featureFunctions;
     this.sentence = sentence;
     this.hypotheses = hypotheses;
@@ -131,7 +123,6 @@ public class Candidate implements Comparable<Candidate> {
     this.rule = isMonotonic() ? Hypothesis.MONO_RULE : Hypothesis.SWAP_RULE;
 //    this.score = hypotheses.get(ranks[0]).score + phrases.get(ranks[1]).getEstimatedCost();
 
-    this.phraseNode = null;
     this.computedResult = null;
     
     // TODO: compute this proactively or lazily according to a parameter
@@ -213,7 +204,8 @@ public class Candidate implements Comparable<Candidate> {
    * @return the phrase rule at position ranks[1]
    */
   public Rule getPhraseRule() {
-    return this.phrases.get(ranks[1]);
+    Rule rule = getPhraseNode().bestHyperedge.getRule();
+    return rule;
   }
   
   /**
@@ -223,22 +215,18 @@ public class Candidate implements Comparable<Candidate> {
    * @return a new hypergraph node representing the phrase translation
    */
   public HGNode getPhraseNode() {
-    return phraseNode;
+    return this.phrases.get(ranks[1]);
   }
   
   /**
-   * Ensures that the cost of applying the edge has been computed. This is tucked away in an
-   * accessor so that we can do it lazily if we wish.
+   * Ensures that the cost of applying the edge has been 
+   * computed. This is tucked away in an accessor so that 
+   * we can do it lazily if we wish.
    * 
-   * @return
+   * @return the computed result.
    */
   public ComputeNodeResult computeResult() {
     if (computedResult == null) {
-      // add the phrase node
-      phraseResult = new ComputeNodeResult(featureFunctions, getPhraseRule(), null, phrases.i, phrases.j, null, sentence);
-      HyperEdge edge = new HyperEdge(getPhraseRule(), phraseResult.getViterbiCost(), phraseResult.getTransitionCost(), null, null);
-      phraseNode = new HGNode(phrases.i, phrases.j, getPhraseRule().getLHS(), phraseResult.getDPStates(), edge, phraseResult.getPruningEstimate());
-
       // add the rule
       // TODO: sourcepath
       computedResult = new ComputeNodeResult(featureFunctions, getRule(), getTailNodes(), getLastCovered(), getPhraseEnd(), null, sentence);
@@ -299,7 +287,7 @@ public class Candidate implements Comparable<Candidate> {
    */
   public float score() {
 //    float score = computedResult.getViterbiCost() + future_delta;
-    float score = getHypothesis().getScore() + future_delta + phraseResult.getTransitionCost() + computedResult.getTransitionCost();
+    float score = getHypothesis().getScore() + getPhraseNode().getScore() + future_delta + computedResult.getTransitionCost();
     return score;
   }
   

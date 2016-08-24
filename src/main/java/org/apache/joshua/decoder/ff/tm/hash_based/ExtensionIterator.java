@@ -24,7 +24,7 @@ import java.util.Iterator;
 public class ExtensionIterator implements Iterator<Integer> {
 
   private Iterator<Integer> iterator;
-  private boolean terminal;
+  private final boolean terminal;
   private boolean done;
   private int next;
 

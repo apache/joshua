@@ -49,8 +49,8 @@ public class ClassBasedLanguageModelTest {
     FeatureVector weights = new FeatureVector();
     weights.set("lm_0", WEIGHT);
     String[] args = { "-lm_type", "kenlm", "-lm_order", "9",
-      "-lm_file", "./src/test/resources/lm/class_lm/class_lm_9gram.gz",
-      "-class_map", "./src/test/resources/lm/class_lm/class.map" };
+      "-lm_file", "src/test/resources/lm/class_lm/class_lm_9gram.gz",
+      "-class_map", "src/test/resources/lm/class_lm/class.map" };
 
     JoshuaConfiguration config = new JoshuaConfiguration();
     KenLmTestUtil.Guard(() -> ff = new LanguageModelFF(weights, args, config));

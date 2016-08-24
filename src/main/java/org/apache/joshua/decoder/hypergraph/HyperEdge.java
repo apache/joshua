@@ -43,7 +43,7 @@ public class HyperEdge {
    * */
   private float transitionScore;
 
-  private Rule rule;
+  private final Rule rule;
 
   private SourcePath srcPath = null;
 
@@ -94,8 +94,6 @@ public class HyperEdge {
   }
 
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append(this.rule);
-    return sb.toString();
+    return String.valueOf(this.rule);
   }
 }
