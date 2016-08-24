@@ -15,3 +15,7 @@ git clone https://github.com/joshua-decoder/giza-pp.git ext/giza-pp
 
 git clone https://github.com/joshua-decoder/symal.git ext/symal
 (make -C ext/symal all)
+
+git clone https://github.com/joshua-decoder/berkeleyaligner ext/berkeleyaligner
+(cd ext/berkeleyaligner; ant)
+
