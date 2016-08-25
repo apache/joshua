@@ -39,7 +39,7 @@ import org.apache.joshua.decoder.Decoder;
  * @author wren ng thornton wren@users.sourceforge.net
  * @author Matt Post post@cs.jhu.edu
  */
-public class LineReader implements Reader<String> {
+public class LineReader implements Reader<String>, AutoCloseable {
 
   /*
    * Note: charset name is case-agnostic "UTF-8" is the canonical name "UTF8", "unicode-1-1-utf-8"

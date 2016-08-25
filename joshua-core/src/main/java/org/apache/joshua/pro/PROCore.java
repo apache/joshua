@@ -477,7 +477,7 @@ public class PROCore {
     // by default, load joshua decoder
     if (decoderCommand == null && fakeFileNameTemplate == null) {
       println("Loading Joshua decoder...", 1);
-      myDecoder = new Decoder(joshuaConfiguration, decoderConfigFileName + ".PRO.orig");
+      myDecoder = new Decoder(joshuaConfiguration);
       println("...finished loading @ " + (new Date()), 1);
       println("");
     } else {

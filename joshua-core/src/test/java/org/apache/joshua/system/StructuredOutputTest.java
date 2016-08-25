@@ -75,9 +75,7 @@ public class StructuredOutputTest {
     joshuaConfig.weights.add("pt_5 -1");
     joshuaConfig.weights.add("glue_0 -1");
     joshuaConfig.weights.add("OOVPenalty 2");
-    decoder = new Decoder(joshuaConfig, ""); // second argument (configFile
-                                             // is not even used by the
-                                             // constructor/initialize)
+    decoder = new Decoder(joshuaConfig);
   }
 
   @AfterMethod

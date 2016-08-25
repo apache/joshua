@@ -115,55 +115,14 @@ public class Decoder {
 
   public static int VERBOSE = 1;
 
-  // ===============================================================
-  // Constructors
-  // ===============================================================
-
   /**
    * Constructor method that creates a new decoder using the specified configuration file.
    *
    * @param joshuaConfiguration a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
-   * @param configFile name of configuration file.
    */
-  public Decoder(JoshuaConfiguration joshuaConfiguration, String configFile) {
-    this(joshuaConfiguration);
-    this.initialize(configFile);
-  }
-
-  /**
-   * Factory method that creates a new decoder using the specified configuration file.
-   *
-   * @param configFile Name of configuration file.
-   * @return a configured {@link org.apache.joshua.decoder.Decoder}
-   */
-  public static Decoder createDecoder(String configFile) {
-    JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
-    return new Decoder(joshuaConfiguration, configFile);
-  }
-
-  /**
-   * Constructs an uninitialized decoder for use in testing.
-   * <p>
-   * This method is private because it should only ever be called by the
-   * {@link #getUninitalizedDecoder()} method to provide an uninitialized decoder for use in
-   * testing.
-   */
-  private Decoder(JoshuaConfiguration joshuaConfiguration) {
+  public Decoder(JoshuaConfiguration joshuaConfiguration) {
     this.joshuaConfiguration = joshuaConfiguration;
-
-    resetGlobalState();
-  }
-
-  /**
-   * Gets an uninitialized decoder for use in testing.
-   * <p>
-   * This method is called by unit tests or any outside packages (e.g., MERT) relying on the
-   * decoder.
-   * @param joshuaConfiguration a {@link org.apache.joshua.decoder.JoshuaConfiguration} object
-   * @return an uninitialized decoder for use in testing
-   */
-  static public Decoder getUninitalizedDecoder(JoshuaConfiguration joshuaConfiguration) {
-    return new Decoder(joshuaConfiguration);
+    this.initialize();
   }
 
   /**
@@ -223,13 +182,8 @@ public class Decoder {
    * @return the sentence {@link org.apache.joshua.decoder.Translation}
    */
   public Translation decode(Sentence sentence) {
-    try {
-      DecoderTask decoderTask = new DecoderTask(this.grammars, Decoder.weights, this.featureFunctions, joshuaConfiguration);
-      return decoderTask.translate(sentence);
-    } catch (IOException e) {
-      throw new RuntimeException(String.format(
-              "Input %d: FATAL UNCAUGHT EXCEPTION: %s", sentence.id(), e.getMessage()), e);
-    }
+    DecoderTask decoderTask = new DecoderTask(this.grammars, this.featureFunctions, joshuaConfiguration);
+    return decoderTask.translate(sentence);
   }
 
   /**
@@ -256,9 +210,8 @@ public class Decoder {
     try {
       int columnID = 0;
 
-      BufferedWriter writer = FileUtility.getWriteFileStream(outputFile);
-      LineReader reader = new LineReader(template);
-      try {
+      try (LineReader reader = new LineReader(template);
+           BufferedWriter writer = FileUtility.getWriteFileStream(outputFile)) {
         for (String line : reader) {
           line = line.trim();
           if (Regex.commentOrEmptyLine.matches(line) || line.contains("=")) {
@@ -271,7 +224,7 @@ public class Decoder {
             StringBuilder newSent = new StringBuilder();
             if (!Regex.floatingNumber.matches(fds[fds.length - 1])) {
               throw new IllegalArgumentException("last field is not a number; the field is: "
-                  + fds[fds.length - 1]);
+                      + fds[fds.length - 1]);
             }
 
             if (newDiscriminativeModel != null && "discriminative".equals(fds[0])) {
@@ -295,9 +248,6 @@ public class Decoder {
             writer.newLine();
           }
         }
-      } finally {
-        reader.close();
-        writer.close();
       }
 
       if (newWeights != null && columnID != newWeights.length) {
@@ -309,20 +259,14 @@ public class Decoder {
     }
   }
 
-  // ===============================================================
-  // Initialization Methods
-  // ===============================================================
-
   /**
    * Initialize all parts of the JoshuaDecoder.
-   *
-   * @param configFile File containing configuration options
-   * @return An initialized decoder
    */
-  public Decoder initialize(String configFile) {
+  private void initialize() {
     try {
 
       long pre_load_time = System.currentTimeMillis();
+      resetGlobalState();
 
       /* Weights can be listed in a separate file (denoted by parameter "weights-file") or directly
        * in the Joshua config file. Config file values take precedent.
@@ -397,21 +341,16 @@ public class Decoder {
             (System.currentTimeMillis() - pre_sort_time) / 1000);
       }
 
-      // Create the threads
-      //TODO: (kellens) see if we need to wait until initialized before decoding
     } catch (IOException e) {
       LOG.warn(e.getMessage(), e);
     }
-
-    return this;
   }
 
   /**
    * Initializes translation grammars Retained for backward compatibility
    *
-   * @param ownersSeen Records which PhraseModelFF's have been instantiated (one is needed for each
-   *          owner)
-   * @throws IOException
+   * @throws IOException Several grammar elements read from disk that can
+   * cause IOExceptions.
    */
   private void initializeTranslationGrammars() throws IOException {
 
@@ -483,9 +422,8 @@ public class Decoder {
       String goalNT = FormatUtils.cleanNonTerminal(joshuaConfiguration.goal_symbol);
       String defaultNT = FormatUtils.cleanNonTerminal(joshuaConfiguration.default_non_terminal);
 
-      //FIXME: too many arguments
-      String ruleString = String.format("[%s] ||| [%s,1] <eps> ||| [%s,1] ||| ", goalNT, goalNT, defaultNT,
-          goalNT, defaultNT);
+      //FIXME: arguments changed to match string format on best effort basis.  Author please review.
+      String ruleString = String.format("[%s] ||| [%s,1] <eps> ||| [%s,1] ||| ", goalNT, defaultNT, defaultNT);
 
       Rule rule = reader.parseLine(ruleString);
       latticeGrammar.addRule(rule);
@@ -589,10 +527,8 @@ public class Decoder {
    *
    * Weights for features are listed separately.
    *
-   * @throws IOException
-   *
    */
-  private void initializeFeatureFunctions() throws IOException {
+  private void initializeFeatureFunctions() {
 
     for (String featureLine : joshuaConfiguration.features) {
       // line starts with NAME, followed by args
@@ -623,9 +559,8 @@ public class Decoder {
    * Searches a list of predefined paths for classes, and returns the first one found. Meant for
    * instantiating feature functions.
    *
-   * @param name
+   * @param featureName Class name of the feature to return.
    * @return the class, found in one of the search paths
-   * @throws ClassNotFoundException
    */
   private Class<?> getFeatureFunctionClass(String featureName) {
     Class<?> clas = null;

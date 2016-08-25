@@ -58,7 +58,7 @@ public class KBestExtractionTest {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.readConfigFile(CONFIG);
     joshuaConfig.outputFormat = "%i ||| %s ||| %c";
-    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig, ""));
+    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig));
   }
 
   @AfterMethod

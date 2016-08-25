@@ -18,13 +18,11 @@
  */
 package org.apache.joshua.decoder;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.joshua.decoder.chart_parser.Chart;
 import org.apache.joshua.decoder.ff.FeatureFunction;
-import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.SourceDependentFF;
 import org.apache.joshua.decoder.ff.tm.Grammar;
 import org.apache.joshua.decoder.hypergraph.ForestWalker;
@@ -60,13 +58,8 @@ public class DecoderTask {
   private final List<Grammar> allGrammars;
   private final List<FeatureFunction> featureFunctions;
 
-
-  // ===============================================================
-  // Constructor
-  // ===============================================================
-  //TODO: (kellens) why is weights unused?
-  public DecoderTask(List<Grammar> grammars, FeatureVector weights,
-                     List<FeatureFunction> featureFunctions, JoshuaConfiguration joshuaConfiguration) throws IOException {
+  public DecoderTask(List<Grammar> grammars, List<FeatureFunction> featureFunctions,
+                       JoshuaConfiguration joshuaConfiguration) {
 
     this.joshuaConfiguration = joshuaConfiguration;
     this.allGrammars = grammars;
@@ -80,10 +73,6 @@ public class DecoderTask {
       }
     }
   }
-
-  // ===============================================================
-  // Methods
-  // ===============================================================
 
   /**
    * Translate a sentence.
@@ -116,12 +105,12 @@ public class DecoderTask {
     if (joshuaConfiguration.segment_oovs)
       sentence.segmentOOVs(grammars);
 
-    /**
+    /*
      * Joshua supports (as of September 2014) both phrase-based and hierarchical decoding. Here
      * we build the appropriate chart. The output of both systems is a hypergraph, which is then
      * used for further processing (e.g., k-best extraction).
      */
-    HyperGraph hypergraph = null;
+    HyperGraph hypergraph;
     try {
 
       if (joshuaConfiguration.search_algorithm.equals("stack")) {
@@ -152,8 +141,6 @@ public class DecoderTask {
     if (!joshuaConfiguration.parse || hypergraph == null) {
       return new Translation(sentence, hypergraph, featureFunctions, joshuaConfiguration);
     }
-
-    /*****************************************************************************************/
 
     /*
      * Synchronous parsing.

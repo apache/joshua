@@ -83,11 +83,7 @@ public class MultithreadedTranslationTests {
                                               // concurrency errors in
                                               // underlying
                                               // data-structures.
-    this.decoder = new Decoder(joshuaConfig, ""); // Second argument
-                                                  // (configFile)
-                                                  // is not even used by the
-                                                  // constructor/initialize.
-
+    this.decoder = new Decoder(joshuaConfig);
     previousLogLevel = Decoder.VERBOSE;
     Decoder.VERBOSE = 0;
   }

@@ -35,10 +35,10 @@ public class DecoderServletContextListener implements ServletContextListener {
         String argsLine = sce.getServletContext().getInitParameter("decoderArgsLine");
         try {
             JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
-            ArgsParser userArgs = new ArgsParser(argsLine.split(" "), joshuaConfiguration);
+            new ArgsParser(argsLine.split(" "), joshuaConfiguration);
             joshuaConfiguration.use_structured_output = true;
             joshuaConfiguration.sanityCheck();
-            Decoder decoder = new Decoder(joshuaConfiguration, userArgs.getConfigFile());
+            Decoder decoder = new Decoder(joshuaConfiguration);
             sce.getServletContext().setAttribute(DECODER_CONTEXT_ATTRIBUTE_NAME, decoder);
         } catch (Exception ex) {
             Throwables.propagate(ex);

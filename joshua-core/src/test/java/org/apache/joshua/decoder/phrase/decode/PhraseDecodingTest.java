@@ -48,7 +48,7 @@ public class PhraseDecodingTest {
   public void setUp() throws Exception {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.readConfigFile(CONFIG);
-    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig, ""));
+    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig));
   }
 
   @AfterMethod

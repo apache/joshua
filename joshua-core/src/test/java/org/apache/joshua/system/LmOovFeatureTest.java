@@ -45,7 +45,7 @@ public class LmOovFeatureTest {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.readConfigFile(CONFIG);
     joshuaConfig.outputFormat = "%f | %c";
-    decoder = new Decoder(joshuaConfig, "");
+    decoder = new Decoder(joshuaConfig);
   }
 
   @AfterMethod

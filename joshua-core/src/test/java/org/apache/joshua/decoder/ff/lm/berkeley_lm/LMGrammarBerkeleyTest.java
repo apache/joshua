@@ -60,7 +60,7 @@ public class LMGrammarBerkeleyTest {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.processCommandLineOptions(OPTIONS);
     joshuaConfig.features.add("LanguageModel -lm_type berkeleylm -lm_order 2 -lm_file " + lmFile);
-    decoder = new Decoder(joshuaConfig, null);
+    decoder = new Decoder(joshuaConfig);
     final String translation = decode(INPUT).toString();
     assertEquals(translation, EXPECTED_OUTPUT);
   }
@@ -75,7 +75,7 @@ public class LMGrammarBerkeleyTest {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.processCommandLineOptions(OPTIONS);
     joshuaConfig.features.add("LanguageModel -lm_type berkeleylm -oov_feature -lm_order 2 -lm_file src/test/resources/berkeley_lm/lm");
-    decoder = new Decoder(joshuaConfig, null);
+    decoder = new Decoder(joshuaConfig);
     final String translation = decode(INPUT).toString();
     assertEquals(translation, EXPECTED_OUTPUT_WITH_OOV);
   }

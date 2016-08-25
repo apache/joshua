@@ -66,7 +66,7 @@ public class JoshuaDecoder {
     joshuaConfiguration.sanityCheck();
 
     /* Step-1: initialize the decoder, test-set independent */
-    Decoder decoder = new Decoder(joshuaConfiguration, userArgs.getConfigFile());
+    Decoder decoder = new Decoder(joshuaConfiguration);
 
     LOG.info("Model loading took {} seconds", (System.currentTimeMillis() - startTime) / 1000);
     LOG.info("Memory used {} MB", ((Runtime.getRuntime().totalMemory()
