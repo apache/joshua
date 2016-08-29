@@ -49,8 +49,8 @@ import org.slf4j.LoggerFactory;
  * @author Zhifei Li, zhifei.work@gmail.com
  */
 
-public class DecoderThread extends Thread {
-  private static final Logger LOG = LoggerFactory.getLogger(DecoderThread.class);
+public class DecoderTask {
+  private static final Logger LOG = LoggerFactory.getLogger(DecoderTask.class);
 
   private final JoshuaConfiguration joshuaConfiguration;
   /*
@@ -64,8 +64,9 @@ public class DecoderThread extends Thread {
   // ===============================================================
   // Constructor
   // ===============================================================
-  public DecoderThread(List<Grammar> grammars, FeatureVector weights,
-      List<FeatureFunction> featureFunctions, JoshuaConfiguration joshuaConfiguration) throws IOException {
+  //TODO: (kellens) why is weights unused?
+  public DecoderTask(List<Grammar> grammars, FeatureVector weights,
+                     List<FeatureFunction> featureFunctions, JoshuaConfiguration joshuaConfiguration) throws IOException {
 
     this.joshuaConfiguration = joshuaConfiguration;
     this.allGrammars = grammars;
@@ -83,11 +84,6 @@ public class DecoderThread extends Thread {
   // ===============================================================
   // Methods
   // ===============================================================
-
-  @Override
-  public void run() {
-    // Nothing to do but wait.
-  }
 
   /**
    * Translate a sentence.

@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/apache/incubator-joshua.svg?branch=master)](https://travis-ci.org/apache/incubator-joshua)
+[![homebrew](https://img.shields.io/homebrew/v/joshua.svg?maxAge=2592000?style=plastic)](http://braumeister.org/formula/joshua)
 
 # Welcome to Apache Joshua (Incubating)
 <img src="https://s.apache.org/joshua_logo" align="right" width="300" />

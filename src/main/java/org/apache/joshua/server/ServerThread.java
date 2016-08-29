@@ -35,11 +35,10 @@ import java.util.HashMap;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Translation;
-import org.apache.joshua.decoder.Translations;
+import org.apache.joshua.decoder.TranslationResponseStream;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.Trie;
 import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
@@ -90,11 +89,11 @@ public class ServerThread extends Thread implements HttpHandler {
       TranslationRequestStream request = new TranslationRequestStream(reader, joshuaConfiguration);
 
       try {
-        Translations translations = decoder.decodeAll(request);
+        TranslationResponseStream translationResponseStream = decoder.decodeAll(request);
         
         OutputStream out = socket.getOutputStream();
         
-        for (Translation translation: translations) {
+        for (Translation translation: translationResponseStream) {
           out.write(translation.toString().getBytes());
         }
         
@@ -163,12 +162,12 @@ public class ServerThread extends Thread implements HttpHandler {
     BufferedReader reader = new BufferedReader(new StringReader(query));
     TranslationRequestStream request = new TranslationRequestStream(reader, joshuaConfiguration);
     
-    Translations translations = decoder.decodeAll(request);
+    TranslationResponseStream translationResponseStream = decoder.decodeAll(request);
     JSONMessage message = new JSONMessage();
     if (meta != null && ! meta.isEmpty())
       handleMetadata(meta, message);
 
-    for (Translation translation: translations) {
+    for (Translation translation: translationResponseStream) {
       LOG.info("TRANSLATION: '{}' with {} k-best items", translation, translation.getStructuredTranslations().size());
       message.addTranslation(translation);
     }
