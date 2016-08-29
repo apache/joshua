@@ -54,9 +54,9 @@ sub run_giza {
   my ($chunkdir,$chunkno,$do_parallel) = @_;
   my $parallel = ($do_parallel == 1) ? "-parallel" : "";
   $cachepipe->cmd("giza-$chunkno",
-                  "rm -f $chunkdir/corpus.0-0.*; $args{giza_trainer} --root-dir $chunkdir -e $args{target}.$chunkno -f $args{source}.$chunkno -corpus $args{train_dir}/splits/corpus -merge $args{giza_merge} $parallel > $chunkdir/giza.log 2>&1",
-                  "$args{train_dir}/splits/corpus.$args{source}.$chunkno",
-                  "$args{train_dir}/splits/corpus.$args{target}.$chunkno",
+                  "rm -f $chunkdir/corpus.0-0.*; $args{giza_trainer} --root-dir $chunkdir -e $args{target} -f $args{source} -corpus $args{train_dir}/splits/$chunkno/corpus -merge $args{giza_merge} $parallel > $chunkdir/giza.log 2>&1",
+                  "$args{train_dir}/splits/$chunkno/corpus.$args{source}",
+                  "$args{train_dir}/splits/$chunkno/corpus.$args{target}",
                   "$chunkdir/model/aligned.$args{giza_merge}");
 }
 
@@ -67,8 +67,8 @@ sub run_berkeley_aligner {
   open FROM, $aligner_conf or die "can't read berkeley alignment template";
   open TO, ">", "alignments/$chunkno/word-align.conf" or die "can't write to 'alignments/$chunkno/word-align.conf'";
   while (<FROM>) {
-    s/<SOURCE>/$args{source}.$chunkno/g;
-    s/<TARGET>/$args{target}.$chunkno/g;
+    s/<SOURCE>/$args{source}/g;
+    s/<TARGET>/$args{target}/g;
     s/<CHUNK>/$chunkno/g;
     s/<TRAIN_DIR>/$args{train_dir}/g;
     print TO;
@@ -78,7 +78,7 @@ sub run_berkeley_aligner {
 
   # run the job
   $cachepipe->cmd("berkeley-aligner-chunk-$chunkno",
-                  "java -d64 -Xmx$args{aligner_mem} -jar $JOSHUA/lib/berkeleyaligner.jar ++alignments/$chunkno/word-align.conf",
+                  "java -d64 -Xmx$args{aligner_mem} -jar $JOSHUA/ext/berkeleyaligner/distribution/berkeleyaligner.jar ++alignments/$chunkno/word-align.conf",
                   "alignments/$chunkno/word-align.conf",
                   "$args{train_dir}/splits/corpus.$args{source}.$chunkno",
                   "$args{train_dir}/splits/corpus.$args{target}.$chunkno",
@@ -91,5 +91,5 @@ sub run_jacana_aligner {
 
   # run the job
   $cachepipe->cmd("jacana-aligner-chunk-$chunkno",
-                  "java -d64 -Xmx$args{aligner_mem} -DJACANA_HOME=$jacana_home -jar $JOSHUA/lib/jacana-xy.jar -m $jacana_home/resources/model/fr-en.model -src fr -tgt en -a $args{train_dir}/splits/corpus.$args{source}.$chunkno -b $args{train_dir}/splits/corpus.$args{target}.$chunkno -o $chunkdir/training.align");
+                  "java -d64 -Xmx$args{aligner_mem} -DJACANA_HOME=$jacana_home -jar $JOSHUA/lib/jacana-xy.jar -m $jacana_home/resources/model/fr-en.model -src fr -tgt en -a $args{train_dir}/splits/$chunkno/corpus.$args{source} -b $args{train_dir}/splits/$chunkno/corpus.$args{target} -o $chunkdir/training.align");
 }
