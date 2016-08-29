@@ -76,7 +76,7 @@ import org.slf4j.LoggerFactory;
  * but also ensures that round-robin parallelization occurs, since RequestParallelizer uses the
  * thread pool before translating each request.
  *
- * A decoding thread is handled by DecoderThread and launched from DecoderThreadRunner. The purpose
+ * A decoding thread is handled by DecoderTask and launched from DecoderThreadRunner. The purpose
  * of the runner is to record where to place the translated sentence when it is done (i.e., which
  * Translations object). Translations itself is an iterator whose next() call blocks until the next
  * translation is available.
@@ -223,8 +223,8 @@ public class Decoder {
    */
   public Translation decode(Sentence sentence) {
     try {
-      DecoderThread decoderThread = new DecoderThread(this.grammars, Decoder.weights, this.featureFunctions, joshuaConfiguration);
-      return decoderThread.translate(sentence);
+      DecoderTask decoderTask = new DecoderTask(this.grammars, Decoder.weights, this.featureFunctions, joshuaConfiguration);
+      return decoderTask.translate(sentence);
     } catch (IOException e) {
       throw new RuntimeException(String.format(
               "Input %d: FATAL UNCAUGHT EXCEPTION: %s", sentence.id(), e.getMessage()), e);

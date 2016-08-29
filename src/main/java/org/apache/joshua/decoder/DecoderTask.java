@@ -49,8 +49,8 @@ import org.slf4j.LoggerFactory;
  * @author Zhifei Li, zhifei.work@gmail.com
  */
 
-public class DecoderThread {
-  private static final Logger LOG = LoggerFactory.getLogger(DecoderThread.class);
+public class DecoderTask {
+  private static final Logger LOG = LoggerFactory.getLogger(DecoderTask.class);
 
   private final JoshuaConfiguration joshuaConfiguration;
   /*
@@ -65,8 +65,8 @@ public class DecoderThread {
   // Constructor
   // ===============================================================
   //TODO: (kellens) why is weights unused?
-  public DecoderThread(List<Grammar> grammars, FeatureVector weights,
-                       List<FeatureFunction> featureFunctions, JoshuaConfiguration joshuaConfiguration) throws IOException {
+  public DecoderTask(List<Grammar> grammars, FeatureVector weights,
+                     List<FeatureFunction> featureFunctions, JoshuaConfiguration joshuaConfiguration) throws IOException {
 
     this.joshuaConfiguration = joshuaConfiguration;
     this.allGrammars = grammars;
