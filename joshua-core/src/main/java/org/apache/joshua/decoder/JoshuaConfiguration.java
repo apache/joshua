@@ -273,6 +273,9 @@ public class JoshuaConfiguration {
   /* Weights overridden from the command line */
   public String weight_overwrite = "";
 
+  /* Timeout in seconds for threads */
+  public long translation_thread_timeout = 30_000;
+
   /**
    * This method resets the state of JoshuaConfiguration back to the state after initialization.
    * This is useful when for example making different calls to the decoder within the same java

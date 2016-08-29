@@ -33,9 +33,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
+import com.google.common.base.Strings;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureMap;
@@ -60,14 +64,12 @@ import org.apache.joshua.util.io.LineReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
-
 /**
  * This class handles decoder initialization and the complication introduced by multithreading.
  *
  * After initialization, the main entry point to the Decoder object is
  * decodeAll(TranslationRequest), which returns a set of Translation objects wrapped in an iterable
- * Translations object. It is important that we support multithreading both (a) across the sentences
+ * TranslationResponseStream object. It is important that we support multithreading both (a) across the sentences
  * within a request and (b) across requests, in a round-robin fashion. This is done by maintaining a
  * fixed sized concurrent thread pool. When a new request comes in, a RequestParallelizer thread is
  * launched. This object iterates over the request's sentences, obtaining a thread from the
@@ -77,15 +79,16 @@ import com.google.common.base.Strings;
  * but also ensures that round-robin parallelization occurs, since RequestParallelizer uses the
  * thread pool before translating each request.
  *
- * A decoding thread is handled by DecoderThread and launched from DecoderThreadRunner. The purpose
+ * A decoding thread is handled by DecoderTask and launched from DecoderThreadRunner. The purpose
  * of the runner is to record where to place the translated sentence when it is done (i.e., which
- * Translations object). Translations itself is an iterator whose next() call blocks until the next
+ * TranslationResponseStream object). TranslationResponseStream itself is an iterator whose next() call blocks until the next
  * translation is available.
  *
  * @author Matt Post post@cs.jhu.edu
  * @author Zhifei Li, zhifei.work@gmail.com
  * @author wren ng thornton wren@users.sourceforge.net
  * @author Lane Schwartz dowobeha@users.sourceforge.net
+ * @author Kellen Sunderland kellen.sunderland@gmail.com
  */
 public class Decoder {
 
@@ -111,8 +114,6 @@ public class Decoder {
   public static FeatureVector weights;
 
   public static int VERBOSE = 1;
-
-  private BlockingQueue<DecoderThread> threadPool = null;
 
   // ===============================================================
   // Constructors
@@ -149,10 +150,7 @@ public class Decoder {
    */
   private Decoder(JoshuaConfiguration joshuaConfiguration) {
     this.joshuaConfiguration = joshuaConfiguration;
-    this.threadPool = new ArrayBlockingQueue<DecoderThread>(
-        this.joshuaConfiguration.num_parallel_decoders, true);
-    this.customPhraseTable = null;
-    
+
     resetGlobalState();
   }
 
@@ -168,162 +166,70 @@ public class Decoder {
     return new Decoder(joshuaConfiguration);
   }
 
-  // ===============================================================
-  // Public Methods
-  // ===============================================================
-
-  /**
-   * This class is responsible for getting sentences from the TranslationRequest and procuring a
-   * DecoderThreadRunner to translate it. Each call to decodeAll(TranslationRequest) launches a
-   * thread that will read the request's sentences, obtain a DecoderThread to translate them, and
-   * then place the Translation in the appropriate place.
-   *
-   * @author Matt Post <post@cs.jhu.edu>
-   *
-   */
-  private class RequestParallelizer extends Thread {
-    /* Source of sentences to translate. */
-    private final TranslationRequestStream request;
-
-    /* Where to put translated sentences. */
-    private final Translations response;
-
-    RequestParallelizer(TranslationRequestStream request, Translations response) {
-      this.request = request;
-      this.response = response;
-    }
-
-    @Override
-    public void run() {
-      /*
-       * Repeatedly get an input sentence, wait for a DecoderThread, and then start a new thread to
-       * translate the sentence. We start a new thread (via DecoderRunnerThread) as opposed to
-       * blocking, so that the RequestHandler can go on to the next sentence in this request, which
-       * allows parallelization across the sentences of the request.
-       */
-      for (;;) {
-        Sentence sentence = request.next();
-
-        if (sentence == null) {
-          response.finish();
-          break;
-        }
-
-        // This will block until a DecoderThread becomes available.
-        DecoderThread thread = Decoder.this.getThread();
-        new DecoderThreadRunner(thread, sentence, response).start();
-      }
-    }
-
-  }
-
-  /**
-   * Retrieve a thread from the thread pool, blocking until one is available. The blocking occurs in
-   * a fair fashion (i.e,. FIFO across requests).
-   *
-   * @return a thread that can be used for decoding.
-   */
-  public DecoderThread getThread() {
-    try {
-      return threadPool.take();
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    return null;
-  }
-
-  /**
-   * This class handles running a DecoderThread (which takes care of the actual translation of an
-   * input Sentence, returning a Translation object when its done). This is done in a thread so as
-   * not to tie up the RequestHandler that launched it, freeing it to go on to the next sentence in
-   * the TranslationRequest, in turn permitting parallelization across the sentences of a request.
-   *
-   * When the decoder thread is finshed, the Translation object is placed in the correct place in
-   * the corresponding Translations object that was returned to the caller of
-   * Decoder.decodeAll(TranslationRequest).
-   *
-   * @author Matt Post <post@cs.jhu.edu>
-   */
-  private class DecoderThreadRunner extends Thread {
-
-    private final DecoderThread decoderThread;
-    private final Sentence sentence;
-    private final Translations translations;
-
-    DecoderThreadRunner(DecoderThread thread, Sentence sentence, Translations translations) {
-      this.decoderThread = thread;
-      this.sentence = sentence;
-      this.translations = translations;
-    }
-
-    @Override
-    public void run() {
-      /*
-       * Process any found metadata.
-       */
-      
-      /*
-       * Use the thread to translate the sentence. Then record the translation with the
-       * corresponding Translations object, and return the thread to the pool.
-       */
-      try {
-        Translation translation = decoderThread.translate(this.sentence);
-        translations.record(translation);
-
-        /*
-         * This is crucial! It's what makes the thread available for the next sentence to be
-         * translated.
-         */
-        threadPool.put(decoderThread);
-      } catch (Exception e) {
-        throw new RuntimeException(String.format(
-            "Input %d: FATAL UNCAUGHT EXCEPTION: %s", sentence.id(), e.getMessage()), e);
-        //        translations.record(new Translation(sentence, null, featureFunctions, joshuaConfiguration));
-      }
-    }
-  }
-
   /**
    * This function is the main entry point into the decoder. It translates all the sentences in a
    * (possibly boundless) set of input sentences. Each request launches its own thread to read the
    * sentences of the request.
    *
-   * @param request the populated {@link org.apache.joshua.decoder.io.TranslationRequestStream}
-   * @throws IOException if there is an error with the input stream or writing the output
-   * @return an iterable, asynchronously-filled list of Translations
+   * @param request the populated {@link TranslationRequestStream}
+   * @throws RuntimeException if any fatal errors occur during translation
+   * @return an iterable, asynchronously-filled list of TranslationResponseStream
    */
-  public Translations decodeAll(TranslationRequestStream request) throws IOException {
-    Translations translations = new Translations(request);
+  public TranslationResponseStream decodeAll(TranslationRequestStream request) {
+    TranslationResponseStream results = new TranslationResponseStream(request);
+    CompletableFuture.runAsync(() -> decodeAllAsync(request, results));
+    return results;
+  }
 
-    /* Start a thread to handle requests on the input stream */
-    new RequestParallelizer(request, translations).start();
+  private void decodeAllAsync(TranslationRequestStream request,
+                              TranslationResponseStream responseStream) {
 
-    return translations;
+    // Give the threadpool a friendly name to help debuggers
+    final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+            .setNameFormat("TranslationWorker-%d")
+            .setDaemon(true)
+            .build();
+    ExecutorService executor = Executors.newFixedThreadPool(this.joshuaConfiguration.num_parallel_decoders,
+            threadFactory);
+    try {
+      for (; ; ) {
+        Sentence sentence = request.next();
+
+        if (sentence == null) {
+          break;
+        }
+
+        executor.execute(() -> {
+          try {
+            Translation result = decode(sentence);
+            responseStream.record(result);
+          } catch (Throwable ex) {
+            responseStream.propagate(ex);
+          }
+        });
+      }
+      responseStream.finish();
+    } finally {
+      executor.shutdown();
+    }
   }
 
 
   /**
-   * We can also just decode a single sentence.
+   * We can also just decode a single sentence in the same thread.
    *
    * @param sentence {@link org.apache.joshua.lattice.Lattice} input
+   * @throws RuntimeException if any fatal errors occur during translation
    * @return the sentence {@link org.apache.joshua.decoder.Translation}
    */
   public Translation decode(Sentence sentence) {
-    // Get a thread.
-
     try {
-      DecoderThread thread = threadPool.take();
-      Translation translation = thread.translate(sentence);
-      threadPool.put(thread);
-
-      return translation;
-
-    } catch (InterruptedException e) {
-      e.printStackTrace();
+      DecoderTask decoderTask = new DecoderTask(this.grammars, Decoder.weights, this.featureFunctions, joshuaConfiguration);
+      return decoderTask.translate(sentence);
+    } catch (IOException e) {
+      throw new RuntimeException(String.format(
+              "Input %d: FATAL UNCAUGHT EXCEPTION: %s", sentence.id(), e.getMessage()), e);
     }
-
-    return null;
   }
 
   /**
@@ -332,14 +238,6 @@ public class Decoder {
    * afterwards gets a fresh start.
    */
   public void cleanUp() {
-    // shut down DecoderThreads
-    for (DecoderThread thread : threadPool) {
-      try {
-        thread.join();
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-    }
     resetGlobalState();
   }
 
@@ -370,7 +268,7 @@ public class Decoder {
 
           } else { // models: replace the weight
             String[] fds = Regex.spaces.split(line);
-            StringBuffer newSent = new StringBuffer();
+            StringBuilder newSent = new StringBuilder();
             if (!Regex.floatingNumber.matches(fds[fds.length - 1])) {
               throw new IllegalArgumentException("last field is not a number; the field is: "
                   + fds[fds.length - 1]);
@@ -500,11 +398,8 @@ public class Decoder {
       }
 
       // Create the threads
-      for (int i = 0; i < joshuaConfiguration.num_parallel_decoders; i++) {
-        this.threadPool.put(new DecoderThread(this.grammars, Decoder.weights,
-            this.featureFunctions, joshuaConfiguration));
-      }
-    } catch (IOException | InterruptedException e) {
+      //TODO: (kellens) see if we need to wait until initialized before decoding
+    } catch (IOException e) {
       LOG.warn(e.getMessage(), e);
     }
 
@@ -536,7 +431,7 @@ public class Decoder {
         int span_limit = Integer.parseInt(parsedArgs.get("maxspan"));
         String path = parsedArgs.get("path");
 
-        Grammar grammar = null;
+        Grammar grammar;
         if (! type.equals("moses") && ! type.equals("phrase")) {
           if (new File(path).isDirectory()) {
             try {

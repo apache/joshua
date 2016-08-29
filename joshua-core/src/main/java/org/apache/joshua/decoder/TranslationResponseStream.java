@@ -20,6 +20,8 @@ package org.apache.joshua.decoder;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+
+import com.google.common.base.Throwables;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
 
 /**
@@ -27,13 +29,13 @@ import org.apache.joshua.decoder.io.TranslationRequestStream;
  * point to the Decoder object, the call to decodeAll. The translations here are parallel to the
  * input sentences in the corresponding TranslationRequest object. Because of parallelization, the
  * translated sentences might be computed out of order. Each Translation is sent to this
- * Translations object by a DecoderThreadRunner via the record() function, which places the
+ * TranslationResponseStream object by a DecoderThreadRunner via the record() function, which places the
  * Translation in the right place. When the next translation in a sequence is available, next() is
  * notified.
  * 
  * @author Matt Post post@cs.jhu.edu
  */
-public class Translations implements Iterator<Translation>, Iterable<Translation> {
+public class TranslationResponseStream implements Iterator<Translation>, Iterable<Translation> {
 
   /* The source sentences to be translated. */
   private TranslationRequestStream request = null;
@@ -50,8 +52,9 @@ public class Translations implements Iterator<Translation>, Iterable<Translation
   private boolean spent = false;
 
   private Translation nextTranslation;
+  private Throwable fatalException;
 
-  public Translations(TranslationRequestStream request) {
+  public TranslationResponseStream(TranslationRequestStream request) {
     this.request = request;
     this.translations = new LinkedList<>();
   }
@@ -144,6 +147,8 @@ public class Translations implements Iterator<Translation>, Iterable<Translation
         }
       }
 
+      fatalErrorCheck();
+
       /* We now have the sentence and can return it. */
       currentID++;
       this.nextTranslation = translations.poll();
@@ -154,5 +159,18 @@ public class Translations implements Iterator<Translation>, Iterable<Translation
   @Override
   public Iterator<Translation> iterator() {
     return this;
+  }
+
+  public void propagate(Throwable ex) {
+    synchronized (this) {
+      fatalException = ex;
+      notify();
+    }
+  }
+
+  private void fatalErrorCheck() {
+    if (fatalException != null) {
+      Throwables.propagate(fatalException);
+    }
   }
 }

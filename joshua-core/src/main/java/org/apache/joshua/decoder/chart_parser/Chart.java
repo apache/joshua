@@ -108,7 +108,7 @@ public class Chart {
    * for the sentence() method, we should just accept a Segment instead of the
    * sentence, segmentID, and constraintSpans parameters. We have the symbol
    * table already, so we can do the integerization here instead of in
-   * DecoderThread. GrammarFactory.getGrammarForSentence will want the
+   * DecoderTask. GrammarFactory.getGrammarForSentence will want the
    * integerized sentence as well, but then we'll need to adjust that interface
    * to deal with (non-trivial) lattices too. Of course, we get passed the
    * grammars too so we could move all of that into here.

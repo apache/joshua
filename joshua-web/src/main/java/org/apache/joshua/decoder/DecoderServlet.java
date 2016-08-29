@@ -61,7 +61,7 @@ public class DecoderServlet extends HttpServlet {
         BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
         TranslationRequestStream request = new TranslationRequestStream(reader, decoder.getJoshuaConfiguration());
 
-        Translations translations = decoder.decodeAll(request);
+        TranslationResponseStream translations = decoder.decodeAll(request);
 
         JSONMessage message = new JSONMessage();
         for (Translation translation : translations) {

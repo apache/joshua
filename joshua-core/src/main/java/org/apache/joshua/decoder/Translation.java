@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class represents translated input objects (sentences or lattices). It is aware of the source
  * sentence and id and contains the decoded hypergraph. Translation objects are returned by
- * DecoderThread instances to the InputHandler, where they are assembled in order for output.
+ * DecoderTask instances to the InputHandler, where they are assembled in order for output.
  * 
  * @author Matt Post post@cs.jhu.edu
  * @author Felix Hieber fhieber@amazon.com
