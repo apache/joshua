@@ -20,6 +20,8 @@ package org.apache.joshua.decoder;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+
+import com.google.common.base.Throwables;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
 
 /**
@@ -50,6 +52,7 @@ public class Translations implements Iterator<Translation>, Iterable<Translation
   private boolean spent = false;
 
   private Translation nextTranslation;
+  private Throwable fatalException;
 
   public Translations(TranslationRequestStream request) {
     this.request = request;
@@ -144,6 +147,8 @@ public class Translations implements Iterator<Translation>, Iterable<Translation
         }
       }
 
+      fatalErrorCheck();
+
       /* We now have the sentence and can return it. */
       currentID++;
       this.nextTranslation = translations.poll();
@@ -154,5 +159,18 @@ public class Translations implements Iterator<Translation>, Iterable<Translation
   @Override
   public Iterator<Translation> iterator() {
     return this;
+  }
+
+  public void propagate(Throwable ex) {
+    synchronized (this) {
+      fatalException = ex;
+      notify();
+    }
+  }
+
+  private void fatalErrorCheck() {
+    if (fatalException != null) {
+      Throwables.propagate(fatalException);
+    }
   }
 }

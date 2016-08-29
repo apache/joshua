@@ -31,27 +31,31 @@ import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.Translations;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.apache.joshua.decoder.segment_file.Sentence;
+import org.mockito.Mockito;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import static org.mockito.Mockito.doReturn;
 import static org.testng.Assert.assertTrue;
 
 /**
  * Integration test for multithreaded Joshua decoder tests. Grammar used is a
  * toy packed grammar.
  *
- * @author kellens
+ * @author Kellen Sunderland kellen.sunderland@gmail.com
  */
 public class MultithreadedTranslationTests {
 
   private JoshuaConfiguration joshuaConfig = null;
   private Decoder decoder = null;
   private static final String INPUT = "A K B1 U Z1 Z2 B2 C";
+  private static final String EXCEPTION_MESSAGE = "This exception should properly propagate";
   private int previousLogLevel;
   private final static long NANO_SECONDS_PER_SECOND = 1_000_000_000;
 
-  @BeforeMethod
+  @BeforeClass
   public void setUp() throws Exception {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.search_algorithm = "cky";
@@ -88,7 +92,7 @@ public class MultithreadedTranslationTests {
     Decoder.VERBOSE = 0;
   }
 
-  @AfterMethod
+  @AfterClass
   public void tearDown() throws Exception {
     this.decoder.cleanUp();
     this.decoder = null;
@@ -105,7 +109,7 @@ public class MultithreadedTranslationTests {
   // should be sufficient to induce concurrent data access for many shared
   // data structures.
 
-  @Test
+  @Test()
   public void givenPackedGrammar_whenNTranslationsCalledConcurrently_thenReturnNResults() throws IOException {
     // GIVEN
 
@@ -125,7 +129,7 @@ public class MultithreadedTranslationTests {
     ByteArrayOutputStream output = new ByteArrayOutputStream();
 
     // WHEN
-    // Translate all spans in parallel.
+    // Translate all segments in parallel.
     Translations translations = this.decoder.decodeAll(req);
 
     ArrayList<Translation> translationResults = new ArrayList<Translation>();
@@ -146,10 +150,35 @@ public class MultithreadedTranslationTests {
     }
 
     final long translationEndTime = System.nanoTime();
-    final double pipelineLoadDurationInSeconds = (translationEndTime - translationStartTime) / ((double)NANO_SECONDS_PER_SECOND);
+    final double pipelineLoadDurationInSeconds = (translationEndTime - translationStartTime)
+            / ((double)NANO_SECONDS_PER_SECOND);
     System.err.println(String.format("%.2f seconds", pipelineLoadDurationInSeconds));
 
     // THEN
     assertTrue(translationResults.size() == inputLines);
+  }
+
+  @Test(expectedExceptions = RuntimeException.class,
+          expectedExceptionsMessageRegExp = EXCEPTION_MESSAGE)
+  public void givenDecodeAllCalled_whenRuntimeExceptionThrown_thenPropagate() throws IOException {
+    // GIVEN
+    // A spy request stream that will cause an exception to be thrown on a threadpool thread
+    TranslationRequestStream spyReq = Mockito.spy(new TranslationRequestStream(null, joshuaConfig));
+    doReturn(createSentenceSpyWithRuntimeExceptions()).when(spyReq).next();
+
+    // WHEN
+    // Translate all segments in parallel.
+    Translations translations = this.decoder.decodeAll(spyReq);
+
+    ArrayList<Translation> translationResults = new ArrayList<>();
+    for (Translation t: translations)
+      translationResults.add(t);
+  }
+
+  private Sentence createSentenceSpyWithRuntimeExceptions() {
+    Sentence sent = new Sentence(INPUT, 0, joshuaConfig);
+    Sentence spy = Mockito.spy(sent);
+    Mockito.when(spy.target()).thenThrow(new RuntimeException(EXCEPTION_MESSAGE));
+    return spy;
   }
 }
