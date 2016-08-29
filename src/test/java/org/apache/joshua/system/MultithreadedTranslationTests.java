@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Translation;
-import org.apache.joshua.decoder.Translations;
+import org.apache.joshua.decoder.TranslationResponseStream;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.mockito.Mockito;
@@ -130,14 +130,14 @@ public class MultithreadedTranslationTests {
 
     // WHEN
     // Translate all segments in parallel.
-    Translations translations = this.decoder.decodeAll(req);
+    TranslationResponseStream translationResponseStream = this.decoder.decodeAll(req);
 
     ArrayList<Translation> translationResults = new ArrayList<Translation>();
 
 
     final long translationStartTime = System.nanoTime();
     try {
-      for (Translation t: translations)
+      for (Translation t: translationResponseStream)
         translationResults.add(t);
     } finally {
       if (output != null) {
@@ -168,10 +168,10 @@ public class MultithreadedTranslationTests {
 
     // WHEN
     // Translate all segments in parallel.
-    Translations translations = this.decoder.decodeAll(spyReq);
+    TranslationResponseStream translationResponseStream = this.decoder.decodeAll(spyReq);
 
     ArrayList<Translation> translationResults = new ArrayList<>();
-    for (Translation t: translations)
+    for (Translation t: translationResponseStream)
       translationResults.add(t);
   }
 

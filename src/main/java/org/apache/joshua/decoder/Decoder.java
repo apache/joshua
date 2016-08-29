@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
  *
  * After initialization, the main entry point to the Decoder object is
  * decodeAll(TranslationRequest), which returns a set of Translation objects wrapped in an iterable
- * Translations object. It is important that we support multithreading both (a) across the sentences
+ * TranslationResponseStream object. It is important that we support multithreading both (a) across the sentences
  * within a request and (b) across requests, in a round-robin fashion. This is done by maintaining a
  * fixed sized concurrent thread pool. When a new request comes in, a RequestParallelizer thread is
  * launched. This object iterates over the request's sentences, obtaining a thread from the
@@ -78,7 +78,7 @@ import org.slf4j.LoggerFactory;
  *
  * A decoding thread is handled by DecoderTask and launched from DecoderThreadRunner. The purpose
  * of the runner is to record where to place the translated sentence when it is done (i.e., which
- * Translations object). Translations itself is an iterator whose next() call blocks until the next
+ * TranslationResponseStream object). TranslationResponseStream itself is an iterator whose next() call blocks until the next
  * translation is available.
  *
  * @author Matt Post post@cs.jhu.edu
@@ -172,16 +172,16 @@ public class Decoder {
    *
    * @param request the populated {@link TranslationRequestStream}
    * @throws RuntimeException if any fatal errors occur during translation
-   * @return an iterable, asynchronously-filled list of Translations
+   * @return an iterable, asynchronously-filled list of TranslationResponseStream
    */
-  public Translations decodeAll(TranslationRequestStream request) {
-    Translations results = new Translations(request);
+  public TranslationResponseStream decodeAll(TranslationRequestStream request) {
+    TranslationResponseStream results = new TranslationResponseStream(request);
     CompletableFuture.runAsync(() -> decodeAllAsync(request, results));
     return results;
   }
 
   private void decodeAllAsync(TranslationRequestStream request,
-                              Translations responseStream) {
+                              TranslationResponseStream responseStream) {
 
     // Give the threadpool a friendly name to help debuggers
     final ThreadFactory threadFactory = new ThreadFactoryBuilder()

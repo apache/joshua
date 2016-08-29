@@ -101,14 +101,14 @@ public class JoshuaDecoder {
 
     BufferedReader reader = new BufferedReader(new InputStreamReader(input));
     TranslationRequestStream fileRequest = new TranslationRequestStream(reader, joshuaConfiguration);
-    Translations translations = decoder.decodeAll(fileRequest);
+    TranslationResponseStream translationResponseStream = decoder.decodeAll(fileRequest);
     
     // Create the n-best output stream
     FileWriter nbest_out = null;
     if (joshuaConfiguration.n_best_file != null)
       nbest_out = new FileWriter(joshuaConfiguration.n_best_file);
 
-    for (Translation translation: translations) {
+    for (Translation translation: translationResponseStream) {
       
       /**
        * We need to munge the feature value outputs in order to be compatible with Moses tuners.
