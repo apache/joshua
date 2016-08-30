@@ -20,6 +20,8 @@ matrix:
     - os: osx
       osx_image: xcode8
       before_install:
+      - brew update
+      - brew install ant
       - export JOSHUA=`pwd`
       - export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
       - ./download-deps.sh

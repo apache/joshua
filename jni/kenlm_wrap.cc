@@ -45,13 +45,14 @@ template<> struct StaticCheck<true> {
 
 typedef StaticCheck<sizeof(jint) == sizeof(lm::WordIndex)>::StaticAssertionPassed FloatSize;
 
-typedef std::unordered_map<uint64_t, lm::ngram::ChartState*> PoolHash;
+typedef std::unordered_multimap<uint64_t, lm::ngram::ChartState*> PoolHash;
 
 /**
- * A Chart bundles together a hash_map that maps ChartState signatures to a single object
- * instantiated using a pool. This allows duplicate states to avoid allocating separate
- * state objects at multiple places throughout a sentence, and also allows state to be
- * shared across KenLMs for the same sentence.
+ * A Chart bundles together a unordered_multimap that maps ChartState signatures to a single
+ * object instantiated using a pool. This allows duplicate states to avoid allocating separate
+ * state objects at multiple places throughout a sentence, and also allows state to be shared
+ * across KenLMs for the same sentence.  Multimap is used to avoid hash collisions which can
+ * return incorrect results, and cause out-of-bounds lookups when multiple KenLMs are in use.
  */
 struct Chart {
   // A cache for allocated chart objects
@@ -71,15 +72,27 @@ struct Chart {
   }
 
   lm::ngram::ChartState* put(const lm::ngram::ChartState& state) {
+    lm::ngram::ChartState* state_ptr = nullptr;
     uint64_t hashValue = lm::ngram::hash_value(state);
+    auto state_it = poolHash->find(hashValue);
 
-    if (poolHash->find(hashValue) == poolHash->end()) {
-      lm::ngram::ChartState* pointer = (lm::ngram::ChartState *)pool->Allocate(sizeof(lm::ngram::ChartState));
-      *pointer = state;
-      (*poolHash)[hashValue] = pointer;
+    // Try to retrieve a matching ChartState pointer from our Pool
+    while(state_it != poolHash->end()) {
+      if (state == *(state_it->second)) {
+        state_ptr = state_it->second;
+        break;
+      }
+      state_it++;
     }
 
-    return (*poolHash)[hashValue];
+    // Unable to find this ChartState in our pool, allocate new space for it
+    if (!state_ptr) {
+      state_ptr = (lm::ngram::ChartState *) pool->Allocate(sizeof(lm::ngram::ChartState));
+      *state_ptr = state;
+      (*poolHash).insert({hashValue, state_ptr});
+    }
+
+    return state_ptr;
   }
 };
 
