@@ -57,7 +57,7 @@ public class TestSetFilter {
     acceptedLastSourceSide = false;
     lastSourceSide = null;
   }
-  
+
   public String getFilterName() {
     if (filter != null)
       if (filter instanceof FastFilter)
@@ -109,7 +109,7 @@ public class TestSetFilter {
   }
 
   /**
-   * Top-level filter, responsible for calling the fast or exact version. Takes the source side 
+   * Top-level filter, responsible for calling the fast or exact version. Takes the source side
    * of a rule and determines whether there is any sentence in the test set that can match it.
    * @param sourceSide an input source sentence
    * @return true if is any sentence in the test set can match the source input
@@ -124,11 +124,11 @@ public class TestSetFilter {
 
     return acceptedLastSourceSide;
   }
-    
+
   /**
    * Determines whether a rule is an abstract rule. An abstract rule is one that has no terminals on
    * its source side.
-   * 
+   *
    * If the rule is abstract, the rule's arity is returned. Otherwise, 0 is returned.
    */
   private boolean isAbstract(String source) {
@@ -144,7 +144,7 @@ public class TestSetFilter {
   private interface Filter {
     /* Tell the filter about a sentence in the test set being filtered to */
     public void addSentence(String sentence);
-    
+
     /* Returns true if the filter permits the specified source side */
     public boolean permits(String sourceSide);
   }
@@ -155,7 +155,7 @@ public class TestSetFilter {
     public FastFilter() {
       ngrams = new HashSet<String>();
     }
-    
+
     @Override
     public boolean permits(String source) {
       for (String chunk : source.split(NT_REGEX)) {
@@ -194,7 +194,7 @@ public class TestSetFilter {
     public LooseFilter() {
       testSentences = new ArrayList<String>();
     }
-    
+
     @Override
     public void addSentence(String source) {
       testSentences.add(source);
@@ -227,13 +227,13 @@ public class TestSetFilter {
     private FastFilter fastFilter = null;
     private Map<String, Set<Integer>> sentencesByWord;
     List<String> testSentences = null;
-    
+
     public ExactFilter() {
       fastFilter = new FastFilter();
       sentencesByWord = new HashMap<String, Set<Integer>>();
       testSentences = new ArrayList<String>();
     }
-    
+
     @Override
     public void addSentence(String source) {
       fastFilter.addSentence(source);
@@ -243,13 +243,13 @@ public class TestSetFilter {
 
     /**
      * Always permit abstract rules. Otherwise, query the fast filter, and if that passes, apply
-     * 
+     *
      */
     @Override
     public boolean permits(String sourceSide) {
       if (isAbstract(sourceSide))
         return true;
-      
+
       if (fastFilter.permits(sourceSide)) {
         Pattern pattern = getPattern(sourceSide);
         for (int i : getSentencesForRule(sourceSide)) {
@@ -257,10 +257,10 @@ public class TestSetFilter {
             return true;
           }
         }
-      } 
+      }
       return false;
     }
-    
+
     protected Pattern getPattern(String source) {
       String pattern = Pattern.quote(source);
       pattern = pattern.replaceAll(NT_REGEX, "\\\\E.+\\\\Q");
@@ -268,7 +268,7 @@ public class TestSetFilter {
       pattern = "(?:^|\\s)" + pattern + "(?:$|\\s)";
       return Pattern.compile(pattern);
     }
-  
+
     /*
      * Map words to all the sentences they appear in.
      */
@@ -280,7 +280,7 @@ public class TestSetFilter {
         sentencesByWord.get(t).add(index);
       }
     }
-    
+
     private Set<Integer> getSentencesForRule(String source) {
       Set<Integer> sentences = null;
       for (String token : source.split("\\s+")) {
@@ -293,7 +293,7 @@ public class TestSetFilter {
           }
         }
       }
-      
+
       return sentences;
     }
   }
@@ -311,7 +311,7 @@ public class TestSetFilter {
       System.err.println("    -n    max n-gram to compare to (default 12)");
       return;
     }
-    
+
     String grammarFile = null;
 
     TestSetFilter filter = new TestSetFilter();
@@ -350,34 +350,35 @@ public class TestSetFilter {
       System.err.println(String.format("Filtering rules with the %s filter...", filter.getFilterName()));
 //      System.err.println("Using at max " + filter.RULE_LENGTH + " n-grams...");
     }
-    LineReader reader = (grammarFile != null) 
+    try(LineReader reader = (grammarFile != null)
         ? new LineReader(grammarFile, filter.verbose)
-        : new LineReader(System.in); 
-    for (String rule: reader) {
-      rulesIn++;
+        : new LineReader(System.in);) {
+      for (String rule: reader) {
+        rulesIn++;
 
-      String[] parts = P_DELIM.split(rule);
-      if (parts.length >= 4) {
-        // the source is the second field for thrax grammars, first field for phrasal ones 
-        String source = rule.startsWith("[") ? parts[1].trim() : parts[0].trim();
-        if (filter.inTestSet(source)) {
-          System.out.println(rule);
-          if (filter.parallel)
+        String[] parts = P_DELIM.split(rule);
+        if (parts.length >= 4) {
+          // the source is the second field for thrax grammars, first field for phrasal ones
+          String source = rule.startsWith("[") ? parts[1].trim() : parts[0].trim();
+          if (filter.inTestSet(source)) {
+            System.out.println(rule);
+            if (filter.parallel)
+              System.out.flush();
+            rulesOut++;
+          } else if (filter.parallel) {
+            System.out.println("");
             System.out.flush();
-          rulesOut++;
-        } else if (filter.parallel) {
-          System.out.println("");
-          System.out.flush();
+          }
         }
       }
-    }
-    if (filter.verbose) {
-      System.err.println("[INFO] Total rules read: " + rulesIn);
-      System.err.println("[INFO] Rules kept: " + rulesOut);
-      System.err.println("[INFO] Rules dropped: " + (rulesIn - rulesOut));
-      System.err.println("[INFO] cached queries: " + filter.cached);
-    }
+      if (filter.verbose) {
+        System.err.println("[INFO] Total rules read: " + rulesIn);
+        System.err.println("[INFO] Rules kept: " + rulesOut);
+        System.err.println("[INFO] Rules dropped: " + (rulesIn - rulesOut));
+        System.err.println("[INFO] cached queries: " + filter.cached);
+      }
 
-    return;
+      return;
+    }
   }
 }

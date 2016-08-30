@@ -18,21 +18,23 @@
  */
 package org.apache.joshua.util.quantization;
 
-import java.io.DataInputStream; 
-import java.io.DataOutputStream; 
-import java.io.IOException; 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
-abstract class StatelessQuantizer implements Quantizer { 
+abstract class StatelessQuantizer implements Quantizer {
 
-  public void initialize() {} 
+  @Override
+  public void initialize() {}
 
-  public void add(float key) {} 
+  @Override
+  public void add(float key) {}
 
-  public void finalize() {} 
+  @Override
+  public void writeState(DataOutputStream out) throws IOException {
+    out.writeUTF(getKey());
+  }
 
-  public void writeState(DataOutputStream out) throws IOException { 
-    out.writeUTF(getKey()); 
-  } 
-
-  public void readState(DataInputStream in) throws IOException {} 
+  @Override
+  public void readState(DataInputStream in) throws IOException {}
 }

@@ -18,12 +18,15 @@
  */
 package org.apache.joshua.system;
 
+import static org.mockito.Mockito.doReturn;
+import static org.testng.Assert.assertTrue;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import org.apache.joshua.decoder.Decoder;
@@ -36,9 +39,6 @@ import org.mockito.Mockito;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import static org.mockito.Mockito.doReturn;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Integration test for multithreaded Joshua decoder tests. Grammar used is a
@@ -120,8 +120,8 @@ public class MultithreadedTranslationTests {
     // engine.
     TranslationRequestStream req = new TranslationRequestStream(
         new BufferedReader(new InputStreamReader(new ByteArrayInputStream(sb.toString()
-        .getBytes(Charset.forName("UTF-8"))))), joshuaConfig);
-    
+        .getBytes(StandardCharsets.UTF_8)))), joshuaConfig);
+
     ByteArrayOutputStream output = new ByteArrayOutputStream();
 
     // WHEN

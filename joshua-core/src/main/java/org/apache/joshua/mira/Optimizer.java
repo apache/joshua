@@ -18,9 +18,9 @@
  */
 package org.apache.joshua.mira;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -81,8 +81,6 @@ public class Optimizer {
       String[] featInfo;
       int thisBatchSize = 0;
       int numBatch = 0;
-      int numUpdate = 0;
-      Iterator it;
       Integer diffFeatId;
 
       // update weights
@@ -98,7 +96,7 @@ public class Optimizer {
 	      s = sents.get(sentCount);
 	      // find out oracle and prediction
 	      findOraPred(s, oraPredScore, oraPredFeat, finalLambda, featScale);
-	      
+
 	      // the model scores here are already scaled in findOraPred
 	      oraMetric = oraPredScore[0];
 	      oraScore = oraPredScore[1];
@@ -106,7 +104,7 @@ public class Optimizer {
 	      predScore = oraPredScore[3];
 	      oraFeat = oraPredFeat[0];
 	      predFeat = oraPredFeat[1];
-	      
+
 	      // update the scale
 	      if (needScale) { // otherwise featscale remains 1.0
 		  sumMetricScore += java.lang.Math.abs(oraMetric + predMetric);
@@ -119,7 +117,7 @@ public class Optimizer {
 
 	      vecOraFeat = oraFeat.split("\\s+");
 	      vecPredFeat = predFeat.split("\\s+");
-	      
+
 	      //accumulate difference feature vector
 	      if ( b == 0 ) {
 		  for (int i = 0; i < vecOraFeat.length; i++) {
@@ -185,8 +183,8 @@ public class Optimizer {
 	  if (!runPercep) { // otherwise eta=1.0
 	      featNorm = 0;
 	      Collection<Double> allDiff = featDiff.values();
-	      for (it = allDiff.iterator(); it.hasNext();) {
-		  diff = (Double) it.next();
+	      for (Iterator<Double> it = allDiff.iterator(); it.hasNext();) {
+		  diff = it.next();
 		  featNorm += diff * diff / ( thisBatchSize * thisBatchSize );
 	      }
 	  }
@@ -199,10 +197,10 @@ public class Optimizer {
 	  }
 	  avgEta += eta;
 	  Set<Integer> diffFeatSet = featDiff.keySet();
-	  it = diffFeatSet.iterator();
+	  Iterator<Integer> it = diffFeatSet.iterator();
 	  if ( java.lang.Math.abs(eta) > 1e-20 ) {
 	      while (it.hasNext()) {
-		  diffFeatId = (Integer) it.next();
+		  diffFeatId = it.next();
 		  finalLambda[diffFeatId] =
 		      finalLambda[diffFeatId] + eta * featDiff.get(diffFeatId) / thisBatchSize;
 	      }
@@ -304,7 +302,7 @@ public class Optimizer {
 	  // find out the 1-best candidate for each sentence
 	  // this depends on the training mode
 	  maxModelScore = NegInf;
-	  for (Iterator it = candSet.iterator(); it.hasNext();) {
+	  for (Iterator<String> it = candSet.iterator(); it.hasNext();) {
 	      modelScore = 0.0;
 	      candStr = it.next().toString();
 	      feat_str = feat_hash[i].get(candStr).split("\\s+");
@@ -363,7 +361,7 @@ public class Optimizer {
 	      worstPredScore = PosInf;
       }
 
-      for (Iterator it = candSet.iterator(); it.hasNext();) {
+      for (Iterator<String> it = candSet.iterator(); it.hasNext();) {
 	  cand = it.next().toString();
 	  candMetric = computeSentMetric(sentId, cand); // compute metric score
 
@@ -605,11 +603,11 @@ public class Optimizer {
 	  }
       }
   }
-    
+
   public double getMetricScore() {
       return finalMetricScore;
   }
-    
+
   private Vector<String> output;
   private double[] initialLambda;
   private double[] finalLambda;

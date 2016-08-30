@@ -20,25 +20,26 @@ package org.apache.joshua.util;
 
 /***
  * One day, all constants should be moved here (many are in Vocabulary).
- * 
+ *
  * @author Matt Post post@cs.jhu.edu
  */
 
 public final class Constants {
-  public static String defaultNT = "[X]";
+  public static final String defaultNT = "[X]";
 
   public static final String START_SYM = "<s>";
   public static final String STOP_SYM = "</s>";
   public static final String UNKNOWN_WORD = "<unk>";
-  
+
   public static final String fieldDelimiterPattern = "\\s\\|{3}\\s";
   public static final String fieldDelimiter = " ||| ";
+
   public static final String spaceSeparator = "\\s+";
-  
+
   public static final String NT_REGEX = "\\[[^\\]]+?\\]";
-  
+
   public static final String TM_PREFIX = "tm";
-  
+
   public static final String labeledFeatureSeparator = "=";
-  
+
 }

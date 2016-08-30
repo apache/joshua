@@ -21,7 +21,14 @@ package org.apache.joshua.decoder.ff.fragmentlm;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.ff.fragmentlm.Trees.PennTreeReader;
@@ -39,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * addition to complete trees (the BP requires terminals to be immediately governed by a
  * preterminal). To distinguish terminals from nonterminals in fragments, the former must be
  * enclosed in double-quotes when read in.
- * 
+ *
  * @author Dan Klein
  * @author Matt Post post@cs.jhu.edu
  */
@@ -72,13 +79,13 @@ public class Tree implements Serializable {
    * This maps the flat right-hand sides of Joshua rules to the tree fragments they were derived
    * from. It is used to lookup the fragment that language model fragments should be match against.
    * For example, if the target (English) side of your rule is
-   * 
+   *
    * [NP,1] said [SBAR,2]
-   * 
+   *
    * we will retrieve the unflattened fragment
-   * 
+   *
    * (S NP (VP (VBD said) SBAR))
-   * 
+   *
    * which presumably was the fronter fragment used to derive the translation rule. With this in
    * hand, we can iterate through our store of language model fragments to match them against this,
    * following tail nodes if necessary.
@@ -114,7 +121,7 @@ public class Tree implements Serializable {
 
   /**
    * Computes the depth-one rule rooted at this node. If the node has no children, null is returned.
-   * 
+   *
    * @return string representation of the rule
    */
   public String getRule() {
@@ -182,7 +189,7 @@ public class Tree implements Serializable {
 
   /**
    * Clone the structure of the tree.
-   * 
+   *
    * @return a cloned tree
    */
   public Tree shallowClone() {
@@ -241,7 +248,7 @@ public class Tree implements Serializable {
    * A tree is lexicalized if it has terminal nodes among the leaves of its frontier. For normal
    * trees this is always true since they bottom out in terminals, but for fragments, this may or
    * may not be true.
-   * 
+   *
    * @return true if the tree is lexicalized
    */
   public boolean isLexicalized() {
@@ -260,7 +267,7 @@ public class Tree implements Serializable {
 
   /**
    * The depth of a tree is the maximum distance from the root to any of the frontier nodes.
-   * 
+   *
    * @return the tree depth
    */
   public int getDepth() {
@@ -308,6 +315,7 @@ public class Tree implements Serializable {
     this.label = Vocabulary.id(label);
   }
 
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     toStringBuilder(sb);
@@ -317,13 +325,13 @@ public class Tree implements Serializable {
   /**
    * Removes the quotes around terminals. Note that the resulting tree could not be read back
    * in by this class, since unquoted leaves are interpreted as nonterminals.
-   * 
+   *
    * @return unquoted string
    */
   public String unquotedString() {
     return toString().replaceAll("\"", "");
   }
-  
+
   public String escapedString() {
     return toString().replaceAll(" ", "_");
   }
@@ -349,7 +357,7 @@ public class Tree implements Serializable {
   /**
    * Get the set of all subtrees inside the tree by returning a tree rooted at each node. These are
    * <i>not</i> copies, but all share structure. The tree is regarded as a subtree of itself.
-   * 
+   *
    * @return the <code>Set</code> of all subtrees in the tree.
    */
   public Set<Tree> subTrees() {
@@ -359,7 +367,7 @@ public class Tree implements Serializable {
   /**
    * Get the list of all subtrees inside the tree by returning a tree rooted at each node. These are
    * <i>not</i> copies, but all share structure. The tree is regarded as a subtree of itself.
-   * 
+   *
    * @return the <code>List</code> of all subtrees in the tree.
    */
   public List<Tree> subTreeList() {
@@ -369,7 +377,7 @@ public class Tree implements Serializable {
   /**
    * Add the set of all subtrees inside a tree (including the tree itself) to the given
    * <code>Collection</code>.
-   * 
+   *
    * @param n A collection of nodes to which the subtrees will be added
    * @return The collection parameter with the subtrees added
    */
@@ -387,7 +395,7 @@ public class Tree implements Serializable {
    * <code>iterator()</code> method required by the <code>Collections</code> interface. It does a
    * preorder (children after node) traversal of the tree. (A possible extension to the class at
    * some point would be to allow different traversal orderings via variant iterators.)
-   * 
+   *
    * @return An interator over the nodes of the tree
    */
   public TreeIterator iterator() {
@@ -403,10 +411,12 @@ public class Tree implements Serializable {
       treeStack.add(Tree.this);
     }
 
+    @Override
     public boolean hasNext() {
       return (!treeStack.isEmpty());
     }
 
+    @Override
     public Tree next() {
       int lastIndex = treeStack.size() - 1;
       Tree tr = treeStack.remove(lastIndex);
@@ -421,6 +431,7 @@ public class Tree implements Serializable {
     /**
      * Not supported
      */
+    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
@@ -454,7 +465,7 @@ public class Tree implements Serializable {
    * to the leftmost (rightmost) pre-terminal in the tree. This facilitates using trees as language
    * models. The arguments have to be passed in to preserve Java generics, even though this is only
    * ever used with String versions.
-   * 
+   *
    * @param sos presumably "&lt;s&gt;"
    * @param eos presumably "&lt;/s&gt;"
    */
@@ -469,7 +480,7 @@ public class Tree implements Serializable {
   }
 
   /**
-   * 
+   *
    * @param symbol the marker to insert
    * @param pos the position at which to insert
    */
@@ -492,7 +503,7 @@ public class Tree implements Serializable {
 
   /**
    * This is a convenience function for producing a fragment from its string representation.
-   * 
+   *
    * @param ptbStr input string from which to produce a fragment
    * @return the fragment
    */
@@ -511,8 +522,7 @@ public class Tree implements Serializable {
 
   public static void readMapping(String fragmentMappingFile) {
     /* Read in the rule / fragments mapping */
-    try {
-      LineReader reader = new LineReader(fragmentMappingFile);
+    try (LineReader reader = new LineReader(fragmentMappingFile);) {
       for (String line : reader) {
         String[] fields = line.split("\\s+\\|{3}\\s+");
         if (fields.length != 2 || !fields[0].startsWith("(")) {
@@ -535,14 +545,14 @@ public class Tree implements Serializable {
    * the internal fragment corresponding to the rule; this will be the top of the tree. We then
    * recursively visit the derivation state objects, following the route through the hypergraph
    * defined by them.
-   * 
+   *
    * This function is like Tree#buildTree(DerivationState, int),
    * but that one simply follows the best incoming hyperedge for each node.
-   * 
+   *
    * @param rule for which corresponding internal fragment can be used to initialize the tree
    * @param derivationStates array of state objects
    * @param maxDepth of route through the hypergraph
-   * @return the Tree 
+   * @return the Tree
    */
   public static Tree buildTree(Rule rule, DerivationState[] derivationStates, int maxDepth) {
     Tree tree = getFragmentFromYield(rule.getTargetWords());
@@ -566,7 +576,7 @@ public class Tree implements Serializable {
      * indices in the Vocabulary, while negative indices are used to nonterminals. These negative
      * indices are a *permutation* of the source side nonterminals, which contain the actual
      * nonterminal Vocabulary indices for the nonterminal names. Here, we convert this permutation
-     * to a nonnegative 0-based permutation and store it in tailIndices. This is used to index 
+     * to a nonnegative 0-based permutation and store it in tailIndices. This is used to index
      * the incoming DerivationState items, which are ordered by the source side.
      */
     ArrayList<Integer> tailIndices = new ArrayList<Integer>();
@@ -604,23 +614,22 @@ public class Tree implements Serializable {
         frontierTree.children = tree.children;
       }
     }
-      
+
     return tree;
   }
-  
+
   /**
    * <p>Builds a tree from the kth-best derivation state. This is done by initializing the tree with
    * the internal fragment corresponding to the rule; this will be the top of the tree. We then
    * recursively visit the derivation state objects, following the route through the hypergraph
    * defined by them.</p>
-   * 
+   *
    * @param derivationState array of state objects
    * @param maxDepth of route through the hypergraph
    * @return the Tree
    */
   public static Tree buildTree(DerivationState derivationState, int maxDepth) {
     Rule rule = derivationState.edge.getRule();
-    
     Tree tree = getFragmentFromYield(rule.getTargetWords());
 
     if (tree == null) {
@@ -628,7 +637,7 @@ public class Tree implements Serializable {
     }
 
     tree = tree.shallowClone();
-    
+
     LOG.debug("buildTree({})", tree);
 
     if (rule.getArity() > 0 && maxDepth > 0) {
@@ -638,7 +647,7 @@ public class Tree implements Serializable {
        * indices in the Vocabulary, while negative indices are used to nonterminals. These negative
        * indices are a *permutation* of the source side nonterminals, which contain the actual
        * nonterminal Vocabulary indices for the nonterminal names. Here, we convert this permutation
-       * to a nonnegative 0-based permutation and store it in tailIndices. This is used to index 
+       * to a nonnegative 0-based permutation and store it in tailIndices. This is used to index
        * the incoming DerivationState items, which are ordered by the source side.
        */
       ArrayList<Integer> tailIndices = new ArrayList<Integer>();
@@ -667,16 +676,16 @@ public class Tree implements Serializable {
           frontierTree.children = childTree.children;
       }
     }
-    
+
     return tree;
   }
 
   /**
    * Takes a rule and its tail pointers and recursively constructs a tree (up to maxDepth).
-   * 
+   *
    * This could be implemented by using the other buildTree() function and using the 1-best
    * DerivationState.
-   * 
+   *
    * @param rule {@link org.apache.joshua.decoder.ff.tm.Rule} to be used whilst building the tree
    * @param tailNodes {@link java.util.List} of {@link org.apache.joshua.decoder.hypergraph.HGNode}'s
    * @param maxDepth to go in the tree
@@ -745,16 +754,16 @@ public class Tree implements Serializable {
     return tree;
   }
 
-  public static void main(String[] args) {
-    LineReader reader = new LineReader(System.in);
-
-    for (String line : reader) {
-      try {
-        Tree tree = Tree.fromString(line);
-        tree.insertSentenceMarkers();
-        System.out.println(tree);
-      } catch (Exception e) {
-        System.out.println("");
+  public static void main(String[] args) throws IOException {
+    try (LineReader reader = new LineReader(System.in);) {
+      for (String line : reader) {
+        try {
+          Tree tree = Tree.fromString(line);
+          tree.insertSentenceMarkers();
+          System.out.println(tree);
+        } catch (Exception e) {
+          System.out.println("");
+        }
       }
     }
 
@@ -762,14 +771,14 @@ public class Tree implements Serializable {
      * Tree fragment = Tree
      * .fromString("(TOP (S (NP (DT the) (NN boy)) (VP (VBD ate) (NP (DT the) (NN food)))))");
      * fragment.insertSentenceMarkers("<s>", "</s>");
-     * 
+     *
      * System.out.println(fragment);
-     * 
+     *
      * ArrayList<Tree> trees = new ArrayList<Tree>(); trees.add(Tree.fromString("(NN \"mat\")"));
      * trees.add(Tree.fromString("(S (NP DT NN) VP)"));
      * trees.add(Tree.fromString("(S (NP (DT \"the\") NN) VP)"));
      * trees.add(Tree.fromString("(S (NP (DT the) NN) VP)"));
-     * 
+     *
      * for (Tree tree : trees) { System.out.println(String.format("TREE %s DEPTH %d LEX? %s", tree,
      * tree.getDepth(), tree.isLexicalized())); }
      */

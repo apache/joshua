@@ -26,21 +26,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 
-import com.sun.net.httpserver.HttpServer;
-
 import org.apache.joshua.decoder.JoshuaConfiguration.SERVER_TYPE;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
+import org.apache.joshua.server.ServerThread;
 import org.apache.joshua.server.TcpServer;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
-import org.apache.joshua.server.ServerThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.net.httpserver.HttpServer;
 
 /**
  * Implements decoder initialization, including interaction with <code>JoshuaConfiguration</code>
  * and <code>DecoderTask</code>.
- * 
+ *
  * @author Zhifei Li, zhifei.work@gmail.com
  * @author wren ng thornton wren@users.sourceforge.net
  * @author Lane Schwartz dowobeha@users.sourceforge.net
@@ -81,7 +81,7 @@ public class JoshuaDecoder {
 
       } else if (joshuaConfiguration.server_type == SERVER_TYPE.HTTP) {
         joshuaConfiguration.use_structured_output = true;
-        
+
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         LOG.info("HTTP Server running and listening on port {}.", port);
         server.createContext("/", new ServerThread(null, decoder, joshuaConfiguration));
@@ -93,23 +93,22 @@ public class JoshuaDecoder {
       }
       return;
     }
-    
+
     // Create a TranslationRequest object, reading from a file if requested, or from STDIN
-    InputStream input = (joshuaConfiguration.input_file != null) 
+    InputStream input = (joshuaConfiguration.input_file != null)
       ? new FileInputStream(joshuaConfiguration.input_file)
       : System.in;
 
     BufferedReader reader = new BufferedReader(new InputStreamReader(input));
     TranslationRequestStream fileRequest = new TranslationRequestStream(reader, joshuaConfiguration);
     TranslationResponseStream translationResponseStream = decoder.decodeAll(fileRequest);
-    
+
     // Create the n-best output stream
     FileWriter nbest_out = null;
     if (joshuaConfiguration.n_best_file != null)
       nbest_out = new FileWriter(joshuaConfiguration.n_best_file);
 
     for (Translation translation: translationResponseStream) {
-      
       /**
        * We need to munge the feature value outputs in order to be compatible with Moses tuners.
        * Whereas Joshua writes to STDOUT whatever is specified in the `output-format` parameter,

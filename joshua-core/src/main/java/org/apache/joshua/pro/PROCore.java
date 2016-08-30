@@ -31,6 +31,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,7 +50,7 @@ import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.metrics.EvaluationMetric;
 import org.apache.joshua.util.StreamGobbler;
-
+import org.apache.joshua.util.io.ExistingUTF8EncodedTextFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,19 +66,15 @@ public class PROCore {
   private TreeSet<Integer>[] indicesOfInterest_all;
 
   private final static DecimalFormat f4 = new DecimalFormat("###0.0000");
-  private final Runtime myRuntime = Runtime.getRuntime();
 
   private final static double NegInf = (-1.0 / 0.0);
   private final static double PosInf = (+1.0 / 0.0);
   private final static double epsilon = 1.0 / 1000000;
 
-  private int progress;
-
   private int verbosity; // anything of priority <= verbosity will be printed
                          // (lower value for priority means more important)
 
   private Random randGen;
-  private int generatedRands;
 
   private int numSentences;
   // number of sentences in the dev set
@@ -256,28 +253,27 @@ public class PROCore {
     this.joshuaConfiguration = joshuaConfiguration;
   }
 
-  public PROCore(String[] args, JoshuaConfiguration joshuaConfiguration) {
+  public PROCore(String[] args, JoshuaConfiguration joshuaConfiguration) throws FileNotFoundException, IOException {
     this.joshuaConfiguration = joshuaConfiguration;
     EvaluationMetric.set_knownMetrics();
     processArgsArray(args);
     initialize(0);
   }
 
-  public PROCore(String configFileName, JoshuaConfiguration joshuaConfiguration) {
+  public PROCore(String configFileName, JoshuaConfiguration joshuaConfiguration) throws FileNotFoundException, IOException {
     this.joshuaConfiguration = joshuaConfiguration;
     EvaluationMetric.set_knownMetrics();
     processArgsArray(cfgFileToArgsArray(configFileName));
     initialize(0);
   }
 
-  private void initialize(int randsToSkip) {
+  private void initialize(int randsToSkip) throws FileNotFoundException, IOException {
     println("NegInf: " + NegInf + ", PosInf: " + PosInf + ", epsilon: " + epsilon, 4);
 
     randGen = new Random(seed);
     for (int r = 1; r <= randsToSkip; ++r) {
       randGen.nextDouble();
     }
-    generatedRands = randsToSkip;
 
     if (randsToSkip == 0) {
       println("----------------------------------------------------", 1);
@@ -291,7 +287,7 @@ public class PROCore {
 
     // COUNT THE TOTAL NUM OF SENTENCES TO BE DECODED, refFileName IS THE COMBINED REFERENCE FILE
     // NAME(AUTO GENERATED)
-    numSentences = countLines(refFileName) / refsPerSen;
+    numSentences = new ExistingUTF8EncodedTextFile(refFileName).getNumberOfLines() / refsPerSen;
 
     // ??
     processDocInfo();
@@ -304,7 +300,7 @@ public class PROCore {
     set_docSubsetInfo(docSubsetInfo);
 
     // count the number of initial features
-    numParams = countNonEmptyLines(paramsFileName) - 1;
+    numParams = new ExistingUTF8EncodedTextFile(paramsFileName).getNumberOfNonEmptyLines() - 1;
     numParamsOld = numParams;
 
     // read parameter config file
@@ -910,7 +906,6 @@ public class PROCore {
                   for (String featurePair : featVal_str) {
                     String[] pair = featurePair.split("=");
                     String name = pair[0];
-                    Double value = Double.parseDouble(pair[1]);
                     int featId = Vocabulary.id(name);
                     // need to identify newly fired feats here
                     if (featId > numParams) {
@@ -1573,8 +1568,6 @@ public class PROCore {
       BufferedReader inFile = new BufferedReader(new FileReader(templateFileName));
       PrintWriter outFile = new PrintWriter(cfgFileName);
 
-      BufferedReader inFeatDefFile = null;
-      PrintWriter outFeatDefFile = null;
       int origFeatNum = 0; // feat num in the template file
 
       String line = inFile.readLine();
@@ -1776,7 +1769,7 @@ public class PROCore {
         // belongs to,
         // and its order in that document. (can also use '-' instead of '_')
 
-        int docInfoSize = countNonEmptyLines(docInfoFileName);
+        int docInfoSize = new ExistingUTF8EncodedTextFile(docInfoFileName).getNumberOfNonEmptyLines();
 
         if (docInfoSize < numSentences) { // format #1 or #2
           numDocuments = docInfoSize;
@@ -1969,9 +1962,7 @@ public class PROCore {
 
     Vector<String> argsVector = new Vector<String>();
 
-    BufferedReader inFile = null;
-    try {
-      inFile = new BufferedReader(new FileReader(fileName));
+    try (BufferedReader inFile = new BufferedReader(new FileReader(fileName));) {
       String line, origLine;
       do {
         line = inFile.readLine();
@@ -2044,8 +2035,6 @@ public class PROCore {
 
         }
       } while (line != null);
-
-      inFile.close();
     } catch (FileNotFoundException e) {
       println("PRO configuration file " + fileName + " was not found!");
       throw new RuntimeException(e);
@@ -2626,9 +2615,7 @@ public class PROCore {
         outFileName = prefix + ".all";
       }
 
-      try {
-        PrintWriter outFile = new PrintWriter(outFileName);
-
+      try (PrintWriter outFile = new PrintWriter(outFileName);) {
         BufferedReader[] inFile = new BufferedReader[numFiles];
 
         int nextIndex;
@@ -2638,14 +2625,14 @@ public class PROCore {
         } else {
           nextIndex = 1;
         }
-        int lineCount = countLines(prefix + nextIndex);
+        int lineCount = new ExistingUTF8EncodedTextFile(prefix + nextIndex).getNumberOfLines();
 
         for (int r = 0; r < numFiles; ++r) {
-          if (countLines(prefix + nextIndex) != lineCount) {
+          if (new ExistingUTF8EncodedTextFile(prefix + nextIndex).getNumberOfLines() != lineCount) {
             throw new RuntimeException("Line count mismatch in " + (prefix + nextIndex) + ".");
           }
           InputStream inStream = new FileInputStream(new File(prefix + nextIndex));
-          inFile[r] = new BufferedReader(new InputStreamReader(inStream, "utf8"));
+          inFile[r] = new BufferedReader(new InputStreamReader(inStream, StandardCharsets.UTF_8));
           ++nextIndex;
         }
 
@@ -2657,8 +2644,6 @@ public class PROCore {
             outFile.println(line);
           }
         }
-
-        outFile.close();
 
         for (int r = 0; r < numFiles; ++r) {
           inFile[r].close();
@@ -2802,107 +2787,9 @@ public class PROCore {
     return str;
   }
 
-  private int countLines(String fileName) {
-    int count = 0;
-
-    try {
-      BufferedReader inFile = new BufferedReader(new FileReader(fileName));
-
-      String line;
-      do {
-        line = inFile.readLine();
-        if (line != null)
-          ++count;
-      } while (line != null);
-
-      inFile.close();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
-    return count;
-  }
-
-  private int countNonEmptyLines(String fileName) {
-    int count = 0;
-
-    try {
-      BufferedReader inFile = new BufferedReader(new FileReader(fileName));
-
-      String line;
-      do {
-        line = inFile.readLine();
-        if (line != null && line.length() > 0)
-          ++count;
-      } while (line != null);
-
-      inFile.close();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
-    return count;
-  }
-
   private String fullPath(String dir, String fileName) {
     File dummyFile = new File(dir, fileName);
     return dummyFile.getAbsolutePath();
-  }
-
-  @SuppressWarnings("unused")
-  private void cleanupMemory() {
-    cleanupMemory(100, false);
-  }
-
-  @SuppressWarnings("unused")
-  private void cleanupMemorySilently() {
-    cleanupMemory(100, true);
-  }
-
-  @SuppressWarnings("static-access")
-  private void cleanupMemory(int reps, boolean silent) {
-    int bytesPerMB = 1024 * 1024;
-
-    long totalMemBefore = myRuntime.totalMemory();
-    long freeMemBefore = myRuntime.freeMemory();
-    long usedMemBefore = totalMemBefore - freeMemBefore;
-
-    long usedCurr = usedMemBefore;
-    long usedPrev = usedCurr;
-
-    // perform garbage collection repeatedly, until there is no decrease in
-    // the amount of used memory
-    for (int i = 1; i <= reps; ++i) {
-      myRuntime.runFinalization();
-      myRuntime.gc();
-      (Thread.currentThread()).yield();
-
-      usedPrev = usedCurr;
-      usedCurr = myRuntime.totalMemory() - myRuntime.freeMemory();
-
-      if (usedCurr == usedPrev)
-        break;
-    }
-
-    if (!silent) {
-      long totalMemAfter = myRuntime.totalMemory();
-      long freeMemAfter = myRuntime.freeMemory();
-      long usedMemAfter = totalMemAfter - freeMemAfter;
-
-      println("GC: d_used = " + ((usedMemAfter - usedMemBefore) / bytesPerMB) + " MB "
-          + "(d_tot = " + ((totalMemAfter - totalMemBefore) / bytesPerMB) + " MB).", 2);
-    }
-  }
-
-  @SuppressWarnings("unused")
-  private void printMemoryUsage() {
-    int bytesPerMB = 1024 * 1024;
-    long totalMem = myRuntime.totalMemory();
-    long freeMem = myRuntime.freeMemory();
-    long usedMem = totalMem - freeMem;
-
-    println("Allocated memory: " + (totalMem / bytesPerMB) + " MB " + "(of which "
-        + (usedMem / bytesPerMB) + " MB is being used).", 2);
   }
 
   private void println(Object obj, int priority) {
@@ -2923,20 +2810,12 @@ public class PROCore {
     System.out.print(obj);
   }
 
-  @SuppressWarnings("unused")
-  private void showProgress() {
-    ++progress;
-    if (progress % 100000 == 0)
-      print(".", 2);
-  }
-
   private ArrayList<Double> randomLambda() {
     ArrayList<Double> retLambda = new ArrayList<Double>(1 + numParams);
 
     for (int c = 1; c <= numParams; ++c) {
       if (isOptimizable[c]) {
         double randVal = randGen.nextDouble(); // number in [0.0,1.0]
-        ++generatedRands;
         randVal = randVal * (maxRandValue[c] - minRandValue[c]); // number in [0.0,max-min]
         randVal = minRandValue[c] + randVal; // number in [min,max]
         retLambda.set(c, randVal);
@@ -2947,81 +2826,4 @@ public class PROCore {
 
     return retLambda;
   }
-
-  private double[] randomPerturbation(double[] origLambda, int i, double method, double param,
-      double mult) {
-    double sigma = 0.0;
-    if (method == 1) {
-      sigma = 1.0 / Math.pow(i, param);
-    } else if (method == 2) {
-      sigma = Math.exp(-param * i);
-    } else if (method == 3) {
-      sigma = Math.max(0.0, 1.0 - (i / param));
-    }
-
-    sigma = mult * sigma;
-
-    double[] retLambda = new double[1 + numParams];
-
-    for (int c = 1; c <= numParams; ++c) {
-      if (isOptimizable[c]) {
-        double randVal = 2 * randGen.nextDouble() - 1.0; // number in [-1.0,1.0]
-        ++generatedRands;
-        randVal = randVal * sigma; // number in [-sigma,sigma]
-        randVal = randVal * origLambda[c]; // number in [-sigma*orig[c],sigma*orig[c]]
-        randVal = randVal + origLambda[c]; // number in
-                                           // [orig[c]-sigma*orig[c],orig[c]+sigma*orig[c]]
-                                           // = [orig[c]*(1-sigma),orig[c]*(1+sigma)]
-        retLambda[c] = randVal;
-      } else {
-        retLambda[c] = origLambda[c];
-      }
-    }
-
-    return retLambda;
-  }
-
-  @SuppressWarnings("unused")
-  private HashSet<Integer> indicesToDiscard(double[] slope, double[] offset) {
-    // some lines can be eliminated: the ones that have a lower offset
-    // than some other line with the same slope.
-    // That is, for any k1 and k2:
-    // if slope[k1] = slope[k2] and offset[k1] > offset[k2],
-    // then k2 can be eliminated.
-    // (This is actually important to do as it eliminates a bug.)
-    // print("discarding: ",4);
-
-    int numCandidates = slope.length;
-    HashSet<Integer> discardedIndices = new HashSet<Integer>();
-    HashMap<Double, Integer> indicesOfSlopes = new HashMap<Double, Integer>();
-    // maps slope to index of best candidate that has that slope.
-    // ("best" as in the one with the highest offset)
-
-    for (int k1 = 0; k1 < numCandidates; ++k1) {
-      double currSlope = slope[k1];
-      if (!indicesOfSlopes.containsKey(currSlope)) {
-        indicesOfSlopes.put(currSlope, k1);
-      } else {
-        int existingIndex = indicesOfSlopes.get(currSlope);
-        if (offset[existingIndex] > offset[k1]) {
-          discardedIndices.add(k1);
-          // print(k1 + " ",4);
-        } else if (offset[k1] > offset[existingIndex]) {
-          indicesOfSlopes.put(currSlope, k1);
-          discardedIndices.add(existingIndex);
-          // print(existingIndex + " ",4);
-        }
-      }
-    }
-
-    // old way of doing it; takes quadratic time (vs. linear time above)
-    /*
-     * for (int k1 = 0; k1 < numCandidates; ++k1) { for (int k2 = 0; k2 < numCandidates; ++k2) { if
-     * (k1 != k2 && slope[k1] == slope[k2] && offset[k1] > offset[k2]) { discardedIndices.add(k2);
-     * // print(k2 + " ",4); } } }
-     */
-
-    // println("",4);
-    return discardedIndices;
-  } // indicesToDiscard(double[] slope, double[] offset)
 }

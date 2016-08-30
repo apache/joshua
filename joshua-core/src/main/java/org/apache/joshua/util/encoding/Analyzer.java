@@ -87,7 +87,7 @@ public class Analyzer {
         // If the count is not 0, i.e. there were negative values, we should
         // not bucket them with the positive ones. Close out the bucket now.
         if (count != 0 && index < buckets.length - 2) {
-          buckets[index++] = (float) sum / count;
+          buckets[index++] = sum / count;
           count = 0;
           sum = 0;
         }
@@ -98,15 +98,15 @@ public class Analyzer {
       sum += key * value;
       // Check if the bucket is full.
       if (count >= size && index < buckets.length - 2) {
-        buckets[index++] = (float) sum / count;
+        buckets[index++] = sum / count;
         count = 0;
         sum = 0;
       }
       last_key = key;
     }
     if (count > 0 && index < buckets.length - 1)
-      buckets[index++] = (float) sum / count;
-    
+      buckets[index++] = sum / count;
+
     float[] shortened = new float[index];
     for (int i = 0; i < shortened.length; ++i)
       shortened[i] = buckets[i];
@@ -167,7 +167,7 @@ public class Analyzer {
       return PrimitiveFloatEncoder.INT;
     return PrimitiveFloatEncoder.FLOAT;
   }
-  
+
   public FloatEncoder inferType(int bits) {
     if (isBoolean())
       return PrimitiveFloatEncoder.BOOLEAN;
@@ -191,45 +191,46 @@ public class Analyzer {
       sb.append(label + "\t" + String.format("%.5f", val) + "\t" + histogram.get(val) + "\n");
     return sb.toString();
   }
-  
+
   public static void main(String[] args) throws IOException {
-    LineReader reader = new LineReader(args[0]);
-    ArrayList<Float> s = new ArrayList<Float>();
+    try (LineReader reader = new LineReader(args[0]);) {
+      ArrayList<Float> s = new ArrayList<Float>();
 
-    System.out.println("Initialized.");
-    while (reader.hasNext())
-      s.add(Float.parseFloat(reader.next().trim()));
-    System.out.println("Data read.");
-    int n = s.size();
-    byte[] c = new byte[n];
-    ByteBuffer b = ByteBuffer.wrap(c);
-    Analyzer q = new Analyzer();
+      System.out.println("Initialized.");
+      while (reader.hasNext())
+        s.add(Float.parseFloat(reader.next().trim()));
+      System.out.println("Data read.");
+      int n = s.size();
+      byte[] c = new byte[n];
+      ByteBuffer b = ByteBuffer.wrap(c);
+      Analyzer q = new Analyzer();
 
-    q.initialize();
-    for (int i = 0; i < n; i++)
-      q.add(s.get(i));
-    EightBitQuantizer eb = new EightBitQuantizer(q.quantize(8));
-    System.out.println("Quantizer learned.");
+      q.initialize();
+      for (int i = 0; i < n; i++)
+        q.add(s.get(i));
+      EightBitQuantizer eb = new EightBitQuantizer(q.quantize(8));
+      System.out.println("Quantizer learned.");
 
-    for (int i = 0; i < n; i++)
-      eb.write(b, s.get(i));
-    b.rewind();
-    System.out.println("Quantization complete.");
+      for (int i = 0; i < n; i++)
+        eb.write(b, s.get(i));
+      b.rewind();
+      System.out.println("Quantization complete.");
 
-    float avg_error = 0;
-    float error = 0;
-    int count = 0;
-    for (int i = -4; i < n - 4; i++) {
-      float coded = eb.read(b, i);
-      if (s.get(i + 4) != 0) {
-        error = Math.abs(s.get(i + 4) - coded);
-        avg_error += error;
-        count++;
+      float avg_error = 0;
+      float error = 0;
+      int count = 0;
+      for (int i = -4; i < n - 4; i++) {
+        float coded = eb.read(b, i);
+        if (s.get(i + 4) != 0) {
+          error = Math.abs(s.get(i + 4) - coded);
+          avg_error += error;
+          count++;
+        }
       }
-    }
-    avg_error /= count;
-    System.out.println("Evaluation complete.");
+      avg_error /= count;
+      System.out.println("Evaluation complete.");
 
-    System.out.println("Average quanitization error over " + n + " samples is: " + avg_error);
+      System.out.println("Average quanitization error over " + n + " samples is: " + avg_error);
+    }
   }
 }

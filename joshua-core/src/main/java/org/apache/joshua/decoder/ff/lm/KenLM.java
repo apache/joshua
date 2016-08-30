@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * feature functions KenLMFF and LanguageModelFF. KenLMFF uses the RuleScore() interface in
  * lm/left.hh, returning a state pointer representing the KenLM state, while LangaugeModelFF handles
  * state by itself and just passes in the ngrams for scoring.
- * 
+ *
  * @author Kenneth Heafield
  * @author Matt Post post@cs.jhu.edu
  */
@@ -58,11 +58,11 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
   private static native float probForString(long ptr, String[] words);
 
   private static native boolean isKnownWord(long ptr, String word);
-  
+
   private static native boolean isLmOov(long ptr, int word);
 
   private static native StateProbPair probRule(long ptr, long pool, long words[]);
-  
+
   private static native float estimateRule(long ptr, long words[]);
 
   private static native float probString(long ptr, int words[], int start);
@@ -98,7 +98,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
     }
   }
 
-  public class KenLMLoadException extends RuntimeException {
+  public static class KenLMLoadException extends RuntimeException {
 
     public KenLMLoadException(UnsatisfiedLinkError e) {
       super(e);
@@ -117,10 +117,12 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
     destroy(pointer);
   }
 
+  @Override
   public int getOrder() {
     return ngramOrder;
   }
 
+  @Override
   public boolean registerWord(String word, int id) {
     return registerWord(pointer, word, id);
   }
@@ -149,10 +151,10 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
    * rule). Nonterminals have a negative value so KenLM can distinguish them. The sentence number is
    * needed so KenLM knows which memory pool to use. When finished, it returns the updated KenLM
    * state and the LM probability incurred along this rule.
-   * 
+   *
    * @param words array of words
    * @param poolPointer todo
-   * @return the updated {@link org.apache.joshua.decoder.ff.lm.KenLM.StateProbPair} e.g. 
+   * @return the updated {@link org.apache.joshua.decoder.ff.lm.KenLM.StateProbPair} e.g.
    * KenLM state and the LM probability incurred along this rule
    */
   public StateProbPair probRule(long[] words, long poolPointer) {
@@ -171,7 +173,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
   /**
    * Public facing function that estimates the cost of a rule, which value is used for sorting
    * rules during cube pruning.
-   * 
+   *
    * @param words array of words
    * @return the estimated cost of the rule (the (partial) n-gram probabilities of all words in the rule)
    */
@@ -182,7 +184,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
     } catch (NoSuchMethodError e) {
       throw new RuntimeException(e);
     }
-    
+
     return estimate;
   }
 
@@ -193,7 +195,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
   public String getStartSymbol() {
     return Vocabulary.START_SYM;
   }
-  
+
   /**
    * Returns whether the given Vocabulary ID is unknown to the
    * KenLM vocabulary. This can be used for a LanguageModel_OOV features

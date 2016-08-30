@@ -19,13 +19,13 @@
 package org.apache.joshua.util.io;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.File;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.zip.GZIPInputStream;
@@ -35,17 +35,11 @@ import org.apache.joshua.decoder.Decoder;
 /**
  * This class provides an Iterator interface to a BufferedReader. This covers the most common
  * use-cases for reading from files without ugly code to check whether we got a line or not.
- * 
+ *
  * @author wren ng thornton wren@users.sourceforge.net
  * @author Matt Post post@cs.jhu.edu
  */
 public class LineReader implements Reader<String>, AutoCloseable {
-
-  /*
-   * Note: charset name is case-agnostic "UTF-8" is the canonical name "UTF8", "unicode-1-1-utf-8"
-   * are aliases Java doesn't distinguish utf8 vs UTF-8 like Perl does
-   */
-  private static final Charset FILE_ENCODING = Charset.forName("UTF-8");
 
   /*
    * The reader and its underlying input stream. We need to keep a hold of the underlying
@@ -59,9 +53,9 @@ public class LineReader implements Reader<String>, AutoCloseable {
   private IOException error;
 
   private int lineno = 0;
-  
+
   private boolean display_progress = false;
-  
+
   private int progress = 0;
 
   // ===============================================================
@@ -71,17 +65,17 @@ public class LineReader implements Reader<String>, AutoCloseable {
   /**
    * Opens a file for iterating line by line. The special "-" filename can be used to specify
    * STDIN. GZIP'd files are tested for automatically.
-   * 
+   *
    * @param filename the file to be opened ("-" for STDIN)
    * @throws IOException if there is an error reading the input file
    */
   public LineReader(String filename) throws IOException {
-    
+
     display_progress = (Decoder.VERBOSE >= 1);
-    
+
     progress = 0;
-    
-    InputStream stream = null; 
+
+    InputStream stream = null;
     long totalBytes = -1;
     if (filename.equals("-")) {
       rawStream = null;
@@ -97,11 +91,11 @@ public class LineReader implements Reader<String>, AutoCloseable {
         rawStream.close();
         stream = rawStream = new ProgressInputStream(new FileInputStream(filename), totalBytes);
       }
-    } 
-    
-    this.reader = new BufferedReader(new InputStreamReader(stream, FILE_ENCODING));
+    }
+
+    this.reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
   }
-  
+
   public LineReader(String filename, boolean show_progress) throws IOException {
     this(filename);
     display_progress = (Decoder.VERBOSE >= 1 && show_progress);
@@ -113,19 +107,19 @@ public class LineReader implements Reader<String>, AutoCloseable {
    * @param in an {@link java.io.InputStream} to wrap and iterate over line by line
    */
   public LineReader(InputStream in) {
-    this.reader = new BufferedReader(new InputStreamReader(in, FILE_ENCODING));
+    this.reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
     display_progress = false;
   }
-  
+
   /**
-   * Chain to the underlying {@link ProgressInputStream}. 
-   * 
+   * Chain to the underlying {@link ProgressInputStream}.
+   *
    * @return an integer from 0..100, indicating how much of the file has been read.
    */
   public int progress() {
     return rawStream == null ? 0 : rawStream.progress();
   }
-  
+
   /**
    * This method will close the file handle, and will raise any exceptions that occured during
    * iteration. The method is idempotent, and all calls after the first are no-ops (unless the
@@ -133,6 +127,7 @@ public class LineReader implements Reader<String>, AutoCloseable {
    * object falls out of scope.
    * @throws IOException if there is an error closing the file handler
    */
+  @Override
   public void close() throws IOException {
 
     this.buffer = null; // Just in case it's a large string
@@ -161,42 +156,13 @@ public class LineReader implements Reader<String>, AutoCloseable {
     }
   }
 
-
-  /**
-   * We attempt to avoid leaking file descriptors if you fail to call close before the object falls
-   * out of scope. However, the language spec makes <b>no guarantees</b> about timeliness of garbage
-   * collection. It is a bug to rely on this method to release the resources. Also, the garbage
-   * collector will discard any exceptions that have queued up, without notifying the application in
-   * any way.
-   * 
-   * Having a finalizer means the JVM can't do "fast allocation" of LineReader objects (or
-   * subclasses). This isn't too important due to disk latency, but may be worth noting.
-   * 
-   * @see <a
-   *      href="http://java2go.blogspot.com/2007/09/javaone-2007-performance-tips-2-finish.html">Performance
-   *      Tips</a>
-   * @see <a
-   *      href="http://www.javaworld.com/javaworld/jw-06-1998/jw-06-techniques.html?page=1">Techniques</a>
-   */
-  protected void finalize() throws Throwable {
-    try {
-      this.close();
-    } catch (IOException e) {
-      // Do nothing. The GC will discard the exception
-      // anyways, but it may cause us to linger on the heap.
-    } finally {
-      super.finalize();
-    }
-  }
-
-
-
   // ===============================================================
   // Reader
   // ===============================================================
 
   // Copied from interface documentation.
   /** Determine if the reader is ready to read a line. */
+  @Override
   public boolean ready() throws IOException {
     return this.reader.ready();
   }
@@ -206,6 +172,7 @@ public class LineReader implements Reader<String>, AutoCloseable {
    * This method is like next() except that it throws the IOException directly. If there are no
    * lines to be read then null is returned.
    */
+  @Override
   public String readLine() throws IOException {
     if (this.hasNext()) {
       String line = this.buffer;
@@ -228,6 +195,7 @@ public class LineReader implements Reader<String>, AutoCloseable {
   // ===============================================================
 
   /** Return self as an iterator. */
+  @Override
   public Iterator<String> iterator() {
     return this;
   }
@@ -243,6 +211,7 @@ public class LineReader implements Reader<String>, AutoCloseable {
    * <code>true</code> if <code>next</code> would return an element rather than throwing an
    * exception.)
    */
+  @Override
   public boolean hasNext() {
     if (null != this.buffer) {
       return true;
@@ -269,12 +238,13 @@ public class LineReader implements Reader<String>, AutoCloseable {
    * The actual IOException encountered will be thrown later, when the LineReader is closed. Also if
    * there is no line to be read then NoSuchElementException is thrown.
    */
+  @Override
   public String next() throws NoSuchElementException {
     if (this.hasNext()) {
       if (display_progress) {
         int newProgress = (reader != null) ? progress() : 100;
 //        System.err.println(String.format("OLD %d NEW %d", progress, newProgress));
-        
+
         if (newProgress > progress) {
           for (int i = progress + 1; i <= newProgress; i++)
             if (i == 97) {
@@ -297,7 +267,7 @@ public class LineReader implements Reader<String>, AutoCloseable {
           progress = newProgress;
         }
       }
-      
+
       String line = this.buffer;
       this.lineno++;
       this.buffer = null;
@@ -306,39 +276,19 @@ public class LineReader implements Reader<String>, AutoCloseable {
       throw new NoSuchElementException();
     }
   }
-  
+
   /* Get the line number of the last line that was returned */
   public int lineno() {
     return this.lineno;
   }
 
   /** Unsupported. */
+  @Override
   public void remove() throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
   }
 
-
   /**
-   * Iterates over all lines, ignoring their contents, and returns the count of lines. If some lines
-   * have already been read, this will return the count of remaining lines. Because no lines will
-   * remain after calling this method, we implicitly call close.
-   * 
-   * @return the number of lines read
-   * @throws IOException if there is an error reading lines
-   */
-  public int countLines() throws IOException {
-    int lines = 0;
-
-    while (this.hasNext()) {
-      this.next();
-      lines++;
-    }
-    this.close();
-
-    return lines;
-  }
-
-  /** 
    * Example usage code.
    * @param args an input file
    */
@@ -348,19 +298,10 @@ public class LineReader implements Reader<String>, AutoCloseable {
       System.exit(1);
     }
 
-    try {
-
-      LineReader in = new LineReader(args[0]);
-      try {
-        for (String line : in) {
-
-          System.out.println(line);
-
-        }
-      } finally {
-        in.close();
+    try (LineReader in = new LineReader(args[0]);) {
+      for (String line : in) {
+        System.out.println(line);
       }
-
     } catch (IOException e) {
       e.printStackTrace();
     }

@@ -53,13 +53,14 @@ import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.metrics.EvaluationMetric;
 import org.apache.joshua.util.StreamGobbler;
+import org.apache.joshua.util.io.ExistingUTF8EncodedTextFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This code was originally written by Omar Zaidan.  In September of 2012, it was augmented to support
  * a sparse feature implementation.
- * 
+ *
  * @author Omar Zaidan
  */
 
@@ -71,7 +72,6 @@ public class MertCore {
   private TreeSet<Integer>[] indicesOfInterest_all;
 
   private final static DecimalFormat f4 = new DecimalFormat("###0.0000");
-  private final Runtime myRuntime = Runtime.getRuntime();
 
   private final static double NegInf = (-1.0 / 0.0);
   private final static double PosInf = (+1.0 / 0.0);
@@ -255,26 +255,26 @@ public class MertCore {
 
   // private int useDisk;
 
-  public MertCore(JoshuaConfiguration joshuaConfiguration) 
+  public MertCore(JoshuaConfiguration joshuaConfiguration)
   {
     this.joshuaConfiguration = joshuaConfiguration;
   }
 
-  public MertCore(String[] args, JoshuaConfiguration joshuaConfiguration) {
+  public MertCore(String[] args, JoshuaConfiguration joshuaConfiguration) throws FileNotFoundException, IOException {
     this.joshuaConfiguration = joshuaConfiguration;
     EvaluationMetric.set_knownMetrics();
     processArgsArray(args);
     initialize(0);
   }
 
-  public MertCore(String configFileName,JoshuaConfiguration joshuaConfiguration) {
+  public MertCore(String configFileName,JoshuaConfiguration joshuaConfiguration) throws FileNotFoundException, IOException {
     this.joshuaConfiguration = joshuaConfiguration;
     EvaluationMetric.set_knownMetrics();
     processArgsArray(cfgFileToArgsArray(configFileName));
     initialize(0);
   }
 
-  private void initialize(int randsToSkip) {
+  private void initialize(int randsToSkip) throws FileNotFoundException, IOException {
     println("NegInf: " + NegInf + ", PosInf: " + PosInf + ", epsilon: " + epsilon, 4);
 
     randGen = new Random(seed);
@@ -298,12 +298,12 @@ public class MertCore {
       if (! new File(refFile).exists())
         refFile = refFileName + ".0";
       if (! new File(refFile).exists()) {
-        throw new RuntimeException(String.format("* FATAL: can't find first reference file '%s{0,.0}'", refFileName));
+        throw new IOException(String.format("* FATAL: can't find first reference file '%s{0,.0}'", refFileName));
       }
 
-      numSentences = countLines(refFile);
+      numSentences = new ExistingUTF8EncodedTextFile(refFile).getNumberOfLines();
     } else {
-      numSentences = countLines(refFileName);
+      numSentences = new ExistingUTF8EncodedTextFile(refFileName).getNumberOfLines();
     }
 
     processDocInfo();
@@ -315,7 +315,7 @@ public class MertCore {
 
 
 
-    numParams = countNonEmptyLines(paramsFileName) - 1;
+    numParams = new ExistingUTF8EncodedTextFile(paramsFileName).getNumberOfNonEmptyLines() - 1;
     // the parameter file contains one line per parameter
     // and one line for the normalization method
 
@@ -375,7 +375,7 @@ public class MertCore {
           reference_readers[i] = new BufferedReader(new InputStreamReader(new FileInputStream(new File(refFile)), "utf8"));
         }
       }
-        
+
       for (int i = 0; i < numSentences; ++i) {
         for (int r = 0; r < refsPerSen; ++r) {
           // read the rth reference translation for the ith sentence
@@ -384,7 +384,7 @@ public class MertCore {
       }
 
       // close all the reference files
-      for (int i = 0; i < refsPerSen; i++) 
+      for (int i = 0; i < refsPerSen; i++)
         reference_readers[i].close();
 
       // read in decoder command, if any
@@ -1522,10 +1522,10 @@ public class MertCore {
 
         /*
          * line format:
-         * 
+         *
          * i ||| words of candidate translation . ||| feat-1_val feat-2_val ... feat-numParams_val
          * .*
-         * 
+         *
          * Updated September 2012: features can now be named (for sparse feature compatibility).
          * You must name all features or none of them.
          */
@@ -1827,7 +1827,7 @@ public class MertCore {
         // belongs to,
         // and its order in that document. (can also use '-' instead of '_')
 
-        int docInfoSize = countNonEmptyLines(docInfoFileName);
+        int docInfoSize = new ExistingUTF8EncodedTextFile(docInfoFileName).getNumberOfNonEmptyLines();
 
         if (docInfoSize < numSentences) { // format #1 or #2
           numDocuments = docInfoSize;
@@ -1935,13 +1935,13 @@ public class MertCore {
       /*
        * InputStream inStream = new FileInputStream(new File(origFileName)); BufferedReader inFile =
        * new BufferedReader(new InputStreamReader(inStream, "utf8"));
-       * 
+       *
        * FileOutputStream outStream = new FileOutputStream(newFileName, false); OutputStreamWriter
        * outStreamWriter = new OutputStreamWriter(outStream, "utf8"); BufferedWriter outFile = new
        * BufferedWriter(outStreamWriter);
-       * 
+       *
        * String line; while(inFile.ready()) { line = inFile.readLine(); writeLine(line, outFile); }
-       * 
+       *
        * inFile.close(); outFile.close();
        */
       return true;
@@ -2454,12 +2454,12 @@ public class MertCore {
     /*
      * 1: -docSet bottom 8d 2: -docSet bottom 25% the bottom ceil(0.20*numDocs) documents 3: -docSet
      * top 8d 4: -docSet top 25% the top ceil(0.20*numDocs) documents
-     * 
+     *
      * 5: -docSet window 11d around 90percentile 11 docs centered around 80th percentile (complain
      * if not enough docs; don't adjust) 6: -docSet window 11d around 40rank 11 docs centered around
      * doc ranked 50 (complain if not enough docs; don't adjust)
-     * 
-     * 
+     *
+     *
      * [0]: method (0-6) [1]: first (1-indexed) [2]: last (1-indexed) [3]: size [4]: center [5]:
      * arg1 (-1 for method 0) [6]: arg2 (-1 for methods 0-4)
      */
@@ -2505,7 +2505,6 @@ public class MertCore {
       info[1] = info[4] - ((info[3] - 1) / 2);
       info[2] = info[4] + ((info[3] - 1) / 2);
     }
-
   }
 
   private void checkFile(String fileName) {
@@ -2688,106 +2687,9 @@ public class MertCore {
     return str;
   }
 
-  private int countLines(String fileName) {
-    int count = 0;
-
-    try {
-      BufferedReader inFile = new BufferedReader(new FileReader(fileName));
-
-      String line;
-      do {
-        line = inFile.readLine();
-        if (line != null) ++count;
-      } while (line != null);
-
-      inFile.close();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
-    return count;
-  }
-
-  private int countNonEmptyLines(String fileName) {
-    int count = 0;
-
-    try {
-      BufferedReader inFile = new BufferedReader(new FileReader(fileName));
-
-      String line;
-      do {
-        line = inFile.readLine();
-        if (line != null && line.length() > 0) ++count;
-      } while (line != null);
-
-      inFile.close();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
-    return count;
-  }
-
   private String fullPath(String dir, String fileName) {
     File dummyFile = new File(dir, fileName);
     return dummyFile.getAbsolutePath();
-  }
-
-  @SuppressWarnings("unused")
-  private void cleanupMemory() {
-    cleanupMemory(100, false);
-  }
-
-  @SuppressWarnings("unused")
-  private void cleanupMemorySilently() {
-    cleanupMemory(100, true);
-  }
-
-  @SuppressWarnings("static-access")
-  private void cleanupMemory(int reps, boolean silent) {
-    int bytesPerMB = 1024 * 1024;
-
-    long totalMemBefore = myRuntime.totalMemory();
-    long freeMemBefore = myRuntime.freeMemory();
-    long usedMemBefore = totalMemBefore - freeMemBefore;
-
-
-    long usedCurr = usedMemBefore;
-    long usedPrev = usedCurr;
-
-    // perform garbage collection repeatedly, until there is no decrease in
-    // the amount of used memory
-    for (int i = 1; i <= reps; ++i) {
-      myRuntime.runFinalization();
-      myRuntime.gc();
-      (Thread.currentThread()).yield();
-
-      usedPrev = usedCurr;
-      usedCurr = myRuntime.totalMemory() - myRuntime.freeMemory();
-
-      if (usedCurr == usedPrev) break;
-    }
-
-
-    if (!silent) {
-      long totalMemAfter = myRuntime.totalMemory();
-      long freeMemAfter = myRuntime.freeMemory();
-      long usedMemAfter = totalMemAfter - freeMemAfter;
-
-      println("GC: d_used = " + ((usedMemAfter - usedMemBefore) / bytesPerMB) + " MB "
-          + "(d_tot = " + ((totalMemAfter - totalMemBefore) / bytesPerMB) + " MB).", 2);
-    }
-  }
-
-  @SuppressWarnings("unused")
-  private void printMemoryUsage() {
-    int bytesPerMB = 1024 * 1024;
-    long totalMem = myRuntime.totalMemory();
-    long freeMem = myRuntime.freeMemory();
-    long usedMem = totalMem - freeMem;
-
-    println("Allocated memory: " + (totalMem / bytesPerMB) + " MB " + "(of which "
-        + (usedMem / bytesPerMB) + " MB is being used).", 2);
   }
 
   private void println(Object obj, int priority) {
@@ -2887,58 +2789,13 @@ public class MertCore {
     lastUsedIndex[i] += 1;
   }
 
-  @SuppressWarnings("unused")
-  private HashSet<Integer> indicesToDiscard(double[] slope, double[] offset) {
-    // some lines can be eliminated: the ones that have a lower offset
-    // than some other line with the same slope.
-    // That is, for any k1 and k2:
-    // if slope[k1] = slope[k2] and offset[k1] > offset[k2],
-    // then k2 can be eliminated.
-    // (This is actually important to do as it eliminates a bug.)
-    // print("discarding: ",4);
-
-    int numCandidates = slope.length;
-    HashSet<Integer> discardedIndices = new HashSet<Integer>();
-    HashMap<Double, Integer> indicesOfSlopes = new HashMap<Double, Integer>();
-    // maps slope to index of best candidate that has that slope.
-    // ("best" as in the one with the highest offset)
-
-    for (int k1 = 0; k1 < numCandidates; ++k1) {
-      double currSlope = slope[k1];
-      if (!indicesOfSlopes.containsKey(currSlope)) {
-        indicesOfSlopes.put(currSlope, k1);
-      } else {
-        int existingIndex = indicesOfSlopes.get(currSlope);
-        if (offset[existingIndex] > offset[k1]) {
-          discardedIndices.add(k1);
-          // print(k1 + " ",4);
-        } else if (offset[k1] > offset[existingIndex]) {
-          indicesOfSlopes.put(currSlope, k1);
-          discardedIndices.add(existingIndex);
-          // print(existingIndex + " ",4);
-        }
-      }
-    }
-
-
-    // old way of doing it; takes quadratic time (vs. linear time above)
-    /*
-     * for (int k1 = 0; k1 < numCandidates; ++k1) { for (int k2 = 0; k2 < numCandidates; ++k2) { if
-     * (k1 != k2 && slope[k1] == slope[k2] && offset[k1] > offset[k2]) { discardedIndices.add(k2);
-     * // print(k2 + " ",4); } } }
-     */
-
-    // println("",4);
-    return discardedIndices;
-  } // indicesToDiscard(double[] slope, double[] offset)
-
-  public static void main(String[] args) {
+  public static void main(String[] args) throws FileNotFoundException, IOException {
 
     String configFileName = args[0];
     String stateFileName = args[1];
     int currIteration = Integer.parseInt(args[2]);
     JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
-    
+
     MertCore DMC = new MertCore(joshuaConfiguration); // dummy MertCore object
 
     // if bad args[], System.exit(80)
@@ -3140,49 +2997,49 @@ public class MertCore {
 
 
 /*
- * 
+ *
  * fake: ----- ex2_N300: java -javaagent:shiftone-jrat.jar -Xmx300m -cp bin joshua.ZMERT.ZMERT -dir
  * MERT_example -s src.txt -r ref.all -rps 4 -cmd decoder_command_ex2.txt -dcfg config_ex2.txt
  * -decOut nbest_ex2.out -N 300 -p params.txt -maxIt 25 -opi 0 -ipi 20 -v 2 -rand 0 -seed
  * 1226091488390 -save 1 -fake nbest_ex2.out.N300.it >
  * ex2_N300ipi20opi0_300max+defratios.it10.noMemRep.bugFixes.monitored.txt
- * 
+ *
  * ex2_N500: java -javaagent:shiftone-jrat.jar -Xmx300m -cp bin joshua.ZMERT.ZMERT -dir MERT_example
  * -s src.txt -r ref.all -rps 4 -cmd decoder_command_ex2.txt -dcfg config_ex2.txt -decOut
  * nbest_ex2.out -N 500 -p params.txt -maxIt 25 -opi 0 -ipi 20 -v 2 -rand 0 -seed 1226091488390
  * -save 1 -fake nbest_ex2.out.N500.it >
  * ex2_N500ipi20opi0_300max+defratios.it05.noMemRep.bugFixes.monitored.txt
- * 
+ *
  * exL_N300__600max: java -javaagent:shiftone-jrat.jar -Xmx600m -cp bin joshua.ZMERT.ZMERT -dir
  * MERT_example -s mt06_source.txt -r mt06_ref.all -rps 4 -cmd decoder_command_ex2.txt -dcfg
  * config_ex2.txt -decOut nbest_exL.out -N 300 -p params.txt -maxIt 5 -opi 0 -ipi 20 -v 2 -rand 0
  * -seed 1226091488390 -save 1 -fake nbest_exL.out.it >
  * exL_N300ipi20opi0_600max+defratios.it05.noMemRep.bugFixes.monitored.txt
- * 
+ *
  * exL_N300__300max: java -javaagent:shiftone-jrat.jar -Xmx300m -cp bin joshua.ZMERT.ZMERT -dir
  * MERT_example -s mt06_source.txt -r mt06_ref.all -rps 4 -cmd decoder_command_ex2.txt -dcfg
  * config_ex2.txt -decOut nbest_exL.out -N 300 -p params.txt -maxIt 5 -opi 0 -ipi 20 -v 2 -rand 0
  * -seed 1226091488390 -save 1 -fake nbest_exL.out.it >
  * exL_N300ipi20opi0_300max+defratios.it05.noMemRep.bugFixes.monitored.txt
- * 
+ *
  * gen: ---- ex2_N300: make sure top_n=300 in MERT_example\config_ex2.txt java
  * -javaagent:shiftone-jrat.jar -Xmx300m -cp bin joshua.ZMERT.ZMERT -dir MERT_example -s src.txt -r
  * ref.all -rps 4 -cmd decoder_command_ex2.txt -dcfg config_ex2.txt -decOut nbest_ex2.out -N 300 -p
  * params.txt -maxIt 25 -opi 0 -ipi 20 -v 2 -rand 0 -seed 1226091488390 -save 1 >
  * ex2_N300ipi20opi0_300max+defratios.itxx.monitored.txt.gen
- * 
+ *
  * ex2_N500: make sure top_n=500 in MERT_example\config_ex2.txt java -javaagent:shiftone-jrat.jar
  * -Xmx300m -cp bin joshua.ZMERT.ZMERT -dir MERT_example -s src.txt -r ref.all -rps 4 -cmd
  * decoder_command_ex2.txt -dcfg config_ex2.txt -decOut nbest_ex2.out -N 500 -p params.txt -maxIt 25
  * -opi 0 -ipi 20 -v 2 -rand 0 -seed 1226091488390 -save 1 >
  * ex2_N500ipi20opi0_300max+defratios.itxx.monitored.txt.gen
- * 
+ *
  * exL_N300__600max: run on CLSP machines only! (e.g. z12) $JAVA_bin/java
  * -javaagent:shiftone-jrat.jar -Xmx600m -cp bin joshua.ZMERT.ZMERT -dir YOURDIR -s mt06_source.txt
  * -r mt06_ref.all -rps 4 -cmd decoder_command.txt -dcfg config_exL.txt -decOut nbest_exL.out -N 300
  * -p params.txt -maxIt 25 -opi 0 -ipi 20 -v 2 -rand 0 -seed 1226091488390 -save 1 >
  * exL_N300ipi20opi0_600max+defratios.itxx.monitored.txt.gen
- * 
+ *
  * exL_N300__300max: run on CLSP machines only! (e.g. z12) $JAVA_bin/java
  * -javaagent:shiftone-jrat.jar -Xmx300m -cp bin joshua.ZMERT.ZMERT -dir YOURDIR -s mt06_source.txt
  * -r mt06_ref.all -rps 4 -cmd decoder_command.txt -dcfg config_exL.txt -decOut nbest_exL.out -N 300
