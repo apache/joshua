@@ -111,20 +111,20 @@ public class PackedGrammar extends AbstractGrammar {
 
   private final File vocabFile; // store path to vocabulary file
 
-  // The version number of the earliest supported grammar packer
-  public static final int SUPPORTED_VERSION = 3;
-
   // A rule cache for commonly used tries to avoid excess object allocations
   // Testing shows there's up to ~95% hit rate when cache size is 5000 Trie nodes.
   private final Cache<Trie, List<Rule>> cached_rules;
 
   private final String grammarDir;
+  
+  private JoshuaConfiguration config;
 
   public PackedGrammar(String grammar_dir, int span_limit, String owner, String type,
       JoshuaConfiguration joshuaConfiguration) throws IOException {
     super(owner, joshuaConfiguration, span_limit);
 
     this.grammarDir = grammar_dir;
+    this.config = joshuaConfiguration;
 
     // Read the vocabulary.
     vocabFile = new File(grammar_dir + File.separator + VOCABULARY_FILENAME);
@@ -1031,7 +1031,7 @@ public class PackedGrammar extends AbstractGrammar {
    * @throws IOException
    */
   private void readConfig(String config) throws IOException {
-    int version = 0;
+    int version = 2;
 
     for (String line: new LineReader(config)) {
       String[] tokens = line.split(" = ");
@@ -1042,10 +1042,19 @@ public class PackedGrammar extends AbstractGrammar {
       }
     }
 
-    if (version != 3) {
-      String message = String.format("The grammar at %s was packed with packer version %d, but the earliest supported version is %d",
-          this.grammarDir, version, SUPPORTED_VERSION);
+    if (! isSupportedVersion(version)) {
+      String message = String.format("The grammar at %s was packed with packer version %d, which is incompatible with the current config",
+          this.grammarDir, version);
       throw new RuntimeException(message);
     }
+  }
+  
+  /*
+   * Determines whether the current grammar is a supported version. For hierarchical decoding,
+   * no changes have occurred, so any version past 2 (the default) is supported. For phrase-
+   * based decoding, version 4 is required.
+   */
+  private boolean isSupportedVersion(int version) {
+    return (config.search_algorithm.equals("cky") && version >= 2) || (version >= 4);
   }
 }
