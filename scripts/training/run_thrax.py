@@ -35,10 +35,11 @@ EXAMPLE = r"""
 Example invocation:
 
 $JOSHUA/scripts/support/run_thrax.py \
+  /path/to/thrax.config \
   /path/to/corpus.SOURCE \
   /path/to/corpus.TARGET \
   /path/to/alignment \
-  -c /path/to/thrax.config \
+  /path/to/thrax.config \
   -o grammar.gz
 """
 parser = argparse.ArgumentParser(description='Run thrax')
