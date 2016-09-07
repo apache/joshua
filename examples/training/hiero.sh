@@ -33,5 +33,4 @@ $JOSHUA/bin/pipeline.pl \
     --threads 8 \
     --tuner mert \
     --joshua-mem 10g \
-    --packer-mem 8g \
-    --optimizer-runs 5
+    --packer-mem 8g

@@ -45,5 +45,4 @@ $JOSHUA/scripts/training/pipeline.pl \
     --joshua-mem 20g \
     --packer-mem 8g \
     --tuner mira \
-    --maxlen 80 \
-    --optimizer-runs 5
+    --maxlen 80
