@@ -44,8 +44,8 @@ public class Hypothesis extends HGNode implements Comparable<Hypothesis> {
 
   public static Rule BEGIN_RULE = new HieroFormatReader().parseLine("[GOAL] ||| <s> ||| <s> |||   ||| 0-0");
   public static Rule END_RULE   = new HieroFormatReader().parseLine("[GOAL] ||| </s> ||| </s> |||   ||| 0-0");
-  public static Rule MONO_RULE  = new HieroFormatReader().parseLine("[GOAL] ||| [GOAL,1] [X,2] ||| [GOAL,1] [X,2] |||   ||| 0-0 1-1");
-  public static Rule SWAP_RULE  = new HieroFormatReader().parseLine("[GOAL] ||| [X,1] [GOAL,2] ||| [GOAL,2] [X,1] |||   ||| 0-1 1-0");
+  public static Rule INORDER_RULE  = new HieroFormatReader().parseLine("[GOAL] ||| [GOAL,1] [X,2] ||| [GOAL,1] [X,2] |||   ||| 0-0 1-1");
+  public static Rule INVERTED_RULE  = new HieroFormatReader().parseLine("[GOAL] ||| [X,1] [GOAL,2] ||| [GOAL,2] [X,1] |||   ||| 0-1 1-0");
   
   public String toString() {
     StringBuffer sb = new StringBuffer();

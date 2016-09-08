@@ -147,9 +147,9 @@ public class Stack extends ArrayList<Hypothesis> {
 
       /* Get the rule. If if it's a swap or monolingual rule, find the right backpointer */
       Rule rule = cand.getHypothesis().getRule();
-      if (rule == Hypothesis.MONO_RULE)
+      if (rule == Hypothesis.INORDER_RULE)
         rule = cand.getHypothesis().bestHyperedge.getTailNodes().get(1).bestHyperedge.getRule();
-      else if (rule == Hypothesis.SWAP_RULE)
+      else if (rule == Hypothesis.INVERTED_RULE)
         rule = cand.getHypothesis().bestHyperedge.getTailNodes().get(0).bestHyperedge.getRule();
       String oldWords = rule.getEnglishWords();
 

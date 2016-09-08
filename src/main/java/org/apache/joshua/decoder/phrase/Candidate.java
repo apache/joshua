@@ -120,7 +120,7 @@ public class Candidate implements Comparable<Candidate> {
     this.phrases = phrases;
     this.future_delta = delta;
     this.ranks = ranks;
-    this.rule = isMonotonic() ? Hypothesis.MONO_RULE : Hypothesis.SWAP_RULE;
+    this.rule = isMonotonic() ? Hypothesis.INORDER_RULE : Hypothesis.INVERTED_RULE;
 //    this.score = hypotheses.get(ranks[0]).score + phrases.get(ranks[1]).getEstimatedCost();
 
     this.computedResult = null;

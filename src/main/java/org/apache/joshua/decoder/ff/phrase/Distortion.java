@@ -56,26 +56,34 @@ public class Distortion extends StatelessFF {
   public DPState compute(Rule rule, List<HGNode> tailNodes, int i, int j, SourcePath sourcePath,
       Sentence sentence, Accumulator acc) {
 
-    if (rule == Hypothesis.MONO_RULE || rule == Hypothesis.SWAP_RULE) {
+    if (rule == Hypothesis.INORDER_RULE || rule == Hypothesis.INVERTED_RULE) {
 //        int start_point = j - rule.getFrench().length + rule.getArity();
 //        int jump_size = Math.abs(tailNodes.get(0).j - start_point);
 
-      if (rule == Hypothesis.MONO_RULE) {
-        int start_point = j - tailNodes.get(1).getHyperEdges().get(0).getRule().getFrench().length;
-        int last_point = tailNodes.get(0).j;
-        int jump_size = Math.abs(start_point - last_point);
+      if (rule == Hypothesis.INORDER_RULE) {
+        int last_phrase_end = tailNodes.get(0).j;
+        int new_phrase_start = tailNodes.get(1).i;
+        int jump_size = Math.abs(last_phrase_end - new_phrase_start);
+        
+//        int start_point = j - tailNodes.get(1).getHyperEdges().get(0).getRule().getFrench().length;
+//        int last_point = tailNodes.get(0).j;
+//        int jump_size = Math.abs(start_point - last_point);
       
 //        System.err.println(String.format("DISTORTION_mono(%d -> %d) = %d", 
-//            last_point, start_point, jump_size));
+//            last_phrase_end, new_phrase_start, jump_size));
 
         acc.add(denseFeatureIndex, -jump_size);
       } else {
-        int start_point = j - tailNodes.get(0).getHyperEdges().get(0).getRule().getFrench().length;
-        int last_point = tailNodes.get(1).j;
-        int jump_size = Math.abs(start_point - last_point);
+        int last_phrase_end = tailNodes.get(1).j;
+        int new_phrase_start = tailNodes.get(0).i;
+        int jump_size = Math.abs(last_phrase_end - new_phrase_start);
+
+//        int start_point = j - tailNodes.get(0).getHyperEdges().get(0).getRule().getFrench().length;
+//        int last_point = tailNodes.get(1).j;
+//        int jump_size = Math.abs(start_point - last_point);
       
 //        System.err.println(String.format("DISTORTION_swap(%d -> %d) = %d", 
-//            last_point, start_point, jump_size));
+//            last_phrase_end, new_phrase_start, jump_size));
 
         acc.add(denseFeatureIndex, -jump_size);    
       }
