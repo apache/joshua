@@ -17,7 +17,7 @@
 #
 set -u
 
-cat corpus.es | $JOSHUA/bin/joshua-decoder -threads 1 -c config > output 2> log
+cat corpus.es | $JOSHUA/bin/joshua-decoder -threads 1 -c joshua.config > output 2> log
 
 # Compare
 diff -u output output.gold > diff
