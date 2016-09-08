@@ -32,7 +32,7 @@ package org.apache.joshua.decoder.phrase;
  * ensures that the coverage vector is consistent but the resulting hypergraph may not be projective,
  * which is different from the CKY algorithm, which does produce projective derivations. 
  * 
- * TODO Lattice decoding is not yet supported (March 2015).
+ * TODO Lattice decoding is not yet supported.
  */
 
 import static org.apache.joshua.decoder.ff.tm.OwnerMap.UNKNOWN_OWNER;
@@ -40,7 +40,6 @@ import static org.apache.joshua.decoder.ff.tm.OwnerMap.UNKNOWN_OWNER;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.joshua.corpus.Span;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
 import org.apache.joshua.decoder.ff.FeatureFunction;
