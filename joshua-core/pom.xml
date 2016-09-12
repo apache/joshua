@@ -91,7 +91,7 @@
         <version>2.19.1</version>
         <configuration>
           <forkMode>once</forkMode>
-          <argLine>-Djava.library.path=${project.basedir}/lib</argLine>
+          <argLine>-Djava.library.path=${project.basedir}/../lib</argLine>
         </configuration>
       </plugin>
       <plugin>
