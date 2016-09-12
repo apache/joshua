@@ -189,6 +189,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
         result += val; 
       }
       this.estimatedCost = result;
+      LOG.debug("  -> " + this.estimatedCost);
     }
 
     return estimatedCost;
@@ -383,21 +384,11 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
     return getPattern().matcher(sentence.fullSource()).find();
   }
 
-  /**
-   * This comparator is used for sorting the rules during cube pruning. An estimate of the cost
-   * of each rule is computed and used to sort. 
-   */
-  public static Comparator<Rule> EstimatedCostComparator = new Comparator<Rule>() {
-    public int compare(Rule rule1, Rule rule2) {
-      return Float.compare(rule1.getEstimatedCost(),  rule2.getEstimatedCost());
-    }
-  };
-  
   public int compare(Rule rule1, Rule rule2) {
-    return EstimatedCostComparator.compare(rule1, rule2);
+    return Float.compare(rule2.getEstimatedCost(), rule1.getEstimatedCost());
   }
 
   public int compareTo(Rule other) {
-    return EstimatedCostComparator.compare(this, other);
+    return compare(this, other);
   }
 }

@@ -88,7 +88,8 @@ public class BasicRuleCollection implements RuleCollection {
       for (Rule rule: getRules())
         rule.estimateRuleCost(models);
 
-      Collections.sort(rules, Rule.EstimatedCostComparator);
+      // Sort using natural order
+      Collections.sort(rules);
       this.sorted = true;      
     }
     
