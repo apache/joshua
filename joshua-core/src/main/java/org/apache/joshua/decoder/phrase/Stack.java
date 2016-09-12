@@ -26,6 +26,7 @@ import java.util.PriorityQueue;
 import java.util.Set;
 
 import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,25 +144,28 @@ public class Stack extends ArrayList<Hypothesis> {
 
     // Constrained decoding
     if (sentence.target() != null) {
-      throw new RuntimeException("* FATAL! Constrained decoding no longer works for the new phrase format");
-      // TODO: fix constrained decoding
+      /* Get the rule. If if it's a swap or monolingual rule, find the right backpointer */
+      Rule rule = cand.getHypothesis().getRule();
+      if (rule == Hypothesis.INORDER_RULE)
+        rule = cand.getHypothesis().bestHyperedge.getTailNodes().get(1).bestHyperedge.getRule();
+      else if (rule == Hypothesis.INVERTED_RULE)
+        rule = cand.getHypothesis().bestHyperedge.getTailNodes().get(0).bestHyperedge.getRule();
+      String oldWords = rule.getTargetWords();
 
-      /*
-      String oldWords = cand.getHypothesis().bestHyperedge.getRule().getTargetWords().replace("[X,1] ",  "");
-      String newWords = cand.getRule().getTargetWords().replace("[X,1] ",  "");
-
+      String newWords = cand.getPhraseRule().getTargetWords();
+          
+      boolean allowed = sentence.fullTarget().contains(oldWords + " " + newWords);
+      
       // If the string is not found in the target sentence, explore the cube neighbors
-      if (!sentence.fullTarget().contains(oldWords + " " + newWords)) {
+      if (! allowed) {
         Candidate next = cand.extendPhrase();
         if (next != null)
           addCandidate(next); 
+        
         return;
       }
-      */
     }
 
-    // TODO: sourcepath
-    
     candidates.add(cand);
   }
   

@@ -59,12 +59,16 @@ public class GrammarPacker {
    * the documentation.
    *
    * Version history:
+   * 
+   * - 2. The default version.
    *
    * - 3 (May 2016). This was the first version that was marked. It removed the special phrase-
    * table packing that packed phrases without the [X,1] on the source and target sides, which
-   * then required special handling in the decoder to use for phrase-based decoding.
+   * then required special handling in the decoder to use for phrase-based decoding. So in this
+   * version, [X,1] is required to be presented on the source and target sides, and phrase-based
+   * decoding is implemented as a left-branching grammar.
    *
-   * - 4 (August 2016). Phrase-based decoding rewritten to represent phrases without a builtin
+   * - 4 (August 2016). Phrase-based decoding was rewritten to represent phrases without a builtin
    * nonterminal. Instead, cost-less glue rules are used in phrase-based decoding. This eliminates
    * the need for special handling of phrase grammars (except for having to add a LHS), and lets
    * phrase grammars be used in both hierarchical and phrase-based decoding without conversion.

@@ -37,6 +37,11 @@ public class OutputStringExtractor implements WalkerFunction, DerivationVisitor 
   private final Stack<OutputString> outputStringStack = new Stack<>();
   private final boolean extractSource;
 
+  /* This comes from the WalkerFunction interface. It is applied at every HGNode in the
+   * hypergraph.
+   *
+   * @see org.apache.joshua.decoder.hypergraph.WalkerFunction#apply(org.apache.joshua.decoder.hypergraph.HGNode, int)
+   */
   @Override
   public void apply(HGNode node, int nodeIndex) {
     apply(node.bestHyperedge.getRule(), nodeIndex);
@@ -47,21 +52,30 @@ public class OutputStringExtractor implements WalkerFunction, DerivationVisitor 
    * apply() for Viterbi extraction but using the edge from
    * the Derivation state.
    */
+  
+  /*
+   * (non-Javadoc)
+   * @see org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationVisitor#before(org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationState, int, int)
+   */
   @Override
   public void before(final DerivationState state, int level, int tailNodeIndex) {
       apply(state.edge.getRule(), tailNodeIndex);
   }
   
+  /* Nothing to do after the visit.
+   * 
+   * (non-Javadoc)
+   * @see org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationVisitor#after(org.apache.joshua.decoder.hypergraph.KBestExtractor.DerivationState, int, int)
+   */
+  @Override
+  public void after(DerivationState state, int level, int tailNodeIndex) {}
+
   private void apply(Rule rule, int nodeIndex) {
     if (rule != null) {
       final int[] words = extractSource ? rule.getSource() : rule.getTarget();
       merge(new OutputString(words, rule.getArity(), nodeIndex));
     }
   }
-  
-  /** Nothing to do */
-  @Override
-  public void after(DerivationState state, int level, int tailNodeIndex) {}
   
   private static int getSourceNonTerminalPosition(final int[] words, int nonTerminalIndex) {
     int nonTerminalsSeen = 0;

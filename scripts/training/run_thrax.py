@@ -35,10 +35,11 @@ EXAMPLE = r"""
 Example invocation:
 
 $JOSHUA/scripts/support/run_thrax.py \
+  /path/to/thrax.config \
   /path/to/corpus.SOURCE \
   /path/to/corpus.TARGET \
   /path/to/alignment \
-  -c /path/to/thrax.config \
+  /path/to/thrax.config \
   -o grammar.gz
 """
 parser = argparse.ArgumentParser(description='Run thrax')
@@ -90,13 +91,13 @@ paste(args.source_corpus, args.target_corpus, args.alignment_file, thrax_file)
 run('%s/bin/hadoop fs -put %s %s/input-file' % (HADOOP, thrax_file, THRAXDIR))
 
 # Copy the template
-conf_file_name = 'thrax.conf'
-conf_file = open(conf_file_name, 'w')
+conf_file = tempfile.NamedTemporaryFile(prefix='thrax.conf')
 for line in open(args.thrax_config):
     if not line.startswith('input-file'):
         conf_file.write(line)
 conf_file.write('input-file %s/input-file\n' % (THRAXDIR))
 conf_file.close()
+conf_file_name = conf_file.name
 
 # Run Hadoop
 run('%s/bin/hadoop jar %s -D mapred.child.java.opts="-Xmx%s" -D hadoop.tmp.dir=%s %s %s > thrax.log 2>&1' % (HADOOP, THRAX_JAR, '4g', args.tmp_dir, conf_file_name, THRAXDIR))

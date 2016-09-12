@@ -20,7 +20,7 @@
 
 port=9011
 
-$JOSHUA/bin/decoder -threads 4 -server-port $port -output-format "%i ||| %s" -mark-oovs true -v 1 > server.log 2>&1 &
+$JOSHUA/bin/joshua -threads 4 -server-port $port -output-format "%i ||| %s" -mark-oovs true -v 1 > server.log 2>&1 &
 serverpid=$!
 sleep 2
 

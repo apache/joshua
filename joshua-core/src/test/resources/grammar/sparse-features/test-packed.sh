@@ -17,7 +17,7 @@
 #
 set -u
 
-echo el chico | $JOSHUA/bin/decoder -c joshua-packed.config -v 0 > output
+echo el chico | $JOSHUA/bin/joshua -c joshua-packed.config -v 0 > output
 
 # Compare
 diff -u output output.gold > diff

@@ -38,5 +38,4 @@ $JOSHUA/bin/pipeline.pl \
     --tuner mert \
     --joshua-mem 20g \
     --packer-mem 16g \
-    --lmfile /path/to/gigaword/lmfile \
-    --optimizer-runs 5
+    --lmfile /path/to/gigaword/lmfile

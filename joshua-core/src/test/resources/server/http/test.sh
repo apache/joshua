@@ -18,7 +18,7 @@
 
 # This test case starts a server and then throws 10 threads at it to make sure threading is working.
 
-$JOSHUA/bin/decoder -threads 4 -server-port 9010 -server-type http -mark-oovs true > server.log 2>&1 &
+$JOSHUA/bin/joshua -threads 4 -server-port 9010 -server-type http -mark-oovs true > server.log 2>&1 &
 serverpid=$!
 sleep 1
 
