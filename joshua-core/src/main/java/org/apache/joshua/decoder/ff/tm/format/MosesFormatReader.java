@@ -78,7 +78,7 @@ public class MosesFormatReader extends HieroFormatReader {
     String mosesFeatureString = fields[2];
     for (String value: mosesFeatureString.split(" ")) {
       float f = Float.parseFloat(value);
-      hieroLine.append(String.format(" %f", f <= 0.0 ? -100 : -Math.log(f)));
+      hieroLine.append(String.format(" %f", f <= 0.0 ? -100 : Math.log(f)));
     }
 
     // alignments

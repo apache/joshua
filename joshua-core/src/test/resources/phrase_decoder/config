@@ -22,8 +22,8 @@ OOVPenalty 1.0
 Distortion 0.114849
 WordPenalty -0.201544
 PhrasePenalty -0.236965
-tm_pt_0 0.0370068
-tm_pt_1 0.0495759
-tm_pt_2 0.196742
-tm_pt_3 0.0745423
+pt_0 0.0370068
+pt_1 0.0495759
+pt_2 0.196742
+pt_3 0.0745423
 lm_0 0.204412452147565
