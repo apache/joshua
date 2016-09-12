@@ -35,7 +35,7 @@ public class LmOovFeatureTest {
   private static final String CONFIG = "src/test/resources/lm_oov/joshua.config";
   private static final String INPUT = "a chat-rooms full";
   // expecting 2 lm oovs ('a' & 'full') and 2 grammar OOVs ('chat-rooms' & 'full') and score -198.000
-  private static final String EXPECTED_FEATURES = "lm_0=-206.718124 lm_0_oov=2.000000 OOVPenalty=-200.000000 pt_0=2.000000 glue_0=-3.000000 | -198.000";
+  private static final String EXPECTED_FEATURES = "lm_0=-206.718124 lm_0_oov=2.000000 OOVPenalty=-200.000000 pt_0=-2.000000 glue_0=3.000000 | -198.000";
 
   private JoshuaConfiguration joshuaConfig = null;
   private Decoder decoder = null;
