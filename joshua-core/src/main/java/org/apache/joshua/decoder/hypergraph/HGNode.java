@@ -34,7 +34,7 @@ import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 
 // TODO: handle the case that the Hypergraph only maintains the one-best tree
 
-public class HGNode {
+public class HGNode implements Comparable<HGNode> {
 
   public final int i;
   public final int j;
@@ -241,16 +241,13 @@ public class HGNode {
     }
   }
 
-  /*
-   * this will called by the sorting in Cell.ensureSorted()
+  /**
+   * Sorts HGNodes by their score, in descending order.
+   *
+   * @return -1, 0, or 1 if this item is greater than, equal to, or less than the other HGNode
    */
-  // sort by estTotalLogP: for pruning purpose
   public int compareTo(HGNode anotherItem) {
-    throw new RuntimeException("HGNode.compareTo(HGNode) is not implemented");
-    /*
-     * if (this.estTotalLogP > anotherItem.estTotalLogP) { return -1; } else if (this.estTotalLogP
-     * == anotherItem.estTotalLogP) { return 0; } else { return 1; }
-     */
+    return Float.compare(anotherItem.getScore(), getScore());
   }
 
   /**
@@ -269,18 +266,6 @@ public class HGNode {
       else if (item1.i > item2.i)
         return 1;
       return 0;
-    }
-  };
-
-  public static final Comparator<HGNode> inverseLogPComparator = (item1, item2) -> {
-    float logp1 = item1.score;
-    float logp2 = item2.score;
-    if (logp1 > logp2) {
-      return -1;
-    } else if (logp1 == logp2) {
-      return 0;
-    } else {
-      return 1;
     }
   };
 

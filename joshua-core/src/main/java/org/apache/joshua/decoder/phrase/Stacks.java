@@ -216,8 +216,8 @@ public class Stacks {
   }
     
   /**
-   * Enforces reordering constraints. Our version of Moses' ReorderingConstraint::Check() and
-   * SearchCubePruning::CheckDistortion(). 
+   * Enforces reordering constraints. Our version of Moses' ReorderingConstraint.Check() and
+   * SearchCubePruning.CheckDistortion(). 
    * 
    * @param coverage
    * @param begin

@@ -45,14 +45,9 @@ public class PhraseNodes extends ArrayList<HGNode> {
   }
   
   /**
-   * Score the rules and sort them. Scoring is necessary 
-   * because rules are only scored if they are used, in an 
-   * effort to make reading in rules more efficient. 
-   * This is starting to create some trouble and should 
-   * probably be reworked.
+   * Called after all the nodes have been added via add(). Sorts them using their natural order.
    */
   public void finish() {
-    Collections.sort(this, HGNode.inverseLogPComparator);    
+    Collections.sort(this);
   }
-
 }

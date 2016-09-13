@@ -21,6 +21,7 @@ package org.apache.joshua.decoder.chart_parser;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -268,7 +269,7 @@ class Cell {
       }
 
       // sort the node in an decreasing-LogP order 
-      this.sortedNodes.sort(HGNode.inverseLogPComparator);
+      Collections.sort(this.sortedNodes);
 
       // TODO: we cannot create new SuperItem here because the DotItem link to them.
       // Thus, we clear nodes from existing SuperNodes
