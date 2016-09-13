@@ -61,7 +61,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
   private static native boolean isLmOov(long ptr, int word);
 
-  private static native StateProbPair probRule(long ptr, long pool, long words[]);
+  private static native long probRule(long ptr, long pool, long words[]);
 
   private static native float estimateRule(long ptr, long words[]);
 
@@ -161,7 +161,10 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
     StateProbPair pair = null;
     try {
-      pair = probRule(pointer, poolPointer, words);
+      long packedResult = probRule(pointer, poolPointer, words);
+      int state = (int) (packedResult >> 32);
+      float probVal = Float.intBitsToFloat((int)packedResult);
+      pair = new StateProbPair(state, probVal);
     } catch (NoSuchMethodError e) {
       e.printStackTrace();
       System.exit(1);

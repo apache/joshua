@@ -27,6 +27,10 @@ import org.testng.annotations.Test;
 
 import static org.apache.joshua.corpus.Vocabulary.registerLanguageModel;
 import static org.apache.joshua.corpus.Vocabulary.unregisterLanguageModels;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.mockito.Matchers.isNotNull;
+import static org.mockito.Matchers.notNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertFalse;
@@ -77,6 +81,31 @@ public class KenLmTest {
     assertEquals("ngram probabilities differ for word and id based n-gram query", prob_string, prob_id,
             Float.MIN_VALUE);
 
+  }
+
+  @Test
+  public void givenKenLm_whenQueryingForNgramProbability2_thenIdAndStringMethodsReturnTheSame() {
+    // GIVEN
+    KenLmTestUtil.Guard(() -> kenLm = new KenLM(LANGUAGE_MODEL_PATH));
+
+    registerLanguageModel(kenLm);
+    String sentence = "Wayne Gretzky";
+    String[] words = sentence.split("\\s+");
+    int[] ids = Vocabulary.addAll(sentence);
+    long[] longIds = new long[ids.length];
+
+    for(int i = 0; i< words.length; i++) {
+      longIds[i] = ids[i];
+    }
+
+    // WHEN
+    long poolPointer = kenLm.createLMPool();
+    KenLM.StateProbPair result = kenLm.probRule(longIds, poolPointer);
+    kenLm.destroyLMPool(poolPointer);
+
+    // THEN
+    assertThat(result.state.getState(), is(0L));
+    assertThat(result.prob, is(-3.7906885f));
   }
 
   @Test

@@ -95,7 +95,7 @@ class Chart {
       return *ins.first;
     }
 
-    const ChartState &InterpretState(StateIndex index) const {
+    const lm::ngram::ChartState &InterpretState(StateIndex index) const {
       return vec_[index];
     }
 
@@ -201,7 +201,7 @@ public:
     lm::ngram::RuleScore<Model> ruleScore(m_, state);
 
     if (*begin < 0) {
-      ruleScore.BeginNonTerminal(chart.Interpet(-*begin));
+      ruleScore.BeginNonTerminal(chart.InterpretState(-*begin));
     } else {
       const lm::WordIndex word = map_[*begin];
       if (word == m_.GetVocabulary().BeginSentence()) {
@@ -213,7 +213,7 @@ public:
     for (jlong* i = begin + 1; i != end; i++) {
       long word = *i;
       if (word < 0)
-        ruleScore.NonTerminal(chart.Interpret(-word));
+        ruleScore.NonTerminal(chart.InterpretState(-word));
       else
         ruleScore.Terminal(map_[word]);
     }
@@ -449,6 +449,7 @@ union FloatConverter {
 
 JNIEXPORT jlong JNICALL Java_org_apache_joshua_decoder_ff_lm_KenLM_probRule(
   JNIEnv *env, jclass, jlong pointer, jlong chartPtr, jlongArray arr) {
+
   jint length = env->GetArrayLength(arr);
   // GCC only.
   jlong values[length];
@@ -458,7 +459,7 @@ JNIEXPORT jlong JNICALL Java_org_apache_joshua_decoder_ff_lm_KenLM_probRule(
   lm::ngram::ChartState outState;
   const VirtualBase *base = reinterpret_cast<const VirtualBase*>(pointer);
   Chart* chart = reinterpret_cast<Chart*>(chartPtr);
-  FloatConvert prob;
+  FloatConverter prob;
   prob.f = base->ProbRule(values, values + length, outState, *chart);
 
   StateIndex index = chart->Intern(outState);
