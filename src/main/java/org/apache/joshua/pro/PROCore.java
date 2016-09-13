@@ -528,7 +528,7 @@ public class PROCore {
 
     // if no default lambda is provided
     if (randInit) {
-      println("Initializing lambda[] randomly.", 1);
+      println("Initializing lambda[] of size "+numParams+" randomly.", 1);
       // initialize optimizable parameters randomly (sampling uniformly from
       // that parameter's random value range)
       lambda = randomLambda();
@@ -2812,15 +2812,16 @@ public class PROCore {
 
   private ArrayList<Double> randomLambda() {
     ArrayList<Double> retLambda = new ArrayList<Double>(1 + numParams);
-
+    // dummy value
+    retLambda.add(0, -1.0);
     for (int c = 1; c <= numParams; ++c) {
       if (isOptimizable[c]) {
         double randVal = randGen.nextDouble(); // number in [0.0,1.0]
         randVal = randVal * (maxRandValue[c] - minRandValue[c]); // number in [0.0,max-min]
         randVal = minRandValue[c] + randVal; // number in [min,max]
-        retLambda.set(c, randVal);
+        retLambda.add(c, randVal);
       } else {
-        retLambda.set(c, defaultLambda[c]);
+        retLambda.add(c, defaultLambda[c]);
       }
     }
 
