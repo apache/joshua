@@ -44,5 +44,5 @@ JAR_PATH=$(ls -t $JOSHUA/target/joshua-*-jar-with-dependencies.jar | head -n1)
 exec java -Xmx${mem} \
 	-Dfile.encoding=utf8 \
 	-Djava.library.path=$JOSHUA/lib \
-	-cp $JOSHUA/target/classes:$JAR_PATH \
+	-cp $JOSHUA/joshua-core/target/classes:$JAR_PATH \
 	org.apache.joshua.decoder.JoshuaDecoder -v 2 "$@"
