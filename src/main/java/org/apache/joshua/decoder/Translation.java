@@ -182,8 +182,8 @@ public class Translation {
 
     }
 
-    // remove state from StateMinimizingLanguageModel instances in features.
-    destroyKenLMStates(featureFunctions);
+    // Force any StateMinimizingLanguageModel pool mappings to be cleaned
+    source.getStateManager().clearStatePool();
 
   }
 
@@ -223,18 +223,5 @@ public class Translation {
           "No StructuredTranslation objects created. You should set JoshuaConfigration.use_structured_output = true");
     }
     return structuredTranslations;
-  }
-
-  /**
-   * KenLM hack. If using KenLMFF, we need to tell KenLM to delete the pool used to create chart
-   * objects for this sentence.
-   */
-  private void destroyKenLMStates(final List<FeatureFunction> featureFunctions) {
-    for (FeatureFunction feature : featureFunctions) {
-      if (feature instanceof StateMinimizingLanguageModel) {
-        ((StateMinimizingLanguageModel) feature).destroyPool(getSourceSentence().id());
-        break;
-      }
-    }
   }
 }

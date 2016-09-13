@@ -19,6 +19,7 @@
 package org.apache.joshua.system;
 
 import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.KenLMPool;
 import org.apache.joshua.decoder.ff.lm.KenLM;
 import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
@@ -29,8 +30,7 @@ import static org.apache.joshua.corpus.Vocabulary.registerLanguageModel;
 import static org.apache.joshua.corpus.Vocabulary.unregisterLanguageModels;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.mockito.Matchers.isNotNull;
-import static org.mockito.Matchers.notNull;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertFalse;
@@ -84,7 +84,7 @@ public class KenLmTest {
   }
 
   @Test
-  public void givenKenLm_whenQueryingForNgramProbability2_thenIdAndStringMethodsReturnTheSame() {
+  public void givenKenLm_whenQueryingWithState_thenStateAndProbReturned() {
     // GIVEN
     KenLmTestUtil.Guard(() -> kenLm = new KenLM(LANGUAGE_MODEL_PATH));
 
@@ -94,16 +94,18 @@ public class KenLmTest {
     int[] ids = Vocabulary.addAll(sentence);
     long[] longIds = new long[ids.length];
 
-    for(int i = 0; i< words.length; i++) {
+    for (int i = 0; i < words.length; i++) {
       longIds[i] = ids[i];
     }
 
     // WHEN
-    long poolPointer = kenLm.createLMPool();
-    KenLM.StateProbPair result = kenLm.probRule(longIds, poolPointer);
-    kenLm.destroyLMPool(poolPointer);
+    KenLM.StateProbPair result;
+    try (KenLMPool poolPointer = kenLm.createLMPool()) {
+      result = kenLm.probRule(longIds, poolPointer);
+    }
 
     // THEN
+    assertThat(result, is(notNullValue()));
     assertThat(result.state.getState(), is(0L));
     assertThat(result.prob, is(-3.7906885f));
   }
