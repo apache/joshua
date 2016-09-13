@@ -92,11 +92,12 @@ class Chart {
       if (!ins.second) {
         vec_.pop_back();
       }
-      return *ins.first;
+      return *ins.first + 1; // +1 so that the first id is 1, not 0.  We use sign bit to 
+                             // distinguish ChartState from vocab id.  
     }
 
     const lm::ngram::ChartState &InterpretState(StateIndex index) const {
-      return vec_[index];
+      return vec_[index - 1];
     }
 
   private:
