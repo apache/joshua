@@ -19,6 +19,7 @@
 package org.apache.joshua.system;
 
 import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.KenLMPool;
 import org.apache.joshua.decoder.ff.lm.KenLM;
 import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
@@ -27,6 +28,9 @@ import org.testng.annotations.Test;
 
 import static org.apache.joshua.corpus.Vocabulary.registerLanguageModel;
 import static org.apache.joshua.corpus.Vocabulary.unregisterLanguageModels;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertFalse;
@@ -77,6 +81,33 @@ public class KenLmTest {
     assertEquals("ngram probabilities differ for word and id based n-gram query", prob_string, prob_id,
             Float.MIN_VALUE);
 
+  }
+
+  @Test
+  public void givenKenLm_whenQueryingWithState_thenStateAndProbReturned() {
+    // GIVEN
+    KenLmTestUtil.Guard(() -> kenLm = new KenLM(LANGUAGE_MODEL_PATH));
+
+    registerLanguageModel(kenLm);
+    String sentence = "Wayne Gretzky";
+    String[] words = sentence.split("\\s+");
+    int[] ids = Vocabulary.addAll(sentence);
+    long[] longIds = new long[ids.length];
+
+    for (int i = 0; i < words.length; i++) {
+      longIds[i] = ids[i];
+    }
+
+    // WHEN
+    KenLM.StateProbPair result;
+    try (KenLMPool poolPointer = kenLm.createLMPool()) {
+      result = kenLm.probRule(longIds, poolPointer);
+    }
+
+    // THEN
+    assertThat(result, is(notNullValue()));
+    assertThat(result.state.getState(), is(0L));
+    assertThat(result.prob, is(-3.7906885f));
   }
 
   @Test

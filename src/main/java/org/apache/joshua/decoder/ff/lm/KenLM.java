@@ -19,6 +19,7 @@
 package org.apache.joshua.decoder.ff.lm;
 
 import org.apache.joshua.corpus.Vocabulary;
+import org.apache.joshua.decoder.KenLMPool;
 import org.apache.joshua.decoder.ff.state_maintenance.KenLMState;
 import org.apache.joshua.util.FormatUtils;
 import org.slf4j.Logger;
@@ -61,7 +62,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
   private static native boolean isLmOov(long ptr, int word);
 
-  private static native StateProbPair probRule(long ptr, long pool, long words[]);
+  private static native long probRule(long ptr, long pool, long words[]);
 
   private static native float estimateRule(long ptr, long words[]);
 
@@ -105,8 +106,8 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
     }
   }
 
-  public long createLMPool() {
-    return createPool();
+  public KenLMPool createLMPool() {
+    return new KenLMPool(createPool(), this);
   }
 
   public void destroyLMPool(long pointer) {
@@ -153,21 +154,16 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
    * state and the LM probability incurred along this rule.
    *
    * @param words array of words
-   * @param poolPointer todo
+   * @param poolWrapper an object that wraps a pool reference returned from KenLM createPool
    * @return the updated {@link org.apache.joshua.decoder.ff.lm.KenLM.StateProbPair} e.g.
    * KenLM state and the LM probability incurred along this rule
    */
-  public StateProbPair probRule(long[] words, long poolPointer) {
+  public StateProbPair probRule(long[] words, KenLMPool poolWrapper) {
+    long packedResult = probRule(pointer, poolWrapper.getPool(), words);
+    int state = (int) (packedResult >> 32);
+    float probVal = Float.intBitsToFloat((int)packedResult);
 
-    StateProbPair pair = null;
-    try {
-      pair = probRule(pointer, poolPointer, words);
-    } catch (NoSuchMethodError e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-
-    return pair;
+    return new StateProbPair(state, probVal);
   }
 
   /**

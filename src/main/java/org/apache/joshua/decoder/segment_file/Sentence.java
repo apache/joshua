@@ -21,16 +21,21 @@ package org.apache.joshua.decoder.segment_file;
 import static org.apache.joshua.util.FormatUtils.addSentenceMarkers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.KenLMPool;
+import org.apache.joshua.decoder.LanguageModelStateManager;
 import org.apache.joshua.decoder.ff.tm.Grammar;
 import org.apache.joshua.lattice.Arc;
 import org.apache.joshua.lattice.Lattice;
@@ -76,6 +81,8 @@ public class Sentence {
   private final List<ConstraintSpan> constraints;
   
   public JoshuaConfiguration config = null;
+
+  private LanguageModelStateManager stateManager = new LanguageModelStateManager();
 
   /**
    * Constructor. Receives a string representing the input sentence. This string may be a
@@ -446,5 +453,9 @@ public class Sentence {
 
   public Node<Token> getNode(int i) {
     return getLattice().getNode(i);
+  }
+
+  public LanguageModelStateManager getStateManager() {
+    return stateManager;
   }
 }
