@@ -80,7 +80,6 @@ public class KenLmTest {
     // THEN
     assertEquals("ngram probabilities differ for word and id based n-gram query", prob_string, prob_id,
             Float.MIN_VALUE);
-
   }
 
   @Test
@@ -106,7 +105,7 @@ public class KenLmTest {
 
     // THEN
     assertThat(result, is(notNullValue()));
-    assertThat(result.state.getState(), is(0L));
+    assertThat(result.state.getState(), is(1L));
     assertThat(result.prob, is(-3.7906885f));
   }
 
