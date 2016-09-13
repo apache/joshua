@@ -31,7 +31,7 @@ Joshua 6.X includes the following new features:
 Joshua must be run with a Java JDK 1.8 minimum.
 
 To run the decoder in any form requires setting a few basic environment
-variables: `$JAVA_HOME`, `$JOSHUA`, and, for certain portions of the model-training
+variables: `$JAVA_HOME`, `$JOSHUA`, and, for certain (optional) portions of the model-training
 pipeline, potentially `$MOSES`.
 
     export JAVA_HOME=/path/to/java  # maybe /usr/java/home
