@@ -18,11 +18,8 @@
  */
 package org.apache.joshua.decoder.cky;
 
-import static org.apache.joshua.decoder.cky.TestUtil.decodeList;
-import static org.apache.joshua.decoder.cky.TestUtil.loadStringsFromFile;
-
-import java.io.IOException;
-import java.util.List;
+import static org.apache.joshua.decoder.cky.TestUtil.translate;
+import static org.testng.Assert.assertEquals;
 
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
@@ -30,15 +27,19 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class DoNotCrashTest {
+public class NoGrammarTest {
 
+	private static final String INPUT = "those who hurt others hurt themselves";
+	private static final String GOLD = "0 ||| those_OOV who_OOV hurt_OOV others_OOV hurt_OOV themselves_OOV ||| tm_glue_0=6.000 ||| 0.000";
+	
 	private JoshuaConfiguration joshuaConfig = null;
 	private Decoder decoder = null;
-
+	
 	@BeforeMethod
 	public void setUp() throws Exception {
 		joshuaConfig = new JoshuaConfiguration();
-		decoder = new Decoder(joshuaConfig, "");
+		joshuaConfig.mark_oovs = true;
+		decoder = new Decoder(joshuaConfig);
 	}
 
 	@AfterMethod
@@ -46,17 +47,10 @@ public class DoNotCrashTest {
 		decoder.cleanUp();
 		decoder = null;
 	}
-
+	
 	@Test
-	public void givenProblematicInput_whenDecoding_thenNoCrash() throws IOException {
-		// Given
-		List<String> inputStrings = loadStringsFromFile("src/test/resources/decoder/dont-crash/input");
-		
-		// When
-		decodeList(inputStrings, decoder, joshuaConfig);
-		
-		// Then
-		// Did not crash
-	}
-
+	public void givenInput_whenDecodingWithoutGrammar_thenOutputAllOOV() {
+		String output = translate(INPUT, decoder, joshuaConfig);
+		assertEquals(output.trim(), GOLD);
+	}	
 }

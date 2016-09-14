@@ -27,10 +27,10 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class NoGrammarTest {
+public class DenormalizationTest {
 
-	private static final String INPUT = "those who hurt others hurt themselves";
-	private static final String GOLD = "0 ||| those_OOV who_OOV hurt_OOV others_OOV hurt_OOV themselves_OOV ||| tm_glue_0=6.000 ||| 0.000";
+	private static final String INPUT = "¿ who you lookin' at , mr. ?";
+	private static final String GOLD = "¿Who you lookin' at, Mr.?";
 	
 	private JoshuaConfiguration joshuaConfig = null;
 	private Decoder decoder = null;
@@ -38,8 +38,10 @@ public class NoGrammarTest {
 	@BeforeMethod
 	public void setUp() throws Exception {
 		joshuaConfig = new JoshuaConfiguration();
-		joshuaConfig.mark_oovs = true;
-		decoder = new Decoder(joshuaConfig, "");
+		joshuaConfig.outputFormat = "%S";
+		joshuaConfig.mark_oovs = false;
+		joshuaConfig.topN = 1;
+		decoder = new Decoder(joshuaConfig);
 	}
 
 	@AfterMethod
@@ -49,7 +51,7 @@ public class NoGrammarTest {
 	}
 	
 	@Test
-	public void givenInput_whenDecodingWithoutGrammar_thenOutputAllOOV() {
+	public void givenTokenizedInputWithSpecialCharacters_whenDecoding_thenOutputNormalized() {
 		String output = translate(INPUT, decoder, joshuaConfig);
 		assertEquals(output.trim(), GOLD);
 	}	

@@ -20,46 +20,43 @@ package org.apache.joshua.decoder.cky;
 
 import static org.apache.joshua.decoder.cky.TestUtil.decodeList;
 import static org.apache.joshua.decoder.cky.TestUtil.loadStringsFromFile;
-import static org.testng.Assert.assertEquals;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
-import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class ConstrainedTest {
+public class DoNotCrashTest {
 
-	private JoshuaConfiguration joshuaConfig;
-	private Decoder decoder;
+	private JoshuaConfiguration joshuaConfig = null;
+	private Decoder decoder = null;
+
+	@BeforeMethod
+	public void setUp() throws Exception {
+		joshuaConfig = new JoshuaConfiguration();
+		decoder = new Decoder(joshuaConfig);
+	}
 
 	@AfterMethod
 	public void tearDown() throws Exception {
-		if(decoder != null) {
-			decoder.cleanUp();
-			decoder = null;
-		}
+		decoder.cleanUp();
+		decoder = null;
 	}
 
 	@Test
-	public void givenInput_whenConstrainedDecoding_thenScoreAndTranslationCorrect() throws Exception {
+	public void givenProblematicInput_whenDecoding_thenNoCrash() throws IOException {
 		// Given
-		List<String> inputStrings = loadStringsFromFile("src/test/resources/decoder/constrained/input.bn");
-
+		List<String> inputStrings = loadStringsFromFile("src/test/resources/decoder/dont-crash/input");
+		
 		// When
-		configureDecoder("src/test/resources/decoder/constrained/joshua.config");
-		List<String> decodedStrings = decodeList(inputStrings, decoder, joshuaConfig);
-
+		decodeList(inputStrings, decoder, joshuaConfig);
+		
 		// Then
-		List<String> goldStrings = loadStringsFromFile("src/test/resources/decoder/constrained/output.gold");
-		assertEquals(decodedStrings, goldStrings);
+		// Did not crash
 	}
-	
-	public void configureDecoder(String pathToConfig) throws Exception {
-		joshuaConfig = new JoshuaConfiguration();
-		joshuaConfig.readConfigFile(pathToConfig);
-		KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig, ""));
-	}
+
 }

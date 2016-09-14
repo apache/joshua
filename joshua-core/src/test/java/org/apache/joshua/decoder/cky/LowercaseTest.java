@@ -103,7 +103,7 @@ public class LowercaseTest {
     joshuaConfig.lowercase = lowercase;
     joshuaConfig.project_case = projectCase;
     joshuaConfig.outputFormat = capitalize ? "%S" : "%s";
-    decoder = new Decoder(joshuaConfig, "");
+    decoder = new Decoder(joshuaConfig);
   }
   
   @AfterMethod
