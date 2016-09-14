@@ -21,10 +21,11 @@ package org.apache.joshua.decoder.ff.lm;
 import static org.apache.joshua.util.FormatUtils.isNonterminal;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.UUID;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.KenLMPool;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.lm.KenLM.StateProbPair;
@@ -41,9 +42,6 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * @author Juri Ganitkevitch juri@cs.jhu.edu
  */
 public class StateMinimizingLanguageModel extends LanguageModelFF {
-
-  // maps from sentence numbers to KenLM-side pools used to allocate state
-  private static final ConcurrentHashMap<Integer, Long> poolMap = new ConcurrentHashMap<>();
 
   public StateMinimizingLanguageModel(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, args, config);
@@ -87,6 +85,8 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
     return lmCost + oovCost;
   }
 
+  private UUID languageModelPoolId = UUID.randomUUID();
+
   /**
    * Computes the features incurred along this edge. Note that these features are unweighted costs
    * of the feature; they are the feature cost, not the model cost, or the inner product of them.
@@ -115,14 +115,11 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
      // map to ken lm ids
     final long[] words = mapToKenLmIds(ruleWords, tailNodes, false);
 
-    final int sentID = sentence.id();
-    // Since sentId is unique across threads, next operations are safe, but not atomic!
-    if (!poolMap.containsKey(sentID)) {
-      poolMap.put(sentID, ((KenLM) languageModel).createLMPool());
-    }
+    KenLMPool statePool = sentence.getStateManager().getStatePool(languageModelPoolId, (KenLM)
+            languageModel);
 
     // Get the probability of applying the rule and the new state
-    final StateProbPair pair = ((KenLM) languageModel).probRule(words, poolMap.get(sentID));
+    final StateProbPair pair = ((KenLM) languageModel).probRule(words, statePool);
 
     // Record the prob
     acc.add(featureId, pair.prob);
@@ -159,19 +156,6 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
       }
     }
     return kenIds;
-  }
-
-  /**
-   * Destroys the pool created to allocate state for this sentence. Called from the
-   * {@link org.apache.joshua.decoder.Translation} class after outputting the sentence or k-best list. Hosting
-   * this map here in KenLMFF statically allows pools to be shared across KenLM instances.
-   *
-   * @param sentId a key in the poolmap table to destroy
-   */
-  public void destroyPool(int sentId) {
-    if (poolMap.containsKey(sentId))
-      ((KenLM) languageModel).destroyLMPool(poolMap.get(sentId));
-    poolMap.remove(sentId);
   }
 
   /**

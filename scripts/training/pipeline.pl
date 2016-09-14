@@ -1149,7 +1149,7 @@ if (! defined $GRAMMAR_FILE) {
 
     # copy the thrax config file
     my $thrax_file = "thrax-$GRAMMAR_TYPE.conf";
-    system("grep -v ^input-file $THRAX_CONF_FILE > $thrax_file.tmp");
+    system("grep -v ^input-file $THRAX_CONF_FILE | perl -pe 's/<MAXPHRLEN>/$MAX_PHRASE_LEN/g' > $thrax_file.tmp");
     system("echo input-file $thrax_input >> $thrax_file.tmp");
     system("mv $thrax_file.tmp $thrax_file");
 
@@ -1734,7 +1734,7 @@ $cachepipe->cmd("test-bleu-${OPTIMIZER_RUN}",
 
 # Update the BLEU summary.
 # Sometimes the target side for test doesn't exist (e.g., WMT)
-if (-e $TEST{target}) {
+if (-e $TEST{target} || -e "$TEST{target}.0") {
   compute_bleu_summary("test/*/bleu", "test/final-bleu");
 
   if (defined $METEOR) {

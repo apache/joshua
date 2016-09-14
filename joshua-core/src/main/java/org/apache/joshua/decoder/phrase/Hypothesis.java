@@ -39,7 +39,7 @@ import org.apache.joshua.decoder.hypergraph.HyperEdge;
  * @author Kenneth Heafield
  * @author Matt Post post@cs.jhu.edu
  */
-public class Hypothesis extends HGNode implements Comparable<Hypothesis> {
+public class Hypothesis extends HGNode {
 
   // The hypothesis' coverage vector
   private final Coverage coverage;
@@ -144,12 +144,6 @@ public class Hypothesis extends HGNode implements Comparable<Hypothesis> {
       return true;
     }
     return false;
-  }
-
-  @Override
-  public int compareTo(Hypothesis o) {
-    // TODO: is this the order we want?
-    return Float.compare(o.getScore(), getScore());
   }
 
   /**

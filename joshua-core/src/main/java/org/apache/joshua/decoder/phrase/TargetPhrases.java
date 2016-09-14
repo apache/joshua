@@ -68,7 +68,7 @@ public class TargetPhrases extends ArrayList<Rule> {
       rule.estimateRuleCost(features);
 //      System.err.println("TargetPhrases:finish(): " + rule);
     }
-    Collections.sort(this, Rule.EstimatedCostComparator);
+    Collections.sort(this);
     
     if (this.size() > num_options)
       this.removeRange(num_options, this.size());
