@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
-import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -39,7 +38,7 @@ public class DoNotCrashTest {
 	@BeforeMethod
 	public void setUp() throws Exception {
 		joshuaConfig = new JoshuaConfiguration();
-		KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig, ""));
+		decoder = new Decoder(joshuaConfig, "");
 	}
 
 	@AfterMethod
