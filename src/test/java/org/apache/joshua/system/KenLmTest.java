@@ -83,6 +83,29 @@ public class KenLmTest {
   }
 
   @Test
+  public void givenKenLm_whenQueryingForNgramProbability1423_thenIdAndStringMethodsReturnTheSame() {
+    // GIVEN
+    KenLmTestUtil.Guard(() -> kenLm = new KenLM
+            ("/Users/kellens/Development/incubator-joshua/src/test/resources/kbest_extraction/lm.gz"));
+
+    registerLanguageModel(kenLm);
+    int[] words = Vocabulary.addAll("! burgher");
+    long[] longIds = new long[words.length];
+
+    for (int i = 0; i < words.length; i++) {
+      longIds[i] = words[i];
+    }
+
+    // WHEN
+    float probability = kenLm.prob(words);
+
+    KenLMPool pool = kenLm.createLMPool();
+    KenLM.StateProbPair probability2 = kenLm.probRule(longIds, pool);
+    pool.close();
+
+  }
+
+  @Test
   public void givenKenLm_whenQueryingWithState_thenStateAndProbReturned() {
     // GIVEN
     KenLmTestUtil.Guard(() -> kenLm = new KenLM(LANGUAGE_MODEL_PATH));
