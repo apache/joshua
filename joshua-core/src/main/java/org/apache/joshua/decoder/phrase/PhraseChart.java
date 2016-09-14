@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
+import org.apache.joshua.decoder.chart_parser.NodeResult;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.RuleCollection;
@@ -31,6 +32,8 @@ import org.apache.joshua.decoder.hypergraph.HyperEdge;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.apache.joshua.decoder.chart_parser.ComputeNodeResult.computeNodeResult;
 
 /**
  * This class represents a bundle of phrase tables that have been read in,
@@ -205,7 +208,7 @@ public class PhraseChart {
 
         // Turn each rule into an HGNode, add them one by one 
         for (Rule rule: rules) {
-          ComputeNodeResult result = new ComputeNodeResult(features, rule, null, i, j, null, sentence);
+          NodeResult result = computeNodeResult(features, rule, null, i, j, null, sentence);
           HyperEdge edge = new HyperEdge(rule, result.getViterbiCost(), result.getTransitionCost(), null, null);
           HGNode phraseNode = new HGNode(i, j, rule.getLHS(), result.getDPStates(), edge, result.getPruningEstimate());
           nodes.add(phraseNode);

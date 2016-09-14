@@ -159,8 +159,8 @@ class Cell {
    * 
    * @return the new hypernode, or null if the cell was pruned.
    */
-  HGNode addHyperEdgeInCell(ComputeNodeResult result, Rule rule, int i, int j, List<HGNode> ants,
-      SourcePath srcPath, boolean noPrune) {
+  HGNode addHyperEdgeInCell(NodeResult result, Rule rule, int i, int j, List<HGNode> ants,
+                            SourcePath srcPath, boolean noPrune) {
 
 //    System.err.println(String.format("ADD_EDGE(%d-%d): %s", i, j, rule.getRuleString()));
 //    if (ants != null) {
