@@ -1,0 +1,1 @@
+Needs to be moved to a unit test. The parameter JoshuaConfiguration.moses is handled by JoshuaDecoder. Therefore, the CLI must be made testable before a unit test can be created.
