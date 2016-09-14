@@ -35,7 +35,7 @@ import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
-public class HieroDecodingTest {
+public class CKYDecodingTest {
 
 	private final static String N_BEST_SEPARATOR = "\n";
 
@@ -44,8 +44,10 @@ public class HieroDecodingTest {
 
 	@AfterMethod
 	public void tearDown() throws Exception {
-		decoder.cleanUp();
-		decoder = null;
+		if(decoder != null) {
+			decoder.cleanUp();
+			decoder = null;
+		}
 	}
 
 	@Test
@@ -87,6 +89,34 @@ public class HieroDecodingTest {
 
 		// Then
 		List<String> goldStrings = loadSentencesFromFile("src/test/resources/bn-en/hiero/output-classlm.gold");
+		assertEquals(decodedStrings, goldStrings);
+	}
+	
+	@Test
+	public void givenBnEnInput_whenPhraseDecodingWithPackedGrammar_thenScoreAndTranslationCorrect() throws Exception {
+		// Given
+		List<String> inputStrings = loadSentencesFromFile("src/test/resources/bn-en/packed/input.bn");
+
+		// When
+		configureDecoder("src/test/resources/bn-en/packed/joshua.config");
+		List<String> decodedStrings = decodeList(inputStrings);
+
+		// Then
+		List<String> goldStrings = loadSentencesFromFile("src/test/resources/bn-en/packed/output.gold");
+		assertEquals(decodedStrings, goldStrings);
+	}
+	
+	@Test
+	public void givenBnEnInput_whenPhraseDecodingWithSAMT_thenScoreAndTranslationCorrect() throws Exception {
+		// Given
+		List<String> inputStrings = loadSentencesFromFile("src/test/resources/bn-en/samt/input.bn");
+
+		// When
+		configureDecoder("src/test/resources/bn-en/samt/joshua.config");
+		List<String> decodedStrings = decodeList(inputStrings);
+
+		// Then
+		List<String> goldStrings = loadSentencesFromFile("src/test/resources/bn-en/samt/output.gold");
 		assertEquals(decodedStrings, goldStrings);
 	}
 
