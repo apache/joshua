@@ -18,24 +18,15 @@
  */
 package org.apache.joshua.oracle;
 
-import static org.apache.joshua.decoder.hypergraph.ViterbiExtractor.getViterbiString;
-import static org.apache.joshua.util.FormatUtils.removeSentenceMarkers;
-
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Support;
-import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.hypergraph.HyperEdge;
 import org.apache.joshua.decoder.hypergraph.HyperGraph;
 import org.apache.joshua.decoder.hypergraph.KBestExtractor;
-import org.apache.joshua.util.FileUtility;
-import org.apache.joshua.util.io.LineReader;
 import org.apache.joshua.util.FormatUtils;
 
 /**
@@ -101,98 +92,98 @@ public class OracleExtractionHG extends SplitHg {
   /*
    * for 919 sent, time_on_reading: 148797 time_on_orc_extract: 580286
    */
-  @SuppressWarnings({ "unused" })
-  public static void main(String[] args) throws IOException {
-    JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
-    /*
-     * String f_hypergraphs="C:\\Users\\zli\\Documents\\mt03.src.txt.ss.nbest.hg.items"; String
-     * f_rule_tbl="C:\\Users\\zli\\Documents\\mt03.src.txt.ss.nbest.hg.rules"; String
-     * f_ref_files="C:\\Users\\zli\\Documents\\mt03.ref.txt.1"; String f_orc_out
-     * ="C:\\Users\\zli\\Documents\\mt03.orc.txt";
-     */
-    if (6 != args.length) {
-      System.out
-      .println("Usage: java Decoder f_hypergraphs f_rule_tbl f_ref_files f_orc_out lm_order orc_extract_nbest");
-      System.out.println("num of args is " + args.length);
-      for (int i = 0; i < args.length; i++) {
-        System.out.println("arg is: " + args[i]);
-      }
-      System.exit(1);
-    }
-    // String f_hypergraphs = args[0].trim();
-    // String f_rule_tbl = args[1].trim();
-    String f_ref_files = args[2].trim();
-    String f_orc_out = args[3].trim();
-    int lm_order = Integer.parseInt(args[4].trim());
-    boolean orc_extract_nbest = Boolean.valueOf(args[5].trim()); // oracle extraction from nbest or hg
-
-    int baseline_lm_feat_id = 0;
-
-    KBestExtractor kbest_extractor = null;
-    int topN = 300;// TODO
-    joshuaConfiguration.use_unique_nbest = true;
-    joshuaConfiguration.include_align_index = false;
-    boolean do_ngram_clip_nbest = true; // TODO
-    if (orc_extract_nbest) {
-      System.out.println("oracle extraction from nbest list");
-
-      kbest_extractor = new KBestExtractor(null, null, Decoder.weights, false, joshuaConfiguration);
-    }
-
-    BufferedWriter orc_out = FileUtility.getWriteFileStream(f_orc_out);
-
-    long start_time0 = System.currentTimeMillis();
-    long time_on_reading = 0;
-    long time_on_orc_extract = 0;
-    // DiskHyperGraph dhg_read = new DiskHyperGraph(baseline_lm_feat_id, true, null);
-
-    // dhg_read.initRead(f_hypergraphs, f_rule_tbl, null);
-
-    OracleExtractionHG orc_extractor = new OracleExtractionHG(baseline_lm_feat_id);
-    long start_time = System.currentTimeMillis();
-    int sent_id = 0;
-    for (String ref_sent: new LineReader(f_ref_files)) {
-      System.out.println("############Process sentence " + sent_id);
-      start_time = System.currentTimeMillis();
-      sent_id++;
-      // if(sent_id>10)break;
-
-      // HyperGraph hg = dhg_read.readHyperGraph();
-      HyperGraph hg = null;
-      if (hg == null)
-        continue;
-
-      // System.out.println("read disk hyp: " + (System.currentTimeMillis()-start_time));
-      time_on_reading += System.currentTimeMillis() - start_time;
-      start_time = System.currentTimeMillis();
-
-      String orc_sent = null;
-      double orc_bleu = 0;
-      if (orc_extract_nbest) {
-        Object[] res = orc_extractor.oracle_extract_nbest(kbest_extractor, hg, topN,
-            do_ngram_clip_nbest, ref_sent);
-        orc_sent = (String) res[0];
-        orc_bleu = (Double) res[1];
-      } else {
-        HyperGraph hg_oracle = orc_extractor.oracle_extract_hg(hg, hg.sentLen(), lm_order, ref_sent);
-        orc_sent = removeSentenceMarkers(getViterbiString(hg_oracle));
-        orc_bleu = orc_extractor.get_best_goal_cost(hg, orc_extractor.g_tbl_split_virtual_items);
-
-        time_on_orc_extract += System.currentTimeMillis() - start_time;
-        System.out.println("num_virtual_items: " + orc_extractor.g_num_virtual_items
-            + " num_virtual_dts: " + orc_extractor.g_num_virtual_deductions);
-        // System.out.println("oracle extract: " + (System.currentTimeMillis()-start_time));
-      }
-
-      orc_out.write(orc_sent + "\n");
-      System.out.println("orc bleu is " + orc_bleu);
-    }
-    orc_out.close();
-
-    System.out.println("time_on_reading: " + time_on_reading);
-    System.out.println("time_on_orc_extract: " + time_on_orc_extract);
-    System.out.println("total running time: " + (System.currentTimeMillis() - start_time0));
-  }
+//  @SuppressWarnings({ "unused" })
+//  public static void main(String[] args) throws IOException {
+//    JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
+//    /*
+//     * String f_hypergraphs="C:\\Users\\zli\\Documents\\mt03.src.txt.ss.nbest.hg.items"; String
+//     * f_rule_tbl="C:\\Users\\zli\\Documents\\mt03.src.txt.ss.nbest.hg.rules"; String
+//     * f_ref_files="C:\\Users\\zli\\Documents\\mt03.ref.txt.1"; String f_orc_out
+//     * ="C:\\Users\\zli\\Documents\\mt03.orc.txt";
+//     */
+//    if (6 != args.length) {
+//      System.out
+//      .println("Usage: java Decoder f_hypergraphs f_rule_tbl f_ref_files f_orc_out lm_order orc_extract_nbest");
+//      System.out.println("num of args is " + args.length);
+//      for (int i = 0; i < args.length; i++) {
+//        System.out.println("arg is: " + args[i]);
+//      }
+//      System.exit(1);
+//    }
+//    // String f_hypergraphs = args[0].trim();
+//    // String f_rule_tbl = args[1].trim();
+//    String f_ref_files = args[2].trim();
+//    String f_orc_out = args[3].trim();
+//    int lm_order = Integer.parseInt(args[4].trim());
+//    boolean orc_extract_nbest = Boolean.valueOf(args[5].trim()); // oracle extraction from nbest or hg
+//
+//    int baseline_lm_feat_id = 0;
+//
+//    KBestExtractor kbest_extractor = null;
+//    int topN = 300;// TODO
+//    joshuaConfiguration.use_unique_nbest = true;
+//    joshuaConfiguration.include_align_index = false;
+//    boolean do_ngram_clip_nbest = true; // TODO
+//    if (orc_extract_nbest) {
+//      System.out.println("oracle extraction from nbest list");
+//
+//      kbest_extractor = new KBestExtractor(null, null, Decoder.weights, false, joshuaConfiguration);
+//    }
+//
+//    BufferedWriter orc_out = FileUtility.getWriteFileStream(f_orc_out);
+//
+//    long start_time0 = System.currentTimeMillis();
+//    long time_on_reading = 0;
+//    long time_on_orc_extract = 0;
+//    // DiskHyperGraph dhg_read = new DiskHyperGraph(baseline_lm_feat_id, true, null);
+//
+//    // dhg_read.initRead(f_hypergraphs, f_rule_tbl, null);
+//
+//    OracleExtractionHG orc_extractor = new OracleExtractionHG(baseline_lm_feat_id);
+//    long start_time = System.currentTimeMillis();
+//    int sent_id = 0;
+//    for (String ref_sent: new LineReader(f_ref_files)) {
+//      System.out.println("############Process sentence " + sent_id);
+//      start_time = System.currentTimeMillis();
+//      sent_id++;
+//      // if(sent_id>10)break;
+//
+//      // HyperGraph hg = dhg_read.readHyperGraph();
+//      HyperGraph hg = null;
+//      if (hg == null)
+//        continue;
+//
+//      // System.out.println("read disk hyp: " + (System.currentTimeMillis()-start_time));
+//      time_on_reading += System.currentTimeMillis() - start_time;
+//      start_time = System.currentTimeMillis();
+//
+//      String orc_sent = null;
+//      double orc_bleu = 0;
+//      if (orc_extract_nbest) {
+//        Object[] res = orc_extractor.oracle_extract_nbest(kbest_extractor, hg, topN,
+//            do_ngram_clip_nbest, ref_sent);
+//        orc_sent = (String) res[0];
+//        orc_bleu = (Double) res[1];
+//      } else {
+//        HyperGraph hg_oracle = orc_extractor.oracle_extract_hg(hg, hg.sentLen(), lm_order, ref_sent);
+//        orc_sent = removeSentenceMarkers(getViterbiString(hg_oracle));
+//        orc_bleu = orc_extractor.get_best_goal_cost(hg, orc_extractor.g_tbl_split_virtual_items);
+//
+//        time_on_orc_extract += System.currentTimeMillis() - start_time;
+//        System.out.println("num_virtual_items: " + orc_extractor.g_num_virtual_items
+//            + " num_virtual_dts: " + orc_extractor.g_num_virtual_deductions);
+//        // System.out.println("oracle extract: " + (System.currentTimeMillis()-start_time));
+//      }
+//
+//      orc_out.write(orc_sent + "\n");
+//      System.out.println("orc bleu is " + orc_bleu);
+//    }
+//    orc_out.close();
+//
+//    System.out.println("time_on_reading: " + time_on_reading);
+//    System.out.println("time_on_orc_extract: " + time_on_orc_extract);
+//    System.out.println("total running time: " + (System.currentTimeMillis() - start_time0));
+//  }
 
   // find the oracle hypothesis in the nbest list
   public Object[] oracle_extract_nbest(KBestExtractor kbest_extractor, HyperGraph hg, int n,

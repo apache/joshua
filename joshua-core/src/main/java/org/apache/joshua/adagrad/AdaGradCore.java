@@ -47,12 +47,13 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.metrics.EvaluationMetric;
 import org.apache.joshua.util.StreamGobbler;
 import org.apache.joshua.util.io.ExistingUTF8EncodedTextFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.typesafe.config.Config;
 
 /**
  * This code was originally written by Yuan Cao, who copied the MERT code to produce this file.
@@ -65,8 +66,6 @@ public class AdaGradCore {
   private final static double PosInf = (+1.0 / 0.0);
   private final static double epsilon = 1.0 / 1000000;
   private final static DecimalFormat f4 = new DecimalFormat("###0.0000");
-
-  private final JoshuaConfiguration joshuaConfiguration;
 
   private TreeSet<Integer>[] indicesOfInterest_all;
 
@@ -249,6 +248,7 @@ public class AdaGradCore {
   private String sourceFileName, refFileName, decoderOutFileName;
   private String decoderConfigFileName, decoderCommandFileName;
   private String fakeFileNameTemplate, fakeFileNamePrefix, fakeFileNameSuffix;
+  private Config config;
 
   // e.g. output.it[1-x].someOldRun would be specified as:
   // output.it?.someOldRun
@@ -256,19 +256,19 @@ public class AdaGradCore {
 
   // private int useDisk;
 
-  public AdaGradCore(JoshuaConfiguration joshuaConfiguration) {
-    this.joshuaConfiguration = joshuaConfiguration;
+  public AdaGradCore(Config config) {
+    this.config = config;
   }
 
-  public AdaGradCore(String[] args, JoshuaConfiguration joshuaConfiguration) throws FileNotFoundException, IOException {
-    this.joshuaConfiguration = joshuaConfiguration;
+  public AdaGradCore(String[] args, Config config) throws FileNotFoundException, IOException {
+    this.config = config;
     EvaluationMetric.set_knownMetrics();
     processArgsArray(args);
     initialize(0);
   }
 
-  public AdaGradCore(String configFileName, JoshuaConfiguration joshuaConfiguration) throws FileNotFoundException, IOException {
-    this.joshuaConfiguration = joshuaConfiguration;
+  public AdaGradCore(String configFileName, Config config) throws FileNotFoundException, IOException {
+    this.config = config;
     EvaluationMetric.set_knownMetrics();
     processArgsArray(cfgFileToArgsArray(configFileName));
     initialize(0);
@@ -480,7 +480,7 @@ public class AdaGradCore {
     // by default, load joshua decoder
     if (decoderCommand == null && fakeFileNameTemplate == null) {
       println("Loading Joshua decoder...", 1);
-      myDecoder = new Decoder(joshuaConfiguration);
+      myDecoder = new Decoder(config);
       println("...finished loading @ " + (new Date()), 1);
       println("");
     } else {

@@ -16,25 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.joshua.decoder.segment_file;
+package org.apache.joshua.decoder.ff;
 
-import com.typesafe.config.Config;
+public class ScoreAccumulator implements Accumulator {
+  private float score;
+  private final FeatureVector weights;
 
-public class ParseTreeInput extends Sentence {
-
-  public ParseTreeInput(String input, int id, Config config) {
-    super(input, id, config);
+  public ScoreAccumulator(FeatureVector weights) {
+    this.score = 0.0f;
+    this.weights = weights;
   }
 
-  // looks_like_parse_tree = sentence.sentence().matches("^\\(+[A-Z]+ .*");
+  @Override
+  public void add(int featureId, float value) {
+    score += value * weights.getOrDefault(featureId);
+  }
 
-  // private SyntaxTree syntax_tree;
-
-  // ParseTreeInput() {
-  // SyntaxTree syntax_tree = new ArraySyntaxTree(sentence.sentence(), Vocabulary);
-  // }
-
-  // public int[] int_sentence() {
-  // return syntax_tree.getTerminals();
-  // }
+  public float getScore() {
+    return score;
+  }
 }

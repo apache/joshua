@@ -19,9 +19,10 @@
 package org.apache.joshua.decoder.chart_parser;
 
 
-import org.apache.joshua.decoder.Decoder;
+import org.apache.joshua.decoder.DecoderConfig;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
+import org.apache.joshua.decoder.ff.ScoreAccumulator;
 import org.apache.joshua.decoder.ff.StatefulFF;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
@@ -55,7 +56,7 @@ public class ComputeNodeResult {
      * @param sourcePath information about a path taken through the source lattice
      * @param sentence the lattice input
      */
-    public static NodeResult computeNodeResult(List<FeatureFunction> featureFunctions, Rule rule, List<HGNode> tailNodes,
+    public static NodeResult computeNodeResult(DecoderConfig config, Rule rule, List<HGNode> tailNodes,
                                                int i, int j, SourcePath sourcePath, Sentence sentence) {
 
       // The total Viterbi cost of this edge. This is the Viterbi cost of the tail nodes, plus
@@ -91,26 +92,27 @@ public class ComputeNodeResult {
       // The future cost estimate is a heuristic estimate of the outside cost of this edge.
       float futureCostEstimate = 0.0f;
 
-      /*
-       * We now iterate over all the feature functions, computing their cost and their expected future
-       * cost.
-       */
-      for (FeatureFunction feature : featureFunctions) {
-        FeatureFunction.ScoreAccumulator acc = feature.new ScoreAccumulator();
+    /*
+     * We now iterate over all the feature functions, computing their cost and their expected future
+     * cost.
+     */
+    for (FeatureFunction feature : config.getFeatureFunctions()) {
+      ScoreAccumulator acc = new ScoreAccumulator(config.getWeights()); 
 
         DPState newState = feature.compute(rule, tailNodes, i, j, sourcePath, sentence, acc);
         transitionCost += acc.getScore();
 
         if (LOG.isDebugEnabled()) {
           LOG.debug("FEATURE {} = {} * {} = {}", feature.getName(),
-              acc.getScore() / Decoder.weights.getOrDefault(hashFeature(feature.getName())),
-              Decoder.weights.getOrDefault(hashFeature(feature.getName())), acc.getScore());
+              acc.getScore() / config.getWeights().getOrDefault(hashFeature(feature.getName())),
+              config.getWeights().getOrDefault(hashFeature(feature.getName())), acc.getScore());
         }
 
         if (feature.isStateful()) {
           futureCostEstimate += feature.estimateFutureCost(rule, newState, sentence);
           allDPStates.add(((StatefulFF)feature).getStateIndex(), newState);
         }
+      
       }
       viterbiCost += transitionCost;
       if (LOG.isDebugEnabled())

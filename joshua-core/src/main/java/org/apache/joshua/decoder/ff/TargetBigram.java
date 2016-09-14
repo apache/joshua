@@ -26,7 +26,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.state_maintenance.NgramDPState;
@@ -35,6 +34,8 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.apache.joshua.util.FormatUtils;
 import org.apache.joshua.util.io.LineReader;
+
+import com.typesafe.config.Config;
 
 /***
  * The RuleBigram feature is an indicator feature that counts target word bigrams that are created when
@@ -59,17 +60,17 @@ public class TargetBigram extends StatefulFF {
   private int maxTerms = 1000000;
   private int threshold = 0;
 
-  public TargetBigram(FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, "TargetBigram", args, config);
+  public TargetBigram(Config featureConfig, FeatureVector weights) {
+    super("TargetBigram", featureConfig, weights);
 
-    if (parsedArgs.containsKey("threshold"))
-      threshold = Integer.parseInt(parsedArgs.get("threshold"));
+    if (featureConfig.hasPath("threshold"))
+      threshold = featureConfig.getInt("threshold");
 
-    if (parsedArgs.containsKey("top-n"))
-      maxTerms = Integer.parseInt(parsedArgs.get("top-n"));
+    if (featureConfig.hasPath("top-n"))
+      maxTerms = featureConfig.getInt("top-n");
 
-    if (parsedArgs.containsKey("vocab")) {
-      loadVocab(parsedArgs.get("vocab"));
+    if (featureConfig.hasPath("vocab")) {
+      loadVocab(featureConfig.getString("vocab"));
     }
   }
 

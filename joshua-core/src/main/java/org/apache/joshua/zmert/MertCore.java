@@ -50,12 +50,13 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.metrics.EvaluationMetric;
 import org.apache.joshua.util.StreamGobbler;
 import org.apache.joshua.util.io.ExistingUTF8EncodedTextFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.typesafe.config.Config;
 
 /**
  * This code was originally written by Omar Zaidan.  In September of 2012, it was augmented to support
@@ -68,7 +69,7 @@ public class MertCore {
 
   private static final Logger LOG = LoggerFactory.getLogger(MertCore.class);
 
-  private final JoshuaConfiguration joshuaConfiguration;
+  private final Config config;
   private TreeSet<Integer>[] indicesOfInterest_all;
 
   private final static DecimalFormat f4 = new DecimalFormat("###0.0000");
@@ -255,20 +256,20 @@ public class MertCore {
 
   // private int useDisk;
 
-  public MertCore(JoshuaConfiguration joshuaConfiguration)
+  public MertCore(Config config)
   {
-    this.joshuaConfiguration = joshuaConfiguration;
+    this.config = config;
   }
 
-  public MertCore(String[] args, JoshuaConfiguration joshuaConfiguration) throws FileNotFoundException, IOException {
-    this.joshuaConfiguration = joshuaConfiguration;
+  public MertCore(String[] args, Config config) throws FileNotFoundException, IOException {
+    this.config = config;
     EvaluationMetric.set_knownMetrics();
     processArgsArray(args);
     initialize(0);
   }
 
-  public MertCore(String configFileName,JoshuaConfiguration joshuaConfiguration) throws FileNotFoundException, IOException {
-    this.joshuaConfiguration = joshuaConfiguration;
+  public MertCore(String configFileName, Config config) throws FileNotFoundException, IOException {
+    this.config = config;
     EvaluationMetric.set_knownMetrics();
     processArgsArray(cfgFileToArgsArray(configFileName));
     initialize(0);
@@ -487,7 +488,7 @@ public class MertCore {
 
     if (decoderCommand == null && fakeFileNameTemplate == null) {
       println("Loading Joshua decoder...", 1);
-      myDecoder = new Decoder(joshuaConfiguration);
+      myDecoder = new Decoder(config);
       println("...finished loading @ " + (new Date()), 1);
       println("");
     } else {
@@ -2794,9 +2795,8 @@ public class MertCore {
     String configFileName = args[0];
     String stateFileName = args[1];
     int currIteration = Integer.parseInt(args[2]);
-    JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
 
-    MertCore DMC = new MertCore(joshuaConfiguration); // dummy MertCore object
+    MertCore DMC = new MertCore(Decoder.getDefaultFlags()); // dummy MertCore object
 
     // if bad args[], System.exit(80)
 

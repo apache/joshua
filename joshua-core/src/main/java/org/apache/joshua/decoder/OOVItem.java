@@ -16,25 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.joshua.decoder.segment_file;
+package org.apache.joshua.decoder;
 
-import com.typesafe.config.Config;
+/*
+ * A list of OOV symbols in the form
+ *
+ * [X1] weight [X2] weight [X3] weight ...
+ *
+ * where the [X] symbols are nonterminals and the weights are weights. For each OOV word w in the
+ * input sentence, Joshua will create rules of the form
+ *
+ * X1 -> w (weight)
+ *
+ * If this is empty, an unweighted default_non_terminal is used.
+ */
+public class OOVItem implements Comparable<OOVItem> {
+  public final String label;
 
-public class ParseTreeInput extends Sentence {
+  public final float weight;
 
-  public ParseTreeInput(String input, int id, Config config) {
-    super(input, id, config);
+  OOVItem(String l, float w) {
+    label = l;
+    weight = w;
   }
-
-  // looks_like_parse_tree = sentence.sentence().matches("^\\(+[A-Z]+ .*");
-
-  // private SyntaxTree syntax_tree;
-
-  // ParseTreeInput() {
-  // SyntaxTree syntax_tree = new ArraySyntaxTree(sentence.sentence(), Vocabulary);
-  // }
-
-  // public int[] int_sentence() {
-  // return syntax_tree.getTerminals();
-  // }
+  @Override
+  public int compareTo(OOVItem other) {
+    if (weight > other.weight)
+      return -1;
+    else if (weight < other.weight)
+      return 1;
+    return 0;
+  }
 }

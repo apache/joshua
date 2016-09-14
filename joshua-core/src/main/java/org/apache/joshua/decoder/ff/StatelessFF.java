@@ -20,12 +20,13 @@ package org.apache.joshua.decoder.ff;
 
 import java.util.List;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
+
+import com.typesafe.config.Config;
 
 /**
  * Stateless feature functions do not contribute any state. You need not implement this class to
@@ -37,8 +38,8 @@ import org.apache.joshua.decoder.segment_file.Sentence;
 
 public abstract class StatelessFF extends FeatureFunction {
 
-  public StatelessFF(FeatureVector weights, String name, String[] args, JoshuaConfiguration config) {
-    super(weights, name, args, config);
+  public StatelessFF(final String name, Config featureConfig, FeatureVector weights) {
+    super(name, featureConfig, weights);
   }
 
   public final boolean isStateful() {

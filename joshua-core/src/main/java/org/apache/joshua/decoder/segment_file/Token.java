@@ -25,10 +25,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.typesafe.config.Config;
 
 /**
  * Stores the identity of a word and its annotations in a sentence.
@@ -73,9 +74,7 @@ public class Token {
    * @param config a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    *  
    */
-  public Token(String rawWord, JoshuaConfiguration config) {
-
-    JoshuaConfiguration joshuaConfiguration = config;
+  public Token(String rawWord, Config config) {
     
     annotations = new HashMap<>();
     
@@ -105,7 +104,7 @@ public class Token {
     // annotations.
     token = escapeSpecialSymbols(token);
 
-    if (joshuaConfiguration != null && joshuaConfiguration.lowercase) {
+    if (config != null && config.getBoolean("lowercase")) {
       if (FormatUtils.ISALLUPPERCASE(token))
         annotations.put("lettercase", "all-upper");
       else if (Character.isUpperCase(token.charAt(0)))

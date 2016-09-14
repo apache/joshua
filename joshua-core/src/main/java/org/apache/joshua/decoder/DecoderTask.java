@@ -18,21 +18,20 @@
  */
 package org.apache.joshua.decoder;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.chart_parser.Chart;
-import org.apache.joshua.decoder.ff.FeatureFunction;
-import org.apache.joshua.decoder.ff.SourceDependentFF;
 import org.apache.joshua.decoder.ff.tm.Grammar;
 import org.apache.joshua.decoder.hypergraph.ForestWalker;
 import org.apache.joshua.decoder.hypergraph.GrammarBuilderWalkerFunction;
 import org.apache.joshua.decoder.hypergraph.HyperGraph;
 import org.apache.joshua.decoder.phrase.Stacks;
 import org.apache.joshua.decoder.segment_file.Sentence;
-import org.apache.joshua.corpus.Vocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableMap;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 /**
  * This class handles decoding of individual Sentence objects (which can represent plain sentences
@@ -41,122 +40,110 @@ import org.slf4j.LoggerFactory;
  * translateAll(), which continually queries the InputHandler for sentences until they have all been
  * consumed and translated.
  * 
- * The DecoderFactory class is responsible for launching the threads.
- * 
  * @author Matt Post post@cs.jhu.edu
  * @author Zhifei Li, zhifei.work@gmail.com
+ * @author Felix Hieber, felix.hieber@gmail.com
  */
-
 public class DecoderTask {
+  
   private static final Logger LOG = LoggerFactory.getLogger(DecoderTask.class);
-
-  private final JoshuaConfiguration joshuaConfiguration;
-  /*
-   * these variables may be the same across all threads (e.g., just copy from DecoderFactory), or
-   * differ from thread to thread
+  
+  /** sentence-specific DecoderConfig,
+   * mostly shared with the global decoderConfig, but can have adaptations
    */
-  private final List<Grammar> allGrammars;
-  private final List<FeatureFunction> featureFunctions;
+  private final DecoderConfig sentenceConfig;
+  private final Sentence sentence;
+  private final boolean segmentOovs;
+  private final boolean useDotChart;
+  private final boolean doParsing;
 
-  public DecoderTask(List<Grammar> grammars, List<FeatureFunction> featureFunctions,
-                       JoshuaConfiguration joshuaConfiguration) {
-
-    this.joshuaConfiguration = joshuaConfiguration;
-    this.allGrammars = grammars;
-
-    this.featureFunctions = new ArrayList<>();
-    for (FeatureFunction ff : featureFunctions) {
-      if (ff instanceof SourceDependentFF) {
-        this.featureFunctions.add(((SourceDependentFF) ff).clone());
-      } else {
-        this.featureFunctions.add(ff);
-      }
-    }
+  public DecoderTask(final DecoderConfig sentenceConfig, final Sentence sentence) {
+    this.sentenceConfig = sentenceConfig;
+    this.sentence = sentence;
+    this.segmentOovs = sentenceConfig.getFlags().getBoolean("segment_oovs");
+    this.useDotChart = sentenceConfig.getFlags().getBoolean("use_dot_chart");
+    this.doParsing = sentenceConfig.getFlags().getBoolean("parse");
   }
 
   /**
-   * Translate a sentence.
-   * 
-   * @param sentence The sentence to be translated.
-   * @return the sentence {@link org.apache.joshua.decoder.Translation}
+   * Translate the sentence.
+   * @return translation of the sentence {@link org.apache.joshua.decoder.Translation}
    */
-  public Translation translate(Sentence sentence) {
+  public Translation translate() {
 
     LOG.info("Input {}: {}", sentence.id(), sentence.fullSource());
 
-    if (sentence.target() != null)
+    if (sentence.target() != null) {
       LOG.info("Input {}: Constraining to target sentence '{}'",
           sentence.id(), sentence.target());
+    }
 
     // skip blank sentences
     if (sentence.isEmpty()) {
       LOG.info("Translation {}: Translation took 0 seconds", sentence.id());
-      return new Translation(sentence, null, featureFunctions, joshuaConfiguration);
+      return new Translation(sentence, null, sentenceConfig);
     }
 
     long startTime = System.currentTimeMillis();
 
-    int numGrammars = allGrammars.size();
-    Grammar[] grammars = new Grammar[numGrammars];
-
-    for (int i = 0; i < allGrammars.size(); i++)
-      grammars[i] = allGrammars.get(i);
-
-    if (joshuaConfiguration.segment_oovs)
-      sentence.segmentOOVs(grammars);
+    // TODO(fhieber): this should be done in the constructor maybe?
+    // But it should not modify the sentence object.
+    if (segmentOovs) {
+      sentence.segmentOOVs(sentenceConfig.getGrammars());
+    }
 
     /*
      * Joshua supports (as of September 2014) both phrase-based and hierarchical decoding. Here
      * we build the appropriate chart. The output of both systems is a hypergraph, which is then
      * used for further processing (e.g., k-best extraction).
      */
-    HyperGraph hypergraph;
-    try {
+    final HyperGraph hypergraph = createHypergraph();
 
-      if (joshuaConfiguration.search_algorithm.equals("stack")) {
-        Stacks stacks = new Stacks(sentence, this.featureFunctions, grammars, joshuaConfiguration);
-
-        hypergraph = stacks.search();
-      } else {
-        /* Seeding: the chart only sees the grammars, not the factories */
-        Chart chart = new Chart(sentence, this.featureFunctions, grammars,
-            joshuaConfiguration.goal_symbol, joshuaConfiguration);
-
-        hypergraph = (joshuaConfiguration.use_dot_chart) 
-            ? chart.expand() 
-                : chart.expandSansDotChart();
-      }
-
-    } catch (java.lang.OutOfMemoryError e) {
-      LOG.error("Input {}: out of memory", sentence.id());
-      hypergraph = null;
-    }
-
-    float seconds = (System.currentTimeMillis() - startTime) / 1000.0f;
-    LOG.info("Input {}: Translation took {} seconds", sentence.id(), seconds);
-    LOG.info("Input {}: Memory used is {} MB", sentence.id(), (Runtime
-        .getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1000000.0);
+    float decodingTime = (System.currentTimeMillis() - startTime) / 1000.0f;
+    float usedMemory = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1000000.0f;
+    LOG.info("Input {}: Translation took {} seconds", sentence.id(), decodingTime);
+    LOG.info("Input {}: Memory used is {} MB", sentence.id(), usedMemory);
 
     /* Return the translation unless we're doing synchronous parsing. */
-    if (!joshuaConfiguration.parse || hypergraph == null) {
-      return new Translation(sentence, hypergraph, featureFunctions, joshuaConfiguration);
+    if (!doParsing || hypergraph == null) {
+      return new Translation(sentence, hypergraph, sentenceConfig);
+    } else {
+      return parse(hypergraph);
     }
-
-    /*
-     * Synchronous parsing.
-     * 
-     * Step 1. Traverse the hypergraph to create a grammar for the second-pass parse.
-     */
-    Grammar newGrammar = getGrammarFromHyperGraph(joshuaConfiguration.goal_symbol, hypergraph);
-    newGrammar.sortGrammar(this.featureFunctions);
+  }
+  
+  private HyperGraph createHypergraph() {
+    try {
+      switch (sentenceConfig.getSearchAlgorithm()) {
+      case stack:
+        final Stacks stacks = new Stacks(sentence, sentenceConfig);
+        return stacks.search();
+      case cky:
+        final Chart chart = new Chart(sentence, sentenceConfig);
+        return useDotChart ? chart.expand() : chart.expandSansDotChart();
+      default:
+        return null;
+      }
+    } catch (java.lang.OutOfMemoryError e) {
+      return null;
+    }
+  }
+  
+  /**
+   * Synchronous parsing.
+   */
+  private Translation parse(final HyperGraph hypergraph) {
+    long startTime = System.currentTimeMillis();
+    // Step 1. Traverse the hypergraph to create a grammar for the second-pass parse.
+    final Grammar newGrammar = getGrammarFromHyperGraph(sentenceConfig.getFlags().getString("goal_symbol"), hypergraph);
+    newGrammar.sortGrammar(sentenceConfig.getFeatureFunctions());
     long sortTime = System.currentTimeMillis();
     LOG.info("Sentence {}: New grammar has {} rules.", sentence.id(),
         newGrammar.getNumRules());
 
     /* Step 2. Create a new chart and parse with the instantiated grammar. */
-    Grammar[] newGrammarArray = new Grammar[] { newGrammar };
-    Sentence targetSentence = new Sentence(sentence.target(), sentence.id(), joshuaConfiguration);
-    Chart chart = new Chart(targetSentence, featureFunctions, newGrammarArray, "GOAL",joshuaConfiguration);
+    final Sentence targetSentence = new Sentence(sentence.target(), sentence.id(), sentenceConfig.getFlags());
+    final Chart chart = new Chart(targetSentence, sentenceConfig);
     int goalSymbol = GrammarBuilderWalkerFunction.goalSymbol(hypergraph);
     String goalSymbolString = Vocabulary.word(goalSymbol);
     LOG.info("Sentence {}: goal symbol is {} ({}).", sentence.id(),
@@ -172,14 +159,17 @@ public class DecoderTask {
         (secondParseTime - startTime) / 1000);
     LOG.info("Memory used after sentence {} is {} MB", sentence.id(), (Runtime
         .getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1000000.0);
-    return new Translation(sentence, englishParse, featureFunctions, joshuaConfiguration); // or do something else
+    return new Translation(sentence, englishParse, sentenceConfig); // or do something else
   }
 
-  private Grammar getGrammarFromHyperGraph(String goal, HyperGraph hg) {
-    GrammarBuilderWalkerFunction f = new GrammarBuilderWalkerFunction(goal,joshuaConfiguration,
-            "pt");
+  private static Grammar getGrammarFromHyperGraph(String goal, HyperGraph hg) {
+    final Config grammarConfig = ConfigFactory.parseMap(
+        ImmutableMap.of("owner", "pt", "span_limit", "1000"), "");
+    GrammarBuilderWalkerFunction f = new GrammarBuilderWalkerFunction(
+        goal, grammarConfig);
     ForestWalker walker = new ForestWalker();
     walker.walk(hg.goalNode, f);
     return f.getGrammar();
   }
+  
 }

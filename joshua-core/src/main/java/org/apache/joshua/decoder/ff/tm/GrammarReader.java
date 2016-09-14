@@ -21,7 +21,6 @@ package org.apache.joshua.decoder.ff.tm;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
 import org.apache.joshua.decoder.ff.tm.format.MosesFormatReader;
 import org.apache.joshua.util.io.LineReader;
@@ -136,7 +135,7 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
     advanceReader();
 
 
-    if (Decoder.VERBOSE >= 1) {
+    if (true) {
       int newProgress = (reader != null) ? reader.progress() : 100;
 
       //TODO: review this code. It is better to print progress based on time gap (like for every 1s or 2sec) than %!

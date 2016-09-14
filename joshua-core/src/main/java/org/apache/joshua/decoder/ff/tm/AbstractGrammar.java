@@ -19,20 +19,13 @@
 package org.apache.joshua.decoder.ff.tm;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
-import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.ff.FeatureFunction;
-import org.apache.joshua.decoder.phrase.PhraseTable;
-import org.apache.joshua.decoder.segment_file.Token;
-import org.apache.joshua.lattice.Arc;
-import org.apache.joshua.lattice.Lattice;
-import org.apache.joshua.lattice.Node;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.typesafe.config.Config;
 
 /**
  * Partial implementation of the <code>Grammar</code> interface that provides logic for sorting a
@@ -89,21 +82,22 @@ public abstract class AbstractGrammar implements Grammar {
   /* The maximum span of the input this grammar rules can be applied to. */
   protected final int spanLimit;
 
-  protected final JoshuaConfiguration joshuaConfiguration;
+  protected final Config config;
 
   /**
-   * Creates an empty, unsorted grammar with given owner and spanlimit
+   * Creates an empty, unsorted grammar with 
+   * owner and spanLimit configured. The Grammar is initially not sorted.
    * 
    * @see Grammar#isSorted()
    * @param owner the associated decoder-wide {@link org.apache.joshua.decoder.ff.tm.OwnerMap}
    * @param config a {@link org.apache.joshua.decoder.JoshuaConfiguration} object
    * @param spanLimit the maximum span of the input grammar rule(s) can be applied to.
    */
-  public AbstractGrammar(final String owner, final JoshuaConfiguration config, final int spanLimit) {
+  public AbstractGrammar(final Config config) {
+    this.config = config;
+    this.owner = OwnerMap.register(config.getString("owner"));
+    this.spanLimit = config.getInt("span_limit");
     this.sorted = false;
-    this.owner = OwnerMap.register(owner);
-    this.joshuaConfiguration = config;
-    this.spanLimit = spanLimit;
   }
 
   public static final int OOV_RULE_ID = 0;
@@ -182,49 +176,5 @@ public abstract class AbstractGrammar implements Grammar {
         LOG.debug("Node has 0 children to extend: {}", node);
       }
     }
-  }
-
-  // write grammar to disk
-  public void writeGrammarOnDisk(String file) {
-  }
-  
-  /**
-   * Adds OOV rules for all words in the input lattice to the current grammar. Uses addOOVRule() so that
-   * sub-grammars can define different types of OOV rules if needed (as is used in {@link PhraseTable}).
-   * 
-   * @param grammar Grammar in the Trie
-   * @param inputLattice the lattice representing the input sentence
-   * @param featureFunctions a list of feature functions used for scoring
-   * @param onlyTrue determine if word is actual OOV.
-   */
-  public static void addOOVRules(Grammar grammar, Lattice<Token> inputLattice, 
-      List<FeatureFunction> featureFunctions, boolean onlyTrue) {
-    /*
-     * Add OOV rules; This should be called after the manual constraints have
-     * been set up.
-     */
-    HashSet<Integer> words = new HashSet<>();
-    for (Node<Token> node : inputLattice) {
-      for (Arc<Token> arc : node.getOutgoingArcs()) {
-        // create a rule, but do not add into the grammar trie
-        // TODO: which grammar should we use to create an OOV rule?
-        int sourceWord = arc.getLabel().getWord();
-        if (sourceWord == Vocabulary.id(Vocabulary.START_SYM)
-            || sourceWord == Vocabulary.id(Vocabulary.STOP_SYM))
-          continue;
-
-        // Determine if word is actual OOV.
-        if (onlyTrue && ! Vocabulary.hasId(sourceWord))
-          continue;
-
-        words.add(sourceWord);
-      }
-    }
-
-    for (int sourceWord: words) 
-      grammar.addOOVRules(sourceWord, featureFunctions);
-
-    // Sort all the rules (not much to actually do, this just marks it as sorted)
-    grammar.sortGrammar(featureFunctions);
   }
 }

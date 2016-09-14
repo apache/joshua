@@ -21,7 +21,7 @@ package org.apache.joshua.zmert;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.util.FileUtility;
 
 public class ZMERT {
@@ -43,8 +43,7 @@ public class ZMERT {
     }
 
     if (!external) {
-      JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
-      MertCore myMert = new MertCore(args[0],joshuaConfiguration);
+      MertCore myMert = new MertCore(args[0], Decoder.getDefaultFlags());
       myMert.run_MERT(); // optimize lambda[]!!!
       myMert.finish();
     } else {

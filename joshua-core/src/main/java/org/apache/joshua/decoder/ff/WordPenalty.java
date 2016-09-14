@@ -20,13 +20,14 @@ package org.apache.joshua.decoder.ff;
 
 import java.util.List;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.phrase.Hypothesis;
 import org.apache.joshua.decoder.segment_file.Sentence;
+
+import com.typesafe.config.Config;
 
 /**
  * 
@@ -38,13 +39,15 @@ public final class WordPenalty extends StatelessFF {
   private float OMEGA = -(float) Math.log10(Math.E); // -0.435
   private final boolean isCky;
 
-  public WordPenalty(final FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, "WordPenalty", args, config);
+  public WordPenalty(Config featureConfig, FeatureVector weights) {
+    super("WordPenalty", featureConfig, weights);
 
-    if (parsedArgs.containsKey("value"))
-      OMEGA = Float.parseFloat(parsedArgs.get("value"));
-    
-    isCky = config.search_algorithm.equals("cky");
+    if (featureConfig.hasPath("value")) {
+      OMEGA = (float) featureConfig.getDouble("value");
+    }
+      
+    // TODO(fhieber): fix this!
+    isCky = true; //decoderConfig.getConfig().getString("search_algorithm").equals("cky");
   }
 
   @Override

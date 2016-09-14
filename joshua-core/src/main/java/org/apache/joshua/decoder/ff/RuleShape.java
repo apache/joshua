@@ -22,7 +22,6 @@ import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
 
 import java.util.List;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
@@ -30,13 +29,15 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.apache.joshua.util.FormatUtils;
 
+import com.typesafe.config.Config;
+
 /*
  * Implements the RuleShape feature for source, target, and paired source+target sides.
  */
 public class RuleShape extends StatelessFF {
 
-  public RuleShape(FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, "RuleShape", args, config);
+  public RuleShape(Config featureConfig, FeatureVector weights) {
+    super("RuleShape", featureConfig, weights);
   }
 
   private enum WordType {

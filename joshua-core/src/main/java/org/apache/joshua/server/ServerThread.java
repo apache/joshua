@@ -35,9 +35,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.SearchAlgorithm;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.TranslationResponseStream;
+import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.Trie;
 import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
@@ -59,8 +60,7 @@ public class ServerThread extends Thread implements HttpHandler {
   private static final Logger LOG = LoggerFactory.getLogger(ServerThread.class);
   private static final Charset FILE_ENCODING = Charset.forName("UTF-8");
   
-  private final JoshuaConfiguration joshuaConfiguration;
-  private Socket socket = null;
+  private final Socket socket;
   private final Decoder decoder;
 
   /**
@@ -70,8 +70,7 @@ public class ServerThread extends Thread implements HttpHandler {
    * @param decoder the configured decoder that handles performing translations
    * @param joshuaConfiguration a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
-  public ServerThread(Socket socket, Decoder decoder, JoshuaConfiguration joshuaConfiguration) {
-    this.joshuaConfiguration = joshuaConfiguration;
+  public ServerThread(Socket socket, Decoder decoder) {
     this.socket = socket;
     this.decoder = decoder;
   }
@@ -88,7 +87,7 @@ public class ServerThread extends Thread implements HttpHandler {
     try {
       BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), FILE_ENCODING));
 
-      TranslationRequestStream request = new TranslationRequestStream(reader, joshuaConfiguration);
+      TranslationRequestStream request = new TranslationRequestStream(reader, decoder.getDecoderConfig().getFlags());
 
       try {
         TranslationResponseStream translationResponseStream = decoder.decodeAll(request);
@@ -162,7 +161,7 @@ public class ServerThread extends Thread implements HttpHandler {
     String meta = params.get("meta");
     
     BufferedReader reader = new BufferedReader(new StringReader(query));
-    TranslationRequestStream request = new TranslationRequestStream(reader, joshuaConfiguration);
+    TranslationRequestStream request = new TranslationRequestStream(reader, decoder.getDecoderConfig().getFlags());
     
     TranslationResponseStream translationResponseStream = decoder.decodeAll(request);
     JSONMessage message = new JSONMessage();
@@ -194,9 +193,11 @@ public class ServerThread extends Thread implements HttpHandler {
     String type = tokens[0];
     String args = tokens.length > 1 ? tokens[1] : "";
     
+    final FeatureVector weights = decoder.getDecoderConfig().getWeights();
+    
     if (type.equals("get_weight")) {
       String weight = tokens[1];
-      LOG.info("WEIGHT: %s = %.3f", weight, Decoder.weights.getOrDefault(hashFeature(weight)));
+      LOG.info("WEIGHT: %s = %.3f", weight, weights.getOrDefault(hashFeature(weight)));
 
     } else if (type.equals("set_weights")) {
       // Change a decoder weight
@@ -205,15 +206,15 @@ public class ServerThread extends Thread implements HttpHandler {
         String feature = argTokens[i];
         int featureId = hashFeature(feature);
         String newValue = argTokens[i+1];
-        float old_weight = Decoder.weights.getOrDefault(featureId);
-        Decoder.weights.put(featureId, Float.parseFloat(newValue));
-        LOG.info("set_weights: {} {} -> {}", feature, old_weight, Decoder.weights.getOrDefault(featureId));
+        float old_weight = weights.getOrDefault(featureId);
+        weights.put(featureId, Float.parseFloat(newValue));
+        LOG.info("set_weights: {} {} -> {}", feature, old_weight, weights.getOrDefault(featureId));
       }
       
-      message.addMetaData("weights " + Decoder.weights.toString());
+      message.addMetaData("weights " + weights.toString());
       
     } else if (type.equals("get_weights")) {
-      message.addMetaData("weights " + Decoder.weights.toString());
+      message.addMetaData("weights " + weights.toString());
       
     } else if (type.equals("add_rule")) {
       String argTokens[] = args.split(" \\|\\|\\| ");
@@ -236,7 +237,7 @@ public class ServerThread extends Thread implements HttpHandler {
       /* Prepend source and target side nonterminals for phrase-based decoding. Probably better
        * handled in each grammar type's addRule() function.
        */
-      String ruleString = (joshuaConfiguration.search_algorithm.equals("stack"))
+      String ruleString = (decoder.getDecoderConfig().getSearchAlgorithm() == SearchAlgorithm.stack)
           ? String.format("%s ||| [X,1] %s ||| [X,1] %s ||| -1 %s %s", lhs, source, target, featureStr, alignmentStr)
           : String.format("%s ||| %s ||| %s ||| -1 %s %s", lhs, source, target, featureStr, alignmentStr);
       

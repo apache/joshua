@@ -21,21 +21,17 @@ package org.apache.joshua.decoder.segment_file;
 import static org.apache.joshua.util.FormatUtils.addSentenceMarkers;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
-import org.apache.joshua.decoder.KenLMPool;
 import org.apache.joshua.decoder.LanguageModelStateManager;
+import org.apache.joshua.decoder.SearchAlgorithm;
 import org.apache.joshua.decoder.ff.tm.Grammar;
 import org.apache.joshua.lattice.Arc;
 import org.apache.joshua.lattice.Lattice;
@@ -44,6 +40,8 @@ import org.apache.joshua.util.ChartSpan;
 import org.apache.joshua.util.Regex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.typesafe.config.Config;
 
 /**
  * This class represents lattice input. The lattice is contained on a single line and is represented
@@ -80,7 +78,11 @@ public class Sentence {
   /* List of constraints */
   private final List<ConstraintSpan> constraints;
   
-  public JoshuaConfiguration config = null;
+  private final Config config;
+  
+  private final boolean latticeDecoding;
+  private final int maximumSentenceLength;
+  private final SearchAlgorithm searchAlgorithm;
 
   private LanguageModelStateManager stateManager = new LanguageModelStateManager();
 
@@ -92,11 +94,14 @@ public class Sentence {
    * @param id ID to associate with the input string
    * @param joshuaConfiguration a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
-  public Sentence(String inputString, int id, JoshuaConfiguration joshuaConfiguration) {
+  public Sentence(String inputString, int id, Config config) {
   
     inputString = Regex.spaces.replaceAll(inputString, " ").trim();
     
-    config = joshuaConfiguration;
+    this.config = config;
+    this.latticeDecoding = this.config.getBoolean("lattice_decoding");
+    this.maximumSentenceLength = this.config.getInt("maximum_sentence_length");
+    this.searchAlgorithm = SearchAlgorithm.valueOf(this.config.getString("search_algorithm"));
     
     this.constraints = new LinkedList<>();
 
@@ -131,8 +136,13 @@ public class Sentence {
     }
     
     // Only trim strings
-    if (! (joshuaConfiguration.lattice_decoding && source.startsWith("(((")))
-      adjustForLength(joshuaConfiguration.maxlen);
+    if (! (latticeDecoding && source.startsWith("((("))) {
+      adjustForLength(maximumSentenceLength);
+    }
+  }
+  
+  public Config getConfig() {
+    return config;
   }
 
   /**
@@ -181,7 +191,7 @@ public class Sentence {
    * 
    * @param grammars a list of grammars to consult to find in- and out-of-vocabulary items
    */
-  public void segmentOOVs(Grammar[] grammars) {
+  public void segmentOOVs(final List<Grammar> grammars) {
     Lattice<Token> oldLattice = this.getLattice();
 
     /* Build a list of terminals across all grammars */
@@ -426,8 +436,8 @@ public class Sentence {
 
   public Lattice<Token> getLattice() {
     if (this.sourceLattice == null) {
-      if (config.lattice_decoding && rawSource().startsWith("(((")) {
-        if (config.search_algorithm.equals("stack")) {
+      if (latticeDecoding && rawSource().startsWith("(((")) {
+        if (searchAlgorithm == SearchAlgorithm.stack) {
           throw new RuntimeException("* FATAL: lattice decoding currently not supported for stack-based search algorithm.");
         }
         this.sourceLattice = Lattice.createTokenLatticeFromPLF(rawSource(), config);

@@ -18,6 +18,8 @@
  */
 package org.apache.joshua.decoder.chart_parser;
 
+import static org.apache.joshua.decoder.chart_parser.ComputeNodeResult.computeNodeResult;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -25,16 +27,12 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.DecoderConfig;
 import org.apache.joshua.decoder.chart_parser.DotChart.DotNode;
-import org.apache.joshua.decoder.ff.FeatureFunction;
-import org.apache.joshua.decoder.ff.SourceDependentFF;
-import org.apache.joshua.decoder.ff.tm.AbstractGrammar;
 import org.apache.joshua.decoder.ff.tm.Grammar;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.RuleCollection;
 import org.apache.joshua.decoder.ff.tm.Trie;
-import org.apache.joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.hypergraph.HyperGraph;
 import org.apache.joshua.decoder.segment_file.Sentence;
@@ -46,7 +44,7 @@ import org.apache.joshua.util.ChartSpan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.joshua.decoder.chart_parser.ComputeNodeResult.computeNodeResult;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Chart class this class implements chart-parsing: (1) seeding the chart (2)
@@ -67,11 +65,12 @@ import static org.apache.joshua.decoder.chart_parser.ComputeNodeResult.computeNo
 public class Chart {
 
   private static final Logger LOG = LoggerFactory.getLogger(Chart.class);
-  private final JoshuaConfiguration config;
-  // ===========================================================
-  // Statistics
-  // ===========================================================
-
+  
+  private final DecoderConfig config;
+  
+  private final int numTranslationOptions;
+  private final int popLimit;
+  
   /**
    * how many items have been pruned away because its cost is greater than the
    * cutoff in calling chart.add_deduction_in_chart()
@@ -79,31 +78,16 @@ public class Chart {
   int nMerged = 0;
   int nAdded = 0;
   int nDotitemAdded = 0; // note: there is no pruning in dot-item
-
-  public Sentence getSentence() {
-    return this.sentence;
-  }
   
-  // ===============================================================
-  // Private instance fields (maybe could be protected instead)
-  // ===============================================================
   private final ChartSpan<Cell> cells; // note that in some cell, it might be null
   private final int sourceLength;
-  private final List<FeatureFunction> featureFunctions;
-  private final Grammar[] grammars;
   private final DotChart[] dotcharts; // each grammar should have a dotchart associated with it
   private Cell goalBin;
   private int goalSymbolID = -1;
   private final Lattice<Token> inputLattice;
 
-  private Sentence sentence = null;
-//  private SyntaxTree parseTree;
+  private final Sentence sentence;
   private StateConstraint stateConstraint;
-
-
-  // ===============================================================
-  // Constructors
-  // ===============================================================
 
   /*
    * TODO: Once the Segment interface is adjusted to provide a Lattice<String>
@@ -116,52 +100,32 @@ public class Chart {
    * grammars too so we could move all of that into here.
    */
 
-  public Chart(Sentence sentence, List<FeatureFunction> featureFunctions, Grammar[] grammars,
-      String goalSymbol, JoshuaConfiguration config) {
+  public Chart(final Sentence sentence, final DecoderConfig config) {
+    
     this.config = config;
+    this.numTranslationOptions = config.getFlags().getInt("num_translation_options");
+    this.popLimit = config.getFlags().getInt("pop_limit");
+    
     this.inputLattice = sentence.getLattice();
     this.sourceLength = inputLattice.size() - 1;
-    this.featureFunctions = featureFunctions;
-
     this.sentence = sentence;
-
-    // TODO: OOV handling no longer handles parse tree input (removed after
-    // commit 748eb69714b26dd67cba8e7c25a294347603bede)
-//    this.parseTree = null;
-//    if (sentence instanceof ParsedSentence)
-//      this.parseTree = ((ParsedSentence) sentence).syntaxTree();
-//
     this.cells = new ChartSpan<>(sourceLength, null);
-
-    this.goalSymbolID = Vocabulary.id(goalSymbol);
+    this.goalSymbolID = Vocabulary.id(config.getFlags().getString("goal_symbol"));
     this.goalBin = new Cell(this, this.goalSymbolID);
 
-    /* Create the grammars, leaving space for the OOV grammar. */
-    this.grammars = new Grammar[grammars.length + 1];
-    System.arraycopy(grammars, 0, this.grammars, 1, grammars.length);
-
-    MemoryBasedBatchGrammar oovGrammar = new MemoryBasedBatchGrammar("oov", this.config, 20);
-    AbstractGrammar.addOOVRules(oovGrammar, sentence.getLattice(), featureFunctions,
-        this.config.true_oovs_only);
-    this.grammars[0] = oovGrammar;
-
     // each grammar will have a dot chart
-    this.dotcharts = new DotChart[this.grammars.length];
-    for (int i = 0; i < this.grammars.length; i++)
-      this.dotcharts[i] = new DotChart(this.inputLattice, this.grammars[i], this);
+    final int numGrammars = config.getGrammars().size();
+    this.dotcharts = new DotChart[numGrammars];
+    for (int i = 0; i < numGrammars; i++) {
+      this.dotcharts[i] = new DotChart(this.inputLattice, config.getGrammars().get(i), this);
+    }
 
     // Begin to do initialization work
-
     stateConstraint = null;
-    if (sentence.target() != null)
-      // stateConstraint = new StateConstraint(sentence.target());
+    if (sentence.target() != null) {
       stateConstraint = new StateConstraint(Vocabulary.START_SYM + " " + sentence.target() + " "
           + Vocabulary.STOP_SYM);
-
-    /* Find the SourceDependent feature and give it access to the sentence. */
-    this.featureFunctions.stream().filter(ff -> ff instanceof SourceDependentFF)
-        .forEach(ff -> ((SourceDependentFF) ff).setSource(sentence));
-
+    }
     LOG.debug("Finished seeding chart.");
   }
 
@@ -179,6 +143,10 @@ public class Chart {
   public void setGoalSymbolID(int i) {
     this.goalSymbolID = i;
     this.goalBin = new Cell(this, i);
+  }
+  
+  public Sentence getSentence() {
+    return this.sentence;
   }
 
   // ===============================================================
@@ -209,8 +177,8 @@ public class Chart {
      * Look at all the grammars, seeding the chart with completed rules from the
      * DotChart
      */
-    for (int g = 0; g < grammars.length; g++) {
-      if (!grammars[g].hasRuleForSpan(i, j, inputLattice.distance(i, j))
+    for (int g = 0; g < config.getGrammars().size(); g++) {
+      if (!config.getGrammars().get(g).hasRuleForSpan(i, j, inputLattice.distance(i, j))
           || null == dotcharts[g].getDotCell(i, j))
         continue;
 
@@ -220,7 +188,7 @@ public class Chart {
         if (ruleCollection == null)
           continue;
 
-        List<Rule> rules = ruleCollection.getSortedRules(this.featureFunctions);
+        List<Rule> rules = ruleCollection.getSortedRules(config.getFeatureFunctions());
         SourcePath sourcePath = dotNode.getSourcePath();
 
         if (null == rules || rules.size() == 0)
@@ -238,12 +206,11 @@ public class Chart {
           /* Terminal productions are added directly to the chart */
           for (Rule rule : rules) {
 
-            if (config.num_translation_options > 0
-                && numTranslationsAdded >= config.num_translation_options) {
+            if (numTranslationOptions > 0 && numTranslationsAdded >= numTranslationOptions) {
               break;
             }
 
-            NodeResult result = computeNodeResult(this.featureFunctions, rule, null, i,
+            NodeResult result = computeNodeResult(config, rule, null, i,
                 j, sourcePath, this.sentence);
 
             if (stateConstraint == null || stateConstraint.isLegal(result.getDPStates())) {
@@ -272,7 +239,7 @@ public class Chart {
           int[] ranks = new int[1 + superNodes.size()];
           Arrays.fill(ranks, 1);
 
-          NodeResult result = computeNodeResult(featureFunctions, bestRule,
+          NodeResult result = computeNodeResult(config, bestRule,
               currentTailNodes, i, j, sourcePath, sentence);
           CubePruneState bestState = new CubePruneState(result, ranks, rules, currentTailNodes,
               dotNode);
@@ -306,7 +273,6 @@ public class Chart {
      */
     HashSet<CubePruneState> visitedStates = new HashSet<>();
 
-    int popLimit = config.pop_limit;
     int popCount = 0;
     while (candidates.size() > 0 && ((++popCount <= popLimit) || popLimit == 0)) {
       CubePruneState state = candidates.poll();
@@ -343,7 +309,7 @@ public class Chart {
          * nodes)
          */
         if (k == 0
-            && (nextRanks[k] > rules.size() || (config.num_translation_options > 0 && nextRanks[k] > config.num_translation_options)))
+            && (nextRanks[k] > rules.size() || (numTranslationOptions > 0 && nextRanks[k] > numTranslationOptions)))
           continue;
         else if ((k != 0 && nextRanks[k] > superNodes.get(k - 1).nodes.size()))
           continue;
@@ -356,7 +322,7 @@ public class Chart {
           nextAntNodes.add(superNodes.get(x).nodes.get(nextRanks[x + 1] - 1));
 
         /* Create the next state. */
-        CubePruneState nextState = new CubePruneState(computeNodeResult(featureFunctions,
+        CubePruneState nextState = new CubePruneState(computeNodeResult(config,
             nextRule, nextAntNodes, i, j, sourcePath, this.sentence), nextRanks, rules,
             nextAntNodes, dotNode);
 
@@ -394,7 +360,7 @@ public class Chart {
         if (!sentence.hasPath(i, j))
           continue;
 
-        for (Grammar grammar : this.grammars) {
+        for (Grammar grammar : config.getGrammars()) {
           // System.err.println(String.format("\n*** I=%d J=%d GRAMMAR=%d", i, j, g));
 
           if (j == i + 1) {
@@ -418,13 +384,13 @@ public class Chart {
         applyCubePruning(i, j, allCandidates[j - i]);
 
         // Add unary nodes
-        addUnaryNodes(this.grammars, i, j);
+        addUnaryNodes(config.getGrammars(), i, j);
       }
     }
 
     // transition_final: setup a goal item, which may have many deductions
     if (null == this.cells.get(0, sourceLength)
-        || !this.goalBin.transitToGoal(this.cells.get(0, sourceLength), this.featureFunctions,
+        || !this.goalBin.transitToGoal(this.cells.get(0, sourceLength), config.getFeatureFunctions(),
             this.sourceLength)) {
       LOG.warn("Input {}: Parse failure (either no derivations exist or pruning is too aggressive",
           sentence.id());
@@ -529,7 +495,7 @@ public class Chart {
 
     // TODO: one entry per rule, or per rule instantiation (rule together with
     // unique matching of input)?
-    List<Rule> rules = dotNode.getRuleCollection().getSortedRules(featureFunctions);
+    List<Rule> rules = dotNode.getRuleCollection().getSortedRules(config.getFeatureFunctions());
     Rule bestRule = rules.get(0);
     List<SuperNode> superNodes = dotNode.getAntSuperNodes();
 
@@ -540,7 +506,7 @@ public class Chart {
     int[] ranks = new int[1 + superNodes.size()];
     Arrays.fill(ranks, 1);
 
-    NodeResult result = computeNodeResult(featureFunctions, bestRule, tailNodes,
+    NodeResult result = computeNodeResult(config, bestRule, tailNodes,
         dotNode.begin(), dotNode.end(), dotNode.getSourcePath(), sentence);
     CubePruneState seedState = new CubePruneState(result, ranks, rules, tailNodes, dotNode);
 
@@ -572,13 +538,13 @@ public class Chart {
          */
         if (LOG.isDebugEnabled())
           LOG.debug("Expanding cell");
-        for (int k = 0; k < this.grammars.length; k++) {
+        for (int k = 0; k < config.getGrammars().size(); k++) {
           /**
            * Each dotChart can act individually (without consulting other
            * dotCharts) because it either consumes the source input or the
            * complete nonTerminals, which are both grammar-independent.
            **/
-          this.dotcharts[k].expandDotCell(i, j);
+          dotcharts[k].expandDotCell(i, j);
         }
 
         /*
@@ -592,16 +558,16 @@ public class Chart {
         /* 3. Process unary rules. */
         if (LOG.isDebugEnabled())
           LOG.debug("Adding unary items into chart");
-        addUnaryNodes(this.grammars, i, j);
+        addUnaryNodes(config.getGrammars(), i, j);
 
         // (4)=== in dot_cell(i,j), add dot-nodes that start from the /complete/
         // superIterms in
         // chart_cell(i,j)
         if (LOG.isDebugEnabled())
           LOG.debug("Initializing new dot-items that start from complete items in this cell");
-        for (int k = 0; k < this.grammars.length; k++) {
-          if (this.grammars[k].hasRuleForSpan(i, j, inputLattice.distance(i, j))) {
-            this.dotcharts[k].startDotItems(i, j);
+        for (int k = 0; k < config.getGrammars().size(); k++) {
+          if (config.getGrammars().get(k).hasRuleForSpan(i, j, inputLattice.distance(i, j))) {
+            dotcharts[k].startDotItems(i, j);
           }
         }
 
@@ -621,7 +587,7 @@ public class Chart {
 
     // transition_final: setup a goal item, which may have many deductions
     if (null == this.cells.get(0, sourceLength)
-        || !this.goalBin.transitToGoal(this.cells.get(0, sourceLength), this.featureFunctions,
+        || !this.goalBin.transitToGoal(this.cells.get(0, sourceLength), config.getFeatureFunctions(),
             this.sourceLength)) {
       LOG.warn("Input {}: Parse failure (either no derivations exist or pruning is too aggressive",
           sentence.id());
@@ -671,7 +637,7 @@ public class Chart {
    * @param j
    * @return the number of nodes added
    */
-  private int addUnaryNodes(Grammar[] grammars, int i, int j) {
+  private int addUnaryNodes(final ImmutableList<Grammar> grammars, int i, int j) {
 
     Cell chartBin = this.cells.get(i, j);
     if (null == chartBin) {
@@ -703,10 +669,10 @@ public class Chart {
           ArrayList<HGNode> antecedents = new ArrayList<>();
           antecedents.add(node);
 
-          List<Rule> rules = childNode.getRuleCollection().getSortedRules(this.featureFunctions);
+          List<Rule> rules = childNode.getRuleCollection().getSortedRules(config.getFeatureFunctions());
           for (Rule rule : rules) { // for each unary rules
 
-            NodeResult states = computeNodeResult(this.featureFunctions, rule,
+            NodeResult states = computeNodeResult(this.config, rule,
                 antecedents, i, j, new SourcePath(), this.sentence);
             HGNode resNode = chartBin.addHyperEdgeInCell(states, rule, i, j, antecedents,
                 new SourcePath(), true);
@@ -738,7 +704,7 @@ public class Chart {
     }
 
     this.cells.get(i, j).addHyperEdgeInCell(
-        computeNodeResult(this.featureFunctions, rule, null, i, j, srcPath, sentence), rule, i,
+        computeNodeResult(config, rule, null, i, j, srcPath, sentence), rule, i,
         j, null, srcPath, false);
 
   }

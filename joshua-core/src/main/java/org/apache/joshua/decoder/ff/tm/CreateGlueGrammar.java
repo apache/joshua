@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.util.io.LineReader;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -47,7 +46,7 @@ public class CreateGlueGrammar {
   private String grammarPath;
 
   @Option(name = "--goal", aliases = {"-goal"}, required = false, usage = "specify custom GOAL symbol. Default: 'GOAL'")
-  private final String goalSymbol = cleanNonTerminal(new JoshuaConfiguration().goal_symbol);
+  private final String goalSymbol = "GOAL";
 
   /* Rule templates */
   // [GOAL] ||| <s> ||| <s> ||| 0

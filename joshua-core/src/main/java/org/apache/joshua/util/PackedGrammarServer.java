@@ -25,18 +25,23 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.Trie;
 import org.apache.joshua.decoder.ff.tm.packed.PackedGrammar;
 import org.apache.joshua.util.io.LineReader;
 
+import com.google.common.collect.ImmutableMap;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+
 public class PackedGrammarServer {
 
   private PackedGrammar grammar;
 
-  public PackedGrammarServer(String packed_directory,JoshuaConfiguration joshuaConfiguration) throws FileNotFoundException, IOException {
-    grammar = new PackedGrammar(packed_directory, -1, "owner", "thrax", joshuaConfiguration);
+  public PackedGrammarServer(String packed_directory) {
+    final Config grammarConfig = ConfigFactory.parseMap(
+        ImmutableMap.of("owner", "thrax", "span_limit", "-1"), "packed grammar config");
+    grammar = new PackedGrammar(grammarConfig);
   }
 
   public List<Rule> get(String source) {
@@ -76,8 +81,7 @@ public class PackedGrammarServer {
   
   
   public static void main(String[] args) throws FileNotFoundException, IOException {
-    JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
-    PackedGrammarServer pgs = new PackedGrammarServer(args[0], joshuaConfiguration);
+    PackedGrammarServer pgs = new PackedGrammarServer(args[0]);
     
     for (String line: new LineReader(System.in)) {
       List<Rule> rules = pgs.get(line);

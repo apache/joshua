@@ -27,8 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
+import org.apache.joshua.decoder.ff.Accumulator;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.StatefulFF;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
@@ -37,6 +37,8 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.typesafe.config.Config;
 
 /**
  * <p>Feature function that reads in a list of language model fragments and matches them against the
@@ -106,15 +108,15 @@ public class FragmentLMFF extends StatefulFF {
    * @param args arguments passed to the feature function
    * @param config the {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
-  public FragmentLMFF(FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, "FragmentLMFF", args, config);
+  public FragmentLMFF(Config featureConfig, FeatureVector weights) {
+    super("FragmentLMFF", featureConfig, weights);
 
     lmFragments = new HashMap<>();
 
-    fragmentLMFile = parsedArgs.get("lm");
-    BUILD_DEPTH = Integer.parseInt(parsedArgs.get("build-depth"));
-    MAX_DEPTH = Integer.parseInt(parsedArgs.get("max-depth"));
-    MIN_LEX_DEPTH = Integer.parseInt(parsedArgs.get("min-lex-depth"));
+    fragmentLMFile = featureConfig.getString("lm");
+    BUILD_DEPTH = featureConfig.getInt("build-depth");
+    MAX_DEPTH = featureConfig.getInt("max-depth");
+    MIN_LEX_DEPTH = featureConfig.getInt("min-lex-depth");
 
     /* Read in the language model fragments */
     try {
@@ -169,7 +171,7 @@ public class FragmentLMFF extends StatefulFF {
    * @param j todo
    * @param sourcePath information about a path taken through the source {@link org.apache.joshua.lattice.Lattice}
    * @param sentence {@link org.apache.joshua.lattice.Lattice} input
-   * @param acc {@link org.apache.joshua.decoder.ff.FeatureFunction.Accumulator} object permitting generalization of feature computation
+   * @param acc {@link org.apache.joshua.decoder.ff.Accumulator} object permitting generalization of feature computation
    * @return the new dynamic programming state (null for stateless features)
    */
   @Override

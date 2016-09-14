@@ -18,13 +18,12 @@
  */
 package org.apache.joshua.mira;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.util.FileUtility;
 import org.apache.joshua.util.StreamGobbler;
 
 public class MIRA {
   public static void main(String[] args) throws Exception {
-    JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
     boolean external = false; // should each MIRA iteration be launched externally?
 
     if (args.length == 1) {
@@ -42,7 +41,7 @@ public class MIRA {
     }
 
     if (!external) {
-      MIRACore myMIRA = new MIRACore(args[0], joshuaConfiguration);
+      MIRACore myMIRA = new MIRACore(args[0], Decoder.getDefaultFlags());
       myMIRA.run_MIRA(); // optimize lambda[]
       myMIRA.finish();
     } else {

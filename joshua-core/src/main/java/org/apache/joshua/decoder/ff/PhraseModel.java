@@ -21,15 +21,15 @@ package org.apache.joshua.decoder.ff;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
-import org.apache.joshua.decoder.ff.tm.Grammar;
 import org.apache.joshua.decoder.ff.tm.OwnerId;
 import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
+
+import com.typesafe.config.Config;
 
 /**
  * This feature handles the list of features that are stored with grammar rules in the grammar file.
@@ -45,10 +45,10 @@ public class PhraseModel extends StatelessFF {
   
   private final OwnerId owner;
 
-  public PhraseModel(FeatureVector weights, String[] args, JoshuaConfiguration config, Grammar g) {
+  public PhraseModel(OwnerId owner, Config featureConfig, FeatureVector weights) {
     // name of this feature is the owner of the grammar
-    super(weights, OwnerMap.getOwner(g.getOwner()), args, config);
-    this.owner = g.getOwner();
+    super(OwnerMap.getOwner(owner), featureConfig, weights);
+    this.owner = owner;
   }
 
   /**

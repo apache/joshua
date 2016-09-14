@@ -20,12 +20,13 @@ package org.apache.joshua.decoder.ff;
 
 import java.util.List;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
+
+import com.typesafe.config.Config;
 
 /**
  * This feature returns the scored path through the source lattice, which is recorded in a
@@ -39,8 +40,8 @@ public final class SourcePathFF extends StatelessFF {
   /*
    * This is a single-value feature template, so we cache the weight here.
    */
-  public SourcePathFF(FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, "SourcePath", args, config);
+  public SourcePathFF(Config featureConfig, FeatureVector weights) {
+    super("SourcePath", featureConfig, weights);
   }
 
   @Override

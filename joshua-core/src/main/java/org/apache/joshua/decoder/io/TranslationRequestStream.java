@@ -22,11 +22,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 
-import com.google.gson.stream.JsonReader;
-
-import org.apache.joshua.decoder.JoshuaConfiguration;
-import org.apache.joshua.decoder.JoshuaConfiguration.INPUT_TYPE;
+import org.apache.joshua.decoder.InputType;
 import org.apache.joshua.decoder.segment_file.Sentence;
+
+import com.google.gson.stream.JsonReader;
+import com.typesafe.config.Config;
 
 /**
  * This class iterates over an input stream, looking for inputs to translate. By default, it
@@ -48,7 +48,7 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * @author orluke
  */
 public class TranslationRequestStream {
-  private final JoshuaConfiguration joshuaConfiguration;
+  private final Config config;
   private int sentenceNo = -1;
 
   /* Plain text or JSON input */
@@ -57,10 +57,10 @@ public class TranslationRequestStream {
   /* Whether the request has been killed by a broken client connection. */
   private volatile boolean isShutDown = false;
 
-  public TranslationRequestStream(BufferedReader reader, JoshuaConfiguration joshuaConfiguration) {
-    this.joshuaConfiguration = joshuaConfiguration;
+  public TranslationRequestStream(BufferedReader reader, Config config) {
+    this.config = config;
     
-    if (joshuaConfiguration.input_type == INPUT_TYPE.json) {
+    if (InputType.valueOf(config.getString("serverSettings.input_type")) == InputType.json) {
       this.requestHandler = new JSONStreamHandler(reader);
     } else {
       this.requestHandler = new PlaintextStreamHandler(reader);
@@ -103,7 +103,7 @@ public class TranslationRequestStream {
       if (line == null)
         return null;
 
-      return new Sentence(line, -1, joshuaConfiguration);
+      return new Sentence(line, -1, config);
     }
   }
   
@@ -121,7 +121,7 @@ public class TranslationRequestStream {
       String line = reader.readLine();
 
       if (line != null) {
-        return new Sentence(line, sentenceNo, joshuaConfiguration);
+        return new Sentence(line, sentenceNo, config);
       }
       
       return null;

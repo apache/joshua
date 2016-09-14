@@ -47,12 +47,13 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.metrics.EvaluationMetric;
 import org.apache.joshua.util.StreamGobbler;
 import org.apache.joshua.util.io.ExistingUTF8EncodedTextFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.typesafe.config.Config;
 
 /**
  * This code was originally written by Yuan Cao, who copied the MERT code to produce this file.
@@ -62,7 +63,7 @@ public class PROCore {
 
   private static final Logger LOG = LoggerFactory.getLogger(PROCore.class);
 
-  private final JoshuaConfiguration joshuaConfiguration;
+  private final Config config;
   private TreeSet<Integer>[] indicesOfInterest_all;
 
   private final static DecimalFormat f4 = new DecimalFormat("###0.0000");
@@ -249,19 +250,19 @@ public class PROCore {
 
   // private int useDisk;
 
-  public PROCore(JoshuaConfiguration joshuaConfiguration) {
-    this.joshuaConfiguration = joshuaConfiguration;
+  public PROCore(Config config) {
+    this.config = config;
   }
 
-  public PROCore(String[] args, JoshuaConfiguration joshuaConfiguration) throws FileNotFoundException, IOException {
-    this.joshuaConfiguration = joshuaConfiguration;
+  public PROCore(String[] args, Config config) throws FileNotFoundException, IOException {
+    this.config = config;
     EvaluationMetric.set_knownMetrics();
     processArgsArray(args);
     initialize(0);
   }
 
-  public PROCore(String configFileName, JoshuaConfiguration joshuaConfiguration) throws FileNotFoundException, IOException {
-    this.joshuaConfiguration = joshuaConfiguration;
+  public PROCore(String configFileName, Config config) throws FileNotFoundException, IOException {
+    this.config = config;
     EvaluationMetric.set_knownMetrics();
     processArgsArray(cfgFileToArgsArray(configFileName));
     initialize(0);
@@ -473,7 +474,7 @@ public class PROCore {
     // by default, load joshua decoder
     if (decoderCommand == null && fakeFileNameTemplate == null) {
       println("Loading Joshua decoder...", 1);
-      myDecoder = new Decoder(joshuaConfiguration);
+      myDecoder = new Decoder(config);
       println("...finished loading @ " + (new Date()), 1);
       println("");
     } else {

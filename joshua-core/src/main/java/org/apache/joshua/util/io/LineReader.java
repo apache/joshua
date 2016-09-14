@@ -71,7 +71,7 @@ public class LineReader implements Reader<String>, AutoCloseable {
    */
   public LineReader(String filename) throws IOException {
 
-    display_progress = (Decoder.VERBOSE >= 1);
+    display_progress = true;
 
     progress = 0;
 
@@ -98,7 +98,7 @@ public class LineReader implements Reader<String>, AutoCloseable {
 
   public LineReader(String filename, boolean show_progress) throws IOException {
     this(filename);
-    display_progress = (Decoder.VERBOSE >= 1 && show_progress);
+    display_progress = show_progress;
   }
 
 

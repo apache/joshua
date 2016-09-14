@@ -25,7 +25,6 @@ import org.apache.joshua.decoder.ff.tm.OwnerId;
 import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.util.Constants;
-import org.apache.joshua.util.FormatUtils;
 import org.apache.joshua.util.io.LineReader;
 
 /***

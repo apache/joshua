@@ -59,7 +59,7 @@ public class DecoderServlet extends HttpServlet {
 
     private void handleRequest(Decoder decoder, InputStream in, OutputStream out) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
-        TranslationRequestStream request = new TranslationRequestStream(reader, decoder.getJoshuaConfiguration());
+        TranslationRequestStream request = new TranslationRequestStream(reader, decoder.getDecoderConfig().getFlags());
 
         TranslationResponseStream translations = decoder.decodeAll(request);
 

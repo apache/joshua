@@ -24,7 +24,6 @@ import static org.apache.joshua.decoder.ff.tm.OwnerMap.UNKNOWN_OWNER_ID;
 import java.util.List;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.OwnerId;
@@ -34,6 +33,7 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
 
 import com.google.common.cache.Cache;
+import com.typesafe.config.Config;
 
 /**
  *  This feature fires for rule ids.
@@ -59,14 +59,14 @@ public class RuleFF extends StatelessFF {
   
   private final Cache<Rule, Integer> featureCache;
   
-  public RuleFF(FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, NAME, args, config);
+  public RuleFF(Config featureConfig, FeatureVector weights) {
+    super(NAME, featureConfig, weights);
     
-    ownerRestriction = (parsedArgs.containsKey("owner"));
-    owner = ownerRestriction ? OwnerMap.register(parsedArgs.get("owner")) : UNKNOWN_OWNER_ID;
+    ownerRestriction = featureConfig.hasPath("owner");
+    owner = ownerRestriction ? OwnerMap.register(featureConfig.getString("owner")) : UNKNOWN_OWNER_ID;
     
-    if (parsedArgs.containsKey("sides")) {
-      final String sideValue = parsedArgs.get("sides");
+    if (featureConfig.hasPath("sides")) {
+      final String sideValue = featureConfig.getString("sides");
       if (sideValue.equalsIgnoreCase("source")) {
         sides = Sides.SOURCE;
       } else if (sideValue.equalsIgnoreCase("target")) {
@@ -81,11 +81,7 @@ public class RuleFF extends StatelessFF {
     }
     
     // initialize cache
-    if (parsedArgs.containsKey("cacheSize")) {
-      featureCache = newBuilder().maximumSize(Integer.parseInt(parsedArgs.get("cacheSize"))).build();
-    } else {
-      featureCache = newBuilder().maximumSize(config.cachedRuleSize).build();
-    }
+    featureCache = newBuilder().maximumSize(featureConfig.getInt("cacheSize")).build();
   }
 
   @Override

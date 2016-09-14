@@ -24,9 +24,10 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.KenLMPool;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
+import org.apache.joshua.decoder.ff.Accumulator;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.lm.KenLM.StateProbPair;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
@@ -34,6 +35,8 @@ import org.apache.joshua.decoder.ff.state_maintenance.KenLMState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
+
+import com.typesafe.config.Config;
 
 /**
  * Wrapper for KenLM LMs with left-state minimization. We inherit from the regular
@@ -43,13 +46,10 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  */
 public class StateMinimizingLanguageModel extends LanguageModelFF {
 
-  public StateMinimizingLanguageModel(FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, args, config);
-    this.type = "kenlm";
-    if (parsedArgs.containsKey("lm_type") && ! parsedArgs.get("lm_type").equals("kenlm")) {
-      String msg = "* FATAL: StateMinimizingLanguageModel only supports 'kenlm' lm_type backend"
-          + "*        Remove lm_type from line or set to 'kenlm'";
-      throw new RuntimeException(msg);
+  public StateMinimizingLanguageModel(Config featureConfig, FeatureVector weights) {
+    super(featureConfig, weights);
+    if (!featureConfig.getString("lm_type").equals("kenlm")) {
+      throw new RuntimeException("StateMinimizingLanguageModel only supports 'lm_type = kenlm'");
     }
   }
 
@@ -63,7 +63,9 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
     this.languageModel = new KenLM(ngramOrder, path);
 
     Vocabulary.registerLanguageModel(this.languageModel);
-    Vocabulary.id(config.default_non_terminal);
+    // TODO(fhieber): this should not be here really, but it works like this.
+    final String defaultNonTerminal = Decoder.getDefaultFlags().getString("default_non_terminal");
+    Vocabulary.id(defaultNonTerminal);
 
   }
 
@@ -100,7 +102,7 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
     }
 
     int[] ruleWords;
-    if (config.source_annotations) {
+    if (useSourceAnnotations) {
       // get source side annotations and project them to the target side
       ruleWords = getTags(rule, i, j, sentence);
     } else {

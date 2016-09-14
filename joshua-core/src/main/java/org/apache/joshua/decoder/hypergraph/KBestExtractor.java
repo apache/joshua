@@ -36,14 +36,12 @@ import java.util.PriorityQueue;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.BLEU;
-import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.DecoderConfig;
 import org.apache.joshua.decoder.StructuredTranslation;
 import org.apache.joshua.decoder.StructuredTranslationFactory;
-import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.fragmentlm.Tree;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
-import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.io.DeNormalize;
 import org.apache.joshua.decoder.segment_file.Sentence;
@@ -96,7 +94,6 @@ import org.apache.joshua.util.FormatUtils;
  * @author Matt Post post@cs.jhu.edu
  */
 public class KBestExtractor {
-  private final JoshuaConfiguration joshuaConfiguration;
   private final String outputFormat;
   private final HashMap<HGNode, VirtualNode> virtualNodesTable = new HashMap<>();
 
@@ -117,33 +114,25 @@ public class KBestExtractor {
   /* The input sentence */
   private final Sentence sentence;
 
-  /* The weights being used to score the forest */
-  private final FeatureVector weights;
-
-  /* The feature functions */
-  private final List<FeatureFunction> featureFunctions;
+  /* The decoderConfig */
+  private final DecoderConfig config;
 
   /* BLEU statistics of the references */
   private BLEU.References references = null;
 
   public KBestExtractor(
-      Sentence sentence,
-      List<FeatureFunction> featureFunctions,
-      FeatureVector weights,
-      boolean isMonolingual,
-      JoshuaConfiguration joshuaConfiguration) {
+      final Sentence sentence,
+      final DecoderConfig config,
+      boolean isMonolingual) {
 
-    this.featureFunctions = featureFunctions;
+    this.config = config;
+    this.outputFormat = config.getFlags().getString("output_format");
+    this.extractUniqueNbest = config.getFlags().getBoolean("use_unique_nbest");
 
-    this.joshuaConfiguration = joshuaConfiguration;
-    this.outputFormat = this.joshuaConfiguration.outputFormat;
-    this.extractUniqueNbest = joshuaConfiguration.use_unique_nbest;
-
-    this.weights = weights;
     this.defaultSide = (isMonolingual ? Side.SOURCE : Side.TARGET);
     this.sentence = sentence;
 
-    if (joshuaConfiguration.rescoreForest) {
+    if (config.getFlags().getBoolean("rescore_forest")) {
       references = new BLEU.References(sentence.references());
     }
   }
@@ -281,7 +270,7 @@ public class KBestExtractor {
   private String maybeProjectCase(String hypothesis, DerivationState state) {
     String output = hypothesis;
 
-    if (joshuaConfiguration.project_case) {
+    if (config.getFlags().getBoolean("project_case")) {
       String[] tokens = hypothesis.split("\\s+");
       List<List<Integer>> points = state.getWordAlignmentList();
       for (int i = 0; i < points.size(); i++) {
@@ -518,7 +507,7 @@ public class KBestExtractor {
                 + virtualTailNode.nbests.get(newRanks[i] - 1).getModelCost();
             nextState.setCost(cost);
 
-            if (joshuaConfiguration.rescoreForest)
+            if (config.getFlags().getBoolean("rescore_forest"))
               nextState.bleu = nextState.computeBLEU();
 
             candHeap.add(nextState);
@@ -632,7 +621,7 @@ public class KBestExtractor {
       cost = hyperEdge.getBestDerivationScore();
 
       DerivationState state = new DerivationState(parentNode, hyperEdge, ranks, cost, edgePos);
-      if (joshuaConfiguration.rescoreForest)
+      if (config.getFlags().getBoolean("rescore_forest"))
         state.bleu = state.computeBLEU();
 
       return state;
@@ -738,7 +727,7 @@ public class KBestExtractor {
      * @return float representing model cost plus the BLEU score
      */
     public float getCost() {
-      return cost - weights.getOrDefault(hashFeature("BLEU")) * bleu;
+      return cost - config.getWeights().getOrDefault(hashFeature("BLEU")) * bleu;
     }
 
     public String toString() {
@@ -839,7 +828,7 @@ public class KBestExtractor {
     }
 
     public FeatureVector getFeatures() {
-      final FeatureVectorExtractor extractor = new FeatureVectorExtractor(featureFunctions, sentence);
+      final FeatureVectorExtractor extractor = new FeatureVectorExtractor(config.getFeatureFunctions(), sentence);
       visit(extractor);
       return extractor.getFeatures();
     }
@@ -1019,7 +1008,7 @@ public class KBestExtractor {
         for (int i = 0; i < indent * 2; i++)
           sb.append(" ");
 
-        final FeatureVectorExtractor extractor = new FeatureVectorExtractor(featureFunctions, sentence);
+        final FeatureVectorExtractor extractor = new FeatureVectorExtractor(config.getFeatureFunctions(), sentence);
         extractor.before(state, indent, tailNodeIndex);
         final FeatureVector transitionFeatures = extractor.getFeatures();
 
@@ -1033,7 +1022,7 @@ public class KBestExtractor {
           sb.append(" ").append(dpState);
         }
         sb.append(" ||| ").append(transitionFeatures);
-        sb.append(" ||| ").append(weights.innerProduct(transitionFeatures));
+        sb.append(" ||| ").append(config.getWeights().innerProduct(transitionFeatures));
         if (rule.getAlignment() != null)
           sb.append(" ||| ").append(Arrays.toString(rule.getAlignment()));
         sb.append("\n");

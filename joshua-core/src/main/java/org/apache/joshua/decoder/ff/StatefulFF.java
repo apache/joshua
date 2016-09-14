@@ -20,7 +20,6 @@ package org.apache.joshua.decoder.ff;
 
 import java.util.List;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
@@ -28,6 +27,8 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.typesafe.config.Config;
 
 /**
  * Stateful features contribute dynamic programming state. Unlike earlier versions of Joshua, the
@@ -48,10 +49,10 @@ public abstract class StatefulFF extends FeatureFunction {
   /* This records the state index for each instantiated stateful feature function. */
   protected int stateIndex = 0;
 
-  public StatefulFF(FeatureVector weights, String name, String[] args, JoshuaConfiguration config) {
-    super(weights, name, args, config);
+  public StatefulFF(final String name, Config featureConfig, FeatureVector weights) {
+    super(name, featureConfig, weights);
 
-    LOG.info("Stateful object with state index {}",  GLOBAL_STATE_INDEX);
+    LOG.info("Stateful object with state index {}", GLOBAL_STATE_INDEX);
     stateIndex = GLOBAL_STATE_INDEX++;
   }
 

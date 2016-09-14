@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.OwnerId;
@@ -36,6 +35,7 @@ import org.apache.joshua.decoder.segment_file.Sentence;
 import org.apache.joshua.util.FormatUtils;
 
 import com.google.common.cache.Cache;
+import com.typesafe.config.Config;
 
 /**
  *  Lexical alignment features denoting alignments, deletions, and insertions.
@@ -58,22 +58,18 @@ public class LexicalFeatures extends StatelessFF {
   
   private final Cache<Rule, List<Integer>> featureCache;
   
-  public LexicalFeatures(FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, NAME, args, config);
+  public LexicalFeatures(Config featureConfig, FeatureVector weights) {
+    super(NAME, featureConfig, weights);
     
-    ownerRestriction = (parsedArgs.containsKey("owner"));
-    owner = ownerRestriction ? OwnerMap.register(parsedArgs.get("owner")) : OwnerMap.UNKNOWN_OWNER_ID;
+    ownerRestriction = featureConfig.hasPath("owner");
+    owner = ownerRestriction ? OwnerMap.register(featureConfig.getString("owner")) : OwnerMap.UNKNOWN_OWNER_ID;
     
-    useAlignments = parsedArgs.containsKey("alignments");
-    useDeletions = parsedArgs.containsKey("deletions");
-    useInsertions = parsedArgs.containsKey("insertions");
+    useAlignments = featureConfig.hasPath("alignments");
+    useDeletions = featureConfig.hasPath("deletions");
+    useInsertions = featureConfig.hasPath("insertions");
     
     // initialize cache
-    if (parsedArgs.containsKey("cacheSize")) {
-      featureCache = newBuilder().maximumSize(Integer.parseInt(parsedArgs.get("cacheSize"))).build();
-    } else {
-      featureCache = newBuilder().maximumSize(config.cachedRuleSize).build();
-    }
+    featureCache = newBuilder().maximumSize(featureConfig.getInt("cache_size")).build();
   }
 
   @Override

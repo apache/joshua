@@ -18,73 +18,124 @@
  */
 package org.apache.joshua.decoder;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.joshua.decoder.JoshuaConfiguration.SERVER_TYPE;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
 import org.apache.joshua.server.ServerThread;
 import org.apache.joshua.server.TcpServer;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.spi.MapOptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Throwables;
 import com.sun.net.httpserver.HttpServer;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.ConfigParseOptions;
+import com.typesafe.config.ConfigRenderOptions;
 
 /**
- * Implements decoder initialization, including interaction with <code>JoshuaConfiguration</code>
- * and <code>DecoderTask</code>.
+ * Command-line tool for the Joshua Decoder.
  *
  * @author Zhifei Li, zhifei.work@gmail.com
  * @author wren ng thornton wren@users.sourceforge.net
  * @author Lane Schwartz dowobeha@users.sourceforge.net
+ * @author Felix Hieber felix.hieber@gmail.com
  */
 public class JoshuaDecoder {
 
   private static final Logger LOG = LoggerFactory.getLogger(JoshuaDecoder.class);
+  
+  @Option(name="--decoderConfig", aliases={"-c"}, metaVar="DECODER.CFG", required=false, usage="configuration file for the decoder (i.e., joshua.config")
+  private File configFile = null;
+  
+  @Option(name = "-C", handler=MapOptionHandler.class, metaVar = "<property>=<value>", usage = "use value for given key to override flags in the config file, i.e., -C top_n=4", required=false)
+  private Map<String, String> overrides = new HashMap<>();
+  
+  @Option(name="--verbose", aliases={"-v"}, required=false, usage="log level of the decoder")
+  private String logLevel = Level.INFO.toString();
+  
+  @Option(name="--help", aliases={"-h"}, required=false, usage="show configuration options and quit.")
+  private boolean help = false;
+  
+  /**
+   * Returns the flags composed of default config, given config, and commandline overrides.
+   */
+  private Config getFlags() {
+    final ConfigParseOptions options = ConfigParseOptions.defaults().setAllowMissing(false);
+    final Config defaultConfig = Decoder.getDefaultFlags();
+    Config givenConfig = ConfigFactory.empty();
+    if (configFile != null) {
+      givenConfig = ConfigFactory.parseFile(configFile, options).resolveWith(defaultConfig);
+      LOG.info("Config: {}", configFile.toString());
+    }
+    final Config config = ConfigFactory.parseMap(overrides, "CmdLine overrides")
+        .resolve()
+        .withFallback(givenConfig)
+        .withFallback(defaultConfig);
+    return config;
+  }
+  
+  private static void printFlags(Config flags) {
+    System.err.println("Joshua configuration options with default values:");
+    System.err.println(
+        flags.root().render(ConfigRenderOptions
+            .concise()
+            .setFormatted(true)
+            .setComments(true)));
+  }
 
-  // ===============================================================
-  // Main
-  // ===============================================================
-  public static void main(String[] args) throws IOException {
-
-    // default log level
-    LogManager.getRootLogger().setLevel(Level.INFO);
-
-    JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
-    ArgsParser userArgs = new ArgsParser(args,joshuaConfiguration);
-
-    long startTime = System.currentTimeMillis();
-
-    /* Step-0: some sanity checking */
-    joshuaConfiguration.sanityCheck();
-
-    /* Step-1: initialize the decoder, test-set independent */
-    Decoder decoder = new Decoder(joshuaConfiguration);
-
-    LOG.info("Model loading took {} seconds", (System.currentTimeMillis() - startTime) / 1000);
-    LOG.info("Memory used {} MB", ((Runtime.getRuntime().totalMemory()
-        - Runtime.getRuntime().freeMemory()) / 1000000.0));
-
-    /* Step-2: Decoding */
+  private void run() throws IOException {
+    
+    // set loglevel
+    LogManager.getRootLogger().setLevel(Level.toLevel(logLevel));
+    
+    // load & compose flags
+    final Config config = getFlags();
+    
+    if (help) {
+      printFlags(config);
+      return;
+    }
+    
+    // initialize the Decoder
+    final long initStartTime = System.currentTimeMillis();
+    final Decoder decoder = new Decoder(config);
+    final float initTime = (System.currentTimeMillis() - initStartTime) / 1000.0f;
+    final float usedMemory = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1000000.0f;
+    LOG.info("Model loading took {} seconds", initTime);
+    LOG.info("Memory used {} MB", usedMemory);
+    
     // create a server if requested, which will create TranslationRequest objects
-    if (joshuaConfiguration.server_port > 0) {
-      int port = joshuaConfiguration.server_port;
-      if (joshuaConfiguration.server_type == SERVER_TYPE.TCP) {
-        new TcpServer(decoder, port, joshuaConfiguration).start();
+    final Config serverConfig = config.getConfig("serverSettings");
+    if (serverConfig.getInt("server_port") > 0) {
+      final int port = serverConfig.getInt("server_port");
+      final ServerType serverType = ServerType.valueOf(serverConfig.getString("server_type"));
+      if (serverType == ServerType.TCP) {
+        new TcpServer(decoder, port).start();
 
-      } else if (joshuaConfiguration.server_type == SERVER_TYPE.HTTP) {
-        joshuaConfiguration.use_structured_output = true;
+      } else if (serverType == ServerType.HTTP) {
+        checkState(decoder.getDecoderConfig().getFlags().getBoolean("use_structured_output"));
 
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         LOG.info("HTTP Server running and listening on port {}.", port);
-        server.createContext("/", new ServerThread(null, decoder, joshuaConfiguration));
+        server.createContext("/", new ServerThread(null, decoder));
         server.setExecutor(null); // creates a default executor
         server.start();
       } else {
@@ -95,18 +146,19 @@ public class JoshuaDecoder {
     }
 
     // Create a TranslationRequest object, reading from a file if requested, or from STDIN
-    InputStream input = (joshuaConfiguration.input_file != null)
-      ? new FileInputStream(joshuaConfiguration.input_file)
+    InputStream input = (!config.getString("input_file").isEmpty())
+      ? new FileInputStream(config.getString("input_file"))
       : System.in;
-
+    
     BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-    TranslationRequestStream fileRequest = new TranslationRequestStream(reader, joshuaConfiguration);
+    TranslationRequestStream fileRequest = new TranslationRequestStream(reader, config);
     TranslationResponseStream translationResponseStream = decoder.decodeAll(fileRequest);
 
     // Create the n-best output stream
     FileWriter nbest_out = null;
-    if (joshuaConfiguration.n_best_file != null)
-      nbest_out = new FileWriter(joshuaConfiguration.n_best_file);
+    if (!config.getString("n_best_file").isEmpty()) {
+      nbest_out = new FileWriter(config.getString("n_best_file"));
+    }
 
     for (Translation translation: translationResponseStream) {
       /**
@@ -115,14 +167,15 @@ public class JoshuaDecoder {
        * Moses expects the simple translation on STDOUT and the n-best list in a file with a fixed
        * format.
        */
-      if (joshuaConfiguration.moses) {
+      if (config.getBoolean("moses")) {
         String text = translation.toString().replaceAll("=", "= ");
         // Write the complete formatted string to STDOUT
-        if (joshuaConfiguration.n_best_file != null)
+        if (!config.getString("n_best_file").isEmpty()) {
           nbest_out.write(text);
+        }
 
         // Extract just the translation and output that to STDOUT
-        text = text.substring(0,  text.indexOf('\n'));
+        text = text.substring(0, text.indexOf('\n'));
         String[] fields = text.split(" \\|\\|\\| ");
         text = fields[1];
 
@@ -133,8 +186,9 @@ public class JoshuaDecoder {
       }
     }
 
-    if (joshuaConfiguration.n_best_file != null)
+    if (!config.getString("n_best_file").isEmpty()) {
       nbest_out.close();
+    }
 
     LOG.info("Decoding completed.");
     LOG.info("Memory used {} MB", ((Runtime.getRuntime().totalMemory()
@@ -142,6 +196,22 @@ public class JoshuaDecoder {
 
     /* Step-3: clean up */
     decoder.cleanUp();
-    LOG.info("Total running time: {} seconds",  (System.currentTimeMillis() - startTime) / 1000);
+    LOG.info("Total running time: {} seconds", (System.currentTimeMillis() - initStartTime) / 1000);
+  }
+  
+  public static void main(String[] args) {
+    final JoshuaDecoder cli = new JoshuaDecoder();
+    final CmdLineParser parser = new CmdLineParser(cli);
+    try {
+        parser.parseArgument(args);
+        cli.run();
+    } catch (CmdLineException e) {
+        // handling of wrong arguments
+        LOG.error(e.getMessage());
+        parser.printUsage(System.err);
+        System.exit(1);
+    } catch (IOException e) {
+      Throwables.propagate(e);
+    }
   }
 }

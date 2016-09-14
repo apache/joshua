@@ -20,7 +20,6 @@ package org.apache.joshua.decoder.ff;
 
 import java.util.List;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.OwnerId;
@@ -28,6 +27,8 @@ import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
+
+import com.typesafe.config.Config;
 
 /**
  * This feature function counts rules from a particular grammar (identified by the owner) having an
@@ -44,11 +45,11 @@ public class ArityPhrasePenalty extends StatelessFF {
   private final int minArity;
   private final int maxArity;
 
-  public ArityPhrasePenalty(final FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, "ArityPenalty", args, config);
-    this.owner = OwnerMap.register(parsedArgs.get("owner"));
-    this.minArity = Integer.parseInt(parsedArgs.get("min-arity"));
-    this.maxArity = Integer.parseInt(parsedArgs.get("max-arity"));
+  public ArityPhrasePenalty(Config featureConfig, FeatureVector weights) {
+    super("ArityPenalty", featureConfig, weights);
+    this.owner = OwnerMap.register(this.featureConfig.getString("owner"));
+    this.minArity = this.featureConfig.getInt("min_arity");
+    this.maxArity = this.featureConfig.getInt("max_arity");
   }
 
   /**

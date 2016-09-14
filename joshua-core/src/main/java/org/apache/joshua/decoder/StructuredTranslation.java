@@ -128,8 +128,7 @@ public class StructuredTranslation {
   private String maybeProjectCase(String hypothesis) {
     String output = hypothesis;
 
-    JoshuaConfiguration config = sourceSentence.config;
-    if (config.project_case) {
+    if (sourceSentence.getConfig().getBoolean("project_case")) {
       String[] tokens = hypothesis.split("\\s+");
       List<List<Integer>> points = getTranslationWordAlignments();
       for (int i = 0; i < points.size(); i++) {

@@ -20,6 +20,7 @@ package org.apache.joshua.decoder.ff.tm;
 
 import java.util.List;
 
+import org.apache.joshua.decoder.DecoderConfig;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 
 /**
@@ -98,11 +99,8 @@ public interface Grammar {
   
   /**
    * Add an OOV rule for the requested word for the grammar.
-   * 
-   * @param word input word to add rules to
-   * @param featureFunctions a {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    */
-  void addOOVRules(int word, List<FeatureFunction> featureFunctions);
+  void addOOVRules(int word, DecoderConfig config);
   
   /**
    * Add a rule to the grammar.

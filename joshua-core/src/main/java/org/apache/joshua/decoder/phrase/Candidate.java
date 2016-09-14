@@ -18,6 +18,8 @@
  */
 package org.apache.joshua.decoder.phrase;
 
+import static org.apache.joshua.decoder.chart_parser.ComputeNodeResult.computeNodeResult;
+
 /*** 
  * A candidate represents a translation hypothesis that may possibly be added to the translation
  * hypergraph. It groups together (a) a set of translation hypotheses all having the same coverage
@@ -37,19 +39,16 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.joshua.corpus.Span;
-import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
+import org.apache.joshua.decoder.DecoderConfig;
 import org.apache.joshua.decoder.chart_parser.NodeResult;
-import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
 
-import static org.apache.joshua.decoder.chart_parser.ComputeNodeResult.computeNodeResult;
-
 public class Candidate implements Comparable<Candidate> {
   
-  private List<FeatureFunction> featureFunctions;
+  private final DecoderConfig config;
   private Sentence sentence;
   
   // the set of hypotheses that can be paired with phrases from this span 
@@ -115,9 +114,9 @@ public class Candidate implements Comparable<Candidate> {
         getHypothesis(), getPhraseNode().bestHyperedge.getRule().getTargetWords(), getSpan());
   }
 
-  public Candidate(List<FeatureFunction> featureFunctions, Sentence sentence, 
+  public Candidate(DecoderConfig config, Sentence sentence, 
       List<Hypothesis> hypotheses, PhraseNodes phrases, float delta, int[] ranks) {
-    this.featureFunctions = featureFunctions;
+    this.config = config;
     this.sentence = sentence;
     this.hypotheses = hypotheses;
     this.phrases = phrases;
@@ -161,7 +160,7 @@ public class Candidate implements Comparable<Candidate> {
    */
   public Candidate extendHypothesis() {
     if (ranks[0] < hypotheses.size() - 1) {
-      return new Candidate(featureFunctions, sentence, hypotheses, phrases, future_delta, new int[] { ranks[0] + 1, ranks[1] });
+      return new Candidate(config, sentence, hypotheses, phrases, future_delta, new int[] { ranks[0] + 1, ranks[1] });
     }
     return null;
   }
@@ -173,7 +172,7 @@ public class Candidate implements Comparable<Candidate> {
    */
   public Candidate extendPhrase() {
     if (ranks[1] < phrases.size() - 1) {
-      return new Candidate(featureFunctions, sentence, hypotheses, phrases, future_delta, new int[] { ranks[0], ranks[1] + 1 });
+      return new Candidate(config, sentence, hypotheses, phrases, future_delta, new int[] { ranks[0], ranks[1] + 1 });
     }
     
     return null;
@@ -232,7 +231,7 @@ public class Candidate implements Comparable<Candidate> {
     if (computedResult == null) {
       // add the rule
       // TODO: sourcepath
-      computedResult = computeNodeResult(featureFunctions, getRule(), getTailNodes(), getLastCovered(), getPhraseEnd(), null, sentence);
+      computedResult = computeNodeResult(config, getRule(), getTailNodes(), getLastCovered(), getPhraseEnd(), null, sentence);
     }
     
     return computedResult;

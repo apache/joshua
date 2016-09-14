@@ -41,5 +41,11 @@ public final class Constants {
   public static final String TM_PREFIX = "tm";
 
   public static final String labeledFeatureSeparator = "=";
+  
+  public static final String GLUE_OWNER = "glue";
+  
+  public static final String OOV_OWNER = "oov";
+  
+  public static final String CUSTOM_OWNER = "custom";
 
 }

@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,12 +31,10 @@ import org.slf4j.LoggerFactory;
  */
 public class TcpServer {
   private static final Logger LOG = LoggerFactory.getLogger(TcpServer.class);
-  private final JoshuaConfiguration joshuaConfiguration;
   private Decoder decoder;
   private int port;
 
-  public TcpServer(Decoder decoder, int port,JoshuaConfiguration joshuaConfiguration) {
-    this.joshuaConfiguration = joshuaConfiguration;
+  public TcpServer(Decoder decoder, int port) {
     this.decoder = decoder;
     this.port = port;
   }
@@ -48,18 +45,18 @@ public class TcpServer {
   public void start() {
 
     try {
-      ServerSocket serverSocket = new ServerSocket(joshuaConfiguration.server_port);
+      ServerSocket serverSocket = new ServerSocket(port);
       LOG.info("** TCP Server running and listening on port {}.", port);
 
       boolean listening = true;
       while (listening)
-        new ServerThread(serverSocket.accept(), decoder, joshuaConfiguration).start();
+        new ServerThread(serverSocket.accept(), decoder).start();
 
       serverSocket.close();
 
     } catch (IOException e) {
       throw new RuntimeException(String.format("Could not listen on port: %d.",
-          joshuaConfiguration.server_port));
+          port));
     }
   }
 }

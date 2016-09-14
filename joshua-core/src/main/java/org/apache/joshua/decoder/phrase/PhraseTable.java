@@ -19,11 +19,11 @@
 package org.apache.joshua.decoder.phrase;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.DecoderConfig;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.tm.Grammar;
@@ -31,51 +31,36 @@ import org.apache.joshua.decoder.ff.tm.OwnerId;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.RuleCollection;
 import org.apache.joshua.decoder.ff.tm.Trie;
-import org.apache.joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
+import org.apache.joshua.decoder.ff.tm.hash_based.TextGrammar;
 import org.apache.joshua.decoder.ff.tm.packed.PackedGrammar;
+
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigValueFactory;
 
 /**
  * Represents a phrase table, and is implemented as a wrapper around either a {@link PackedGrammar}
- * or a {@link MemoryBasedBatchGrammar}.
+ * or a {@link TextGrammar}.
  * 
  * TODO: this should all be implemented as a two-level trie (source trie and target trie).
  */
 public class PhraseTable implements Grammar {
   
-  private final JoshuaConfiguration config;
-  private Grammar backend;
+  private final Grammar backend;
+  private final Optional<String> path;
   
   /**
    * Chain to the super with a number of defaults. For example, we only use a single nonterminal,
    * and there is no span limit.
-   * 
-   * @param grammarFile file path parent directory
-   * @param owner used to set phrase owners
-   * @param type the grammar specification keyword (e.g., "thrax" or "moses")
-   * @param config a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
-   * @throws IOException if there is an error reading the grammar file
    */
-  public PhraseTable(String grammarFile, String owner, String type, JoshuaConfiguration config) 
-      throws IOException {
-    this.config = config;
-    int spanLimit = 0;
-    
-    if (grammarFile != null && new File(grammarFile).isDirectory()) {
-      this.backend = new PackedGrammar(grammarFile, spanLimit, owner, type, config);
-      if (this.backend.getMaxSourcePhraseLength() == -1) {
-        String msg = "FATAL: Using a packed grammar for a phrase table backend requires that you "
-            + "packed the grammar with Joshua 6.0.2 or greater";
-        throw new RuntimeException(msg);
-      }
-
+  public PhraseTable(Config config) {
+    // override span_limit to 0
+    final Config newConfig = config.withValue("span_limit", ConfigValueFactory.fromAnyRef(0));
+    this.path = newConfig.hasPath("path") ? Optional.of(newConfig.getString("path")) : Optional.empty();
+    if (path.isPresent() && new File(path.get()).isDirectory()) {
+      this.backend = new PackedGrammar(newConfig);
     } else {
-      this.backend = new MemoryBasedBatchGrammar(type, grammarFile, owner, "[X]", spanLimit, config);
+      this.backend = new TextGrammar(newConfig);
     }
-  }
-  
-  public PhraseTable(String owner, JoshuaConfiguration config) {
-    this.config = config;
-    this.backend = new MemoryBasedBatchGrammar(owner, config, 20);
   }
       
   /**
@@ -119,10 +104,10 @@ public class PhraseTable implements Grammar {
   }
   
   @Override
-  public void addOOVRules(int sourceWord, List<FeatureFunction> featureFunctions) {
+  public void addOOVRules(int sourceWord, DecoderConfig config) {
     // TODO: _OOV shouldn't be outright added, since the word might not be OOV for the LM (but now almost
     // certainly is)
-    int targetWord = config.mark_oovs
+    int targetWord = config.getFlags().getBoolean("mark_oovs")
         ? Vocabulary.id(Vocabulary.word(sourceWord) + "_OOV")
         : sourceWord;   
 
@@ -135,7 +120,7 @@ public class PhraseTable implements Grammar {
         new FeatureVector(0),
         new byte[] {0,0}, backend.getOwner());
     addRule(oovRule);
-    oovRule.estimateRuleCost(featureFunctions);
+    oovRule.estimateRuleCost(config.getFeatureFunctions());
   }
 
   @Override

@@ -18,12 +18,10 @@
  */
 package org.apache.joshua.decoder.ff;
 
-import java.util.HashMap;
+import static org.apache.joshua.util.Constants.OOV_OWNER;
+
 import java.util.List;
 
-import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
-import org.apache.joshua.decoder.JoshuaConfiguration.OOVItem;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.OwnerId;
@@ -31,6 +29,9 @@ import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.util.Constants;
+
+import com.typesafe.config.Config;
 
 /**
  * This feature is fired when an out-of-vocabulary word (with respect to the translation model) is
@@ -44,19 +45,12 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  */
 public class OOVPenalty extends StatelessFF {
   private final OwnerId ownerID;
+  private static final String NAME = "OOVPenalty";
+  private static final float DEFAULT_VALUE = -100f;
 
-  private final HashMap<Integer,Float> oovWeights;
-
-  public OOVPenalty(FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, "OOVPenalty", args, config);
-    ownerID = OwnerMap.register("oov");
-    oovWeights = new HashMap<>();
-    
-    if (config.oovList != null) {
-      for (OOVItem item: config.oovList) { 
-        oovWeights.put(Vocabulary.id(item.label), item.weight);
-      }
-    }
+  public OOVPenalty(Config featureConfig, FeatureVector weights) {
+    super(NAME, featureConfig, weights);
+    ownerID = OwnerMap.register(OOV_OWNER);
   }
   
   /**
@@ -69,7 +63,7 @@ public class OOVPenalty extends StatelessFF {
       Sentence sentence, Accumulator acc) {
     
     if (rule != null && this.ownerID.equals(rule.getOwner())) {
-      acc.add(featureId, getValue(rule.getLHS()));
+      acc.add(featureId, DEFAULT_VALUE);
     }
 
     return null;
@@ -85,13 +79,8 @@ public class OOVPenalty extends StatelessFF {
   @Override
   public float estimateCost(Rule rule, Sentence sentence) {
     if (rule != null && this.ownerID.equals(rule.getOwner())) {
-      return weights.getOrDefault(featureId) * getValue(rule.getLHS());
+      return weights.getOrDefault(featureId) * DEFAULT_VALUE;
     }
     return 0.0f;
-  }
-  
-  private float getValue(int lhs) {
-    float defaultValue = -100f;
-    return oovWeights.containsKey(lhs) ? oovWeights.get(lhs) : defaultValue;
   }
 }

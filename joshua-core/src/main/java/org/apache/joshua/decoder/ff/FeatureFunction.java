@@ -20,17 +20,15 @@ package org.apache.joshua.decoder.ff;
 
 import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
+
+import com.typesafe.config.Config;
 
 /**
  * <p>This class defines Joshua's feature function interface, for both sparse and
@@ -81,18 +79,11 @@ public abstract class FeatureFunction {
    */
   protected int featureId;
 
-  // The list of arguments passed to the feature, and the hash for the parsed args
-  protected final String[] args;
-  protected final HashMap<String, String> parsedArgs; 
-
-  /*
-   * The global weight vector used by the decoder, passed it when the feature is
-   * instantiated
-   */
+  // The configuration passed to the feature
+  protected final Config featureConfig;
+  
+  // reference to the global decoder weights
   protected final FeatureVector weights;
-
-  /* The config */
-  protected final JoshuaConfiguration config;
 
   public String getName() {
     return name;
@@ -101,23 +92,21 @@ public abstract class FeatureFunction {
   // Whether the feature has state.
   public abstract boolean isStateful();
 
-  public FeatureFunction(FeatureVector weights, String name, String[] args, JoshuaConfiguration config) {
-    this.weights = weights;
+  public FeatureFunction(final String name, final Config featureConfig, final FeatureVector weights) {
     this.name = name;
-    this.featureId = FeatureMap.hashFeature(this.name);
-    this.args = args;
-    this.config = config;
-    this.parsedArgs = FeatureFunction.parseArgs(args);
+    this.featureId = hashFeature(this.name); // TODO(fhieber) proper hashing here
+    this.featureConfig = featureConfig;
+    this.weights = weights;
   }
 
   public String logString() {
-    return String.format("%s (weight %.3f)", name, weights.getOrDefault(hashFeature(name)));
+    return String.format("%s (weight %.3f)", name, weights.getOrDefault(featureId));
   }
 
   /**
    * This is the main function for defining feature values. The implementor
    * should compute all the features along the hyperedge, calling 
-   * {@link org.apache.joshua.decoder.ff.FeatureFunction.Accumulator#add(String, float)}
+   * {@link org.apache.joshua.decoder.ff.Accumulator#add(String, float)}
    * for each feature. It then returns the newly-computed dynamic
    * programming state for this feature (for example, for the
    * {@link org.apache.joshua.decoder.ff.lm.LanguageModelFF} feature, this returns the new language model
@@ -132,14 +121,14 @@ public abstract class FeatureFunction {
    * @param j todo
    * @param sourcePath information about a path taken through the source {@link org.apache.joshua.lattice.Lattice}
    * @param sentence {@link org.apache.joshua.lattice.Lattice} input
-   * @param acc {@link org.apache.joshua.decoder.ff.FeatureFunction.Accumulator} object permitting generalization of feature computation
+   * @param acc {@link org.apache.joshua.decoder.ff.Accumulator} object permitting generalization of feature computation
    * @return the new dynamic programming state (null for stateless features)
    */
   public abstract DPState compute(Rule rule, List<HGNode> tailNodes, int i, int j,
       SourcePath sourcePath, Sentence sentence, Accumulator acc);
 
   /**
-   * Feature functions must overrided this. StatefulFF and StatelessFF provide
+   * Feature functions must override this. StatefulFF and StatelessFF provide
    * reasonable defaults since most features do not fire on the goal node.
    * 
    * @param tailNode single {@link org.apache.joshua.decoder.hypergraph.HGNode} representing tail node
@@ -147,7 +136,7 @@ public abstract class FeatureFunction {
    * @param j todo
    * @param sourcePath information about a path taken through the source {@link org.apache.joshua.lattice.Lattice}
    * @param sentence {@link org.apache.joshua.lattice.Lattice} input
-   * @param acc {@link org.apache.joshua.decoder.ff.FeatureFunction.Accumulator} object permitting generalization of feature computation
+   * @param acc {@link org.apache.joshua.decoder.ff.Accumulator} object permitting generalization of feature computation
    * @return the DPState (null if none)
    */
   public abstract DPState computeFinal(HGNode tailNode, int i, int j, SourcePath sourcePath,
@@ -195,7 +184,7 @@ public abstract class FeatureFunction {
   public final float computeFinalCost(HGNode tailNode, int i, int j, SourcePath sourcePath,
       Sentence sentence) {
 
-    ScoreAccumulator score = new ScoreAccumulator();
+    final ScoreAccumulator score = new ScoreAccumulator(weights);
     computeFinal(tailNode, i, j, sourcePath, sentence, score);
     return score.getScore();
   }
@@ -248,92 +237,4 @@ public abstract class FeatureFunction {
    *         context.
    */
   public abstract float estimateFutureCost(Rule rule, DPState state, Sentence sentence);
-
-  /**
-   * Parses the arguments passed to a feature function in the Joshua config file TODO: Replace this
-   * with a proper CLI library at some point Expects key value pairs in the form : -argname value
-   * Any key without a value is added with an empty string as value Multiple values for the same key
-   * are not parsed. The first one is used.
-   * 
-   * @param args A string with the raw arguments and their names
-   * @return A hash with the keys and the values of the string
-   */
-  public static HashMap<String, String> parseArgs(String[] args) {
-    HashMap<String, String> parsedArgs = new HashMap<>();
-    boolean lookingForValue = false;
-    String currentKey = null;
-    for (String arg : args) {
-
-      Pattern argKeyPattern = Pattern.compile("^-[a-zA-Z]\\S+");
-      Matcher argKey = argKeyPattern.matcher(arg);
-      if (argKey.find()) {
-        // This is a key
-        // First check to see if there is a key that is waiting to be written
-        if (lookingForValue) {
-          // This is a key with no specified value
-          parsedArgs.put(currentKey, "");
-        }
-        // Now store the new key and look for its value
-        currentKey = arg.substring(1);
-        lookingForValue = true;
-      } else {
-        // This is a value
-        if (lookingForValue) {
-          parsedArgs.put(currentKey, arg);
-          lookingForValue = false;
-        }
-      }
-    }
-    
-    // make sure we add the last key without value
-    if (lookingForValue && currentKey != null) {
-      // end of line, no value
-      parsedArgs.put(currentKey, "");
-    }
-    return parsedArgs;
-  }
-
-  /**
-   * Accumulator objects allow us to generalize feature computation.
-   * ScoreAccumulator takes (feature,value) pairs and simple stores the weighted
-   * sum (for decoding). FeatureAccumulator records the named feature values
-   * (for k-best extraction).
-   */
-  public interface Accumulator {
-    public void add(int featureId, float value);
-  }
-
-  public class ScoreAccumulator implements Accumulator {
-    private float score;
-
-    public ScoreAccumulator() {
-      this.score = 0.0f;
-    }
-
-    @Override
-    public void add(int featureId, float value) {
-      score += value * weights.getOrDefault(featureId);
-    }
-
-    public float getScore() {
-      return score;
-    }
-  }
-
-  public class FeatureAccumulator implements Accumulator {
-    private final FeatureVector features;
-
-    public FeatureAccumulator() {
-      this.features = new FeatureVector(10);
-    }
-
-    @Override
-    public void add(int id, float value) {
-      features.add(id, value);
-    }
-
-    public FeatureVector getFeatures() {
-      return features;
-    }
-  }
 }

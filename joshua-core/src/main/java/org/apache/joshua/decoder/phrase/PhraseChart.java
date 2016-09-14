@@ -18,13 +18,14 @@
  */
 package org.apache.joshua.decoder.phrase;
 
-import java.util.ArrayList;	
+import static org.apache.joshua.decoder.chart_parser.ComputeNodeResult.computeNodeResult;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
+import org.apache.joshua.decoder.DecoderConfig;
 import org.apache.joshua.decoder.chart_parser.NodeResult;
-import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.RuleCollection;
 import org.apache.joshua.decoder.hypergraph.HGNode;
@@ -33,7 +34,7 @@ import org.apache.joshua.decoder.segment_file.Sentence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.joshua.decoder.chart_parser.ComputeNodeResult.computeNodeResult;
+import com.google.common.collect.ImmutableList;
 
 /**
  * This class represents a bundle of phrase tables that have been read in,
@@ -50,13 +51,13 @@ public class PhraseChart {
   private final List<PhraseNodes> entries;
 
   // number of translation options
-  private int numOptions = 20;
+  private final int numOptions;
   
   // The feature functions
-  private final List<FeatureFunction> features;
+  private final DecoderConfig config;
   
   // The input sentence
-  private Sentence sentence;
+  private final Sentence sentence;
 
   /**
    * Create a new PhraseChart object, which represents all phrases that are
@@ -68,13 +69,13 @@ public class PhraseChart {
    * @param source input to {@link org.apache.joshua.lattice.Lattice}
    * @param num_options number of translation options (typically set to 20)
    */
-  public PhraseChart(PhraseTable[] tables, List<FeatureFunction> features, Sentence source,
+  public PhraseChart(ImmutableList<PhraseTable> tables, DecoderConfig config, Sentence source,
       int num_options) {
 
     float startTime = System.currentTimeMillis();
 
     this.numOptions = num_options;
-    this.features = features;
+    this.config = config;
     this.sentence = source;
 
     max_source_phrase_length = 0;
@@ -193,7 +194,7 @@ public class PhraseChart {
        * performance gains --- the more common the word, the more translations options it is
        * likely to have (often into the tens of thousands).
        */
-      List<Rule> rules = to.getSortedRules(features);
+      List<Rule> rules = to.getSortedRules(config.getFeatureFunctions());
       
       // TODO: I think this is a race condition
       if (numOptions > 0 && rules.size() > numOptions)
@@ -208,7 +209,7 @@ public class PhraseChart {
 
         // Turn each rule into an HGNode, add them one by one 
         for (Rule rule: rules) {
-          NodeResult result = computeNodeResult(features, rule, null, i, j, null, sentence);
+          NodeResult result = computeNodeResult(config, rule, null, i, j, null, sentence);
           HyperEdge edge = new HyperEdge(rule, result.getViterbiCost(), result.getTransitionCost(), null, null);
           HGNode phraseNode = new HGNode(i, j, rule.getLHS(), result.getDPStates(), edge, result.getPruningEstimate());
           nodes.add(phraseNode);

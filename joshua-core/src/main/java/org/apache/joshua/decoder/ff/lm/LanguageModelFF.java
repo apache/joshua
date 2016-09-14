@@ -27,9 +27,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.Support;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
+import org.apache.joshua.decoder.ff.Accumulator;
 import org.apache.joshua.decoder.ff.FeatureMap;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.StatefulFF;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.Ints;
+import com.typesafe.config.Config;
 
 /**
  * This class performs the following:
@@ -95,8 +97,9 @@ public class LanguageModelFF extends StatefulFF {
   /**
    * We cache the weight of the feature since there is only one.
    */
-  protected String type;
+  protected final String type;
   protected final String path;
+  protected final boolean useSourceAnnotations;
 
   /** Whether this is a class-based LM */
   protected boolean isClassLM;
@@ -105,21 +108,23 @@ public class LanguageModelFF extends StatefulFF {
   /** Whether this feature function fires LM oov indicators */ 
   protected boolean withOovFeature;
 
-  public LanguageModelFF(FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, NAME_PREFIX + LM_INDEX, args, config);
+  public LanguageModelFF(Config featureConfig, FeatureVector weights) {
+    super(NAME_PREFIX + LM_INDEX, featureConfig, weights);
     this.oovFeatureId = FeatureMap.hashFeature(NAME_PREFIX + LM_INDEX + OOV_SUFFIX);
     LM_INDEX++;
 
-    this.type = parsedArgs.get("lm_type");
-    this.ngramOrder = Integer.parseInt(parsedArgs.get("lm_order"));
-    this.path = parsedArgs.get("lm_file");
+    this.type = featureConfig.getString("lm_type");
+    this.ngramOrder = featureConfig.getInt("lm_order");
+    this.path = featureConfig.getString("lm_file");
+    this.useSourceAnnotations = featureConfig.hasPath("source_annotations") ? 
+        featureConfig.getBoolean("source_annotations") : false;
 
-    if (parsedArgs.containsKey("class_map")) {
+    if (featureConfig.hasPath("class_map")) {
       this.isClassLM = true;
-      this.classMap = new ClassMap(parsedArgs.get("class_map"));
+      this.classMap = new ClassMap(featureConfig.getString("class_map"));
     }
     
-    if (parsedArgs.containsKey("oov_feature")) {
+    if (featureConfig.hasPath("oov_feature")) {
       this.withOovFeature = true;
     }
 
@@ -146,7 +151,9 @@ public class LanguageModelFF extends StatefulFF {
     }
 
     Vocabulary.registerLanguageModel(this.languageModel);
-    Vocabulary.id(config.default_non_terminal);
+    // TODO(fhieber): this should not be here really, but it works like this.
+    final String defaultNonTerminal = Decoder.getDefaultFlags().getString("default_non_terminal");
+    Vocabulary.id(defaultNonTerminal);
 
     startSymbolId = Vocabulary.id(Vocabulary.START_SYM);
   }
@@ -177,7 +184,7 @@ public class LanguageModelFF extends StatefulFF {
     }
 
     int[] words;
-    if (config.source_annotations) {
+    if (useSourceAnnotations) {
       // get source side annotations and project them to the target side
       words = getTags(rule, i, j, sentence);
     } else {

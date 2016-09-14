@@ -18,13 +18,12 @@
  */
 package org.apache.joshua.adagrad;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.util.FileUtility;
 import org.apache.joshua.util.StreamGobbler;
 
 public class AdaGrad {
   public static void main(String[] args) throws Exception {
-    JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
     boolean external = false; // should each AdaGrad iteration be launched externally?
 
     if (args.length == 1) {
@@ -42,7 +41,7 @@ public class AdaGrad {
     }
 
     if (!external) {
-      AdaGradCore myAdaGrad = new AdaGradCore(args[0], joshuaConfiguration);
+      AdaGradCore myAdaGrad = new AdaGradCore(args[0], Decoder.getDefaultFlags());
       myAdaGrad.run_AdaGrad(); // optimize lambda[]
       myAdaGrad.finish();
     } else {

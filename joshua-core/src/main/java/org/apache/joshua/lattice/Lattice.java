@@ -28,11 +28,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.segment_file.Token;
 import org.apache.joshua.util.ChartSpan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 /**
  * A lattice representation of a directed graph.
@@ -61,9 +63,6 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    */
   private List<Node<Value>> nodes;
 
-
-  JoshuaConfiguration config = null;
-
   /**
    * Constructs a new lattice from an existing list of (connected) nodes.
    * <p>
@@ -73,13 +72,13 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    * @param nodes A list of nodes which must be in topological order.
    * @param config a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
-  public Lattice(List<Node<Value>> nodes, JoshuaConfiguration config) {
+  public Lattice(List<Node<Value>> nodes, Config config) {
     this.nodes = nodes;
     //    this.distances = calculateAllPairsShortestPath();
     this.latticeHasAmbiguity = true;
   }
 
-  public Lattice(List<Node<Value>> nodes, boolean isAmbiguous, JoshuaConfiguration config) {
+  public Lattice(List<Node<Value>> nodes, boolean isAmbiguous, Config config) {
     // Node<Value> sink = new Node<Value>(nodes.size());
     // nodes.add(sink);
     this.nodes = nodes;
@@ -93,7 +92,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    * @param linearChain a sequence of Value objects
    * @param config a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
-  public Lattice(Value[] linearChain, JoshuaConfiguration config) {
+  public Lattice(Value[] linearChain, Config config) {
     this.latticeHasAmbiguity = false;
     this.nodes = new ArrayList<Node<Value>>();
 
@@ -144,7 +143,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    * @param config a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    * @return Lattice representation of the linear chain.
    */
-  public static Lattice<Token> createTokenLatticeFromString(String source, JoshuaConfiguration config) {
+  public static Lattice<Token> createTokenLatticeFromString(String source, Config config) {
     String[] tokens = source.split("\\s+");
     Token[] integerSentence = new Token[tokens.length];
     for (int i = 0; i < tokens.length; i++) {
@@ -154,7 +153,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
     return new Lattice<Token>(integerSentence, config);
   }
 
-  public static Lattice<Token> createTokenLatticeFromPLF(String data, JoshuaConfiguration config) {
+  public static Lattice<Token> createTokenLatticeFromPLF(String data, Config config) {
     ArrayList<Node<Token>> nodes = new ArrayList<Node<Token>>();
 
     // This matches a sequence of tuples, which describe arcs leaving this node
@@ -248,7 +247,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    * @param config a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    * @return A lattice that corresponds to the given string.
    */
-  public static Lattice<String> createStringLatticeFromString(String data, JoshuaConfiguration config) {
+  public static Lattice<String> createStringLatticeFromString(String data, Config config) {
 
     Map<Integer, Node<String>> nodes = new HashMap<Integer, Node<String>>();
 
@@ -536,6 +535,6 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
 
     LOG.debug("Nodelist={}", nodeList);
 
-    return new Lattice<String>(nodeList, new JoshuaConfiguration());
+    return new Lattice<String>(nodeList, ConfigFactory.empty());
   }
 }

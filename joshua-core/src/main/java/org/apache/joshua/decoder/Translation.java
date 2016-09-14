@@ -31,9 +31,7 @@ import java.io.StringWriter;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
-import org.apache.joshua.decoder.ff.lm.StateMinimizingLanguageModel;
 import org.apache.joshua.decoder.hypergraph.HyperGraph;
 import org.apache.joshua.decoder.hypergraph.KBestExtractor;
 import org.apache.joshua.decoder.io.DeNormalize;
@@ -67,21 +65,21 @@ public class Translation {
    */
   private List<StructuredTranslation> structuredTranslations = null;
 
-  public Translation(Sentence source, HyperGraph hypergraph,
-      List<FeatureFunction> featureFunctions, JoshuaConfiguration joshuaConfiguration) {
+  public Translation(final Sentence source,
+      final HyperGraph hypergraph, DecoderConfig config) {
     this.source = source;
 
     /**
      * Structured output from Joshua provides a way to programmatically access translation results
      * from downstream applications, instead of writing results as strings to an output buffer.
      */
-    if (joshuaConfiguration.use_structured_output) {
+    if (config.getFlags().getBoolean("use_structured_output")) {
 
-      if (joshuaConfiguration.topN == 0) {
+      if (config.getFlags().getInt("top_n") == 0) {
         /*
          * Obtain Viterbi StructuredTranslation
          */
-        StructuredTranslation translation = fromViterbiDerivation(source, hypergraph, featureFunctions);
+        StructuredTranslation translation = fromViterbiDerivation(source, hypergraph, config.getFeatureFunctions());
         this.output = translation.getTranslationString();
         structuredTranslations = Collections.singletonList(translation);
 
@@ -89,8 +87,8 @@ public class Translation {
         /*
          * Get K-Best list of StructuredTranslations
          */
-        final KBestExtractor kBestExtractor = new KBestExtractor(source, featureFunctions, Decoder.weights, false, joshuaConfiguration);
-        structuredTranslations = kBestExtractor.KbestExtractOnHG(hypergraph, joshuaConfiguration.topN);
+        final KBestExtractor kBestExtractor = new KBestExtractor(source, config, false);
+        structuredTranslations = kBestExtractor.KbestExtractOnHG(hypergraph, config.getFlags().getInt("top_n"));
         if (structuredTranslations.isEmpty()) {
             structuredTranslations = Collections
                 .singletonList(StructuredTranslationFactory.fromEmptyOutput(source));
@@ -112,7 +110,7 @@ public class Translation {
 
           long startTime = System.currentTimeMillis();
 
-          if (joshuaConfiguration.topN == 0) {
+          if (config.getFlags().getInt("top_n") == 0) {
 
             /* construct Viterbi output */
             final String best = getViterbiString(hypergraph);
@@ -124,18 +122,19 @@ public class Translation {
              * the output-string, with the understanding that we can only substitute variables for the
              * output string, sentence number, and model score.
              */
-            String translation = joshuaConfiguration.outputFormat
+            String outputFormat = config.getFlags().getString("output_format");
+            String translation = outputFormat
                 .replace("%s", removeSentenceMarkers(best))
                 .replace("%S", DeNormalize.processSingleLine(best))
                 .replace("%c", String.format("%.3f", hypergraph.goalNode.getScore()))
                 .replace("%i", String.format("%d", source.id()));
 
-            if (joshuaConfiguration.outputFormat.contains("%a")) {
+            if (outputFormat.contains("%a")) {
               translation = translation.replace("%a", getViterbiWordAlignments(hypergraph));
             }
 
-            if (joshuaConfiguration.outputFormat.contains("%f")) {
-              final FeatureVector features = getViterbiFeatures(hypergraph, featureFunctions, source);
+            if (outputFormat.contains("%f")) {
+              final FeatureVector features = getViterbiFeatures(hypergraph, config.getFeatureFunctions(), source);
               translation = translation.replace("%f", features.textFormat());
             }
 
@@ -145,27 +144,28 @@ public class Translation {
           } else {
 
             final KBestExtractor kBestExtractor = new KBestExtractor(
-                source, featureFunctions, Decoder.weights, false, joshuaConfiguration);
-            kBestExtractor.lazyKBestExtractOnHG(hypergraph, joshuaConfiguration.topN, out);
+                source, config, false);
+            kBestExtractor.lazyKBestExtractOnHG(hypergraph, config.getFlags().getInt("top_n"), out);
 
-            if (joshuaConfiguration.rescoreForest) {
+            if (config.getFlags().getBoolean("rescore_forest")) {
               final int bleuFeatureHash = hashFeature("BLEU");
-              Decoder.weights.add(bleuFeatureHash, joshuaConfiguration.rescoreForestWeight);
-              kBestExtractor.lazyKBestExtractOnHG(hypergraph, joshuaConfiguration.topN, out);
+              // TODO(fhieber): this is fishy, why would we want to change the decoder weights HERE?
+              config.getWeights().add(bleuFeatureHash, (float) config.getFlags().getDouble("rescore_forest_weight"));
+              kBestExtractor.lazyKBestExtractOnHG(hypergraph, config.getFlags().getInt("top_n"), out);
 
-              Decoder.weights.add(bleuFeatureHash, -joshuaConfiguration.rescoreForestWeight);
-              kBestExtractor.lazyKBestExtractOnHG(hypergraph, joshuaConfiguration.topN, out);
+              config.getWeights().add(bleuFeatureHash, -(float) config.getFlags().getDouble("rescore_forest_weight"));
+              kBestExtractor.lazyKBestExtractOnHG(hypergraph, config.getFlags().getInt("top_n"), out);
             }
           }
 
           float seconds = (System.currentTimeMillis() - startTime) / 1000.0f;
           LOG.info("Input {}: {}-best extraction took {} seconds", id(),
-              joshuaConfiguration.topN, seconds);
+              config.getFlags().getInt("top_n"), seconds);
 
         } else {
 
           // Failed translations and blank lines get empty formatted outputs
-          out.write(getFailedTranslationOutput(source, joshuaConfiguration));
+          out.write(getFailedTranslationOutput(source, config.getFlags().getString("output_format")));
           out.newLine();
 
         }
@@ -198,8 +198,8 @@ public class Translation {
     return output;
   }
 
-  private String getFailedTranslationOutput(final Sentence source, final JoshuaConfiguration joshuaConfiguration) {
-    return joshuaConfiguration.outputFormat
+  private String getFailedTranslationOutput(final Sentence source, final String outputFormat) {
+    return outputFormat
         .replace("%s", source.source())
         .replace("%e", "")
         .replace("%S", "")

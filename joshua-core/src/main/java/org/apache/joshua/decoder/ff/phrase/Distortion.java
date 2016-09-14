@@ -20,8 +20,8 @@ package org.apache.joshua.decoder.ff.phrase;
 
 import java.util.List;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
+import org.apache.joshua.decoder.ff.Accumulator;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.StatelessFF;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
@@ -30,16 +30,12 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.phrase.Hypothesis;
 import org.apache.joshua.decoder.segment_file.Sentence;
 
+import com.typesafe.config.Config;
+
 public class Distortion extends StatelessFF {
 
-  public Distortion(FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, "Distortion", args, config);
-    
-    if (! config.search_algorithm.equals("stack")) {
-      String msg = "* FATAL: Distortion feature only application for phrase-based decoding. "
-          + "Use -search phrase or remove this feature";
-      throw new RuntimeException(msg);
-    }
+  public Distortion(Config featureConfig, FeatureVector weights) {
+    super("Distortion", featureConfig, weights);
   }
 
   @Override

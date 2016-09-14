@@ -21,14 +21,15 @@ package org.apache.joshua.decoder.segment_file;
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.corpus.syntax.ArraySyntaxTree;
 import org.apache.joshua.corpus.syntax.SyntaxTree;
-import org.apache.joshua.decoder.JoshuaConfiguration;
+
+import com.typesafe.config.Config;
 
 public class ParsedSentence extends Sentence {
 
   private SyntaxTree syntaxTree = null;
 
-  public ParsedSentence(String input, int id,JoshuaConfiguration joshuaConfiguration) {
-    super(input, id, joshuaConfiguration);
+  public ParsedSentence(String input, int id, Config config) {
+    super(input, id, config);
   }
 
   public int[] getWordIDs() {

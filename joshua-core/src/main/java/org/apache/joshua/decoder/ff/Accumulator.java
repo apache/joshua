@@ -16,25 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.joshua.decoder.segment_file;
+package org.apache.joshua.decoder.ff;
 
-import com.typesafe.config.Config;
-
-public class ParseTreeInput extends Sentence {
-
-  public ParseTreeInput(String input, int id, Config config) {
-    super(input, id, config);
-  }
-
-  // looks_like_parse_tree = sentence.sentence().matches("^\\(+[A-Z]+ .*");
-
-  // private SyntaxTree syntax_tree;
-
-  // ParseTreeInput() {
-  // SyntaxTree syntax_tree = new ArraySyntaxTree(sentence.sentence(), Vocabulary);
-  // }
-
-  // public int[] int_sentence() {
-  // return syntax_tree.getTerminals();
-  // }
+/**
+ * Accumulator objects allow us to generalize feature computation.
+ * ScoreAccumulator takes (feature,value) pairs and simple stores the weighted
+ * sum (for decoding). FeatureAccumulator records the named feature values
+ * (for k-best extraction).
+ */
+public interface Accumulator {
+  public void add(int featureId, float value);
 }

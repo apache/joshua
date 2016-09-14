@@ -14,6 +14,7 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
 import com.google.common.base.Throwables;
+import com.typesafe.config.ConfigValueFactory;
 
 /**
  * Initializes {@link Decoder} via <code>decoderArgsLine</code> init parameter.
@@ -32,13 +33,8 @@ public class DecoderServletContextListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        String argsLine = sce.getServletContext().getInitParameter("decoderArgsLine");
         try {
-            JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
-            new ArgsParser(argsLine.split(" "), joshuaConfiguration);
-            joshuaConfiguration.use_structured_output = true;
-            joshuaConfiguration.sanityCheck();
-            Decoder decoder = new Decoder(joshuaConfiguration);
+            Decoder decoder = new Decoder(Decoder.getDefaultFlags().withValue("use_structured_output", ConfigValueFactory.fromAnyRef("true")));
             sce.getServletContext().setAttribute(DECODER_CONTEXT_ATTRIBUTE_NAME, decoder);
         } catch (Exception ex) {
             Throwables.propagate(ex);

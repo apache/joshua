@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.slf4j.Logger;
@@ -43,8 +42,8 @@ public class Stack extends ArrayList<Hypothesis> {
 
   private final HashMap<Coverage, ArrayList<Hypothesis>> coverages;
   
-  private Sentence sentence;
-  private JoshuaConfiguration config;
+  private final Sentence sentence;
+  private final int popLimit;
 
   /* The list of states we've already visited. */
   private final HashSet<Candidate> visitedStates;
@@ -61,9 +60,9 @@ public class Stack extends ArrayList<Hypothesis> {
    * @param sentence input for a {@link org.apache.joshua.lattice.Lattice}
    * @param config populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
-  public Stack(Sentence sentence, JoshuaConfiguration config) {
+  public Stack(Sentence sentence, int popLimit) {
     this.sentence = sentence;
-    this.config = config;
+    this.popLimit = popLimit;
     
     this.candidates = new PriorityQueue<Candidate>(1);
     this.coverages = new HashMap<Coverage, ArrayList<Hypothesis>>();
@@ -175,7 +174,7 @@ public class Stack extends ArrayList<Hypothesis> {
    * candidate.
    */
   public void search() {
-    int to_pop = config.pop_limit;
+    int to_pop = popLimit;
     
     if (LOG.isDebugEnabled()) {
       LOG.debug("Stack::search(): pop: {} size: {}", to_pop, candidates.size());

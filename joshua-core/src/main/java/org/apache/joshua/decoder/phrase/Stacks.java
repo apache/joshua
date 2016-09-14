@@ -36,16 +36,14 @@ package org.apache.joshua.decoder.phrase;
  */
 
 import static org.apache.joshua.decoder.chart_parser.ComputeNodeResult.computeNodeResult;
-import static org.apache.joshua.decoder.ff.tm.OwnerMap.UNKNOWN_OWNER;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.DecoderConfig;
 import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
 import org.apache.joshua.decoder.chart_parser.NodeResult;
 import org.apache.joshua.decoder.ff.FeatureFunction;
-import org.apache.joshua.decoder.ff.tm.AbstractGrammar;
 import org.apache.joshua.decoder.ff.tm.Grammar;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.hypergraph.HyperEdge;
@@ -53,6 +51,8 @@ import org.apache.joshua.decoder.hypergraph.HyperGraph;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableList;
 
 public class Stacks {
 
@@ -63,15 +63,18 @@ public class Stacks {
 
   // The end state
   private Hypothesis end;
-  
-  final List<FeatureFunction> featureFunctions;
 
   private final Sentence sentence;
 
-  private final JoshuaConfiguration config;
+  private final DecoderConfig config;
+  private final ImmutableList<FeatureFunction> featureFunctions;
 
   /* Contains all the phrase tables */
   private final PhraseChart chart;
+  
+  private final int reorderingLimit;
+  private final int numTranslationOptions;
+  private final int popLimit;
   
   /**
    * Entry point. Initialize everything. Create pass-through (OOV) phrase table and glue phrase
@@ -82,32 +85,26 @@ public class Stacks {
    * @param grammars an array of {@link org.apache.joshua.decoder.ff.tm.Grammar}'s
    * @param config a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
-  public Stacks(Sentence sentence, List<FeatureFunction> featureFunctions, Grammar[] grammars, 
-      JoshuaConfiguration config) {
+  public Stacks(Sentence sentence, DecoderConfig config) {
 
     this.sentence = sentence;
-    this.featureFunctions = featureFunctions;
     this.config = config;
+    this.featureFunctions = config.getFeatureFunctions();
+    this.popLimit = config.getFlags().getInt("pop_limit");
+    this.numTranslationOptions = config.getFlags().getInt("num_translation_options");
+    this.reorderingLimit = config.getFlags().getInt("reordering_limit");
     
-    int num_phrase_tables = 0;
-    for (Grammar grammar : grammars)
-      if (grammar instanceof PhraseTable)
-        ++num_phrase_tables;
+    // collect grammars that are phrase tables
+    final ImmutableList.Builder<PhraseTable> phraseTablesBuilder = new ImmutableList.Builder<>();
+    for (Grammar grammar : config.getGrammars()) {
+      if (grammar instanceof PhraseTable) {
+        phraseTablesBuilder.add((PhraseTable) grammar);
+      }
+    }
     
-    PhraseTable[] phraseTables = new PhraseTable[num_phrase_tables + 2];
-    for (int i = 0, j = 0; i < grammars.length; i++)
-      if (grammars[i] instanceof PhraseTable)
-        phraseTables[j++] = (PhraseTable) grammars[i];
+    this.chart = new PhraseChart(phraseTablesBuilder.build(), config, sentence, numTranslationOptions);
     
-    phraseTables[phraseTables.length - 2] = new PhraseTable(UNKNOWN_OWNER, config);
-    phraseTables[phraseTables.length - 2].addRule(Hypothesis.END_RULE);
-    
-    phraseTables[phraseTables.length - 1] = new PhraseTable("oov", config);
-    AbstractGrammar.addOOVRules(phraseTables[phraseTables.length - 1], sentence.getLattice(), featureFunctions, config.true_oovs_only);
-    
-    this.chart = new PhraseChart(phraseTables, featureFunctions, sentence, config.num_translation_options);
   }
-  
   
   /**
    * The main algorithm. Returns a hypergraph representing the search space.
@@ -125,15 +122,15 @@ public class Stacks {
     stacks.add(null);
 
     // Initialize root hypothesis with <s> context and future cost for everything.
-    NodeResult result = computeNodeResult(this.featureFunctions, Hypothesis.BEGIN_RULE,
+    NodeResult result = computeNodeResult(config, Hypothesis.BEGIN_RULE,
         null, -1, 1, null, this.sentence);
-    Stack firstStack = new Stack(sentence, config);
+    Stack firstStack = new Stack(sentence, popLimit);
     firstStack.add(new Hypothesis(result.getDPStates(), future.Full()));
     stacks.add(firstStack);
     
     // Decode with increasing numbers of source words. 
     for (int source_words = 2; source_words <= sentence.length(); ++source_words) {
-      Stack targetStack = new Stack(sentence, config);
+      Stack targetStack = new Stack(sentence, popLimit);
       stacks.add(targetStack);
 
       // Iterate over stacks to continue from.
@@ -159,7 +156,7 @@ public class Stacks {
           int begin = coverage.firstZero();
           
           // the absolute position of the ending spot of the last possible phrase
-          int last_end = Math.min(coverage.firstZero() + config.reordering_limit, chart.SentenceLength());
+          int last_end = Math.min(coverage.firstZero() + reorderingLimit, chart.SentenceLength());
           int last_begin = (last_end > phrase_length) ? (last_end - phrase_length) : 0;
 
           for (begin = coverage.firstZero(); begin <= last_begin; begin++) {
@@ -192,7 +189,7 @@ public class Stacks {
              * phrases from that span. The hypotheses are wrapped in HypoState objects, which
              * augment the hypothesis score with a future cost.
              */
-            Candidate cand = new Candidate(featureFunctions, sentence, hypotheses, phrases, future_delta, new int[] {0, 0});
+            Candidate cand = new Candidate(config, sentence, hypotheses, phrases, future_delta, new int[] {0, 0});
             targetStack.addCandidate(cand);
           }
         }
@@ -229,7 +226,7 @@ public class Stacks {
   private boolean permissible(Coverage coverage, int begin, int end) {
     int firstZero = coverage.firstZero();
 
-    if (config.reordering_limit < 0)
+    if (reorderingLimit < 0)
       return true;
     
     /* We can always start with the first zero since it doesn't create a reordering gap
@@ -240,7 +237,7 @@ public class Stacks {
     /* If a gap is created by applying this phrase, make sure that you can reach the first
      * zero later on without violating the distortion constraint.
      */
-    return end - firstZero <= config.reordering_limit;
+    return end - firstZero <= reorderingLimit;
 
   }
 

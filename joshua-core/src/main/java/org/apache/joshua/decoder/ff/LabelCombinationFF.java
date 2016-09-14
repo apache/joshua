@@ -22,19 +22,20 @@ package org.apache.joshua.decoder.ff;
  * @author Gideon Wenniger
  */
 
-import java.util.List;	
+import java.util.List;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
 
+import com.typesafe.config.Config;
+
 public class LabelCombinationFF extends StatelessFF {
 
-  public LabelCombinationFF(FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, "LabelCombination", args, config);
+  public LabelCombinationFF(Config featureConfig, FeatureVector weights) {
+    super("LabelCombination", featureConfig, weights);
   }
 
   public String getLowerCasedFeatureName() {

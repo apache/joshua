@@ -80,7 +80,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.DecoderConfig;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.tm.AbstractGrammar;
@@ -99,8 +99,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
+import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.typesafe.config.Config;
 
 public class PackedGrammar extends AbstractGrammar {
 
@@ -117,49 +119,50 @@ public class PackedGrammar extends AbstractGrammar {
   // Testing shows there's up to ~95% hit rate when cache size is 5000 Trie nodes.
   private final Cache<Trie, List<Rule>> cached_rules;
 
-  private final String grammarDir;
+  private final String path;
+
+  public PackedGrammar(Config config) {
+    super(config);
+
+    this.path = config.getString("path");
+    vocabFile = new File(path + File.separator + VOCABULARY_FILENAME);
+
+    try {
+      // Read the vocabulary.
+      LOG.info("Reading vocabulary: {}", vocabFile);
+      if (!Vocabulary.read(vocabFile)) {
+        throw new RuntimeException("mismatches or collisions while reading on-disk vocabulary");
+      }
   
-  private JoshuaConfiguration config;
-
-  public PackedGrammar(String grammar_dir, int span_limit, String owner, String type,
-      JoshuaConfiguration joshuaConfiguration) throws IOException {
-    super(owner, joshuaConfiguration, span_limit);
-
-    this.grammarDir = grammar_dir;
-    this.config = joshuaConfiguration;
-
-    // Read the vocabulary.
-    vocabFile = new File(grammar_dir + File.separator + VOCABULARY_FILENAME);
-    LOG.info("Reading vocabulary: {}", vocabFile);
-    if (!Vocabulary.read(vocabFile)) {
-      throw new RuntimeException("mismatches or collisions while reading on-disk vocabulary");
-    }
-
-    // Read the config
-    String configFile = grammar_dir + File.separator + "config";
-    if (new File(configFile).exists()) {
-      LOG.info("Reading packed config: {}", configFile);
-      readConfig(configFile);
-    }
-
-    // Read the quantizer setup.
-    LOG.info("Reading encoder configuration: {}{}encoding", grammar_dir, File.separator);
-    encoding = new EncoderConfiguration();
-    encoding.load(grammar_dir + File.separator + "encoding");
-
-    final List<String> listing = Arrays.asList(new File(grammar_dir).list());
-    sort(listing); // File.list() has arbitrary sort order
-    slices = new ArrayList<>();
-    for (String prefix : listing) {
-      if (prefix.startsWith("slice_") && prefix.endsWith(".source"))
-        slices.add(new PackedSlice(grammar_dir + File.separator + prefix.substring(0, 11)));
+      // Read the config
+      String configFile = path + File.separator + "config";
+      if (new File(configFile).exists()) {
+        LOG.info("Reading packed config: {}", configFile);
+        readConfig(configFile);
+      }
+  
+      // Read the quantizer setup.
+      LOG.info("Reading encoder configuration: {}{}encoding", path, File.separator);
+      encoding = new EncoderConfiguration();
+      encoding.load(path + File.separator + "encoding");
+  
+      final List<String> listing = Arrays.asList(new File(path).list());
+      sort(listing); // File.list() has arbitrary sort order
+      slices = new ArrayList<>();
+      for (String prefix : listing) {
+        if (prefix.startsWith("slice_") && prefix.endsWith(".source"))
+          slices.add(new PackedSlice(path + File.separator + prefix.substring(0, 11)));
+      }
+    } catch (IOException e) {
+      Throwables.propagate(e);
     }
 
     long count = 0;
     for (PackedSlice s : slices)
       count += s.estimated.length;
     root = new PackedRoot(slices);
-    cached_rules = CacheBuilder.newBuilder().maximumSize(joshuaConfiguration.cachedRuleSize).build();
+    int cacheSize = config.getInt("rule_cache_size");
+    cached_rules = CacheBuilder.newBuilder().maximumSize(cacheSize).build();
 
     LOG.info("Loaded {} rules", count);
   }
@@ -854,7 +857,7 @@ public class PackedGrammar extends AbstractGrammar {
         @Override
         public int[] getSource() {
           int phrase[] = new int[src.length + 1];
-          int ntid = Vocabulary.id(PackedGrammar.this.joshuaConfiguration.default_non_terminal);
+          int ntid = Vocabulary.id(PackedGrammar.this.config.getString("default_non_terminal"));
           phrase[0] = ntid;
           System.arraycopy(src,  0, phrase, 1, src.length);
           return phrase;
@@ -956,9 +959,9 @@ public class PackedGrammar extends AbstractGrammar {
       }
     }
   }
-
+  
   @Override
-  public void addOOVRules(int word, List<FeatureFunction> featureFunctions) {
+  public void addOOVRules(int word, DecoderConfig config) {
     throw new RuntimeException("PackedGrammar.addOOVRules(): I can't add OOV rules");
   }
 
@@ -989,17 +992,15 @@ public class PackedGrammar extends AbstractGrammar {
 
     if (! isSupportedVersion(version)) {
       String message = String.format("The grammar at %s was packed with packer version %d, which is incompatible with the current config",
-          this.grammarDir, version);
+          this.path, version);
       throw new RuntimeException(message);
     }
   }
   
-  /*
-   * Determines whether the current grammar is a supported version. For hierarchical decoding,
-   * no changes have occurred, so any version past 2 (the default) is supported. For phrase-
-   * based decoding, version 4 is required.
-   */
+  /**
+    * With Joshua 7 we require newly packed grammars for everything.
+    */
   private boolean isSupportedVersion(int version) {
-    return (config.search_algorithm.equals("cky") && version >= 2) || (version >= 4);
+    return version >= 3; // TODO(fhieber): fix this once we ship Joshua
   }
 }

@@ -22,15 +22,16 @@ import java.io.PrintStream;
 import java.util.HashSet;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.tm.Grammar;
 import org.apache.joshua.decoder.ff.tm.OwnerMap;
 import org.apache.joshua.decoder.ff.tm.Rule;
-import org.apache.joshua.decoder.ff.tm.hash_based.MemoryBasedBatchGrammar;
+import org.apache.joshua.decoder.ff.tm.hash_based.TextGrammar;
 import org.apache.joshua.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.typesafe.config.Config;
 
 /**
  * This walker function builds up a new context-free grammar by visiting each node in a hypergraph.
@@ -49,13 +50,13 @@ public class GrammarBuilderWalkerFunction implements WalkerFunction {
 
   private static final Logger LOG = LoggerFactory.getLogger(GrammarBuilderWalkerFunction.class);
 
-  private final MemoryBasedBatchGrammar grammar;
+  private final TextGrammar grammar;
   private final PrintStream outStream;
   private final int goalSymbol;
   private final HashSet<Rule> rules;
 
-  public GrammarBuilderWalkerFunction(String goal, JoshuaConfiguration joshuaConfiguration, String owner) {
-    grammar = new MemoryBasedBatchGrammar(owner, joshuaConfiguration, 1000);
+  public GrammarBuilderWalkerFunction(String goal, Config config) {
+    grammar = new TextGrammar(config);
     outStream = null;
     goalSymbol = Vocabulary.id(goal);
     rules = new HashSet<>();

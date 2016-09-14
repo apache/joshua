@@ -20,7 +20,6 @@ package org.apache.joshua.decoder.ff;
 
 import java.util.List;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.OwnerId;
@@ -29,6 +28,8 @@ import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.phrase.Hypothesis;
 import org.apache.joshua.decoder.segment_file.Sentence;
+
+import com.typesafe.config.Config;
 
 /**
  *  This feature just counts rules that are used. You can restrict it with a number of flags:
@@ -45,10 +46,10 @@ public class PhrasePenalty extends StatelessFF {
   private final OwnerId owner;
   private final float value = 1.0f;
   
-  public PhrasePenalty(FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, "PhrasePenalty", args, config);
-    if (parsedArgs.containsKey("owner"))
-      this.owner = OwnerMap.register(parsedArgs.get("owner"));
+  public PhrasePenalty(Config featureConfig, FeatureVector weights) {
+    super("PhrasePenalty", featureConfig, weights);
+    if (featureConfig.hasPath("owner"))
+      this.owner = OwnerMap.register(featureConfig.getString("owner"));
     else // default
       this.owner = OwnerMap.register("pt"); 
   }

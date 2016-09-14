@@ -26,7 +26,6 @@ import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
 
 import java.util.List;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
@@ -34,12 +33,14 @@ import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.apache.joshua.util.ListUtil;
 
+import com.typesafe.config.Config;
+
 public class LabelSubstitutionFF extends StatelessFF {
   private static final String MATCH_SUFFIX = "MATCH";
   private static final String NO_MATCH_SUFFIX = "NOMATCH";
 
-  public LabelSubstitutionFF(FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, "LabelSubstitution", args, config);
+  public LabelSubstitutionFF(Config featureConfig, FeatureVector weights) {
+    super("LabelSubstitution", featureConfig, weights);
   }
 
   public String getLowerCasedFeatureName() {

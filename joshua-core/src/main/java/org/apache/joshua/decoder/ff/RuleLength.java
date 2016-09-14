@@ -22,12 +22,13 @@ import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
 
 import java.util.List;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
+
+import com.typesafe.config.Config;
 
 /*
  * This feature computes three feature templates: a feature indicating the length of the rule's
@@ -37,8 +38,8 @@ public abstract class RuleLength extends StatelessFF {
   
   private static final int VALUE = 1;
 
-  public RuleLength(FeatureVector weights, String[] args, JoshuaConfiguration config) {
-    super(weights, "RuleLength", args, config);
+  public RuleLength(Config featureConfig, FeatureVector weights) {
+    super("RuleLength", featureConfig, weights);
   }
 
   @Override
