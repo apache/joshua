@@ -35,8 +35,8 @@ import static org.testng.Assert.assertEquals;
 public class LMGrammarBerkeleyTest {
 
   private static final String INPUT = "the chat-rooms";
-  private static final String EXPECTED_OUTPUT = "glue_0=-2.000000 lm_0=-7.152632\n";
-  private static final String EXPECTED_OUTPUT_WITH_OOV = "glue_0=-2.000000 lm_0=-7.152632 lm_0_oov=0.000000\n";
+  private static final String EXPECTED_OUTPUT = "lm_0=-7.152632 glue_0=-2.000000\n";
+  private static final String EXPECTED_OUTPUT_WITH_OOV = "lm_0_oov=0.000000 lm_0=-7.152632 glue_0=-2.000000\n";
   private static final String[] OPTIONS = "-v 1 -output-format %f".split(" ");
 
   private JoshuaConfiguration joshuaConfig;
