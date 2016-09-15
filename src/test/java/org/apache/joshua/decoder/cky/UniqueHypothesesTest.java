@@ -65,8 +65,10 @@ public class UniqueHypothesesTest {
 
   @AfterMethod
   public void tearDown() throws Exception {
-    decoder.cleanUp();
-    decoder = null;
+    if (decoder != null) {
+      decoder.cleanUp();
+      decoder = null;
+    }
   }
 
 }
