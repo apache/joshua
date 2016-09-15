@@ -47,7 +47,6 @@ import com.google.common.base.Throwables;
 import com.sun.net.httpserver.HttpServer;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigParseOptions;
 import com.typesafe.config.ConfigRenderOptions;
 
 /**
@@ -78,18 +77,12 @@ public class JoshuaDecoder {
    * Returns the flags composed of default config, given config, and commandline overrides.
    */
   private Config getFlags() {
-    final ConfigParseOptions options = ConfigParseOptions.defaults().setAllowMissing(false);
-    final Config defaultConfig = Decoder.getDefaultFlags();
-    Config givenConfig = ConfigFactory.empty();
-    if (configFile != null) {
-      givenConfig = ConfigFactory.parseFile(configFile, options).resolveWith(defaultConfig);
-      LOG.info("Config: {}", configFile.toString());
+    final Config commandLineOverrides = ConfigFactory.parseMap(overrides, "CmdLine overrides");
+    if (configFile == null) {
+      return commandLineOverrides.withFallback(Decoder.getDefaultFlags()).resolve();
+    } else {
+      return commandLineOverrides.withFallback(Decoder.createDecoderFlagsFromFile(configFile)).resolve();
     }
-    final Config config = ConfigFactory.parseMap(overrides, "CmdLine overrides")
-        .resolve()
-        .withFallback(givenConfig)
-        .withFallback(defaultConfig);
-    return config;
   }
   
   private static void printFlags(Config flags) {

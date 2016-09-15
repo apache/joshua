@@ -21,9 +21,11 @@ package org.apache.joshua.lattice;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.Decoder;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import com.typesafe.config.Config;
 
 /**
  * Unit tests for Lattice class.
@@ -34,6 +36,8 @@ import org.testng.annotations.Test;
  */
 @Test(groups = { "lattice" })
 public class LatticeTest {
+  
+  private static final Config FLAGS = Decoder.getDefaultFlags();
 
   @Test
   public void allPairsShortestPath() {
@@ -49,7 +53,7 @@ public class LatticeTest {
     nodes.get(2).addArc(nodes.get(3), (float) 3.0, "b");
     nodes.get(2).addArc(nodes.get(3), (float) 5.0, "c");
 
-    Lattice<String> graph = new Lattice<String>(nodes, new JoshuaConfiguration());
+    Lattice<String> graph = new Lattice<String>(nodes, FLAGS);
 
     Assert.assertEquals(graph.getShortestPath(0, 1), 1);
     Assert.assertEquals(graph.getShortestPath(0, 2), 1);

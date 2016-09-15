@@ -18,15 +18,18 @@
  */
 package org.apache.joshua.decoder.ff.lm.berkeley_lm;
 
+import static org.testng.Assert.assertEquals;
+
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 /**
  * Replacement for test/lm/berkeley/test.sh regression test
@@ -37,9 +40,8 @@ public class LMGrammarBerkeleyTest {
   private static final String INPUT = "the chat-rooms";
   private static final String EXPECTED_OUTPUT = "lm_0=-7.152632 glue_0=-2.000000\n";
   private static final String EXPECTED_OUTPUT_WITH_OOV = "lm_0_oov=0.000000 lm_0=-7.152632 glue_0=-2.000000\n";
-  private static final String[] OPTIONS = "-v 1 -output-format %f".split(" ");
+  private static final Config DECODER_FLAGS = ConfigFactory.parseString("output_format=%f").withFallback(Decoder.getDefaultFlags());
 
-  private JoshuaConfiguration joshuaConfig;
   private Decoder decoder;
 
   @DataProvider(name = "languageModelFiles")
@@ -49,6 +51,11 @@ public class LMGrammarBerkeleyTest {
             {"src/test/resources/berkeley_lm/lm.berkeleylm"},
             {"src/test/resources/berkeley_lm/lm.berkeleylm.gz"}};
   }
+  
+  @BeforeMethod
+  public void setUp() {
+    Decoder.resetGlobalState();
+  }
 
   @AfterMethod
   public void tearDown() throws Exception {
@@ -57,25 +64,28 @@ public class LMGrammarBerkeleyTest {
 
   @Test(dataProvider = "languageModelFiles")
   public void verifyLM(String lmFile) {
-    joshuaConfig = new JoshuaConfiguration();
-    joshuaConfig.processCommandLineOptions(OPTIONS);
-    joshuaConfig.features.add("LanguageModel -lm_type berkeleylm -lm_order 2 -lm_file " + lmFile);
-    decoder = new Decoder(joshuaConfig);
+    final Config config = ConfigFactory
+        .parseString(
+            String.format(
+                "feature_functions=[{ class=LanguageModel, lm_type=berkeleylm, lm_order=2, lm_file=%s }]",
+                lmFile))
+        .withFallback(DECODER_FLAGS);
+    decoder = new Decoder(config);
     final String translation = decode(INPUT).toString();
     assertEquals(translation, EXPECTED_OUTPUT);
   }
 
   private Translation decode(String input) {
-    final Sentence sentence = new Sentence(input, 0, joshuaConfig);
+    final Sentence sentence = new Sentence(input, 0, decoder.getDecoderConfig().getFlags());
     return decoder.decode(sentence);
   }
 
   @Test
   public void givenLmWithOovFeature_whenDecoder_thenCorrectFeaturesReturned() {
-    joshuaConfig = new JoshuaConfiguration();
-    joshuaConfig.processCommandLineOptions(OPTIONS);
-    joshuaConfig.features.add("LanguageModel -lm_type berkeleylm -oov_feature -lm_order 2 -lm_file src/test/resources/berkeley_lm/lm");
-    decoder = new Decoder(joshuaConfig);
+    final Config config = ConfigFactory
+        .parseString("feature_functions=[{ class=LanguageModel, oov_feature=true, lm_type=berkeleylm, lm_order=2, lm_file=src/test/resources/berkeley_lm/lm }]")
+        .withFallback(DECODER_FLAGS);
+    decoder = new Decoder(config);
     final String translation = decode(INPUT).toString();
     assertEquals(translation, EXPECTED_OUTPUT_WITH_OOV);
   }

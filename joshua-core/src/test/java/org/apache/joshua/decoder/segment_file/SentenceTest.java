@@ -18,22 +18,25 @@
  */
 package org.apache.joshua.decoder.segment_file;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
 
 import org.testng.annotations.Test;
+
+import com.typesafe.config.Config;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.AfterMethod;
 import static org.testng.Assert.*;
 
+import org.apache.joshua.decoder.Decoder;
+
 public class SentenceTest {
   private String tooLongInput;
-  private final JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
-  
+  private static final Config FLAGS = Decoder.getDefaultFlags();
   
 
   @BeforeMethod
   public void setUp() {
-    tooLongInput = concatTokens("*", joshuaConfiguration.maxlen * 2);
+    tooLongInput = concatTokens("*", FLAGS.getInt("maximum_sentence_length") * 2);
   }
 
   @AfterMethod
@@ -42,18 +45,18 @@ public class SentenceTest {
 
   @Test
   public void testConstructor() {
-    Sentence sent = new Sentence("", 0, joshuaConfiguration);
+    Sentence sent = new Sentence("", 0, FLAGS);
     assertNotNull(sent);
   }
 
   @Test
   public void testEmpty() {
-    assertTrue(new Sentence("", 0, joshuaConfiguration).isEmpty());
+    assertTrue(new Sentence("", 0, FLAGS).isEmpty());
   }
 
   @Test
   public void testNotEmpty() {
-    assertFalse(new Sentence("hello , world", 0, joshuaConfiguration).isEmpty());
+    assertFalse(new Sentence("hello , world", 0, FLAGS).isEmpty());
   }
 
   /**
@@ -79,23 +82,23 @@ public class SentenceTest {
    */
   @Test
   public void testTooManyTokensSourceTruncated() {
-    assertTrue(new Sentence(this.tooLongInput, 0, joshuaConfiguration).length() == 202);
+    assertTrue(new Sentence(this.tooLongInput, 0, FLAGS).length() == 202);
   }
 
   @Test
   public void testTooManyTokensSourceOnlyNotNull() {
-    assertNotNull(new Sentence(this.tooLongInput, 0, joshuaConfiguration));
+    assertNotNull(new Sentence(this.tooLongInput, 0, FLAGS));
   }
 
   @Test
   public void testTooManyTokensSourceAndTargetIsEmpty() {
-    Sentence sentence = new Sentence(this.tooLongInput + " ||| target side", 0, joshuaConfiguration);
+    Sentence sentence = new Sentence(this.tooLongInput + " ||| target side", 0, FLAGS);
     assertEquals(sentence.target, "");
   }
 
   @Test
   public void testTooManyTokensSourceAndTargetTruncated() {
-    Sentence sentence = new Sentence(this.tooLongInput + " ||| target side", 0, joshuaConfiguration);
+    Sentence sentence = new Sentence(this.tooLongInput + " ||| target side", 0, FLAGS);
     assertTrue(sentence.length() == 202);
   }
 
@@ -103,7 +106,7 @@ public class SentenceTest {
   public void testClearlyNotTooManyTokens() {
     // Concatenate MAX_SENTENCE_NODES, each shorter than the average length, joined by a space.
     String input = "token";
-    assertFalse(new Sentence(input, 0, joshuaConfiguration).isEmpty());
+    assertFalse(new Sentence(input, 0, FLAGS).isEmpty());
   }
 
 }

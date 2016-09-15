@@ -22,17 +22,16 @@ import static org.apache.joshua.decoder.cky.TestUtil.decodeList;
 import static org.apache.joshua.decoder.cky.TestUtil.loadStringsFromFile;
 import static org.testng.Assert.assertEquals;
 
+import java.io.File;
 import java.util.List;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 public class LeftStateTest {
 
-	private JoshuaConfiguration joshuaConfig;
 	private Decoder decoder;
 
 	@AfterMethod
@@ -49,17 +48,16 @@ public class LeftStateTest {
 		List<String> inputStrings = loadStringsFromFile("src/test/resources/decoder/left-state/input.bn");
 
 		// When
-		configureDecoder("src/test/resources/decoder/left-state/joshua.config");
-		List<String> decodedStrings = decodeList(inputStrings, decoder, joshuaConfig);
+		configureDecoder(new File("src/test/resources/decoder/left-state/joshua.config"));
+		List<String> decodedStrings = decodeList(inputStrings, decoder);
 
 		// Then
 		List<String> goldStrings = loadStringsFromFile("src/test/resources/decoder/left-state/output.gold");
+
 		assertEquals(decodedStrings, goldStrings);
 	}
 	
-	public void configureDecoder(String pathToConfig) throws Exception {
-		joshuaConfig = new JoshuaConfiguration();
-		joshuaConfig.readConfigFile(pathToConfig);
-		KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig));
+	public void configureDecoder(File pathToConfig) throws Exception {
+		KenLmTestUtil.Guard(() -> decoder = new Decoder(Decoder.createDecoderFlagsFromFile(pathToConfig)));
 	}
 }

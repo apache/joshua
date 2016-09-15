@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.segment_file.Sentence;
 
 public class TestUtil {
@@ -58,12 +57,11 @@ public class TestUtil {
 	 *         (separated by N_BEST_SEPARATOR), then each translation of the
 	 *         n-best list has its own entry in the returned list.
 	 */
-	public static List<String> decodeList(List<String> inputStrings, Decoder decoder,
-			JoshuaConfiguration joshuaConfig) {
+	public static List<String> decodeList(List<String> inputStrings, Decoder decoder) {
 		final List<String> decodedStrings = new ArrayList<>();
 
 		for (String inputString : inputStrings) {
-			final Sentence sentence = new Sentence(inputString, 0, joshuaConfig);
+			final Sentence sentence = new Sentence(inputString, 0, decoder.getDecoderConfig().getFlags());
 			final String[] nBestList = decoder.decode(sentence).toString().split(N_BEST_SEPARATOR);
 			decodedStrings.addAll(Arrays.asList(nBestList));
 		}
@@ -79,8 +77,8 @@ public class TestUtil {
 	 * @param joshuaConfig
 	 * @return
 	 */
-	public static String translate(String input, Decoder decoder, JoshuaConfiguration joshuaConfig) {
-	    final Sentence sentence = new Sentence(input, 0, joshuaConfig);
+	public static String translate(String input, Decoder decoder) {
+	    final Sentence sentence = new Sentence(input, 0, decoder.getDecoderConfig().getFlags());
 	    return decoder.decode(sentence).toString();
 	}
 

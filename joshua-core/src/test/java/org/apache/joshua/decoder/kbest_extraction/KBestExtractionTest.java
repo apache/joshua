@@ -19,7 +19,6 @@
 package org.apache.joshua.decoder.kbest_extraction;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.apache.joshua.util.io.KenLmTestUtil;
@@ -38,11 +37,8 @@ import static java.nio.file.Files.readAllBytes;
 import static org.testng.Assert.assertEquals;
 
 /**
- * Reimplements the kbest extraction regression test
- * TODO (fhieber): this test strangely only works with StateMinimizing KenLM.
- * This is to be investigated
+ * Reimplements the kbest extraction regression test.
  */
-
 public class KBestExtractionTest {
 
   private static final String CONFIG = "src/test/resources/kbest_extraction/joshua.config";

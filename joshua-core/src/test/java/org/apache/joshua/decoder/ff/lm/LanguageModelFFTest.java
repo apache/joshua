@@ -25,7 +25,6 @@ import static org.testng.Assert.assertEquals;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.ff.FeatureMap;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.state_maintenance.NgramDPState;
@@ -33,22 +32,29 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+
 public class LanguageModelFFTest {
 
   private static final float WEIGHT = 0.5f;
+  private static final Config FF_CONFIG = 
+      ConfigFactory.parseMap(
+          ImmutableMap.of(
+              "lm_type", "berkeleylm",
+              "lm_order", "2",
+              "lm_file", "./src/test/resources/lm/berkeley/lm",
+              "state_index", "0"));
 
   private LanguageModelFF ff;
 
   @BeforeMethod
   public void setUp() {
     Decoder.resetGlobalState();
-
     FeatureVector weights = new FeatureVector(2);
     weights.put(FeatureMap.hashFeature("lm_0"), WEIGHT);
-    String[] args = {"-lm_type", "berkeleylm", "-lm_order", "2", "-lm_file", "./src/test/resources/lm/berkeley/lm"};
-
-    JoshuaConfiguration config = new JoshuaConfiguration();
-    ff = new LanguageModelFF(weights, args, config);
+    ff = new LanguageModelFF(FF_CONFIG, weights);
   }
 
   @AfterMethod

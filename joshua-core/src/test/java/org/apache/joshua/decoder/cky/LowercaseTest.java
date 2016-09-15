@@ -21,10 +21,14 @@ package org.apache.joshua.decoder.cky;
 import static org.apache.joshua.decoder.cky.TestUtil.translate;
 import static org.testng.Assert.assertEquals;
 
+import java.io.File;
+
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
+
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigValueFactory;
 
 public class LowercaseTest {
 
@@ -36,9 +40,8 @@ public class LowercaseTest {
   private static final String GOLD_CAPITALIZED = "She";
   private static final String GOLD_ALL_UPPERCASED = "SHE";
   
-  private static final String JOSHUA_CONFIG_PATH = "src/test/resources/decoder/lowercaser/joshua.config";
+  private static final File JOSHUA_CONFIG_PATH = new File("src/test/resources/decoder/lowercaser/joshua.config");
 
-  private JoshuaConfiguration joshuaConfig;
   private Decoder decoder;
 
   /**
@@ -49,7 +52,7 @@ public class LowercaseTest {
   @Test
   public void givenAllUppercasedInput_whenNotLowercasing_thenLowercasedRuleNotFound() throws Exception {
     setUp(false, false, false);
-    String output = translate(INPUT_ALL_UPPERCASED, decoder, joshuaConfig);
+    String output = translate(INPUT_ALL_UPPERCASED, decoder);
     assertEquals(output.trim(), GOLD_UNTRANSLATED_ALL_UPPERCASED);
   }
   
@@ -60,7 +63,7 @@ public class LowercaseTest {
   @Test
   public void givenAllUppercasedInput_whenLowercasing_thenLowercasedRuleFound() throws Exception {
     setUp(true, false, false);
-    String output = translate(INPUT_ALL_UPPERCASED, decoder, joshuaConfig);
+    String output = translate(INPUT_ALL_UPPERCASED, decoder);
     assertEquals(output.trim(), GOLD_LOWERCASED);
   }
   
@@ -71,7 +74,7 @@ public class LowercaseTest {
   @Test
   public void givenCapitalizedInput_whenLowercasingAndProjecting_thenLowercased() throws Exception {
     setUp(true, true, false);
-    String output = translate(INPUT_CAPITALIZED, decoder, joshuaConfig);
+    String output = translate(INPUT_CAPITALIZED, decoder);
     assertEquals(output.trim(), GOLD_LOWERCASED);
   }
   
@@ -82,7 +85,7 @@ public class LowercaseTest {
   @Test
   public void givenCapitalizedInput_whenLowercasingAndOutputFormatCapitalization_thenCapitalized() throws Exception {
     setUp(true, true, true);
-    String output = translate(INPUT_CAPITALIZED, decoder, joshuaConfig);
+    String output = translate(INPUT_CAPITALIZED, decoder);
     assertEquals(output.trim(), GOLD_CAPITALIZED);
   }
   
@@ -93,17 +96,16 @@ public class LowercaseTest {
   @Test
   public void givenAllUppercasedInput_whenLowercasingAndProjecting_thenAllUppercased() throws Exception {
     setUp(true, true, false);
-    String output = translate(INPUT_ALL_UPPERCASED, decoder, joshuaConfig);
+    String output = translate(INPUT_ALL_UPPERCASED, decoder);
     assertEquals(output.trim(), GOLD_ALL_UPPERCASED);
   }
 
   public void setUp(boolean lowercase, boolean projectCase, boolean capitalize) throws Exception {
-    joshuaConfig = new JoshuaConfiguration();
-    joshuaConfig.readConfigFile(JOSHUA_CONFIG_PATH);
-    joshuaConfig.lowercase = lowercase;
-    joshuaConfig.project_case = projectCase;
-    joshuaConfig.outputFormat = capitalize ? "%S" : "%s";
-    decoder = new Decoder(joshuaConfig);
+    Config config = Decoder.createDecoderFlagsFromFile(JOSHUA_CONFIG_PATH)
+          .withValue("lowercase", ConfigValueFactory.fromAnyRef(lowercase))
+          .withValue("project_case", ConfigValueFactory.fromAnyRef(projectCase))
+          .withValue("output_format", ConfigValueFactory.fromAnyRef(capitalize ? "%S" : "%s"));
+    decoder = new Decoder(config);
   }
   
   @AfterMethod

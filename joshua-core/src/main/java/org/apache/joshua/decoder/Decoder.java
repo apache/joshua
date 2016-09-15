@@ -23,6 +23,7 @@ import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
 import static org.apache.joshua.decoder.ff.tm.hash_based.TextGrammarFactory.createCustomGrammar;
 import static org.apache.joshua.decoder.ff.tm.hash_based.TextGrammarFactory.createGlueTextGrammar;
 import static org.apache.joshua.util.Constants.spaceSeparator;
+import static org.apache.joshua.util.FormatUtils.ensureNonTerminalBrackets;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,6 +64,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigParseOptions;
 import com.typesafe.config.ConfigValue;
+import com.typesafe.config.ConfigValueFactory;
 
 /**
  * This class handles decoder initialization and the complication introduced by multithreading.
@@ -126,6 +128,24 @@ public class Decoder {
   public static Config getDefaultFlags() {
     final ConfigParseOptions options = ConfigParseOptions.defaults().setAllowMissing(false);
     return ConfigFactory.parseResources(Decoder.class, "Decoder.conf", options).resolve();
+  }
+  
+  /**
+   * Returns a fully-specified decoder flags {@link Config} from the given
+   * Config. This is the preferable way to include default configuration and ensures 
+   * certain format correctness at runtime.
+   */
+  public static Config createDecoderFlags(final Config userFlags) {
+    final Config defaultFlags = Decoder.getDefaultFlags();
+    final Config allFlags = userFlags.resolveWith(defaultFlags).withFallback(defaultFlags);
+    return allFlags
+      .withValue("default_non_terminal", ConfigValueFactory.fromAnyRef(ensureNonTerminalBrackets(allFlags.getString("default_non_terminal"))))
+      .withValue("goal_symbol", ConfigValueFactory.fromAnyRef(ensureNonTerminalBrackets(allFlags.getString("goal_symbol"))));
+  }
+  
+  public static Config createDecoderFlagsFromFile(final File fileName) {
+    final ConfigParseOptions options = ConfigParseOptions.defaults().setAllowMissing(false);
+    return createDecoderFlags(ConfigFactory.parseFile(fileName, options));
   }
   
   /**
@@ -256,6 +276,8 @@ public class Decoder {
   private DecoderConfig initialize(final Config config) {
     
     LOG.info("Initializing decoder ...");
+    LOG.info("Default non-terminal: {}", config.getString("default_non_terminal"));
+    LOG.info("Goal symbol: {}", config.getString("goal_symbol"));
     long initTime = System.currentTimeMillis();
     
     /*

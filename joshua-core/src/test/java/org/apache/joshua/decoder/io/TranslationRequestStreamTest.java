@@ -18,10 +18,12 @@
  */
 package org.apache.joshua.decoder.io;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.Decoder;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.typesafe.config.Config;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -47,7 +49,7 @@ import static org.testng.Assert.fail;
 
 public class TranslationRequestStreamTest {
 
-  private final JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
+  private static final Config CONFIG = Decoder.getDefaultFlags();
 
   @BeforeMethod
   public void createTranslationRequest() throws Exception {
@@ -82,7 +84,7 @@ public class TranslationRequestStreamTest {
   public void testSize_uponConstruction() {
     InputStream in = mock(InputStream.class);
     TranslationRequestStream request = new TranslationRequestStream(
-            new BufferedReader(new InputStreamReader(in, Charset.defaultCharset())), joshuaConfiguration);
+            new BufferedReader(new InputStreamReader(in, Charset.defaultCharset())), CONFIG);
     assertEquals(request.size(), 0);
   }
 
@@ -96,7 +98,7 @@ public class TranslationRequestStreamTest {
     byte[] data = "1".getBytes();
     ByteArrayInputStream input = new ByteArrayInputStream(data);
     TranslationRequestStream request = new TranslationRequestStream(
-            new BufferedReader(new InputStreamReader(input, Charset.defaultCharset())), joshuaConfiguration);
+            new BufferedReader(new InputStreamReader(input, Charset.defaultCharset())), CONFIG);
     request.next();
     assertEquals(request.size(), 1);
   }
@@ -111,7 +113,7 @@ public class TranslationRequestStreamTest {
     byte[] data = "\n".getBytes();
     ByteArrayInputStream input = new ByteArrayInputStream(data);
     TranslationRequestStream request = new TranslationRequestStream(
-            new BufferedReader(new InputStreamReader(input, Charset.defaultCharset())), joshuaConfiguration);
+            new BufferedReader(new InputStreamReader(input, Charset.defaultCharset())), CONFIG);
     request.next();
     assertEquals(request.size(), 1);
   }
@@ -126,7 +128,7 @@ public class TranslationRequestStreamTest {
     byte[] data = "\n\n".getBytes();
     ByteArrayInputStream input = new ByteArrayInputStream(data);
     TranslationRequestStream request = new TranslationRequestStream(
-            new BufferedReader(new InputStreamReader(input, Charset.defaultCharset())), joshuaConfiguration);
+            new BufferedReader(new InputStreamReader(input, Charset.defaultCharset())), CONFIG);
     request.next();
     request.next();
     assertEquals(request.size(), 2);
@@ -142,7 +144,7 @@ public class TranslationRequestStreamTest {
     byte[] data = "\n\n".getBytes();
     ByteArrayInputStream input = new ByteArrayInputStream(data);
     TranslationRequestStream request = new TranslationRequestStream(
-            new BufferedReader(new InputStreamReader(input, Charset.defaultCharset())), joshuaConfiguration);
+            new BufferedReader(new InputStreamReader(input, Charset.defaultCharset())), CONFIG);
     assertEquals(request.next().source(), "");
     assertEquals(request.next().source(), "");
   }

@@ -20,22 +20,23 @@ package org.apache.joshua.decoder.segment_file;
 
 import org.testng.annotations.Test;
 
+import com.typesafe.config.Config;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.AfterMethod;
 import static org.testng.Assert.*;
 
-import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.Decoder;
 
 public class AlmostTooLongSentenceTest {
-  private JoshuaConfiguration joshuaConfiguration;
   private String almostTooLongInput;
   private Sentence sentencePlusTarget;
+  private static final Config FLAGS = Decoder.getDefaultFlags();
 
   @BeforeMethod
   public void setUp() {
-    joshuaConfiguration = new JoshuaConfiguration();
-    almostTooLongInput = concatStrings(".", joshuaConfiguration.maxlen);
-    sentencePlusTarget = new Sentence(this.almostTooLongInput + " ||| target side", 0,joshuaConfiguration);
+    almostTooLongInput = concatStrings(".", FLAGS.getInt("maximum_sentence_length"));
+    sentencePlusTarget = new Sentence(this.almostTooLongInput + " ||| target side", 0, FLAGS);
   }
 
   @AfterMethod
@@ -44,18 +45,18 @@ public class AlmostTooLongSentenceTest {
 
   @Test
   public void testConstructor() {
-    Sentence sent = new Sentence("", 0,joshuaConfiguration);
+    Sentence sent = new Sentence("", 0, FLAGS);
     assertNotNull(sent);
   }
 
   @Test
   public void testEmpty() {
-    assertTrue(new Sentence("", 0,joshuaConfiguration).isEmpty());
+    assertTrue(new Sentence("", 0, FLAGS).isEmpty());
   }
 
   @Test
   public void testNotEmpty() {
-    assertFalse(new Sentence("hello , world", 0, joshuaConfiguration).isEmpty());
+    assertFalse(new Sentence("hello , world", 0, FLAGS).isEmpty());
   }
 
   /**
@@ -75,12 +76,12 @@ public class AlmostTooLongSentenceTest {
 
   @Test
   public void testAlmostButNotTooManyTokensSourceOnlyNotEmpty() {
-    assertFalse(new Sentence(this.almostTooLongInput, 0, joshuaConfiguration).isEmpty());
+    assertFalse(new Sentence(this.almostTooLongInput, 0, FLAGS).isEmpty());
   }
 
   @Test
   public void testAlmostButNotTooManyTokensSourceOnlyTargetNull() {
-    assertNull(new Sentence(this.almostTooLongInput, 0, joshuaConfiguration).target);
+    assertNull(new Sentence(this.almostTooLongInput, 0, FLAGS).target);
   }
 
   @Test

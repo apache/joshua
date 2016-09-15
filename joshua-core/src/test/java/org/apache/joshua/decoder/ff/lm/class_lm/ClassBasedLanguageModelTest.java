@@ -23,7 +23,6 @@ import static org.testng.Assert.assertTrue;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.ff.FeatureMap;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.lm.LanguageModelFF;
@@ -34,27 +33,33 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+
 /**
  * This unit test relies on KenLM.  If the KenLM library is not found when the test is run all tests will be skipped.
  */
 public class ClassBasedLanguageModelTest {
 
   private static final float WEIGHT = 0.5f;
+  private static final Config FF_CONFIG = 
+      ConfigFactory.parseMap(
+          ImmutableMap.of(
+              "lm_type", "kenlm",
+              "lm_order", "9",
+              "lm_file", "src/test/resources/lm/class_lm/class_lm_9gram.gz",
+              "class_map", "src/test/resources/lm/class_lm/class.map",
+              "state_index", "0"));
 
   private LanguageModelFF ff;
 
   @BeforeMethod
   public void setUp() {
     Decoder.resetGlobalState();
-
     FeatureVector weights = new FeatureVector(1);
     weights.put(FeatureMap.hashFeature("lm_0"), WEIGHT);
-    String[] args = { "-lm_type", "kenlm", "-lm_order", "9",
-      "-lm_file", "src/test/resources/lm/class_lm/class_lm_9gram.gz",
-      "-class_map", "src/test/resources/lm/class_lm/class.map" };
-
-    JoshuaConfiguration config = new JoshuaConfiguration();
-    KenLmTestUtil.Guard(() -> ff = new LanguageModelFF(weights, args, config));
+    KenLmTestUtil.Guard(() -> ff = new LanguageModelFF(FF_CONFIG, weights));
   }
 
   @AfterMethod
