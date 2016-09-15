@@ -124,7 +124,7 @@ public class LanguageModelFF extends StatefulFF {
       this.classMap = new ClassMap(featureConfig.getString("class_map"));
     }
     
-    if (featureConfig.hasPath("oov_feature")) {
+    if (featureConfig.hasPath("oov_feature") && featureConfig.getBoolean("oov_feature")) {
       this.withOovFeature = true;
     }
 
@@ -138,11 +138,9 @@ public class LanguageModelFF extends StatefulFF {
     switch (type) {
     case "kenlm":
       this.languageModel = new KenLM(ngramOrder, path);
-
       break;
     case "berkeleylm":
       this.languageModel = new LMGrammarBerkeley(ngramOrder, path);
-
       break;
     default:
       String msg = String.format("* FATAL: Invalid backend lm_type '%s' for LanguageModel", type)

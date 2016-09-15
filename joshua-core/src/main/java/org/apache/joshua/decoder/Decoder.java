@@ -213,10 +213,12 @@ public class Decoder {
     case cky:
       grammars
         .add(TextGrammarFactory.createOovGrammarForSentence(sentence, globalConfig));
+        break;
     case stack:
       grammars 
         .add(TextGrammarFactory.createEndRulePhraseTable(sentence, globalConfig))
         .add(TextGrammarFactory.createOovPhraseTable(sentence, globalConfig));
+      break;
     }
     
     return new DecoderConfig(
