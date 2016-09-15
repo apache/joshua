@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Juri Ganitkevitch
  * 
  */
-public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iterator<R> {
+public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iterator<R>, AutoCloseable {
 
   private static final Logger LOG = LoggerFactory.getLogger(GrammarReader.class);
 
@@ -95,6 +95,7 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public void close() {
     if (null != this.reader) {
       try {
@@ -104,23 +105,6 @@ public abstract class GrammarReader<R extends Rule> implements Iterable<R>, Iter
         LOG.error("Error closing grammar file stream: {}", this.fileName);
       }
     }
-  }
-
-  /**
-   * For correct behavior <code>close</code> must be called on every GrammarReader, however this
-   * code attempts to avoid resource leaks.
-   * 
-   * @see org.apache.joshua.util.io.LineReader
-   */
-  @Override
-  protected void finalize() throws Throwable {
-    if (this.reader != null) {
-      LOG.error("Grammar file stream was not closed, this indicates a coding error: {}",
-          this.fileName);
-    }
-
-    this.close();
-    super.finalize();
   }
 
   @Override

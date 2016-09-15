@@ -21,6 +21,7 @@ package org.apache.joshua.decoder.ff.tm.hash_based;
 import static org.apache.joshua.decoder.ff.tm.GrammarReader.createReader;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.apache.joshua.decoder.JoshuaConfiguration.OOVItem;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.tm.AbstractGrammar;
+import org.apache.joshua.decoder.ff.tm.GrammarReader;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.ff.tm.Trie;
 import org.apache.joshua.decoder.ff.tm.format.HieroFormatReader;
@@ -83,10 +85,13 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
     this.grammarFile = grammarFile;
 
     // ==== loading grammar
-    for (Rule rule : createReader(formatKeyword, grammarFile, getOwner()))
-      if (rule != null) {
-        addRule(rule);
+    try(GrammarReader<Rule> reader = createReader(formatKeyword, grammarFile, getOwner());) { 
+      for (Rule rule : reader) {
+        if (rule != null) {
+          addRule(rule);
+        }
       }
+    }
 
     this.printGrammar();
   }
