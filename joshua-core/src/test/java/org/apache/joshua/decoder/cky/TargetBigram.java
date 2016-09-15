@@ -63,7 +63,7 @@ public class TargetBigram {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.features.add(featureFunction);
     joshuaConfig.outputFormat = "%s ||| %f ||| %c";
-    decoder = new Decoder(joshuaConfig, "");
+    decoder = new Decoder(joshuaConfig);
   }
 
   @AfterMethod

@@ -101,6 +101,6 @@ public class NumTranslationOptionsTest {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.readConfigFile(pathToConfig);
     joshuaConfig.use_dot_chart = useDotChart;
-    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig, ""));
+    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig));
   }
 }

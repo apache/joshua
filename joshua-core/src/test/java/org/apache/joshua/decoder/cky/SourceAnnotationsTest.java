@@ -56,7 +56,7 @@ public class SourceAnnotationsTest {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.readConfigFile(JOSHUA_CONFIG_PATH);
     joshuaConfig.source_annotations = sourceAnnotations;
-    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig, ""));
+    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig));
   }
 
   @AfterMethod

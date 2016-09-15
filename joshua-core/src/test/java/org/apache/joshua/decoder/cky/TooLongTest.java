@@ -75,7 +75,7 @@ public class TooLongTest {
     joshuaConfig.outputFormat = "%s ||| %f ||| %c";
     joshuaConfig.maxlen = maxLen;
     joshuaConfig.lattice_decoding = latticeDecoding;
-    decoder = new Decoder(joshuaConfig, "");
+    decoder = new Decoder(joshuaConfig);
   }
 
   @AfterMethod

@@ -60,7 +60,7 @@ public class UniqueHypothesesTest {
   public void configureDecoder(String pathToConfig) throws Exception {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.readConfigFile(pathToConfig);
-    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig, ""));
+    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig));
   }
 
   @AfterMethod
