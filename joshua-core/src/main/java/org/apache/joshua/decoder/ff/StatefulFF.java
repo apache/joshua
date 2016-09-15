@@ -43,21 +43,17 @@ import com.typesafe.config.Config;
 public abstract class StatefulFF extends FeatureFunction {
 
   private static final Logger LOG = LoggerFactory.getLogger(StatefulFF.class);
-  /* Every stateful FF takes a unique index value and increments this. */
-  static int GLOBAL_STATE_INDEX = 0;
 
   /* This records the state index for each instantiated stateful feature function. */
-  protected int stateIndex = 0;
+  protected final int stateIndex;
 
   public StatefulFF(final String name, Config featureConfig, FeatureVector weights) {
     super(name, featureConfig, weights);
-
-    LOG.info("Stateful object with state index {}", GLOBAL_STATE_INDEX);
-    stateIndex = GLOBAL_STATE_INDEX++;
-  }
-
-  public static void resetGlobalStateIndex() {
-    GLOBAL_STATE_INDEX = 0;
+    if (!featureConfig.hasPath("state_index")) {
+      throw new RuntimeException("StatefulFF must configure a state_index");
+    }
+    stateIndex = featureConfig.getInt("state_index");
+    LOG.info("StatefulFF with state index {}", stateIndex);
   }
 
   public final boolean isStateful() {

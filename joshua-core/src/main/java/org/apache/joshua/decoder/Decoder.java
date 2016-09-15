@@ -18,6 +18,7 @@
  */
 package org.apache.joshua.decoder;
 
+import static com.typesafe.config.ConfigValueFactory.fromAnyRef;
 import static org.apache.joshua.decoder.ff.FeatureMap.hashFeature;
 import static org.apache.joshua.decoder.ff.tm.hash_based.TextGrammarFactory.createCustomGrammar;
 import static org.apache.joshua.decoder.ff.tm.hash_based.TextGrammarFactory.createGlueTextGrammar;
@@ -245,7 +246,6 @@ public class Decoder {
     Vocabulary.clear();
     Vocabulary.unregisterLanguageModels();
     LanguageModelFF.resetLmIndex();
-    StatefulFF.resetGlobalStateIndex();
   }
 
   /**
@@ -448,23 +448,23 @@ public class Decoder {
     }
     
     // (2) instantiate other feature functions by class name
+    int statefulStateIndex = 0;
     for (Config featureConfig : config.getConfigList("feature_functions")) {
       final Class<?> clazz = getClassFromPackages(featureConfig.getString("class"), FEATURE_PACKAGES);
+      if (StatefulFF.class.isAssignableFrom(clazz)) {
+        featureConfig = featureConfig.withValue("state_index", fromAnyRef(statefulStateIndex++));
+      }
       try {
         final Constructor<?> constructor = clazz.getConstructor(Config.class, FeatureVector.class);
         final FeatureFunction feature = (FeatureFunction) constructor.newInstance(featureConfig, weights);
+        LOG.info("FEATURE: {}", feature.logString());
         result.add(feature);
       } catch (Exception e) {
         LOG.error("Unable to instantiate feature '{}'", clazz.getName());
         Throwables.propagate(e);
       }
     }
-    
-    final ImmutableList<FeatureFunction> features = result.build(); 
-    for (final FeatureFunction feature : features) {
-      LOG.info("FEATURE: {}", feature.logString());
-    }
-    return features;
+    return result.build();
   }
   
   /**

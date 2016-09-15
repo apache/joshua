@@ -167,7 +167,7 @@ public class LanguageModelFF extends StatefulFF {
   }
 
   public String logString() {
-    return String.format("%s, order %d (weight %.3f), classLm=%s", name, languageModel.getOrder(), weights.getOrDefault(featureId), isClassLM);
+    return String.format("%s, order %d (weight %.3f), stateIndex=%d classLm=%s", name, languageModel.getOrder(), weights.getOrDefault(featureId), stateIndex, isClassLM);
   }
 
   /**
