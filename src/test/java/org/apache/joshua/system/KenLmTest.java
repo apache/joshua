@@ -90,23 +90,23 @@ public class KenLmTest {
     registerLanguageModel(kenLm);
     String sentence = "Wayne Gretzky";
     String[] words = sentence.split("\\s+");
-    int[] ids = Vocabulary.addAll(sentence);
-    long[] longIds = new long[ids.length];
-
-    for (int i = 0; i < words.length; i++) {
-      longIds[i] = ids[i];
-    }
+    Vocabulary.addAll(sentence);
 
     // WHEN
     KenLM.StateProbPair result;
     try (KenLMPool poolPointer = kenLm.createLMPool()) {
-      result = kenLm.probRule(longIds, poolPointer);
+
+      poolPointer.setBufferLength(words.length);
+      for(int i =0; i< words.length; i++) {
+        poolPointer.writeIdToBuffer(i, Vocabulary.id(words[i]));
+      }
+      result = kenLm.probRule(poolPointer);
     }
 
     // THEN
     assertThat(result, is(notNullValue()));
     assertThat(result.state.getState(), is(1L));
-    assertThat(result.prob, is(-3.7906885f));
+    assertThat(result.prob, is(-3.7906885F));
   }
 
   @Test

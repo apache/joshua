@@ -49,7 +49,7 @@ public abstract class StatelessFF extends FeatureFunction {
    * The estimated cost of applying this feature, given only the rule. This is used in sorting the
    * rules for cube pruning. For most features, this will be 0.0.
    */
-  public float estimateCost(Rule rule, Sentence sentence) {
+  public float estimateCost(Rule rule) {
     return 0.0f;
   }
 

@@ -325,7 +325,7 @@ public class LanguageModelFF extends StatefulFF {
    * n-grams on the left-hand side.
    */
   @Override
-  public float estimateCost(Rule rule, Sentence sentence) {
+  public float estimateCost(Rule rule) {
 
     float lmEstimate = 0.0f;
     boolean considerIncompleteNgrams = true;

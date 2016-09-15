@@ -148,7 +148,7 @@ public:
   virtual float ProbString(jint * const begin, jint * const end,
       jint start) const = 0;
 
-  virtual float EstimateRule(jlong *begin, jlong *end) const = 0;
+  virtual float EstimateRule(const Chart &chart) const = 0;
 
   virtual uint8_t Order() const = 0;
 
@@ -229,7 +229,12 @@ public:
     return ruleScore.Finish();
   }
 
-  float EstimateRule(jlong * const begin, jlong * const end) const {
+  float EstimateRule(const Chart &chart) const {
+
+    // By convention the first long in the ngramBuffer denotes the size of the buffer
+    long* begin = chart.ngramBuffer_ + 1;
+    long* end = begin + *chart.ngramBuffer_;
+
     if (begin == end) return 0.0;
     lm::ngram::ChartState nullState;
     lm::ngram::RuleScore<Model> ruleScore(m_, nullState);
@@ -472,15 +477,11 @@ JNIEXPORT jlong JNICALL Java_org_apache_joshua_decoder_ff_lm_KenLM_probRule(
 }
 
 JNIEXPORT jfloat JNICALL Java_org_apache_joshua_decoder_ff_lm_KenLM_estimateRule(
-  JNIEnv *env, jclass, jlong pointer, jlongArray arr) {
-  jint length = env->GetArrayLength(arr);
-  // GCC only.
-  jlong values[length];
-  env->GetLongArrayRegion(arr, 0, length, values);
+  JNIEnv *env, jclass, jlong pointer, jlong chartPtr) {
 
   // Compute the probability
-  return reinterpret_cast<const VirtualBase*>(pointer)->EstimateRule(values,
-      values + length);
+  Chart* chart = reinterpret_cast<Chart*>(chartPtr);
+  return reinterpret_cast<const VirtualBase*>(pointer)->EstimateRule(*chart);
 }
 
 } // extern

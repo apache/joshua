@@ -72,17 +72,19 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
    * efficiently than the default {@link LanguageModelFF} class.
    */
   @Override
-  public float estimateCost(Rule rule, Sentence sentence) {
+  public float estimateCost(Rule rule) {
 
     int[] ruleWords = getRuleIds(rule);
 
-    // map to ken lm ids
-    final long[] words = mapToKenLmIds(ruleWords, null, true);
-    
-    // Get the probability of applying the rule and the new state
-    float lmCost = weight * ((KenLM) languageModel).estimateRule(words);
-    float oovCost = oovWeight * ((withOovFeature) ? getOovs(ruleWords) : 0f);
-    return lmCost + oovCost;
+    try(KenLMPool poolWrapper = ((KenLM)languageModel).createLMPool();) {
+      // Write KenLM word ids to a shared ByteBuffer.
+      writeKenLmIds(ruleWords, null, poolWrapper);
+
+      // Get the probability of applying the rule and the new state
+      float lmCost = weight * ((KenLM)languageModel).estimateRule(poolWrapper);
+      float oovCost = oovWeight * ((withOovFeature) ? getOovs(ruleWords) : 0f);
+      return lmCost + oovCost;
+    }
   }
 
   private UUID languageModelPoolId = UUID.randomUUID();
@@ -101,7 +103,7 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
 
     int[] ruleWords;
     if (config.source_annotations) {
-      // get source side annotations and project them to the target side
+      // Get source side annotations and project them to the target side
       ruleWords = getTags(rule, i, j, sentence);
     } else {
       ruleWords = getRuleIds(rule);
@@ -112,14 +114,16 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
       acc.add(oovDenseFeatureIndex, getOovs(ruleWords));
     }
 
-     // map to ken lm ids
-    final long[] words = mapToKenLmIds(ruleWords, tailNodes, false);
+    KenLMPool statePool = sentence.getStateManager().getStatePool(languageModelPoolId,
+            (KenLM)languageModel);
 
-    KenLMPool statePool = sentence.getStateManager().getStatePool(languageModelPoolId, (KenLM)
-            languageModel);
+     // Write KenLM ngram ids to the shared direct buffer
+    writeKenLmIds(ruleWords, tailNodes, statePool);
+
+
 
     // Get the probability of applying the rule and the new state
-    final StateProbPair pair = ((KenLM) languageModel).probRule(words, statePool);
+    final StateProbPair pair = ((KenLM)languageModel).probRule(statePool);
 
     // Record the prob
     acc.add(denseFeatureIndex, pair.prob);
@@ -131,31 +135,34 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
   /**
    * Maps given array of word/class ids to KenLM ids. For estimating cost and computing,
    * state retrieval differs slightly.
+   *
+   * When used for estimation tailNodes may be null.
    */
-  private long[] mapToKenLmIds(int[] ids, List<HGNode> tailNodes, boolean isOnlyEstimate) {
+  private void writeKenLmIds(int[] ids, List<HGNode> tailNodes, KenLMPool poolWrapper) {
+
+    poolWrapper.setBufferLength(ids.length);
+
     // The IDs we will to KenLM
-    long[] kenIds = new long[ids.length];
     for (int x = 0; x < ids.length; x++) {
       int id = ids[x];
 
       if (isNonterminal(id)) {
 
-        if (isOnlyEstimate) {
-          // For the estimate, we can just mark negative values
-          kenIds[x] = -1;
+        if (tailNodes == null) {
+          // For the estimation, we can just mark negative values
+          poolWrapper.writeIdToBuffer(x, -1);
         } else {
           // Nonterminal: retrieve the KenLM long that records the state
           int index = -(id + 1);
           final KenLMState state = (KenLMState) tailNodes.get(index).getDPState(stateIndex);
-          kenIds[x] = -state.getState();
+          poolWrapper.writeIdToBuffer(x, -state.getState());
         }
 
       } else {
         // Terminal: just add it
-        kenIds[x] = id;
+        poolWrapper.writeIdToBuffer(x, id);
       }
     }
-    return kenIds;
   }
 
   /**
