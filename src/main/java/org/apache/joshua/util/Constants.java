@@ -33,4 +33,5 @@ public final class Constants {
 
   public static final String fieldDelimiter = "\\s\\|{3}\\s";
   public static final String spaceSeparator = "\\s+";
+  public static final int LONG_SIZE_IN_BYTES = Long.SIZE / 8;
 }

@@ -278,7 +278,7 @@ public class FragmentLMFF extends StatefulFF {
   }
 
   @Override
-  public float estimateCost(Rule rule, Sentence sentence) {
+  public float estimateCost(Rule rule) {
     // TODO Auto-generated method stub
     return 0;
   }
