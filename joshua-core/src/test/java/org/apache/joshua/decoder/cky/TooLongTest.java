@@ -31,11 +31,11 @@ import org.testng.annotations.Test;
  */
 public class TooLongTest {
   private static final String INPUT1 = "as kingfishers draw fire";
-  private static final String GOLD1 = "as kingfishers ||| tm_glue_0=2.000 ||| 0.000";
+  private static final String GOLD1 = "as kingfishers ||| glue_0=-2.000000 ||| 0.000";
   private static final String INPUT2 = "dragonflies draw flame";
-  private static final String GOLD2 = "dragonflies ||| tm_glue_0=1.000 ||| 0.000";
+  private static final String GOLD2 = "dragonflies ||| glue_0=-1.000000 ||| 0.000";
   private static final String INPUT3 = "(((as tumbled over rim in roundy wells stones ring";
-  private static final String GOLD3 = "(((as tumbled over rim in roundy wells stones ||| tm_glue_0=8.000 ||| 0.000";
+  private static final String GOLD3 = "(((as tumbled over rim in roundy wells stones ||| glue_0=-8.000000 ||| 0.000";
   private static final String INPUT4 = "(((like each tucked string tells";
   private static final String GOLD4 = "|||  ||| 0.000";
 
