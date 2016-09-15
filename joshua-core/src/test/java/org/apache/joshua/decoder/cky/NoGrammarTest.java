@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 public class NoGrammarTest {
 
 	private static final String INPUT = "those who hurt others hurt themselves";
-	private static final String GOLD = "0 ||| those_OOV who_OOV hurt_OOV others_OOV hurt_OOV themselves_OOV ||| tm_glue_0=6.000 ||| 0.000";
+	private static final String GOLD = "0 ||| those_OOV who_OOV hurt_OOV others_OOV hurt_OOV themselves_OOV ||| glue_0=-6.000000 ||| 0.000";
 	
 	private JoshuaConfiguration joshuaConfig = null;
 	private Decoder decoder = null;
