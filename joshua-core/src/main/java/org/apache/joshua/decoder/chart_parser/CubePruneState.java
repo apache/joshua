@@ -31,13 +31,13 @@ import org.apache.joshua.decoder.ff.tm.Rule;
 // ===============================================================
 public class CubePruneState implements Comparable<CubePruneState> {
   final int[] ranks;
-  final ComputeNodeResult computeNodeResult;
+  final NodeResult nodeResult;
   final List<HGNode> antNodes;
   final List<Rule> rules;
   private DotNode dotNode;
 
-  public CubePruneState(ComputeNodeResult score, int[] ranks, List<Rule> rules, List<HGNode> antecedents, DotNode dotNode) {
-    this.computeNodeResult = score;
+  public CubePruneState(NodeResult score, int[] ranks, List<Rule> rules, List<HGNode> antecedents, DotNode dotNode) {
+    this.nodeResult = score;
     this.ranks = ranks;
     this.rules = rules;
     this.antNodes = antecedents;
@@ -50,7 +50,7 @@ public class CubePruneState implements Comparable<CubePruneState> {
    * @return
    */
   List<DPState> getDPStates() {
-    return this.computeNodeResult.getDPStates();
+    return this.nodeResult.getDPStates();
   }
   
   Rule getRule() {
@@ -59,8 +59,8 @@ public class CubePruneState implements Comparable<CubePruneState> {
 
   public String toString() {
     String sb = "STATE ||| rule=" + getRule() + " inside cost = " +
-        computeNodeResult.getViterbiCost() + " estimate = " +
-        computeNodeResult.getPruningEstimate();
+        nodeResult.getViterbiCost() + " estimate = " +
+        nodeResult.getPruningEstimate();
     return sb;
   }
 
@@ -99,10 +99,10 @@ public class CubePruneState implements Comparable<CubePruneState> {
    * order (high-prob first).
    */
   public int compareTo(CubePruneState another) {
-    if (this.computeNodeResult.getPruningEstimate() < another.computeNodeResult
+    if (this.nodeResult.getPruningEstimate() < another.nodeResult
         .getPruningEstimate()) {
       return 1;
-    } else if (this.computeNodeResult.getPruningEstimate() == another.computeNodeResult
+    } else if (this.nodeResult.getPruningEstimate() == another.nodeResult
         .getPruningEstimate()) {
       return 0;
     } else {

@@ -35,6 +35,7 @@ package org.apache.joshua.decoder.phrase;
  * TODO Lattice decoding is not yet supported.
  */
 
+import static org.apache.joshua.decoder.chart_parser.ComputeNodeResult.computeNodeResult;
 import static org.apache.joshua.decoder.ff.tm.OwnerMap.UNKNOWN_OWNER;
 
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ import java.util.List;
 
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
+import org.apache.joshua.decoder.chart_parser.NodeResult;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.tm.AbstractGrammar;
 import org.apache.joshua.decoder.ff.tm.Grammar;
@@ -123,7 +125,7 @@ public class Stacks {
     stacks.add(null);
 
     // Initialize root hypothesis with <s> context and future cost for everything.
-    ComputeNodeResult result = new ComputeNodeResult(this.featureFunctions, Hypothesis.BEGIN_RULE,
+    NodeResult result = computeNodeResult(this.featureFunctions, Hypothesis.BEGIN_RULE,
         null, -1, 1, null, this.sentence);
     Stack firstStack = new Stack(sentence, config);
     firstStack.add(new Hypothesis(result.getDPStates(), future.Full()));

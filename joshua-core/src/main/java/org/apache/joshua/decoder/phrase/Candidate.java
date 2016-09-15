@@ -38,11 +38,14 @@ import java.util.List;
 
 import org.apache.joshua.corpus.Span;
 import org.apache.joshua.decoder.chart_parser.ComputeNodeResult;
+import org.apache.joshua.decoder.chart_parser.NodeResult;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.state_maintenance.DPState;
 import org.apache.joshua.decoder.ff.tm.Rule;
 import org.apache.joshua.decoder.hypergraph.HGNode;
 import org.apache.joshua.decoder.segment_file.Sentence;
+
+import static org.apache.joshua.decoder.chart_parser.ComputeNodeResult.computeNodeResult;
 
 public class Candidate implements Comparable<Candidate> {
   
@@ -68,7 +71,7 @@ public class Candidate implements Comparable<Candidate> {
    * Stores the inside cost of the current phrase, as well as the computed dynamic programming
    * state. Expensive to compute so there is an option of delaying it.
    */
-  private ComputeNodeResult computedResult;
+  private NodeResult computedResult;
 
   /**
    * When candidate objects are extended, the new one is initialized with the same underlying
@@ -225,11 +228,11 @@ public class Candidate implements Comparable<Candidate> {
    * 
    * @return the computed result.
    */
-  public ComputeNodeResult computeResult() {
+  public NodeResult computeResult() {
     if (computedResult == null) {
       // add the rule
       // TODO: sourcepath
-      computedResult = new ComputeNodeResult(featureFunctions, getRule(), getTailNodes(), getLastCovered(), getPhraseEnd(), null, sentence);
+      computedResult = computeNodeResult(featureFunctions, getRule(), getTailNodes(), getLastCovered(), getPhraseEnd(), null, sentence);
     }
     
     return computedResult;

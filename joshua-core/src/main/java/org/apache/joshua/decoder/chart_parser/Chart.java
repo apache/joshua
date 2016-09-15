@@ -46,6 +46,8 @@ import org.apache.joshua.util.ChartSpan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.joshua.decoder.chart_parser.ComputeNodeResult.computeNodeResult;
+
 /**
  * Chart class this class implements chart-parsing: (1) seeding the chart (2)
  * cky main loop over bins, (3) identify applicable rules in each bin
@@ -241,7 +243,7 @@ public class Chart {
               break;
             }
 
-            ComputeNodeResult result = new ComputeNodeResult(this.featureFunctions, rule, null, i,
+            NodeResult result = computeNodeResult(this.featureFunctions, rule, null, i,
                 j, sourcePath, this.sentence);
 
             if (stateConstraint == null || stateConstraint.isLegal(result.getDPStates())) {
@@ -270,7 +272,7 @@ public class Chart {
           int[] ranks = new int[1 + superNodes.size()];
           Arrays.fill(ranks, 1);
 
-          ComputeNodeResult result = new ComputeNodeResult(featureFunctions, bestRule,
+          NodeResult result = computeNodeResult(featureFunctions, bestRule,
               currentTailNodes, i, j, sourcePath, sentence);
           CubePruneState bestState = new CubePruneState(result, ranks, rules, currentTailNodes,
               dotNode);
@@ -319,7 +321,7 @@ public class Chart {
        * doing constrained decoding or (b) we are and the state is legal.
        */
       if (stateConstraint == null || stateConstraint.isLegal(state.getDPStates())) {
-        getCell(i, j).addHyperEdgeInCell(state.computeNodeResult, state.getRule(), i, j,
+        getCell(i, j).addHyperEdgeInCell(state.nodeResult, state.getRule(), i, j,
             state.antNodes, sourcePath, true);
       }
 
@@ -354,7 +356,7 @@ public class Chart {
           nextAntNodes.add(superNodes.get(x).nodes.get(nextRanks[x + 1] - 1));
 
         /* Create the next state. */
-        CubePruneState nextState = new CubePruneState(new ComputeNodeResult(featureFunctions,
+        CubePruneState nextState = new CubePruneState(computeNodeResult(featureFunctions,
             nextRule, nextAntNodes, i, j, sourcePath, this.sentence), nextRanks, rules,
             nextAntNodes, dotNode);
 
@@ -538,7 +540,7 @@ public class Chart {
     int[] ranks = new int[1 + superNodes.size()];
     Arrays.fill(ranks, 1);
 
-    ComputeNodeResult result = new ComputeNodeResult(featureFunctions, bestRule, tailNodes,
+    NodeResult result = computeNodeResult(featureFunctions, bestRule, tailNodes,
         dotNode.begin(), dotNode.end(), dotNode.getSourcePath(), sentence);
     CubePruneState seedState = new CubePruneState(result, ranks, rules, tailNodes, dotNode);
 
@@ -704,7 +706,7 @@ public class Chart {
           List<Rule> rules = childNode.getRuleCollection().getSortedRules(this.featureFunctions);
           for (Rule rule : rules) { // for each unary rules
 
-            ComputeNodeResult states = new ComputeNodeResult(this.featureFunctions, rule,
+            NodeResult states = computeNodeResult(this.featureFunctions, rule,
                 antecedents, i, j, new SourcePath(), this.sentence);
             HGNode resNode = chartBin.addHyperEdgeInCell(states, rule, i, j, antecedents,
                 new SourcePath(), true);
@@ -736,7 +738,7 @@ public class Chart {
     }
 
     this.cells.get(i, j).addHyperEdgeInCell(
-        new ComputeNodeResult(this.featureFunctions, rule, null, i, j, srcPath, sentence), rule, i,
+        computeNodeResult(this.featureFunctions, rule, null, i, j, srcPath, sentence), rule, i,
         j, null, srcPath, false);
 
   }
