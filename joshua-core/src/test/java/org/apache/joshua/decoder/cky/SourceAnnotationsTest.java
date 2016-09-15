@@ -30,8 +30,8 @@ import org.testng.annotations.Test;
 public class SourceAnnotationsTest {
 
   private static final String INPUT = "mis[tag=ADJ;num=PL;class=OOV] amigos me llaman";
-  private static final String GOLD_WITHOUT_ANNOTATIONS = "my friends call me ||| tm_pt_0=-3.000 tm_glue_0=3.000 lm_0=-11.974 OOVPenalty=0.000 WordPenalty=-2.606 ||| -7.650";
-  private static final String GOLD_WITH_ANNOTATIONS = "my friends call me ||| tm_pt_0=-3.000 tm_glue_0=3.000 lm_0=-111.513 OOVPenalty=0.000 WordPenalty=-2.606 ||| -107.189";
+  private static final String GOLD_WITHOUT_ANNOTATIONS = "my friends call me ||| pt_0=3.000000 lm_0=-11.973694 glue_0=-3.000000 WordPenalty=-2.605767 ||| -7.650";
+  private static final String GOLD_WITH_ANNOTATIONS = "my friends call me ||| pt_0=3.000000 lm_0=-111.512733 glue_0=-3.000000 WordPenalty=-2.605767 ||| -107.189";
 
   private static final String JOSHUA_CONFIG_PATH = "src/test/resources/decoder/source-annotations/joshua.config";
 
