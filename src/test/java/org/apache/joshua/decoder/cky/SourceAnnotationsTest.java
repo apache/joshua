@@ -23,6 +23,7 @@ import static org.testng.Assert.assertEquals;
 
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
@@ -55,13 +56,15 @@ public class SourceAnnotationsTest {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.readConfigFile(JOSHUA_CONFIG_PATH);
     joshuaConfig.source_annotations = sourceAnnotations;
-    decoder = new Decoder(joshuaConfig, "");
+    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig, ""));
   }
 
   @AfterMethod
   public void tearDown() throws Exception {
-    decoder.cleanUp();
-    decoder = null;
+    if (decoder != null) {
+      decoder.cleanUp();
+      decoder = null;
+    }
   }
 
 }
