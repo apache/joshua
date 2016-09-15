@@ -2,6 +2,8 @@ package org.apache.joshua.decoder;
 
 import org.apache.joshua.decoder.ff.lm.KenLM;
 
+import java.nio.ByteBuffer;
+
 /**
  * Class to wrap a KenLM pool of states.  This class is not ThreadSafe.  It should be
  * used in a scoped context, and close must be called to release native resources.  It
@@ -15,11 +17,13 @@ public class KenLMPool implements AutoCloseable {
 
   private final long pool;
   private final KenLM languageModel;
+  private final ByteBuffer ngramBuffer;
   private boolean released = false;
 
-  public KenLMPool(long pool, KenLM languageModel) {
+  public KenLMPool(long pool, KenLM languageModel, ByteBuffer ngramBuffer) {
     this.pool = pool;
     this.languageModel = languageModel;
+    this.ngramBuffer = ngramBuffer;
   }
 
   public long getPool() {
@@ -38,5 +42,9 @@ public class KenLMPool implements AutoCloseable {
       released = true;
       languageModel.destroyLMPool(pool);
     }
+  }
+
+  public ByteBuffer getNgramBuffer() {
+    return ngramBuffer;
   }
 }

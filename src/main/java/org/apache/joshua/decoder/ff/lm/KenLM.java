@@ -25,6 +25,8 @@ import org.apache.joshua.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.ByteBuffer;
+
 /**
  * JNI wrapper for KenLM. This version of KenLM supports two use cases, implemented by the separate
  * feature functions KenLMFF and LanguageModelFF. KenLMFF uses the RuleScore() interface in
@@ -37,7 +39,12 @@ import org.slf4j.LoggerFactory;
 
 public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
+  private static final int LONG_SIZE_IN_BYTES = Long.SIZE / 8;
+
   private static final Logger LOG = LoggerFactory.getLogger(KenLM.class);
+
+  // Maximum number of terminal and non-terminal symbols on a rule's target side
+  private static final int MAX_TARGET_LENGTH = 256;
 
   private final long pointer;
 
@@ -45,6 +52,24 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
   private final int ngramOrder;
   // inferred from model file (may be larger than ngramOrder)
   private final int N;
+
+  public KenLM(int order, String file_name) {
+    pointer = initializeSystemLibrary(file_name);
+    ngramOrder = order;
+    N = order(pointer);
+  }
+
+  /**
+   * Constructor if order is not known.
+   * Order will be inferred from the model.
+   *
+   * @param file_name string path to an input file
+   */
+  public KenLM(String file_name) {
+    pointer = initializeSystemLibrary(file_name);
+    N = order(pointer);
+    ngramOrder = N;
+  }
 
   private static native long construct(String file_name);
 
@@ -62,32 +87,15 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
   private static native boolean isLmOov(long ptr, int word);
 
-  private static native long probRule(long ptr, long pool, long words[]);
+  private static native long probRule(long ptr, long pool);
 
   private static native float estimateRule(long ptr, long words[]);
 
   private static native float probString(long ptr, int words[], int start);
 
-  private static native long createPool();
+  private static native long createPool(ByteBuffer wordsBuffer);
 
   private static native void destroyPool(long pointer);
-
-  public KenLM(int order, String file_name) {
-    pointer = initializeSystemLibrary(file_name);
-    ngramOrder = order;
-    N = order(pointer);
-  }
-
-  /**
-   * Constructor if order is not known.
-   * Order will be inferred from the model.
-   * @param file_name string path to an input file
-   */
-  public KenLM(String file_name) {
-    pointer = initializeSystemLibrary(file_name);
-    N = order(pointer);
-    ngramOrder = N;
-  }
 
   private long initializeSystemLibrary(String file_name) {
     try {
@@ -99,15 +107,11 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
     }
   }
 
-  public static class KenLMLoadException extends RuntimeException {
-
-    public KenLMLoadException(UnsatisfiedLinkError e) {
-      super(e);
-    }
-  }
-
   public KenLMPool createLMPool() {
-    return new KenLMPool(createPool(), this);
+    ByteBuffer ngramBuffer = ByteBuffer.allocateDirect(MAX_TARGET_LENGTH * LONG_SIZE_IN_BYTES);
+    ngramBuffer.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+    long pool = createPool(ngramBuffer);
+    return new KenLMPool(pool, this, ngramBuffer);
   }
 
   public void destroyLMPool(long pointer) {
@@ -134,6 +138,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
   /**
    * Query for n-gram probability using strings.
+   *
    * @param words a string array of words
    * @return float value denoting probability
    */
@@ -153,15 +158,21 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
    * needed so KenLM knows which memory pool to use. When finished, it returns the updated KenLM
    * state and the LM probability incurred along this rule.
    *
-   * @param words array of words
+   * @param words       array of words
    * @param poolWrapper an object that wraps a pool reference returned from KenLM createPool
    * @return the updated {@link org.apache.joshua.decoder.ff.lm.KenLM.StateProbPair} e.g.
    * KenLM state and the LM probability incurred along this rule
    */
   public StateProbPair probRule(long[] words, KenLMPool poolWrapper) {
-    long packedResult = probRule(pointer, poolWrapper.getPool(), words);
+
+    poolWrapper.getNgramBuffer().putLong(0, words.length);
+    for (int i = 0; i < words.length; i++) {
+      poolWrapper.getNgramBuffer().putLong((i + 1) * LONG_SIZE_IN_BYTES, words[i]);
+    }
+
+    long packedResult = probRule(pointer, poolWrapper.getPool());
     int state = (int) (packedResult >> 32);
-    float probVal = Float.intBitsToFloat((int)packedResult);
+    float probVal = Float.intBitsToFloat((int) packedResult);
 
     return new StateProbPair(state, probVal);
   }
@@ -186,6 +197,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
   /**
    * The start symbol for a KenLM is the Vocabulary.START_SYM.
+   *
    * @return "&lt;s&gt;"
    */
   public String getStartSymbol() {
@@ -207,21 +219,6 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
   public boolean isKnownWord(String word) {
     return isKnownWord(pointer, word);
-  }
-
-
-  /**
-   * Inner class used to hold the results returned from KenLM with left-state minimization. Note
-   * that inner classes have to be static to be accessible from the JNI!
-   */
-  public static class StateProbPair {
-    public KenLMState state = null;
-    public float prob = 0.0f;
-
-    public StateProbPair(long state, float prob) {
-      this.state = new KenLMState(state);
-      this.prob = prob;
-    }
   }
 
   @Override
@@ -250,6 +247,27 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
   @Override
   public float ngramLogProbability(int[] ngram) {
     return prob(ngram);
+  }
+
+  public static class KenLMLoadException extends RuntimeException {
+
+    public KenLMLoadException(UnsatisfiedLinkError e) {
+      super(e);
+    }
+  }
+
+  /**
+   * Inner class used to hold the results returned from KenLM with left-state minimization. Note
+   * that inner classes have to be static to be accessible from the JNI!
+   */
+  public static class StateProbPair {
+    public KenLMState state = null;
+    public float prob = 0.0f;
+
+    public StateProbPair(long state, float prob) {
+      this.state = new KenLMState(state);
+      this.prob = prob;
+    }
   }
 
 }
