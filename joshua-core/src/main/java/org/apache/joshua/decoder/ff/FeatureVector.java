@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.joining;
 
 import java.util.AbstractMap;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -141,7 +142,8 @@ public class FeatureVector extends AbstractMap<Integer, Float> {
   public String textFormat() {
     return internalMap.entrySet()
       .stream()
-      .map(e -> String.format("%s=%.6f", FeatureMap.getFeature(e.getKey()), e.getValue())  )
+      .map(e -> String.format("%s=%.6f", FeatureMap.getFeature(e.getKey()), e.getValue()))
+      .sorted(Comparator.reverseOrder())
       .collect(joining(" "));
   }
 
