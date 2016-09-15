@@ -1,12 +1,12 @@
-the boy ate the cockroach ||| tm_pt_0=-6.000 tm_glue_0=5.000 lm_0=-17.198 WordPenalty=-3.040 OOVPenalty=0.000 ||| -19.240
-the boy eated the cockroach ||| tm_pt_0=-11.000 tm_glue_0=5.000 lm_0=-17.198 WordPenalty=-3.040 OOVPenalty=0.000 ||| -24.240
-the boy eated the cockroach ||| tm_pt_0=-11.000 tm_glue_0=5.000 lm_0=-17.198 WordPenalty=-3.040 OOVPenalty=0.000 ||| -24.240
-the kid eated the cockroach ||| tm_pt_0=-15.000 tm_glue_0=5.000 lm_0=-20.053 WordPenalty=-3.040 OOVPenalty=0.000 ||| -31.773
-the boy ate the cockroach ||| tm_pt_0=-6.000 tm_glue_0=5.000 lm_0=-17.198 WordPenalty=-3.040 OOVPenalty=0.000 ||| -19.240
-the boy eated the cockroach ||| tm_pt_0=-11.000 tm_glue_0=5.000 lm_0=-17.198 WordPenalty=-3.040 OOVPenalty=0.000 ||| -24.240
-the boy ate the cockroach ||| tm_pt_0=-6.000 tm_glue_0=5.000 lm_0=-17.198 WordPenalty=-3.040 OOVPenalty=0.000 ||| -19.240
-the boy eated the cockroach ||| tm_pt_0=-11.000 tm_glue_0=5.000 lm_0=-17.198 WordPenalty=-3.040 OOVPenalty=0.000 ||| -24.240
-the boy ate the cockroach ||| tm_pt_0=-6.000 tm_glue_0=5.000 lm_0=-17.198 WordPenalty=-3.040 OOVPenalty=0.000 ||| -19.240
-the boy eated the cockroach ||| tm_pt_0=-11.000 tm_glue_0=5.000 lm_0=-17.198 WordPenalty=-3.040 OOVPenalty=0.000 ||| -24.240
-the boy ate the cockroach ||| tm_pt_0=-6.000 tm_glue_0=5.000 lm_0=-17.198 WordPenalty=-3.040 OOVPenalty=0.000 ||| -19.240
-the boy eated the cockroach ||| tm_pt_0=-11.000 tm_glue_0=5.000 lm_0=-17.198 WordPenalty=-3.040 OOVPenalty=0.000 ||| -24.240
+the boy ate the cockroach ||| pt_0=6.000000 lm_0=-17.198177 glue_0=-5.000000 WordPenalty=-3.040061 ||| -19.240
+the boy eated the cockroach ||| pt_0=11.000000 lm_0=-17.198177 glue_0=-5.000000 WordPenalty=-3.040061 ||| -24.240
+the boy eated the cockroach ||| pt_0=11.000000 lm_0=-17.198177 glue_0=-5.000000 WordPenalty=-3.040061 ||| -24.240
+the kid eated the cockroach ||| pt_0=15.000000 lm_0=-20.053476 glue_0=-5.000000 WordPenalty=-3.040061 ||| -31.773
+the boy ate the cockroach ||| pt_0=6.000000 lm_0=-17.198177 glue_0=-5.000000 WordPenalty=-3.040061 ||| -19.240
+the boy eated the cockroach ||| pt_0=11.000000 lm_0=-17.198177 glue_0=-5.000000 WordPenalty=-3.040061 ||| -24.240
+the boy ate the cockroach ||| pt_0=6.000000 lm_0=-17.198177 glue_0=-5.000000 WordPenalty=-3.040061 ||| -19.240
+the boy eated the cockroach ||| pt_0=11.000000 lm_0=-17.198177 glue_0=-5.000000 WordPenalty=-3.040061 ||| -24.240
+the boy ate the cockroach ||| pt_0=6.000000 lm_0=-17.198177 glue_0=-5.000000 WordPenalty=-3.040061 ||| -19.240
+the boy eated the cockroach ||| pt_0=11.000000 lm_0=-17.198177 glue_0=-5.000000 WordPenalty=-3.040061 ||| -24.240
+the boy ate the cockroach ||| pt_0=6.000000 lm_0=-17.198177 glue_0=-5.000000 WordPenalty=-3.040061 ||| -19.240
+the boy eated the cockroach ||| pt_0=11.000000 lm_0=-17.198177 glue_0=-5.000000 WordPenalty=-3.040061 ||| -24.240

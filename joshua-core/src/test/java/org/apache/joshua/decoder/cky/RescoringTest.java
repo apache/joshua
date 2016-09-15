@@ -22,6 +22,8 @@ import static org.apache.joshua.decoder.cky.TestUtil.decodeList;
 import static org.apache.joshua.decoder.cky.TestUtil.loadStringsFromFile;
 import static org.testng.Assert.assertEquals;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.joshua.decoder.Decoder;
