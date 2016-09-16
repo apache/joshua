@@ -81,5 +81,4 @@ public class TestUtil {
 	    final Sentence sentence = new Sentence(input, 0, decoder.getFlags());
 	    return decoder.decode(sentence).toString();
 	}
-
 }

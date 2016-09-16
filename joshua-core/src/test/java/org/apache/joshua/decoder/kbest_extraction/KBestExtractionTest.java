@@ -66,7 +66,6 @@ public class KBestExtractionTest {
   public void givenInput_whenKbestExtraction_thenOutputIsAsExpected() throws IOException {
     final String translation = decode(INPUT).toString();
     final String gold = new String(readAllBytes(GOLD_PATH), UTF_8);
-    Files.writeFile(translation, new File("resources/kbest_extraction/output.actual"));
     assertEquals(translation, gold);
   }
 

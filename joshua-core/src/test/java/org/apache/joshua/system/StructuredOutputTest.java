@@ -18,7 +18,7 @@
  */
 package org.apache.joshua.system;
 
-import static com.typesafe.config.ConfigFactory.parseString;
+import static com.typesafe.config.ConfigFactory.parseResources;
 import static com.typesafe.config.ConfigValueFactory.fromAnyRef;
 
 import java.util.Arrays;
@@ -58,18 +58,8 @@ public class StructuredOutputTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    Config weights = parseString(
-        "weights = {pt_0=-1, pt_1=-1, pt_2=-1, pt_3=-1, pt_4=-1, pt_5=-1, glue_0=-1, OOVPenalty=2}");
-    Config features = parseString("feature_functions = [{class=OOVPenalty}]");
-    Config grammars = parseString("grammars=[{class=TextGrammar, owner=pt, span_limit=20, path=src/test/resources/wa_grammar},"
-        + "{class=TextGrammar, owner=glue, span_limit=-1, path=src/test/resources/grammar.glue}]");
-    Config flags = weights
-        .withFallback(features)
-        .withFallback(grammars)
-        .withFallback(Decoder.getDefaultFlags())
-        .withValue("top_n", fromAnyRef(0))
-        .withValue("use_unique_nbest", fromAnyRef(false))
-        .withValue("output_format", fromAnyRef("%s | %a"));
+    Config flags = parseResources(this.getClass(), "StructuredOutputTest.conf")
+        .withFallback(Decoder.getDefaultFlags());
     decoder = new Decoder(flags);
   }
 

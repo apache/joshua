@@ -18,6 +18,8 @@
  */
 package org.apache.joshua.system;
 
+import static com.typesafe.config.ConfigFactory.parseResources;
+import static com.typesafe.config.ConfigValueFactory.fromAnyRef;
 import static java.util.Arrays.asList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -73,27 +75,9 @@ public class StructuredTranslationTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    joshuaConfig = new JoshuaConfiguration();
-    joshuaConfig.search_algorithm = "cky";
-    joshuaConfig.mark_oovs = false;
-    joshuaConfig.pop_limit = 100;
-    joshuaConfig.use_unique_nbest = false;
-    joshuaConfig.include_align_index = false;
-    joshuaConfig.topN = 0;
-    joshuaConfig.tms.add("thrax -owner pt -maxspan 20 -path src/test/resources/wa_grammar");
-    joshuaConfig.tms.add("thrax -owner glue -maxspan -1 -path src/test/resources/grammar.glue");
-    joshuaConfig.goal_symbol = "[GOAL]";
-    joshuaConfig.default_non_terminal = "[X]";
-    joshuaConfig.features.add("OOVPenalty");
-    joshuaConfig.weights.add("pt_0 -1");
-    joshuaConfig.weights.add("pt_1 -1");
-    joshuaConfig.weights.add("pt_2 -1");
-    joshuaConfig.weights.add("pt_3 -1");
-    joshuaConfig.weights.add("pt_4 -1");
-    joshuaConfig.weights.add("pt_5 -1");
-    joshuaConfig.weights.add("glue_0 -1");
-    joshuaConfig.weights.add("OOVPenalty 1");
-    decoder = new Decoder(joshuaConfig);
+    Config flags = parseResources(this.getClass(), "StructuredTranslationTest.conf")
+        .withFallback(Decoder.getDefaultFlags());
+    decoder = new Decoder(flags);
   }
 
   @AfterMethod
@@ -110,11 +94,15 @@ public class StructuredTranslationTest {
   @Test
   public void givenInput_whenRegularOutputFormat_thenExpectedOutput() {
     // GIVEN
-    joshuaConfig.use_structured_output = false;
-    joshuaConfig.outputFormat = "%s | %a ";
+    boolean useStructuredOutput = false;
+    String outputFormat = "%s | %a ";
 
     // WHEN
-    final String translation = decode(INPUT).toString().trim();
+    final String translation = decode(
+        INPUT,
+        decoder.getFlags()
+          .withValue("output_format", fromAnyRef(outputFormat))
+          .withValue("use_structured_output", fromAnyRef(useStructuredOutput))).toString().trim();
 
     // THEN
     assertEquals(translation, EXPECTED_TRANSLATION + " | " + EXPECTED_WORD_ALIGNMENT_STRING);
@@ -123,12 +111,17 @@ public class StructuredTranslationTest {
   @Test
   public void givenInput_whenRegularOutputFormatWithTopN1_thenExpectedOutput() {
     // GIVEN
-    joshuaConfig.use_structured_output = false;
-    joshuaConfig.outputFormat = "%s | %e | %a | %c";
-    joshuaConfig.topN = 1;
+    boolean useStructuredOutput = false;
+    String outputFormat = "%s | %e | %a | %c";
+    int topN = 1;
 
     // WHEN
-    final String translation = decode(INPUT).toString().trim();
+    final String translation = decode(
+        INPUT,
+        decoder.getFlags()
+          .withValue("top_n", fromAnyRef(topN))
+          .withValue("output_format", fromAnyRef(outputFormat))
+          .withValue("use_structured_output", fromAnyRef(useStructuredOutput))).toString().trim();
 
     // THEN
     assertEquals(translation,
@@ -138,11 +131,16 @@ public class StructuredTranslationTest {
   @Test
   public void givenInput_whenStructuredOutputFormatWithTopN0_thenExpectedOutput() {
     // GIVEN
-    joshuaConfig.use_structured_output = true;
-    joshuaConfig.topN = 0;
+    boolean useStructuredOutput = true;
+    int topN = 0;
 
     // WHEN
-    final Translation translation = decode(INPUT);
+    final Translation translation = decode(
+        INPUT,
+        decoder.getFlags()
+          .withValue("top_n", fromAnyRef(topN))
+          .withValue("use_structured_output", fromAnyRef(useStructuredOutput)));
+    
     final StructuredTranslation structuredTranslation = translation.getStructuredTranslations().get(0);
     final String translationString = structuredTranslation.getTranslationString();
     final List<String> translatedTokens = structuredTranslation.getTranslationTokens();
@@ -163,11 +161,16 @@ public class StructuredTranslationTest {
   @Test
   public void givenInput_whenStructuredOutputFormatWithTopN1_thenExpectedOutput() {
     // GIVEN
-    joshuaConfig.use_structured_output = true;
-    joshuaConfig.topN = 1;
+    boolean useStructuredOutput = true;
+    int topN = 0;
 
     // WHEN
-    final Translation translation = decode(INPUT);
+    final Translation translation = decode(
+        INPUT,
+        decoder.getFlags()
+          .withValue("top_n", fromAnyRef(topN))
+          .withValue("use_structured_output", fromAnyRef(useStructuredOutput)));
+    
     final List<StructuredTranslation> structuredTranslations = translation.getStructuredTranslations();
     final StructuredTranslation structuredTranslation = structuredTranslations.get(0);
     final String translationString = structuredTranslation.getTranslationString();
@@ -189,11 +192,16 @@ public class StructuredTranslationTest {
   @Test
   public void givenInput_whenStructuredOutputFormatWithKBest_thenExpectedOutput() {
     // GIVEN
-    joshuaConfig.use_structured_output = true;
-    joshuaConfig.topN = 100;
+    boolean useStructuredOutput = true;
+    int topN = 100;
 
     // WHEN
-    final Translation translation = decode(INPUT);
+    final Translation translation = decode(
+        INPUT,
+        decoder.getFlags()
+          .withValue("top_n", fromAnyRef(topN))
+          .withValue("use_structured_output", fromAnyRef(useStructuredOutput)));
+    
     final List<StructuredTranslation> structuredTranslations = translation.getStructuredTranslations();
     final StructuredTranslation viterbiTranslation = structuredTranslations.get(0);
     final StructuredTranslation lastKBest = structuredTranslations.get(structuredTranslations.size() - 1);
@@ -215,10 +223,13 @@ public class StructuredTranslationTest {
   @Test
   public void givenEmptyInput_whenStructuredOutputFormat_thenEmptyOutput() {
     // GIVEN
-    joshuaConfig.use_structured_output = true;
+    boolean useStructuredOutput = true;
 
     // WHEN
-    final Translation translation = decode("");
+    final Translation translation = decode(
+        "",
+        decoder.getFlags()
+          .withValue("use_structured_output", fromAnyRef(useStructuredOutput)));
     final StructuredTranslation structuredTranslation = translation.getStructuredTranslations().get(0);
     final String translationString = structuredTranslation.getTranslationString();
     final List<String> translatedTokens = structuredTranslation.getTranslationTokens();
@@ -235,32 +246,44 @@ public class StructuredTranslationTest {
   @Test
   public void givenOOVInput_whenStructuredOutputFormat_thenOOVOutput() {
     // GIVEN
-    joshuaConfig.use_structured_output = true;
+    boolean useStructuredOutput = true;
     final String input = "gabarbl";
 
     // WHEN
-    final Translation translation = decode(input);
+    final Translation translation = decode(
+        input,
+        decoder.getFlags()
+          .withValue("use_structured_output", fromAnyRef(useStructuredOutput)));
+    
     final StructuredTranslation structuredTranslation = translation.getStructuredTranslations().get(0);
     final String translationString = structuredTranslation.getTranslationString();
     final List<String> translatedTokens = structuredTranslation.getTranslationTokens();
+    final Map<String,Float> translationFeatures = structuredTranslation.getTranslationFeatures();
     final float translationScore = structuredTranslation.getTranslationScore();
     final List<List<Integer>> wordAlignment = structuredTranslation.getTranslationWordAlignments();
+    
+    System.out.println(translationFeatures);
+    System.out.println(decoder.getWeights().textFormat());
 
     // THEN
     assertEquals(input, translationString);
     assertTrue(translatedTokens.contains(input));
-    assertEquals(-99.0, translationScore, 0.00001);
+    assertEquals(translationScore, -99.0, 0.00001);
     assertTrue(wordAlignment.contains(asList(0)));
   }
 
   @Test
   public void givenEmptyInput_whenRegularOutputFormat_thenNewlineOutput() {
     // GIVEN
-    joshuaConfig.use_structured_output = false;
-    joshuaConfig.outputFormat = "%s";
+    boolean useStructuredOutput = false;
+    String outputFormat = "%s";
 
     // WHEN
-    final Translation translation = decode("");
+    final Translation translation = decode(
+        "",
+        decoder.getFlags()
+          .withValue("output_format", fromAnyRef(outputFormat))
+          .withValue("use_structured_output", fromAnyRef(useStructuredOutput)));
     final String translationString = translation.toString();
 
     // THEN
