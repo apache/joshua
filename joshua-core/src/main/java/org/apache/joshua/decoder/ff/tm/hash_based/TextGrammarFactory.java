@@ -37,7 +37,6 @@ public class TextGrammarFactory {
     final Config config = ConfigFactory.parseMap(
         ImmutableMap.of("owner", GLUE_OWNER, "span_limit", "-1"), "Glue Grammar Config");
     final TextGrammar glueGrammar = new TextGrammar(config);
-    final HieroFormatReader reader = new HieroFormatReader(glueGrammar.getOwner());
     final String goalNT = FormatUtils.cleanNonTerminal(goalSymbol);
     final String defaultNT = FormatUtils.cleanNonTerminal(defaultNonTerminal);
     
@@ -49,11 +48,13 @@ public class TextGrammarFactory {
         String.format("[%s] ||| [%s,1] %s ||| [%s,1] %s ||| 0", goalNT, goalNT,
             Vocabulary.STOP_SYM, goalNT, Vocabulary.STOP_SYM) };
     
-    for (String ruleString : ruleStrings) {
-      Rule rule = reader.parseLine(ruleString);
-      glueGrammar.addRule(rule);
-      // glue rules do not any features
-      rule.estimateRuleCost(emptyList());
+    try(HieroFormatReader reader = new HieroFormatReader(glueGrammar.getOwner());) {
+      for (String ruleString : ruleStrings) {
+        Rule rule = reader.parseLine(ruleString);
+        glueGrammar.addRule(rule);
+        // glue rules do not any features
+        rule.estimateRuleCost(emptyList());
+      }
     }
     return glueGrammar;
   }
@@ -75,16 +76,17 @@ public class TextGrammarFactory {
     final Config config = ConfigFactory.parseMap(
         ImmutableMap.of("owner", "lattice", "span_limit", "-1"), "Epsilon Grammar Config");
     final TextGrammar latticeGrammar = new TextGrammar(config);
-    final HieroFormatReader reader = new HieroFormatReader(latticeGrammar.getOwner());
     final String goalNT = FormatUtils.cleanNonTerminal(goalSymbol);
     final String defaultNT = FormatUtils.cleanNonTerminal(defaultNonTerminal);
 
     //FIXME: arguments changed to match string format on best effort basis.  Author please review.
     final String ruleString = String.format("[%s] ||| [%s,1] <eps> ||| [%s,1] ||| ", goalNT, defaultNT, defaultNT);
     
-    final Rule rule = reader.parseLine(ruleString);
-    latticeGrammar.addRule(rule);
-    rule.estimateRuleCost(emptyList());
+    try(HieroFormatReader reader = new HieroFormatReader(latticeGrammar.getOwner());) {
+      final Rule rule = reader.parseLine(ruleString);
+      latticeGrammar.addRule(rule);
+      rule.estimateRuleCost(emptyList());
+    }
     return latticeGrammar;
   }
   
@@ -92,9 +94,9 @@ public class TextGrammarFactory {
     final Config grammarConfig = ConfigFactory.parseMap(
         ImmutableMap.of("owner", OOV_OWNER, "span_limit", "20"), "OOV grammar config");
     final TextGrammar oovGrammar = new TextGrammar(grammarConfig);
-    final Set<Integer> words = getOovCandidateWords(sentence, config.getFlags().getBoolean("true_oovs_only"));
+    final Set<Integer> words = getOovCandidateWords(sentence);
     for (int sourceWord: words) {
-      oovGrammar.addOOVRules(sourceWord, config);
+      oovGrammar.addOOVRules(sourceWord, sentence.getFlags(), config.getFeatureFunctions());
     }
     // Sort all the rules (not much to actually do, this just marks it as sorted)
     oovGrammar.sortGrammar(config.getFeatureFunctions());
@@ -105,9 +107,9 @@ public class TextGrammarFactory {
     final Config grammarConfig = ConfigFactory.parseMap(
         ImmutableMap.of("owner", OOV_OWNER, "span_limit", "0"), "OOV phrase table config");
     final PhraseTable oovPhraseTable = new PhraseTable(grammarConfig);
-    final Set<Integer> words = getOovCandidateWords(sentence, config.getFlags().getBoolean("true_oovs_only"));
+    final Set<Integer> words = getOovCandidateWords(sentence);
     for (int sourceWord: words) {
-      oovPhraseTable.addOOVRules(sourceWord, config);
+      oovPhraseTable.addOOVRules(sourceWord, sentence.getFlags(), config.getFeatureFunctions());
     }
     // Sort all the rules (not much to actually do, this just marks it as sorted)
     oovPhraseTable.sortGrammar(config.getFeatureFunctions());
@@ -118,8 +120,9 @@ public class TextGrammarFactory {
    * Returns a set of integer ids for which OOV rules will be created.
    * The set is determined by the flag trueOovsOnly.
    */
-  private static Set<Integer> getOovCandidateWords(final Sentence sentence, boolean trueOovsOnly) {
+  private static Set<Integer> getOovCandidateWords(final Sentence sentence) {
     final Set<Integer> words = new HashSet<>();
+    final boolean trueOovsOnly = sentence.getFlags().getBoolean("true_oovs_only");
     for (Node<Token> node : sentence.getLattice()) {
       for (Arc<Token> arc : node.getOutgoingArcs()) {
         int sourceWord = arc.getLabel().getWord();
@@ -137,7 +140,7 @@ public class TextGrammarFactory {
     return words;
   }
   
-  public static PhraseTable createEndRulePhraseTable(Sentence sentence, DecoderConfig config) {
+  public static PhraseTable createEndRulePhraseTable() {
     final Config grammarConfig = ConfigFactory.parseMap(
         ImmutableMap.of("owner", UNKNOWN_OWNER, "span_limit", "0"), "End Rule Phrase Table Config");
     final PhraseTable endRulePhraseTable = new PhraseTable(grammarConfig);

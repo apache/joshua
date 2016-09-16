@@ -26,10 +26,9 @@ import org.apache.joshua.decoder.ff.tm.Grammar;
 import org.apache.joshua.decoder.ff.tm.OwnerMap;
 
 import com.google.common.collect.ImmutableList;
-import com.typesafe.config.Config;
 
 /**
- * This is the central config/state object that holds references to relevant attributes
+ * This is the central state object that holds references to relevant attributes
  * of the decoder (features, grammars, etc.).
  * A sentence-specific instance of this object is created before
  * translating a single sentence.
@@ -37,9 +36,6 @@ import com.typesafe.config.Config;
  * @author Felix Hieber, felix.hieber@gmail.com
  */
 public class DecoderConfig {
-  
-  /** Decoder flags */ 
-  private final Config flags;
   
   /** Decoder feature functions */
   private final ImmutableList<FeatureFunction> featureFunctions;
@@ -65,7 +61,7 @@ public class DecoderConfig {
   private final SearchAlgorithm searchAlgorithm;
   
   public DecoderConfig(
-      final Config flags,
+      final SearchAlgorithm searchAlgorithm,
       final ImmutableList<FeatureFunction> featureFunctions,
       final ImmutableList<Grammar> grammars,
       final Grammar customGrammar,
@@ -73,7 +69,7 @@ public class DecoderConfig {
       final FeatureVector weights,
       final FeatureMap featureMap,
       final OwnerMap ownerMap) {
-    this.flags = flags;
+    this.searchAlgorithm = searchAlgorithm;
     this.featureFunctions = featureFunctions;
     this.grammars = grammars;
     this.customGrammar = customGrammar;
@@ -81,11 +77,6 @@ public class DecoderConfig {
     this.weights = weights;
     this.featureMap = featureMap;
     this.ownerMap = ownerMap;
-    this.searchAlgorithm = SearchAlgorithm.valueOf(flags.getString("search_algorithm"));
-  }
-
-  public Config getFlags() {
-    return flags;
   }
 
   public ImmutableList<FeatureFunction> getFeatureFunctions() {

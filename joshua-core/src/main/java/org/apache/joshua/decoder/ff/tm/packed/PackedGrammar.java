@@ -80,7 +80,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.DecoderConfig;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.tm.AbstractGrammar;
@@ -961,7 +960,7 @@ public class PackedGrammar extends AbstractGrammar {
   }
   
   @Override
-  public void addOOVRules(int word, DecoderConfig config) {
+  public void addOOVRules(int sourceWord, Config sentenceFlags, List<FeatureFunction> featureFunctions) {
     throw new RuntimeException("PackedGrammar.addOOVRules(): I can't add OOV rules");
   }
 

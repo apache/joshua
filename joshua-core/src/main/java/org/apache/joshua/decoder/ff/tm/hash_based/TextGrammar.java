@@ -18,13 +18,14 @@
  */
 package org.apache.joshua.decoder.ff.tm.hash_based;
 
+import static org.apache.joshua.util.FormatUtils.ensureNonTerminalBrackets;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.DecoderConfig;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.tm.AbstractGrammar;
@@ -162,13 +163,14 @@ public class TextGrammar extends AbstractGrammar {
    * @param featureFunctions {@link java.util.List} of {@link org.apache.joshua.decoder.ff.FeatureFunction}'s
    */
   @Override
-  public void addOOVRules(int sourceWord, DecoderConfig config) {
+  public void addOOVRules(int sourceWord, Config sentenceFlags, List<FeatureFunction> featureFunctions) {
 
     // TODO: _OOV shouldn't be outright added, since the word might not be OOV for the LM (but now
     // almost
     // certainly is)
-    final int targetWord = config.getFlags().getBoolean("mark_oovs") ? Vocabulary.id(Vocabulary
+    final int targetWord = sentenceFlags.getBoolean("mark_oovs") ? Vocabulary.id(Vocabulary
         .word(sourceWord) + "_OOV") : sourceWord;
+    final int lhs = Vocabulary.id(ensureNonTerminalBrackets(sentenceFlags.getString("default_non_terminal")));
 
     final int[] sourceWords = { sourceWord };
     final int[] targetWords = { targetWord };
@@ -176,7 +178,7 @@ public class TextGrammar extends AbstractGrammar {
     final FeatureVector features = new FeatureVector(0);
 
     final Rule oovRule = new Rule(
-          Vocabulary.id(config.getFlags().getString("default_non_terminal")),
+          lhs,
           sourceWords,
           targetWords,
           0,
@@ -184,7 +186,7 @@ public class TextGrammar extends AbstractGrammar {
           alignment,
           getOwner());
     addRule(oovRule);
-    oovRule.estimateRuleCost(config.getFeatureFunctions());
+    oovRule.estimateRuleCost(featureFunctions);
   }
 
   /**

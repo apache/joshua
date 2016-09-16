@@ -126,13 +126,13 @@ public class KBestExtractor {
       boolean isMonolingual) {
 
     this.config = config;
-    this.outputFormat = config.getFlags().getString("output_format");
-    this.extractUniqueNbest = config.getFlags().getBoolean("use_unique_nbest");
+    this.outputFormat = sentence.getFlags().getString("output_format");
+    this.extractUniqueNbest = sentence.getFlags().getBoolean("use_unique_nbest");
 
     this.defaultSide = (isMonolingual ? Side.SOURCE : Side.TARGET);
     this.sentence = sentence;
 
-    if (config.getFlags().getBoolean("rescore_forest")) {
+    if (sentence.getFlags().getBoolean("rescore_forest")) {
       references = new BLEU.References(sentence.references());
     }
   }
@@ -270,7 +270,7 @@ public class KBestExtractor {
   private String maybeProjectCase(String hypothesis, DerivationState state) {
     String output = hypothesis;
 
-    if (config.getFlags().getBoolean("project_case")) {
+    if (sentence.getFlags().getBoolean("project_case")) {
       String[] tokens = hypothesis.split("\\s+");
       List<List<Integer>> points = state.getWordAlignmentList();
       for (int i = 0; i < points.size(); i++) {
@@ -507,7 +507,7 @@ public class KBestExtractor {
                 + virtualTailNode.nbests.get(newRanks[i] - 1).getModelCost();
             nextState.setCost(cost);
 
-            if (config.getFlags().getBoolean("rescore_forest"))
+            if (sentence.getFlags().getBoolean("rescore_forest"))
               nextState.bleu = nextState.computeBLEU();
 
             candHeap.add(nextState);
@@ -621,7 +621,7 @@ public class KBestExtractor {
       cost = hyperEdge.getBestDerivationScore();
 
       DerivationState state = new DerivationState(parentNode, hyperEdge, ranks, cost, edgePos);
-      if (config.getFlags().getBoolean("rescore_forest"))
+      if (sentence.getFlags().getBoolean("rescore_forest"))
         state.bleu = state.computeBLEU();
 
       return state;

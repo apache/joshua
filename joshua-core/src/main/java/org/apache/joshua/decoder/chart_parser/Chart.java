@@ -41,6 +41,7 @@ import org.apache.joshua.lattice.Arc;
 import org.apache.joshua.lattice.Lattice;
 import org.apache.joshua.lattice.Node;
 import org.apache.joshua.util.ChartSpan;
+import org.apache.joshua.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,14 +104,14 @@ public class Chart {
   public Chart(final Sentence sentence, final DecoderConfig config) {
     
     this.config = config;
-    this.numTranslationOptions = config.getFlags().getInt("num_translation_options");
-    this.popLimit = config.getFlags().getInt("pop_limit");
+    this.numTranslationOptions = sentence.getFlags().getInt("num_translation_options");
+    this.popLimit = sentence.getFlags().getInt("pop_limit");
     
     this.inputLattice = sentence.getLattice();
     this.sourceLength = inputLattice.size() - 1;
     this.sentence = sentence;
     this.cells = new ChartSpan<>(sourceLength, null);
-    this.goalSymbolID = Vocabulary.id(config.getFlags().getString("goal_symbol"));
+    this.goalSymbolID = Vocabulary.id(FormatUtils.ensureNonTerminalBrackets(sentence.getFlags().getString("goal_symbol")));
     this.goalBin = new Cell(this, this.goalSymbolID);
 
     // each grammar will have a dot chart

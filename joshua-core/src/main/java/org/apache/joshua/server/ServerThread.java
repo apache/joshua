@@ -87,7 +87,7 @@ public class ServerThread extends Thread implements HttpHandler {
     try {
       BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), FILE_ENCODING));
 
-      TranslationRequestStream request = new TranslationRequestStream(reader, decoder.getDecoderConfig().getFlags());
+      TranslationRequestStream request = new TranslationRequestStream(reader, decoder.getFlags());
 
       try {
         TranslationResponseStream translationResponseStream = decoder.decodeAll(request);
@@ -161,7 +161,7 @@ public class ServerThread extends Thread implements HttpHandler {
     String meta = params.get("meta");
     
     BufferedReader reader = new BufferedReader(new StringReader(query));
-    TranslationRequestStream request = new TranslationRequestStream(reader, decoder.getDecoderConfig().getFlags());
+    TranslationRequestStream request = new TranslationRequestStream(reader, decoder.getFlags());
     
     TranslationResponseStream translationResponseStream = decoder.decodeAll(request);
     JSONMessage message = new JSONMessage();
@@ -193,7 +193,7 @@ public class ServerThread extends Thread implements HttpHandler {
     String type = tokens[0];
     String args = tokens.length > 1 ? tokens[1] : "";
     
-    final FeatureVector weights = decoder.getDecoderConfig().getWeights();
+    final FeatureVector weights = decoder.getWeights();
     
     if (type.equals("get_weight")) {
       String weight = tokens[1];
@@ -237,7 +237,7 @@ public class ServerThread extends Thread implements HttpHandler {
       /* Prepend source and target side nonterminals for phrase-based decoding. Probably better
        * handled in each grammar type's addRule() function.
        */
-      String ruleString = (decoder.getDecoderConfig().getSearchAlgorithm() == SearchAlgorithm.stack)
+      String ruleString = (SearchAlgorithm.valueOf(decoder.getFlags().getString("search_algorithm")) == SearchAlgorithm.stack)
           ? String.format("%s ||| [X,1] %s ||| [X,1] %s ||| -1 %s %s", lhs, source, target, featureStr, alignmentStr)
           : String.format("%s ||| %s ||| %s ||| -1 %s %s", lhs, source, target, featureStr, alignmentStr);
       

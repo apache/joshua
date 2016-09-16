@@ -26,6 +26,7 @@ import org.apache.joshua.decoder.hypergraph.GrammarBuilderWalkerFunction;
 import org.apache.joshua.decoder.hypergraph.HyperGraph;
 import org.apache.joshua.decoder.phrase.Stacks;
 import org.apache.joshua.decoder.segment_file.Sentence;
+import org.apache.joshua.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,13 +57,15 @@ public class DecoderTask {
   private final boolean segmentOovs;
   private final boolean useDotChart;
   private final boolean doParsing;
+  private final String goalSymbol;
 
   public DecoderTask(final DecoderConfig sentenceConfig, final Sentence sentence) {
     this.sentenceConfig = sentenceConfig;
     this.sentence = sentence;
-    this.segmentOovs = sentenceConfig.getFlags().getBoolean("segment_oovs");
-    this.useDotChart = sentenceConfig.getFlags().getBoolean("use_dot_chart");
-    this.doParsing = sentenceConfig.getFlags().getBoolean("parse");
+    this.segmentOovs = sentence.getFlags().getBoolean("segment_oovs");
+    this.useDotChart = sentence.getFlags().getBoolean("use_dot_chart");
+    this.doParsing = sentence.getFlags().getBoolean("parse");
+    this.goalSymbol = FormatUtils.ensureNonTerminalBrackets(sentence.getFlags().getString("goal_symbol"));
   }
 
   /**
@@ -135,14 +138,14 @@ public class DecoderTask {
   private Translation parse(final HyperGraph hypergraph) {
     long startTime = System.currentTimeMillis();
     // Step 1. Traverse the hypergraph to create a grammar for the second-pass parse.
-    final Grammar newGrammar = getGrammarFromHyperGraph(sentenceConfig.getFlags().getString("goal_symbol"), hypergraph);
+    final Grammar newGrammar = getGrammarFromHyperGraph(goalSymbol, hypergraph);
     newGrammar.sortGrammar(sentenceConfig.getFeatureFunctions());
     long sortTime = System.currentTimeMillis();
     LOG.info("Sentence {}: New grammar has {} rules.", sentence.id(),
         newGrammar.getNumRules());
 
     /* Step 2. Create a new chart and parse with the instantiated grammar. */
-    final Sentence targetSentence = new Sentence(sentence.target(), sentence.id(), sentenceConfig.getFlags());
+    final Sentence targetSentence = new Sentence(sentence.target(), sentence.id(), sentence.getFlags());
     final Chart chart = new Chart(targetSentence, sentenceConfig);
     int goalSymbol = GrammarBuilderWalkerFunction.goalSymbol(hypergraph);
     String goalSymbolString = Vocabulary.word(goalSymbol);

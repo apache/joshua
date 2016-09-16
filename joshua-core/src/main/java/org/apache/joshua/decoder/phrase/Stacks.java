@@ -90,9 +90,9 @@ public class Stacks {
     this.sentence = sentence;
     this.config = config;
     this.featureFunctions = config.getFeatureFunctions();
-    this.popLimit = config.getFlags().getInt("pop_limit");
-    this.numTranslationOptions = config.getFlags().getInt("num_translation_options");
-    this.reorderingLimit = config.getFlags().getInt("reordering_limit");
+    this.popLimit = sentence.getFlags().getInt("pop_limit");
+    this.numTranslationOptions = sentence.getFlags().getInt("num_translation_options");
+    this.reorderingLimit = sentence.getFlags().getInt("reordering_limit");
     
     // collect grammars that are phrase tables
     final ImmutableList.Builder<PhraseTable> phraseTablesBuilder = new ImmutableList.Builder<>();

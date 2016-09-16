@@ -97,11 +97,20 @@ import com.typesafe.config.ConfigValueFactory;
 public class Decoder {
 
   private static final Logger LOG = LoggerFactory.getLogger(Decoder.class);
+  
+  /*
+   * The immutable configuration used to initialize the decoder.
+   * Sentences may have specific overrides, but the decoder flags are immutable.
+   */
+  private final Config flags;
 
   /*
    * Holds the common (immutable) decoder state (features, grammars etc.) after initialization
    */
   private final DecoderConfig decoderConfig;
+
+  private final int numParallelDecoders;
+  private final SearchAlgorithm searchAlgorithm;
   
   private static final ImmutableList<String> GRAMMAR_PACKAGES = ImmutableList.of(
       "org.apache.joshua.decoder.ff.tm.hash_based",
@@ -118,12 +127,22 @@ public class Decoder {
    *
    * @param joshuaConfiguration a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
    */
-  public Decoder(Config config) {
-    this.decoderConfig = initialize(config); 
+  public Decoder(Config flags) {
+    this.flags = flags;
+    this.searchAlgorithm = SearchAlgorithm.valueOf(flags.getString("search_algorithm"));
+    this.numParallelDecoders = flags.getInt("num_parallel_decoders");
+    this.decoderConfig = initialize(flags);
   }
   
   /**
-   * Returns the default Decoder flags.
+   * Returns the flags this decoder was initialized with.
+   */
+  public Config getFlags() {
+    return flags;
+  }
+  
+  /**
+   * Returns the default configuration for {@link Decoder}.
    */
   public static Config getDefaultFlags() {
     final ConfigParseOptions options = ConfigParseOptions.defaults().setAllowMissing(false);
@@ -131,11 +150,11 @@ public class Decoder {
   }
   
   /**
-   * Returns a fully-specified decoder flags {@link Config} from the given
-   * Config. This is the preferable way to include default configuration and ensures 
+   * Returns fully-specified decoder flags with the given
+   * Config as override. This is the preferable way to include default configuration and ensures 
    * certain format correctness at runtime.
    */
-  public static Config createDecoderFlags(final Config userFlags) {
+  public static Config getFlags(final Config userFlags) {
     final Config defaultFlags = Decoder.getDefaultFlags();
     final Config allFlags = userFlags.resolveWith(defaultFlags).withFallback(defaultFlags);
     return allFlags
@@ -143,16 +162,13 @@ public class Decoder {
       .withValue("goal_symbol", ConfigValueFactory.fromAnyRef(ensureNonTerminalBrackets(allFlags.getString("goal_symbol"))));
   }
   
-  public static Config createDecoderFlagsFromFile(final File fileName) {
-    final ConfigParseOptions options = ConfigParseOptions.defaults().setAllowMissing(false);
-    return createDecoderFlags(ConfigFactory.parseFile(fileName, options));
-  }
-  
   /**
-   * Returns the DecoderConfig
+   * Returns fully-specified decoder flags with overrides
+   * loaded from the given file in TypeSafeConfig syntax.
    */
-  public DecoderConfig getDecoderConfig() {
-    return decoderConfig;
+  public static Config getFlagsFromFile(final File fileName) {
+    final ConfigParseOptions options = ConfigParseOptions.defaults().setAllowMissing(false);
+    return getFlags(ConfigFactory.parseFile(fileName, options));
   }
 
   /**
@@ -178,7 +194,6 @@ public class Decoder {
             .setNameFormat("TranslationWorker-%d")
             .setDaemon(true)
             .build();
-    int numParallelDecoders = this.decoderConfig.getFlags().getInt("num_parallel_decoders");
     ExecutorService executor = Executors.newFixedThreadPool(numParallelDecoders, threadFactory);
     try {
       for (; ; ) {
@@ -205,9 +220,8 @@ public class Decoder {
 
 
   /**
-   * Decode call for a single sentence.
-   * Creates a sentence-specific {@link DecoderConfig} including
-   * sentence-specific OOVGrammar.
+   * Decode call for a single sentence
+   * using the flags specified in the Sentence object.
    *
    * @param sentence {@link org.apache.joshua.lattice.Lattice} input
    * @return the sentence {@link org.apache.joshua.decoder.Translation}
@@ -219,11 +233,18 @@ public class Decoder {
   }
   
   /**
+   * Returns the current weights in the decoder;
+   */
+  public FeatureVector getWeights() {
+    return decoderConfig.getWeights();
+  }
+  
+  /**
    * Creates a sentence-specific {@link DecoderConfig}.
    * Most importantly, adds an OOV grammar for the words of this
    * sentence.
    */
-  private static DecoderConfig createSentenceDecoderConfig(
+  private DecoderConfig createSentenceDecoderConfig(
       final Sentence sentence, final DecoderConfig globalConfig) {
     
     // create a new list of grammars that includes the OOVgrammar
@@ -236,13 +257,13 @@ public class Decoder {
         break;
     case stack:
       grammars 
-        .add(TextGrammarFactory.createEndRulePhraseTable(sentence, globalConfig))
+        .add(TextGrammarFactory.createEndRulePhraseTable())
         .add(TextGrammarFactory.createOovPhraseTable(sentence, globalConfig));
       break;
     }
     
     return new DecoderConfig(
-        globalConfig.getFlags(),
+        this.searchAlgorithm,
         globalConfig.getFeatureFunctions(),
         grammars.addAll(globalConfig.getGrammars()).build(),
         globalConfig.getCustomGrammar(),
@@ -316,7 +337,7 @@ public class Decoder {
     // TODO(fhieber): right now we still rely on static variables for vocab etc.
     // this should be changed and then we pass the instance of vocab etc. in here
     return new DecoderConfig(
-        config,
+        searchAlgorithm,
         featureFunctions,
         ImmutableList.copyOf(grammars),
         customGrammar,

@@ -18,12 +18,13 @@
  */
 package org.apache.joshua.decoder.phrase;
 
+import static org.apache.joshua.util.Constants.defaultNT;
+
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.DecoderConfig;
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.tm.Grammar;
@@ -104,14 +105,14 @@ public class PhraseTable implements Grammar {
   }
   
   @Override
-  public void addOOVRules(int sourceWord, DecoderConfig config) {
+  public void addOOVRules(int sourceWord, Config sentenceFlags, List<FeatureFunction> featureFunctions) {
     // TODO: _OOV shouldn't be outright added, since the word might not be OOV for the LM (but now almost
     // certainly is)
-    int targetWord = config.getFlags().getBoolean("mark_oovs")
+    int targetWord = sentenceFlags.getBoolean("mark_oovs")
         ? Vocabulary.id(Vocabulary.word(sourceWord) + "_OOV")
         : sourceWord;   
 
-    int nt_i = Vocabulary.id("[X]");
+    int nt_i = Vocabulary.id(defaultNT);
     Rule oovRule = new Rule(
         nt_i,
         new int[] { nt_i, sourceWord },
@@ -120,7 +121,7 @@ public class PhraseTable implements Grammar {
         new FeatureVector(0),
         new byte[] {0,0}, backend.getOwner());
     addRule(oovRule);
-    oovRule.estimateRuleCost(config.getFeatureFunctions());
+    oovRule.estimateRuleCost(featureFunctions);
   }
 
   @Override

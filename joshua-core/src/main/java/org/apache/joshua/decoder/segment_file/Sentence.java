@@ -78,7 +78,7 @@ public class Sentence {
   /* List of constraints */
   private final List<ConstraintSpan> constraints;
   
-  private final Config config;
+  private final Config flags;
   
   private final boolean latticeDecoding;
   private final int maximumSentenceLength;
@@ -92,16 +92,16 @@ public class Sentence {
    * 
    * @param inputString representing the input sentence
    * @param id ID to associate with the input string
-   * @param joshuaConfiguration a populated {@link org.apache.joshua.decoder.JoshuaConfiguration}
+   * @param Config flags
    */
-  public Sentence(String inputString, int id, Config config) {
+  public Sentence(String inputString, int id, Config flags) {
   
     inputString = Regex.spaces.replaceAll(inputString, " ").trim();
     
-    this.config = config;
-    this.latticeDecoding = this.config.getBoolean("lattice_decoding");
-    this.maximumSentenceLength = this.config.getInt("maximum_sentence_length");
-    this.searchAlgorithm = SearchAlgorithm.valueOf(this.config.getString("search_algorithm"));
+    this.flags = flags;
+    this.latticeDecoding = this.flags.getBoolean("lattice_decoding");
+    this.maximumSentenceLength = this.flags.getInt("maximum_sentence_length");
+    this.searchAlgorithm = SearchAlgorithm.valueOf(this.flags.getString("search_algorithm"));
     
     this.constraints = new LinkedList<>();
 
@@ -141,8 +141,8 @@ public class Sentence {
     }
   }
   
-  public Config getConfig() {
-    return config;
+  public Config getFlags() {
+    return flags;
   }
 
   /**
@@ -224,7 +224,7 @@ public class Sentence {
             for (int i = 0; i <= chars.length - width; i++) {
               int j = i + width;
               if (width != chars.length) {
-                Token token = new Token(word.substring(i, j), config);
+                Token token = new Token(word.substring(i, j), flags);
                 if (vocabulary.contains(id)) {
                   nodes.get(i).addArc(nodes.get(j), 0.0f, token);
                   wordChart.set(i, j, true);
@@ -427,7 +427,7 @@ public class Sentence {
    */
   public Lattice<String> stringLattice() {
     assert isLinearChain();
-    return Lattice.createStringLatticeFromString(source(), config);
+    return Lattice.createStringLatticeFromString(source(), flags);
   }
 
   public List<ConstraintSpan> constraints() {
@@ -440,10 +440,10 @@ public class Sentence {
         if (searchAlgorithm == SearchAlgorithm.stack) {
           throw new RuntimeException("* FATAL: lattice decoding currently not supported for stack-based search algorithm.");
         }
-        this.sourceLattice = Lattice.createTokenLatticeFromPLF(rawSource(), config);
+        this.sourceLattice = Lattice.createTokenLatticeFromPLF(rawSource(), flags);
       } else
         this.sourceLattice = Lattice.createTokenLatticeFromString(String.format("%s %s %s", Vocabulary.START_SYM,
-            rawSource(), Vocabulary.STOP_SYM), config);
+            rawSource(), Vocabulary.STOP_SYM), flags);
     }
     return this.sourceLattice;
   }

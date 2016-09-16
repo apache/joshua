@@ -81,7 +81,7 @@ public class JoshuaDecoder {
     if (configFile == null) {
       return commandLineOverrides.withFallback(Decoder.getDefaultFlags()).resolve();
     } else {
-      return commandLineOverrides.withFallback(Decoder.createDecoderFlagsFromFile(configFile)).resolve();
+      return commandLineOverrides.withFallback(Decoder.getFlagsFromFile(configFile)).resolve();
     }
   }
   
@@ -124,7 +124,7 @@ public class JoshuaDecoder {
         new TcpServer(decoder, port).start();
 
       } else if (serverType == ServerType.HTTP) {
-        checkState(decoder.getDecoderConfig().getFlags().getBoolean("use_structured_output"));
+        checkState(config.getBoolean("use_structured_output"));
 
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         LOG.info("HTTP Server running and listening on port {}.", port);

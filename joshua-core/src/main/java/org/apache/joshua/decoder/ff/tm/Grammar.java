@@ -20,8 +20,9 @@ package org.apache.joshua.decoder.ff.tm;
 
 import java.util.List;
 
-import org.apache.joshua.decoder.DecoderConfig;
 import org.apache.joshua.decoder.ff.FeatureFunction;
+
+import com.typesafe.config.Config;
 
 /**
  * Grammar is a class for wrapping a trie of TrieGrammar in order to store holistic metadata.
@@ -100,7 +101,7 @@ public interface Grammar {
   /**
    * Add an OOV rule for the requested word for the grammar.
    */
-  void addOOVRules(int word, DecoderConfig config);
+  void addOOVRules(int sourceWord, Config sentenceFlags, List<FeatureFunction> featureFunctions);
   
   /**
    * Add a rule to the grammar.

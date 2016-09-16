@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
 
 public class Translation {
   private static final Logger LOG = LoggerFactory.getLogger(Translation.class);
-  private final Sentence source;
+  private final Sentence sourceSentence;
 
   /**
    * This stores the output of the translation so we don't have to hold onto the hypergraph while we
@@ -65,21 +65,26 @@ public class Translation {
    */
   private List<StructuredTranslation> structuredTranslations = null;
 
-  public Translation(final Sentence source,
+  public Translation(final Sentence sourceSentence,
       final HyperGraph hypergraph, DecoderConfig config) {
-    this.source = source;
+    this.sourceSentence = sourceSentence;
+    final boolean useStructuredOutput = sourceSentence.getFlags().getBoolean("use_structured_output");
+    final int topN = sourceSentence.getFlags().getInt("top_n");
+    final String outputFormat = sourceSentence.getFlags().getString("output_format");
+    final boolean rescoreForest = sourceSentence.getFlags().getBoolean("rescore_forest");
+    final double rescoreForestWeight = sourceSentence.getFlags().getDouble("rescore_forest_weight");
 
     /**
      * Structured output from Joshua provides a way to programmatically access translation results
      * from downstream applications, instead of writing results as strings to an output buffer.
      */
-    if (config.getFlags().getBoolean("use_structured_output")) {
+    if (useStructuredOutput) {
 
-      if (config.getFlags().getInt("top_n") == 0) {
+      if (topN == 0) {
         /*
          * Obtain Viterbi StructuredTranslation
          */
-        StructuredTranslation translation = fromViterbiDerivation(source, hypergraph, config.getFeatureFunctions());
+        StructuredTranslation translation = fromViterbiDerivation(sourceSentence, hypergraph, config.getFeatureFunctions());
         this.output = translation.getTranslationString();
         structuredTranslations = Collections.singletonList(translation);
 
@@ -87,11 +92,11 @@ public class Translation {
         /*
          * Get K-Best list of StructuredTranslations
          */
-        final KBestExtractor kBestExtractor = new KBestExtractor(source, config, false);
-        structuredTranslations = kBestExtractor.KbestExtractOnHG(hypergraph, config.getFlags().getInt("top_n"));
+        final KBestExtractor kBestExtractor = new KBestExtractor(sourceSentence, config, false);
+        structuredTranslations = kBestExtractor.KbestExtractOnHG(hypergraph, topN);
         if (structuredTranslations.isEmpty()) {
             structuredTranslations = Collections
-                .singletonList(StructuredTranslationFactory.fromEmptyOutput(source));
+                .singletonList(StructuredTranslationFactory.fromEmptyOutput(sourceSentence));
             this.output = "";
         } else {
             this.output = structuredTranslations.get(0).getTranslationString();
@@ -110,31 +115,30 @@ public class Translation {
 
           long startTime = System.currentTimeMillis();
 
-          if (config.getFlags().getInt("top_n") == 0) {
+          if (topN == 0) {
 
             /* construct Viterbi output */
             final String best = getViterbiString(hypergraph);
 
-            LOG.info("Translation {}: {} {}", source.id(), hypergraph.goalNode.getScore(), best);
+            LOG.info("Translation {}: {} {}", sourceSentence.id(), hypergraph.goalNode.getScore(), best);
 
             /*
              * Setting topN to 0 turns off k-best extraction, in which case we need to parse through
              * the output-string, with the understanding that we can only substitute variables for the
              * output string, sentence number, and model score.
              */
-            String outputFormat = config.getFlags().getString("output_format");
             String translation = outputFormat
                 .replace("%s", removeSentenceMarkers(best))
                 .replace("%S", DeNormalize.processSingleLine(best))
                 .replace("%c", String.format("%.3f", hypergraph.goalNode.getScore()))
-                .replace("%i", String.format("%d", source.id()));
+                .replace("%i", String.format("%d", sourceSentence.id()));
 
             if (outputFormat.contains("%a")) {
               translation = translation.replace("%a", getViterbiWordAlignments(hypergraph));
             }
 
             if (outputFormat.contains("%f")) {
-              final FeatureVector features = getViterbiFeatures(hypergraph, config.getFeatureFunctions(), source);
+              final FeatureVector features = getViterbiFeatures(hypergraph, config.getFeatureFunctions(), sourceSentence);
               translation = translation.replace("%f", features.textFormat());
             }
 
@@ -144,28 +148,27 @@ public class Translation {
           } else {
 
             final KBestExtractor kBestExtractor = new KBestExtractor(
-                source, config, false);
-            kBestExtractor.lazyKBestExtractOnHG(hypergraph, config.getFlags().getInt("top_n"), out);
+                sourceSentence, config, false);
+            kBestExtractor.lazyKBestExtractOnHG(hypergraph, topN, out);
 
-            if (config.getFlags().getBoolean("rescore_forest")) {
+            if (rescoreForest) {
               final int bleuFeatureHash = hashFeature("BLEU");
               // TODO(fhieber): this is fishy, why would we want to change the decoder weights HERE?
-              config.getWeights().add(bleuFeatureHash, (float) config.getFlags().getDouble("rescore_forest_weight"));
-              kBestExtractor.lazyKBestExtractOnHG(hypergraph, config.getFlags().getInt("top_n"), out);
+              config.getWeights().add(bleuFeatureHash, (float) rescoreForestWeight);
+              kBestExtractor.lazyKBestExtractOnHG(hypergraph, topN, out);
 
-              config.getWeights().add(bleuFeatureHash, -(float) config.getFlags().getDouble("rescore_forest_weight"));
-              kBestExtractor.lazyKBestExtractOnHG(hypergraph, config.getFlags().getInt("top_n"), out);
+              config.getWeights().add(bleuFeatureHash, -(float) rescoreForestWeight);
+              kBestExtractor.lazyKBestExtractOnHG(hypergraph, topN, out);
             }
           }
 
           float seconds = (System.currentTimeMillis() - startTime) / 1000.0f;
-          LOG.info("Input {}: {}-best extraction took {} seconds", id(),
-              config.getFlags().getInt("top_n"), seconds);
+          LOG.info("Input {}: {}-best extraction took {} seconds", id(), topN, seconds);
 
         } else {
 
           // Failed translations and blank lines get empty formatted outputs
-          out.write(getFailedTranslationOutput(source, config.getFlags().getString("output_format")));
+          out.write(getFailedTranslationOutput(sourceSentence, outputFormat));
           out.newLine();
 
         }
@@ -181,23 +184,23 @@ public class Translation {
     }
 
     // Force any StateMinimizingLanguageModel pool mappings to be cleaned
-    source.getStateManager().clearStatePool();
+    sourceSentence.getStateManager().clearStatePool();
 
   }
 
   public Sentence getSourceSentence() {
-    return this.source;
+    return this.sourceSentence;
   }
 
   public int id() {
-    return source.id();
+    return sourceSentence.id();
   }
 
   @Override
   public String toString() {
     return output;
   }
-
+  
   private String getFailedTranslationOutput(final Sentence source, final String outputFormat) {
     return outputFormat
         .replace("%s", source.source())
