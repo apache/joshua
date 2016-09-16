@@ -101,7 +101,7 @@ public class LowercaseTest {
   }
 
   public void setUp(boolean lowercase, boolean projectCase, boolean capitalize) throws Exception {
-    Config config = Decoder.createDecoderFlagsFromFile(JOSHUA_CONFIG_PATH)
+    Config config = Decoder.getFlagsFromFile(JOSHUA_CONFIG_PATH)
           .withValue("lowercase", ConfigValueFactory.fromAnyRef(lowercase))
           .withValue("project_case", ConfigValueFactory.fromAnyRef(projectCase))
           .withValue("output_format", ConfigValueFactory.fromAnyRef(capitalize ? "%S" : "%s"));

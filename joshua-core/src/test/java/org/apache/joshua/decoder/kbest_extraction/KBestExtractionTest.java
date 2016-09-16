@@ -27,6 +27,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.testng.reporters.Files;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigValueFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -44,17 +47,13 @@ public class KBestExtractionTest {
   private static final String CONFIG = "src/test/resources/kbest_extraction/joshua.config";
   private static final String INPUT = "a b c d e";
   private static final Path GOLD_PATH = Paths.get("src/test/resources/kbest_extraction/output.scores.gold");
-
-  private JoshuaConfiguration joshuaConfig = null;
   private Decoder decoder = null;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    //BROKEN
-    joshuaConfig = new JoshuaConfiguration();
-    joshuaConfig.readConfigFile(CONFIG);
-    joshuaConfig.outputFormat = "%i ||| %s ||| %c";
-    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig));
+    Config config = Decoder.getFlagsFromFile(new File(CONFIG))
+        .withValue("output_format", ConfigValueFactory.fromAnyRef("%i ||| %s ||| %c"));
+    KenLmTestUtil.Guard(() -> decoder = new Decoder(config));
   }
 
   @AfterMethod
@@ -72,7 +71,7 @@ public class KBestExtractionTest {
   }
 
   private Translation decode(String input) {
-    final Sentence sentence = new Sentence(input, 0, joshuaConfig);
+    final Sentence sentence = new Sentence(input, 0, decoder.getFlags());
     return decoder.decode(sentence);
   }
 

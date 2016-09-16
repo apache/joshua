@@ -1,29 +1,35 @@
-tm = moses -owner pt -maxspan 0 -path src/test/resources/phrase_decoder/rules.1.gz -max-source-len 5
-feature-function = StateMinimizingLanguageModel -lm_order 5 -lm_file src/test/resources/phrase_decoder/lm.1.gz
+grammars = [
+	{class=TextGrammar, owner=pt, span_limit=0, max_source_len=5, path=src/test/resources/phrase_decoder/rules.1.gz},
+]
 
-search = stack
+search_algorithm=stack
 
-mark-oovs = false
-pop-limit = 10
-top-n = 1
+mark_oovs = false
+pop_limit = 10
+top_n = 1
 
-output-format = %i ||| %s ||| %f ||| %c
+output_format = %i ||| %s ||| %f ||| %c
 
-include-align-index = true
-reordering-limit = 6
+include_align_index = true
+reordering_limit = 6
 
-# And these are the feature functions to activate.
-feature-function = OOVPenalty
-feature-function = WordPenalty
-feature-function = Distortion
-feature-function = PhrasePenalty -owner pt
 
-OOVPenalty 1.0
-Distortion 0.114849
-WordPenalty -0.201544
-PhrasePenalty -0.236965
-pt_0 0.0370068
-pt_1 0.0495759
-pt_2 0.196742
-pt_3 0.0745423
-lm_0 0.204412452147565
+feature_functions = [
+	{class=LanguageModel, lm_type=kenlm, lm_order=5, lm_file=src/test/resources/phrase_decoder/lm.1.gz},
+	{class=OOVPenalty},
+	{class=WordPenalty},
+	{class=Distortion},
+	{class=PhrasePenalty, owner=pt},
+]
+
+weights = {
+	OOVPenalty = 1
+	Distortion = 0.114849
+	WordPenalty = -0.201544
+	PhrasePenalty = -0.236965
+	pt_0 = 0.0370068
+	pt_1 = 0.0495759
+	pt_2 = 0.196742
+	pt_3 = 0.0745423
+	lm_0 = 0.204412452147565
+}

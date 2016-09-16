@@ -58,6 +58,6 @@ public class LeftStateTest {
 	}
 	
 	public void configureDecoder(File pathToConfig) throws Exception {
-		KenLmTestUtil.Guard(() -> decoder = new Decoder(Decoder.createDecoderFlagsFromFile(pathToConfig)));
+		KenLmTestUtil.Guard(() -> decoder = new Decoder(Decoder.getFlagsFromFile(pathToConfig)));
 	}
 }

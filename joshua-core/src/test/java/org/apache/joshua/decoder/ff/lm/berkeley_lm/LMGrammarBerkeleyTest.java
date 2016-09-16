@@ -76,7 +76,7 @@ public class LMGrammarBerkeleyTest {
   }
 
   private Translation decode(String input) {
-    final Sentence sentence = new Sentence(input, 0, decoder.getDecoderConfig().getFlags());
+    final Sentence sentence = new Sentence(input, 0, decoder.getFlags());
     return decoder.decode(sentence);
   }
 

@@ -20,16 +20,19 @@
 
 import static org.testng.Assert.assertEquals;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigValueFactory;
 
 /**
  * Reimplements the constrained phrase decoding test
@@ -41,14 +44,12 @@ public class PhraseDecodingTest {
   private static final String OUTPUT = "0 ||| a strategy republican to hinder reelection Obama ||| pt_3=-8.555386 pt_2=-7.542729 pt_1=-10.799793 pt_0=-9.702445 lm_0=-19.116861 WordPenalty=-3.040061 PhrasePenalty=5.000000 Distortion=0.000000 ||| -7.496"; 
   private static final String OUTPUT_WITH_ALIGNMENTS = "0 ||| a strategy |0-1| republican |2-2| to hinder |3-4| reelection |5-6| Obama |7-8| ||| Distortion=0.000000 WordPenalty=-3.040061 PhrasePenalty=5.000000 pt_0=-9.702445 pt_1=-10.799793 pt_2=-7.542729 pt_3=-8.555386 lm_0=-19.116861 ||| -7.496";
   
-  private JoshuaConfiguration joshuaConfig = null;
   private Decoder decoder = null;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    joshuaConfig = new JoshuaConfiguration();
-    joshuaConfig.readConfigFile(CONFIG);
-    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig));
+    Config config = Decoder.getFlagsFromFile(new File(CONFIG));
+    KenLmTestUtil.Guard(() -> decoder = new Decoder(config));
   }
 
   @AfterMethod
@@ -59,7 +60,7 @@ public class PhraseDecodingTest {
 
   @Test(enabled = true)
   public void givenInput_whenPhraseDecoding_thenOutputIsAsExpected() throws IOException {
-    final String translation = decode(INPUT).toString().trim();
+    final String translation = decode(INPUT, "%i ||| %s ||| %f ||| %c").toString().trim();
     final String gold = OUTPUT;
     assertEquals(translation, gold);
   }
@@ -72,24 +73,21 @@ public class PhraseDecodingTest {
    */
   @Test(enabled = false)
   public void givenInput_whenPhraseDecodingWithAlignments_thenOutputHasAlignments() throws IOException {
-    final String translation = decode(INPUT).toString().trim();
+    final String translation = decode(INPUT, "%i ||| %s ||| %f ||| %c").toString().trim();
     final String gold = OUTPUT_WITH_ALIGNMENTS;
     assertEquals(translation, gold);
   }
   
   @Test(enabled = true)
   public void givenInput_whenPhraseDecoding_thenInputCanBeRetrieved() throws IOException {
-    String outputFormat = joshuaConfig.outputFormat;
-    joshuaConfig.outputFormat = "%e";
-    final String translation = decode(INPUT).toString().trim();
-    joshuaConfig.outputFormat = outputFormat;
+    final String translation = decode(INPUT, "%e").toString().trim();
     final String gold = INPUT;
     assertEquals(translation, gold);
   }
 
-  private Translation decode(String input) {
-    final Sentence sentence = new Sentence(input, 0, joshuaConfig);
-//    joshuaConfig.setVerbosity(2);
+  private Translation decode(String input, String outputFormat) {
+    final Config flags = decoder.getFlags().withValue("output_format", ConfigValueFactory.fromAnyRef(outputFormat));
+    final Sentence sentence = new Sentence(input, 0, flags);
     return decoder.decode(sentence);
   }
 

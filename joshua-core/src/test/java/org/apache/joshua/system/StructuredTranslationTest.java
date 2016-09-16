@@ -27,13 +27,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.StructuredTranslation;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.typesafe.config.Config;
 
 /**
  * Integration test for the complete Joshua decoder using a toy grammar that translates
@@ -46,7 +47,6 @@ import org.testng.annotations.Test;
  */
 public class StructuredTranslationTest {
 
-  private JoshuaConfiguration joshuaConfig = null;
   private Decoder decoder = null;
   private static final String INPUT = "A K B1 U Z1 Z2 B2 C";
   private static final String EXPECTED_TRANSLATION = "a b n1 u z c1 k1 k2 k3 n1 n2 n3 c2";
@@ -102,8 +102,8 @@ public class StructuredTranslationTest {
     decoder = null;
   }
 
-  private Translation decode(String input) {
-    Sentence sentence = new Sentence(input, 0, joshuaConfig);
+  private Translation decode(String input, Config flags) {
+    Sentence sentence = new Sentence(input, 0, flags);
     return decoder.decode(sentence);
   }
 

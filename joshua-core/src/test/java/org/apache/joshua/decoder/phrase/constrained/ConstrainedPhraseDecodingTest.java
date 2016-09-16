@@ -22,18 +22,20 @@ import static com.google.common.base.Charsets.UTF_8;
 import static java.nio.file.Files.readAllBytes;
 import static org.testng.Assert.assertEquals;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.typesafe.config.Config;
 
 /**
  * Reimplements the constrained phrase decoding test
@@ -44,15 +46,13 @@ public class ConstrainedPhraseDecodingTest {
   private static final String CONFIG = "resources/phrase_decoder/constrained.config";
   private static final String INPUT = "una estrategia republicana para obstaculizar la reelección de Obama ||| President Obama to hinder a strategy for Republican re @-@ election";
   private static final Path GOLD_PATH = Paths.get("resources/phrase_decoder/constrained.output.gold");
-
-  private JoshuaConfiguration joshuaConfig = null;
+  
   private Decoder decoder = null;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    joshuaConfig = new JoshuaConfiguration();
-    joshuaConfig.readConfigFile(CONFIG);
-    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig));
+    Config config = Decoder.getFlagsFromFile(new File(CONFIG));
+    KenLmTestUtil.Guard(() -> decoder = new Decoder(config));
   }
 
   @AfterMethod
@@ -69,7 +69,7 @@ public class ConstrainedPhraseDecodingTest {
   }
 
   private Translation decode(String input) {
-    final Sentence sentence = new Sentence(input, 0, joshuaConfig);
+    final Sentence sentence = new Sentence(input, 0, decoder.getFlags());
     return decoder.decode(sentence);
   }
 

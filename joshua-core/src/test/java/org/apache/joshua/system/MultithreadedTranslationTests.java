@@ -18,6 +18,8 @@
  */
 package org.apache.joshua.system;
 
+import static com.typesafe.config.ConfigFactory.parseString;
+import static com.typesafe.config.ConfigValueFactory.fromAnyRef;
 import static org.mockito.Mockito.doReturn;
 import static org.testng.Assert.assertTrue;
 
@@ -30,7 +32,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.TranslationResponseStream;
 import org.apache.joshua.decoder.io.TranslationRequestStream;
@@ -40,6 +41,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.typesafe.config.Config;
+
 /**
  * Integration test for multithreaded Joshua decoder tests. Grammar used is a
  * toy packed grammar.
@@ -48,51 +51,66 @@ import org.testng.annotations.Test;
  */
 public class MultithreadedTranslationTests {
 
-  private JoshuaConfiguration joshuaConfig = null;
   private Decoder decoder = null;
   private static final String INPUT = "A K B1 U Z1 Z2 B2 C";
   private static final String EXCEPTION_MESSAGE = "This exception should properly propagate";
-  private int previousLogLevel;
   private final static long NANO_SECONDS_PER_SECOND = 1_000_000_000;
 
   @BeforeClass
   public void setUp() throws Exception {
-    joshuaConfig = new JoshuaConfiguration();
-    joshuaConfig.search_algorithm = "cky";
-    joshuaConfig.mark_oovs = false;
-    joshuaConfig.pop_limit = 100;
-    joshuaConfig.use_unique_nbest = false;
-    joshuaConfig.include_align_index = false;
-    joshuaConfig.topN = 0;
-    joshuaConfig.tms.add("thrax -owner pt -maxspan 20 -path src/test/resources/wa_grammar.packed");
-    joshuaConfig.tms.add("thrax -owner glue -maxspan -1 -path src/test/resources/grammar.glue");
-    joshuaConfig.goal_symbol = "[GOAL]";
-    joshuaConfig.default_non_terminal = "[X]";
-    joshuaConfig.features.add("OOVPenalty");
-    joshuaConfig.weights.add("tm_pt_0 1");
-    joshuaConfig.weights.add("tm_pt_1 1");
-    joshuaConfig.weights.add("tm_pt_2 1");
-    joshuaConfig.weights.add("tm_pt_3 1");
-    joshuaConfig.weights.add("tm_pt_4 1");
-    joshuaConfig.weights.add("tm_pt_5 1");
-    joshuaConfig.weights.add("tm_glue_0 1");
-    joshuaConfig.weights.add("OOVPenalty 2");
-    joshuaConfig.num_parallel_decoders = 500; // This will enable 500 parallel
-                                              // decoders to run at once.
-                                              // Useful to help flush out
-                                              // concurrency errors in
-                                              // underlying
-                                              // data-structures.
-    this.decoder = new Decoder(joshuaConfig);
-    previousLogLevel = Decoder.VERBOSE;
-    Decoder.VERBOSE = 0;
+    Config weights = parseString(
+        "weights = {pt_0=-1, pt_1=-1, pt_2=-1, pt_3=-1, pt_4=-1, pt_5=-1, glue_0=-1, OOVPenalty=2}");
+    Config features = parseString("feature_functions = [{class=OOVPenalty}]");
+    Config grammars = parseString("grammars=[{class=TextGrammar, owner=pt, span_limit=20, path=src/test/resources/wa_grammar},"
+        + "{class=TextGrammar, owner=glue, span_limit=-1, path=src/test/resources/grammar.glue}]");
+    Config flags = weights
+        .withFallback(features)
+        .withFallback(grammars)
+        .withFallback(Decoder.getDefaultFlags())
+        .withValue("top_n", fromAnyRef(0))
+        .withValue("use_unique_nbest", fromAnyRef(false))
+        .withValue("use_structured_output", fromAnyRef(true))
+        .withValue("num_parallel_decoders", fromAnyRef(500)); // This will enable 500 parallel
+                                                              // decoders to run at once.
+                                                              // Useful to help flush out
+                                                              // concurrency errors in
+                                                              // underlying
+                                                              // data-structures.
+    decoder = new Decoder(flags);
+    
+//    joshuaConfig = new JoshuaConfiguration();
+//    joshuaConfig.search_algorithm = "cky";
+//    joshuaConfig.mark_oovs = false;
+//    joshuaConfig.pop_limit = 100;
+//    joshuaConfig.use_unique_nbest = false;
+//    joshuaConfig.include_align_index = false;
+//    joshuaConfig.topN = 0;
+//    joshuaConfig.tms.add("thrax -owner pt -maxspan 20 -path src/test/resources/wa_grammar.packed");
+//    joshuaConfig.tms.add("thrax -owner glue -maxspan -1 -path src/test/resources/grammar.glue");
+//    joshuaConfig.goal_symbol = "[GOAL]";
+//    joshuaConfig.default_non_terminal = "[X]";
+//    joshuaConfig.features.add("OOVPenalty");
+//    joshuaConfig.weights.add("tm_pt_0 1");
+//    joshuaConfig.weights.add("tm_pt_1 1");
+//    joshuaConfig.weights.add("tm_pt_2 1");
+//    joshuaConfig.weights.add("tm_pt_3 1");
+//    joshuaConfig.weights.add("tm_pt_4 1");
+//    joshuaConfig.weights.add("tm_pt_5 1");
+//    joshuaConfig.weights.add("tm_glue_0 1");
+//    joshuaConfig.weights.add("OOVPenalty 2");
+//    joshuaConfig.num_parallel_decoders = 500; // This will enable 500 parallel
+//                                              // decoders to run at once.
+//                                              // Useful to help flush out
+//                                              // concurrency errors in
+//                                              // underlying
+//                                              // data-structures.
+    this.decoder = new Decoder(flags);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
     this.decoder.cleanUp();
     this.decoder = null;
-    Decoder.VERBOSE = previousLogLevel;
   }
 
 
@@ -110,7 +128,6 @@ public class MultithreadedTranslationTests {
     // GIVEN
 
     int inputLines = 10000;
-    joshuaConfig.use_structured_output = true; // Enabled alignments.
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < inputLines; i++) {
       sb.append(INPUT + "\n");
@@ -120,7 +137,7 @@ public class MultithreadedTranslationTests {
     // engine.
     TranslationRequestStream req = new TranslationRequestStream(
         new BufferedReader(new InputStreamReader(new ByteArrayInputStream(sb.toString()
-        .getBytes(StandardCharsets.UTF_8)))), joshuaConfig);
+        .getBytes(StandardCharsets.UTF_8)))), decoder.getFlags());
 
     ByteArrayOutputStream output = new ByteArrayOutputStream();
 
@@ -159,7 +176,7 @@ public class MultithreadedTranslationTests {
   public void givenDecodeAllCalled_whenRuntimeExceptionThrown_thenPropagate() throws IOException {
     // GIVEN
     // A spy request stream that will cause an exception to be thrown on a threadpool thread
-    TranslationRequestStream spyReq = Mockito.spy(new TranslationRequestStream(null, joshuaConfig));
+    TranslationRequestStream spyReq = Mockito.spy(new TranslationRequestStream(null, decoder.getFlags()));
     doReturn(createSentenceSpyWithRuntimeExceptions()).when(spyReq).next();
 
     // WHEN
@@ -172,7 +189,7 @@ public class MultithreadedTranslationTests {
   }
 
   private Sentence createSentenceSpyWithRuntimeExceptions() {
-    Sentence sent = new Sentence(INPUT, 0, joshuaConfig);
+    Sentence sent = new Sentence(INPUT, 0, decoder.getFlags());
     Sentence spy = Mockito.spy(sent);
     Mockito.when(spy.target()).thenThrow(new RuntimeException(EXCEPTION_MESSAGE));
     return spy;

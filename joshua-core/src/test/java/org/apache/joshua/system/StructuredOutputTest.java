@@ -18,17 +18,21 @@
  */
 package org.apache.joshua.system;
 
+import static com.typesafe.config.ConfigFactory.parseString;
+import static com.typesafe.config.ConfigValueFactory.fromAnyRef;
+
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.typesafe.config.Config;
 
 /**
  * Integration test for the complete Joshua decoder using a toy grammar that translates
@@ -40,7 +44,6 @@ import org.testng.annotations.Test;
  */
 public class StructuredOutputTest {
 
-  private JoshuaConfiguration joshuaConfig = null;
   private Decoder decoder = null;
   private Translation translation = null;
   private static final String input = "A K B1 U Z1 Z2 B2 C";
@@ -55,27 +58,19 @@ public class StructuredOutputTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    joshuaConfig = new JoshuaConfiguration();
-    joshuaConfig.search_algorithm = "cky";
-    joshuaConfig.mark_oovs = false;
-    joshuaConfig.pop_limit = 100;
-    joshuaConfig.use_unique_nbest = false;
-    joshuaConfig.include_align_index = false;
-    joshuaConfig.topN = 0;
-    joshuaConfig.tms.add("thrax -owner pt -maxspan 20 -path src/test/resources/wa_grammar");
-    joshuaConfig.tms.add("thrax -owner glue -maxspan -1 -path src/test/resources/grammar.glue");
-    joshuaConfig.goal_symbol = "[GOAL]";
-    joshuaConfig.default_non_terminal = "[X]";
-    joshuaConfig.features.add("OOVPenalty");
-    joshuaConfig.weights.add("pt_0 -1");
-    joshuaConfig.weights.add("pt_1 -1");
-    joshuaConfig.weights.add("pt_2 -1");
-    joshuaConfig.weights.add("pt_3 -1");
-    joshuaConfig.weights.add("pt_4 -1");
-    joshuaConfig.weights.add("pt_5 -1");
-    joshuaConfig.weights.add("glue_0 -1");
-    joshuaConfig.weights.add("OOVPenalty 2");
-    decoder = new Decoder(joshuaConfig);
+    Config weights = parseString(
+        "weights = {pt_0=-1, pt_1=-1, pt_2=-1, pt_3=-1, pt_4=-1, pt_5=-1, glue_0=-1, OOVPenalty=2}");
+    Config features = parseString("feature_functions = [{class=OOVPenalty}]");
+    Config grammars = parseString("grammars=[{class=TextGrammar, owner=pt, span_limit=20, path=src/test/resources/wa_grammar},"
+        + "{class=TextGrammar, owner=glue, span_limit=-1, path=src/test/resources/grammar.glue}]");
+    Config flags = weights
+        .withFallback(features)
+        .withFallback(grammars)
+        .withFallback(Decoder.getDefaultFlags())
+        .withValue("top_n", fromAnyRef(0))
+        .withValue("use_unique_nbest", fromAnyRef(false))
+        .withValue("output_format", fromAnyRef("%s | %a"));
+    decoder = new Decoder(flags);
   }
 
   @AfterMethod
@@ -85,8 +80,8 @@ public class StructuredOutputTest {
     translation = null;
   }
 
-  private Translation decode(String input) {
-    Sentence sentence = new Sentence(input, 0, joshuaConfig);
+  private Translation decode(String input, Config flags) {
+    Sentence sentence = new Sentence(input, 0, flags);
     return decoder.decode(sentence);
   }
 
@@ -94,14 +89,12 @@ public class StructuredOutputTest {
   public void test() {
 
     // test standard output
-    joshuaConfig.use_structured_output = false;
-    joshuaConfig.outputFormat = "%s | %a ";
-    translation = decode(input);
+    translation = decode(input,
+        decoder.getFlags().withValue("use_structured_output", fromAnyRef(false)));
     Assert.assertEquals(translation.toString().trim(), expectedTranslation + " | " + expectedWordAlignmentString);
 
     // test structured output
-    joshuaConfig.use_structured_output = true; // set structured output creation to true
-    translation = decode(input);
+    translation = decode(input, decoder.getFlags().withValue("use_structured_output", fromAnyRef(true)));
     Assert.assertEquals(translation.getStructuredTranslations().get(0).getTranslationString(), expectedTranslation);
     Assert.assertEquals(translation.getStructuredTranslations().get(0).getTranslationTokens(), Arrays.asList(expectedTranslation.split("\\s+")));
     Assert.assertEquals(translation.getStructuredTranslations().get(0).getTranslationScore(), expectedScore, 0.00001);

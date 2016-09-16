@@ -61,7 +61,7 @@ public class TestUtil {
 		final List<String> decodedStrings = new ArrayList<>();
 
 		for (String inputString : inputStrings) {
-			final Sentence sentence = new Sentence(inputString, 0, decoder.getDecoderConfig().getFlags());
+			final Sentence sentence = new Sentence(inputString, 0, decoder.getFlags());
 			final String[] nBestList = decoder.decode(sentence).toString().split(N_BEST_SEPARATOR);
 			decodedStrings.addAll(Arrays.asList(nBestList));
 		}
@@ -78,7 +78,7 @@ public class TestUtil {
 	 * @return
 	 */
 	public static String translate(String input, Decoder decoder) {
-	    final Sentence sentence = new Sentence(input, 0, decoder.getDecoderConfig().getFlags());
+	    final Sentence sentence = new Sentence(input, 0, decoder.getFlags());
 	    return decoder.decode(sentence).toString();
 	}
 

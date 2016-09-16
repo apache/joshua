@@ -40,7 +40,7 @@ public class LmOovFeatureTest {
   // expecting 2 lm oovs ('a' & 'full') and 2 grammar OOVs ('chat-rooms' & 'full') and score -198.000
   private static final String EXPECTED_FEATURES = "pt_0=-2.000000 lm_0_oov=2.000000 lm_0=-206.718124 glue_0=3.000000 OOVPenalty=-200.000000 | -198.000";
   
-  private static final Config FLAGS = Decoder.createDecoderFlagsFromFile(CONFIG).withValue("output_format", ConfigValueFactory.fromAnyRef("%f | %c"));
+  private static final Config FLAGS = Decoder.getFlagsFromFile(CONFIG).withValue("output_format", ConfigValueFactory.fromAnyRef("%f | %c"));
   private Decoder decoder = null;
 
   @BeforeMethod
@@ -62,7 +62,7 @@ public class LmOovFeatureTest {
   }
 
   private Translation decode(String input) {
-    final Sentence sentence = new Sentence(input, 0, decoder.getDecoderConfig().getFlags());
+    final Sentence sentence = new Sentence(input, 0, decoder.getFlags());
     return decoder.decode(sentence);
   }
   
