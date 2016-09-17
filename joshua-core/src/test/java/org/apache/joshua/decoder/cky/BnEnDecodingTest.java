@@ -50,7 +50,7 @@ public class BnEnDecodingTest {
     return new Object[][]{
       {"BnEnHieroTest.conf", "BnEnHiero.in", "BnEnHieroTest.gold"},
       {"BnEnBerkeleyLMTest.conf", "BnEnHiero.in", "BnEnBerkeleyLMTest.gold"},
-//      {"BnEnClassLMTest.conf" , "BnEnHiero.in", "BnEnClassLMTest.gold"},
+      {"BnEnClassLMTest.conf" , "BnEnHiero.in", "BnEnClassLMTest.gold"},
 //      {"BnEnPackedTest.conf", "BnEn.in", "BnEnPackedTest.gold"},
 //      {"BnEnSAMTTest.conf", "BnEn.in", "BnEnSAMTTest.gold"}
       };
