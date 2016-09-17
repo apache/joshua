@@ -48,11 +48,11 @@ public class BnEnDecodingTest {
   @DataProvider(name = "testFiles")
   public Object[][] lmFiles() {
     return new Object[][]{
-      {"BnEnHieroTest.conf", "BnEnHiero.in", "BnEnHieroTest.gold"},
-      {"BnEnBerkeleyLMTest.conf", "BnEnHiero.in", "BnEnBerkeleyLMTest.gold"},
-      {"BnEnClassLMTest.conf" , "BnEnHiero.in", "BnEnClassLMTest.gold"},
-//      {"BnEnPackedTest.conf", "BnEn.in", "BnEnPackedTest.gold"},
-//      {"BnEnSAMTTest.conf", "BnEn.in", "BnEnSAMTTest.gold"}
+      {"BnEnHieroTest.conf", "BnEn.in", "BnEnHieroTest.gold"},
+      {"BnEnBerkeleyLMTest.conf", "BnEn.in", "BnEnBerkeleyLMTest.gold"},
+      {"BnEnClassLMTest.conf" , "BnEn.in", "BnEnClassLMTest.gold"},
+      {"BnEnPackedTest.conf", "BnEn.in", "BnEnPackedTest.gold"},
+      {"BnEnSAMTTest.conf", "BnEn.in", "BnEnSAMTTest.gold"}
       };
   }
   
@@ -79,6 +79,11 @@ public class BnEnDecodingTest {
 
     // Then
     List<String> goldStrings = loadStringsFromFile(this.getClass().getResource(goldFile).getFile());
+
+//    System.err.println("\n\n\nTEST OUTPUT");
+//    for (String line: decodedStrings)
+//      System.err.println(line);
+
     assertEquals(decodedStrings, goldStrings);
   }
 }
