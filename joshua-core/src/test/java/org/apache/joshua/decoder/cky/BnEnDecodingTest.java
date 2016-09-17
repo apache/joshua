@@ -1,23 +1,23 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.apache.joshua.decoder.cky;
 
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.Test;
+import org.testng.annotations.BeforeMethod;
+import static com.typesafe.config.ConfigFactory.parseResources;
 import static org.apache.joshua.decoder.cky.TestUtil.decodeList;
 import static org.apache.joshua.decoder.cky.TestUtil.loadStringsFromFile;
 import static org.testng.Assert.assertEquals;
@@ -25,97 +25,57 @@ import static org.testng.Assert.assertEquals;
 import java.util.List;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
+import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.util.io.KenLmTestUtil;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.DataProvider;
+
+
+
+import com.typesafe.config.Config;
 
 public class BnEnDecodingTest {
 
-	private JoshuaConfiguration joshuaConfig;
-	private Decoder decoder;
+  private Decoder decoder;
+  Translation translation = null;
 
-	@AfterMethod
-	public void tearDown() throws Exception {
-		if(decoder != null) {
-			decoder.cleanUp();
-			decoder = null;
-		}
-	}
+  @BeforeMethod
+  public void setUp() throws Exception {
+  }
+  
+  @DataProvider(name = "testFiles")
+  public Object[][] lmFiles() {
+    return new Object[][]{
+      {"BnEnHieroTest.conf", "BnEnHiero.in", "BnEnHieroTest.gold"},
+//      {"BnEnBerkeleyLMTest.conf", "BnEnHiero.in", "BnEnBerkeleyLMTest.gold"},
+//      {"BnEnClassLMTest.conf" , "BnEnHiero.in", "BnEnClassLMTest.gold"},
+//      {"BnEnPackedTest.conf", "BnEn.in", "BnEnPackedTest.gold"},
+//      {"BnEnSAMTTest.conf", "BnEn.in", "BnEnSAMTTest.gold"}
+      };
+  }
+  
+  @AfterMethod
+  public void tearDown() throws Exception {
+    if (decoder != null) {
+      decoder.cleanUp();
+      decoder = null;
+    }
+    translation = null;
+  }
 
-	@Test
-	public void givenBnEnInput_whenPhraseDecoding_thenScoreAndTranslationCorrect() throws Exception {
-		// Given
-		List<String> inputStrings = loadStringsFromFile("src/test/resources/bn-en/hiero/input.bn");
+  @Test(dataProvider = "testFiles")
+  public void givenBnEnInput_whenDecoding_thenScoreAndTranslationCorrect(String confFile, String inFile, String goldFile) throws Exception {
+    // Given
+    List<String> inputStrings = loadStringsFromFile(this.getClass().getResource(inFile).getFile());
 
-		// When
-		configureDecoder("src/test/resources/bn-en/hiero/joshua.config");
-		List<String> decodedStrings = decodeList(inputStrings, decoder, joshuaConfig);
+    // When
+    Config config = parseResources(this.getClass(), confFile)
+        .withFallback(Decoder.getDefaultFlags());
+    decoder = new Decoder(config);
 
-		// Then
-		List<String> goldStrings = loadStringsFromFile("src/test/resources/bn-en/hiero/output.gold");
-		assertEquals(decodedStrings, goldStrings);
-	}
+    List<String> decodedStrings = decodeList(inputStrings, decoder);
 
-	@Test
-	public void givenBnEnInput_whenPhraseDecodingWithBerkeleyLM_thenScoreAndTranslationCorrect() throws Exception {
-		// Given
-		List<String> inputStrings = loadStringsFromFile("src/test/resources/bn-en/hiero/input.bn");
-
-		// When
-		configureDecoder("src/test/resources/bn-en/hiero/joshua-berkeleylm.config");
-		List<String> decodedStrings = decodeList(inputStrings, decoder, joshuaConfig);
-
-		// Then
-		List<String> goldStrings = loadStringsFromFile("src/test/resources/bn-en/hiero/output-berkeleylm.gold");
-		assertEquals(decodedStrings, goldStrings);
-	}
-
-	@Test
-	public void givenBnEnInput_whenPhraseDecodingWithClassLM_thenScoreAndTranslationCorrect() throws Exception {
-		// Given
-		List<String> inputStrings = loadStringsFromFile("src/test/resources/bn-en/hiero/input.bn");
-
-		// When
-		configureDecoder("src/test/resources/bn-en/hiero/joshua-classlm.config");
-		List<String> decodedStrings = decodeList(inputStrings, decoder, joshuaConfig);
-
-		// Then
-		List<String> goldStrings = loadStringsFromFile("src/test/resources/bn-en/hiero/output-classlm.gold");
-		assertEquals(decodedStrings, goldStrings);
-	}
-	
-	@Test
-	public void givenBnEnInput_whenPhraseDecodingWithPackedGrammar_thenScoreAndTranslationCorrect() throws Exception {
-		// Given
-		List<String> inputStrings = loadStringsFromFile("src/test/resources/bn-en/packed/input.bn");
-
-		// When
-		configureDecoder("src/test/resources/bn-en/packed/joshua.config");
-		List<String> decodedStrings = decodeList(inputStrings, decoder, joshuaConfig);
-
-		// Then
-		List<String> goldStrings = loadStringsFromFile("src/test/resources/bn-en/packed/output.gold");
-		assertEquals(decodedStrings, goldStrings);
-	}
-	
-	@Test
-	public void givenBnEnInput_whenPhraseDecodingWithSAMT_thenScoreAndTranslationCorrect() throws Exception {
-		// Given
-		List<String> inputStrings = loadStringsFromFile("src/test/resources/bn-en/samt/input.bn");
-
-		// When
-		configureDecoder("src/test/resources/bn-en/samt/joshua.config");
-		List<String> decodedStrings = decodeList(inputStrings, decoder, joshuaConfig);
-
-		// Then
-		List<String> goldStrings = loadStringsFromFile("src/test/resources/bn-en/samt/output.gold");
-		assertEquals(decodedStrings, goldStrings);
-	}
-	
-	public void configureDecoder(String pathToConfig) throws Exception {
-		joshuaConfig = new JoshuaConfiguration();
-		joshuaConfig.readConfigFile(pathToConfig);
-		KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig));
-	}
+    // Then
+    List<String> goldStrings = loadStringsFromFile(this.getClass().getResource(goldFile).getFile());
+    assertEquals(decodedStrings, goldStrings);
+  }
 }
