@@ -35,6 +35,7 @@ def parse_args(line):
             if type == 'thrax' or type == 'hiero':
                 if os.path.isdir(val):
                     type = 'PackedGrammar'
+                    found['rule_cache_size'] = 10000
                 else:
                     type = 'TextGrammar'
 
