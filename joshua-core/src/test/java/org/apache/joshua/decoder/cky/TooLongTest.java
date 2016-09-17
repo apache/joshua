@@ -21,9 +21,6 @@ package org.apache.joshua.decoder.cky;
 import static org.apache.joshua.decoder.cky.TestUtil.translate;
 import static org.testng.Assert.assertEquals;
 
-import static com.typesafe.config.ConfigFactory.parseResources;
-import static com.typesafe.config.ConfigValueFactory.fromAnyRef;
-
 import org.apache.joshua.decoder.Decoder;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.DataProvider;
