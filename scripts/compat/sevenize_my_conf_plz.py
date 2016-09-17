@@ -57,10 +57,29 @@ for line in sys.stdin:
         weights[name] = weight
 
     elif line.startswith('tm'):
+        """Two types of tm lines are supported. Ones that look like this:
+
+               tm = thrax pt 12 src/test/resources/decoder/constrained/grammar.gz
+
+            and ones that look like this:
+
+               tm = thrax -owner pt -maxlen 12 -path src/test/resources/decoder/constrained/grammar.gz
+        """
 
         _, tm = re.split(r'\s*=\s*', line, 1)
 
-        tms.append(parse_args_to_string(tm))
+        if tm.find("-path") == -1:
+            # first kind
+            classType, owner, maxlen, path = tm.split(' ')
+            className = 'TextGrammar'
+            if os.path.isdir(path):
+                className = 'PackedGrammar'
+
+            tms.append('class = %s, owner = %s, span_limit = %s, path = %s' % (className, owner, maxlen, path))
+
+        else:
+            # second kind
+            tms.append(parse_args_to_string(tm))
 
     elif line.startswith('lm'):
         """Backwards compatibility for old LM specification method"""
