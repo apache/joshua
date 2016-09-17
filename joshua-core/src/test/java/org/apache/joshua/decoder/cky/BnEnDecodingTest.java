@@ -29,8 +29,6 @@ import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.DataProvider;
 
-
-
 import com.typesafe.config.Config;
 
 public class BnEnDecodingTest {
@@ -40,13 +38,18 @@ public class BnEnDecodingTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
+    /*
+     * TODO: @DataProvider doesn't seem to play well with our KenLM guard test, so we
+     * should try to directly load a KenLM model here, to check that it works.
+     */
+    //    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig));
   }
   
   @DataProvider(name = "testFiles")
   public Object[][] lmFiles() {
     return new Object[][]{
       {"BnEnHieroTest.conf", "BnEnHiero.in", "BnEnHieroTest.gold"},
-//      {"BnEnBerkeleyLMTest.conf", "BnEnHiero.in", "BnEnBerkeleyLMTest.gold"},
+      {"BnEnBerkeleyLMTest.conf", "BnEnHiero.in", "BnEnBerkeleyLMTest.gold"},
 //      {"BnEnClassLMTest.conf" , "BnEnHiero.in", "BnEnClassLMTest.gold"},
 //      {"BnEnPackedTest.conf", "BnEn.in", "BnEnPackedTest.gold"},
 //      {"BnEnSAMTTest.conf", "BnEn.in", "BnEnSAMTTest.gold"}
