@@ -20,7 +20,7 @@ def smooth_key(key):
     return key.replace('-', '_').replace('maxspan', 'span_limit')
 
 def parse_args(line):
-    found = []
+    found = {}
     
     """Assume the argument string is "-key value" pairs. Don't bother with error checking."""
     tokens = line.split(' ')
@@ -29,7 +29,7 @@ def parse_args(line):
         key = smooth_key(tokens[i][1:]) # strip leading -
         val = tokens[i+1]
 
-        found.append('%s=%s' % (key, val))
+        found[key] = val
 
         if key == 'path':
             if type == 'thrax' or type == 'hiero':
@@ -38,9 +38,12 @@ def parse_args(line):
                 else:
                     type = 'TextGrammar'
 
-    found.insert(0, 'class = %s' % (type))
+    found['class'] = type
 
-    return ", ".join(found)
+    return found
+
+def parse_args_to_string(line):
+    return ', '.join(['%s = %s' % (k,v) for k,v in parse_args(line).iteritems()])
 
 for line in sys.stdin:
     line = line.rstrip()
@@ -56,12 +59,24 @@ for line in sys.stdin:
 
         _, tm = re.split(r'\s*=\s*', line, 1)
 
-        tms.append(parse_args(tm))
+        tms.append(parse_args_to_string(tm))
+
+    elif line.startswith('lm'):
+        """Backwards compatibility for old LM specification method"""
+
+        _, lm = re.split(r'\s*=\s*', line, 1)
+        lm_type, order, left, right, default, path = lm.split(' ')
+
+        className = 'LanguageModel'
+        if left == 'true':
+            className = 'StateMinimizingLanguageModel'
+
+        features.append('class = %s, lm_type = %s, lm_order = %s, lm_file = %s' % (className, lm_type, order, path))
 
     elif line.startswith('feature-function'):
         _, feature = re.split(r'\s*=\s*', line, 1)
 
-        features.append(parse_args(feature))
+        features.append(parse_args_to_string(feature))
 
     else:
         key, value = re.split(r'\s*=\s*', line, 1)
