@@ -21,10 +21,16 @@ package org.apache.joshua.decoder.cky;
 import static org.apache.joshua.decoder.cky.TestUtil.translate;
 import static org.testng.Assert.assertEquals;
 
+import static com.typesafe.config.ConfigFactory.parseResources;
+import static com.typesafe.config.ConfigValueFactory.fromAnyRef;
+
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigValueFactory;
 
 /**
  * Ensures that the decoder trims inputs when and only when it should
@@ -39,43 +45,32 @@ public class TooLongTest {
   private static final String INPUT4 = "(((like each tucked string tells";
   private static final String GOLD4 = "|||  ||| 0.000";
 
-  private JoshuaConfiguration joshuaConfig;
   private Decoder decoder;
-
-  @Test
-  public void givenInput_whenMaxLen2_thenOutputCorrect() throws Exception {
-    setUp(2, false);
-    String output = translate(INPUT1, decoder, joshuaConfig);
-    assertEquals(output.trim(), GOLD1);
+  
+  @DataProvider(name = "params")
+  public Object[][] lmFiles() {
+    return new Object[][]{
+      {INPUT1, 2, false, GOLD1},
+      {INPUT2, 1, true, GOLD2},
+      {INPUT3, 8, false, GOLD3},
+      {INPUT4, 3, true, GOLD4}
+    };
   }
 
-  @Test
-  public void givenInput_whenMaxLen1AndLatticeDecoding_thenOutputCorrect() throws Exception {
-    setUp(1, true);
-    String output = translate(INPUT2, decoder, joshuaConfig);
-    assertEquals(output.trim(), GOLD2);
+  @Test(dataProvider = "params")
+  public void producesCorrectOutput(String input, int maxlen, boolean latticeDecoding, String gold) throws Exception {
+    setUp(maxlen, latticeDecoding);
+    String output = translate(input, decoder);
+    assertEquals(output.trim(), gold);
   }
 
-  @Test
-  public void givenInput_whenMaxLen8_thenOutputCorrect() throws Exception {
-    setUp(8, false);
-    String output = translate(INPUT3, decoder, joshuaConfig);
-    assertEquals(output.trim(), GOLD3);
-  }
+  private void setUp(int maxLen, boolean latticeDecoding) throws Exception {
+    Config config = Decoder.getDefaultFlags()
+        .withValue("output_format", ConfigValueFactory.fromAnyRef("%s ||| %f ||| %c"))
+        .withValue("maximum_sentence_length", ConfigValueFactory.fromAnyRef(maxLen))
+        .withValue("lattice_decoding", ConfigValueFactory.fromAnyRef(latticeDecoding));
 
-  @Test
-  public void givenInput_whenMaxLen3AndLatticeDecoding_thenOutputCorrect() throws Exception {
-    setUp(3, true);
-    String output = translate(INPUT4, decoder, joshuaConfig);
-    assertEquals(output.trim(), GOLD4);
-  }
-
-  public void setUp(int maxLen, boolean latticeDecoding) throws Exception {
-    joshuaConfig = new JoshuaConfiguration();
-    joshuaConfig.outputFormat = "%s ||| %f ||| %c";
-    joshuaConfig.maxlen = maxLen;
-    joshuaConfig.lattice_decoding = latticeDecoding;
-    decoder = new Decoder(joshuaConfig);
+    decoder = new Decoder(config);
   }
 
   @AfterMethod
