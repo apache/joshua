@@ -98,7 +98,7 @@ print ']'
 
 print
 print 'weights = {'
-for weight in weights.keys():
+for weight in sorted(weights.keys()):
     print ' ', weight, '=', weights[weight]
 print '}'
 
