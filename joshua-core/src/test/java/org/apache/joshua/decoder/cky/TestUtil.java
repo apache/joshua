@@ -14,9 +14,6 @@
  */
 package org.apache.joshua.decoder.cky;
 
-import static com.typesafe.config.ConfigFactory.parseResources;
-import static org.apache.joshua.decoder.cky.TestUtil.decodeList;
-import static org.apache.joshua.decoder.cky.TestUtil.loadStringsFromFile;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
@@ -29,18 +26,17 @@ import java.util.stream.Collectors;
 
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.segment_file.Sentence;
-import org.apache.joshua.util.io.KenLmTestUtil;
-
-import com.typesafe.config.Config;
 
 public class TestUtil {
 
   public static final String N_BEST_SEPARATOR = "\n";
-  
+
   /**
-   * Loads a text file and returns a list containing one string per line in the file.
+   * Loads a text file and returns a list containing one string per line in the
+   * file.
    * 
-   * @param pathToFile path to file on disc
+   * @param pathToFile
+   *          path to file on disc
    * @return
    * @throws IOException
    */
@@ -48,15 +44,18 @@ public class TestUtil {
     List<String> inputLines = Files.lines(Paths.get(pathToFile)).collect(Collectors.toList());
     return inputLines;
   }
-  
+
   /**
    * 
-   * @param inputStrings A list of strings that should be decoded,
-   * @param decoder An initialized decoder,
-   * @param joshuaConfig The JoshuaConfiguration corresponding to the decoder.
-   * @return A list of decoded strings. If the decoder produces a n-best list (separated by
-   *         N_BEST_SEPARATOR), then each translation of the n-best list has its own entry in the
-   *         returned list.
+   * @param inputStrings
+   *          A list of strings that should be decoded,
+   * @param decoder
+   *          An initialized decoder,
+   * @param joshuaConfig
+   *          The JoshuaConfiguration corresponding to the decoder.
+   * @return A list of decoded strings. If the decoder produces a n-best list
+   *         (separated by N_BEST_SEPARATOR), then each translation of the
+   *         n-best list has its own entry in the returned list.
    */
   public static List<String> decodeList(List<String> inputStrings, Decoder decoder) {
     final List<String> decodedStrings = new ArrayList<>();
@@ -71,7 +70,8 @@ public class TestUtil {
   }
 
   /**
-   * Translates the given input string and returns the translation converted into a string.
+   * Translates the given input string and returns the translation converted
+   * into a string.
    * 
    * @param input
    * @param decoder
@@ -82,13 +82,14 @@ public class TestUtil {
     final Sentence sentence = new Sentence(input, 0, decoder.getFlags());
     return decoder.decode(sentence).toString();
   }
-  
-  public static void decodeAndAssertDecodedOutputEqualsGold(String pathToInput, Decoder decoder, String pathToGold) throws IOException {
-	    List<String> inputStrings = loadStringsFromFile(pathToInput);
 
-	    List<String> decodedStrings = decodeList(inputStrings, decoder);
+  public static void decodeAndAssertDecodedOutputEqualsGold(String pathToInput, Decoder decoder,
+      String pathToGold) throws IOException {
+    List<String> inputStrings = loadStringsFromFile(pathToInput);
 
-	    List<String> goldStrings = loadStringsFromFile(pathToGold);
-	    assertEquals(decodedStrings, goldStrings);
+    List<String> decodedStrings = decodeList(inputStrings, decoder);
+
+    List<String> goldStrings = loadStringsFromFile(pathToGold);
+    assertEquals(decodedStrings, goldStrings);
   }
 }
