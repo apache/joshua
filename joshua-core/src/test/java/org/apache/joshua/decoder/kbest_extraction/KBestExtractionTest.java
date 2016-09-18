@@ -18,6 +18,15 @@
  */
 package org.apache.joshua.decoder.kbest_extraction;
 
+import static com.google.common.base.Charsets.UTF_8;
+import static java.nio.file.Files.readAllBytes;
+import static org.testng.Assert.assertEquals;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.segment_file.Sentence;
@@ -25,19 +34,9 @@ import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.testng.reporters.Files;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValueFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import static com.google.common.base.Charsets.UTF_8;
-import static java.nio.file.Files.readAllBytes;
-import static org.testng.Assert.assertEquals;
 
 /**
  * Reimplements the kbest extraction regression test.

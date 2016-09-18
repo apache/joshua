@@ -60,7 +60,8 @@ public class NumTranslationOptionsTest {
     String inputPath = this.getClass().getResource(inFile).getFile();
     String goldPath = this.getClass().getResource(goldFile).getFile();
     Config config = parseResources(this.getClass(), confFile)
-        .withFallback(Decoder.getDefaultFlags());
+        .withFallback(Decoder.getDefaultFlags())
+        .resolve();
     KenLmTestUtil.Guard(() -> decoder = new Decoder(config));
 
     decodeAndAssertDecodedOutputEqualsGold(inputPath, decoder, goldPath);
