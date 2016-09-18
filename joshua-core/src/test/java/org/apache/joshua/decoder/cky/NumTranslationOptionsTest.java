@@ -18,23 +18,21 @@
  */
 package org.apache.joshua.decoder.cky;
 
-import static org.apache.joshua.decoder.cky.TestUtil.decodeList;
-import static org.apache.joshua.decoder.cky.TestUtil.loadStringsFromFile;
-import static org.testng.Assert.assertEquals;
-
-import java.util.List;
+import static com.typesafe.config.ConfigFactory.parseResources;
+import static org.apache.joshua.decoder.cky.TestUtil.decodeAndAssertDecodedOutputEqualsGold;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import com.typesafe.config.Config;
 
 /**
  * Tests that num_translation_options is enforced for hierarchical decoders
  */
 public class NumTranslationOptionsTest {
-  private JoshuaConfiguration joshuaConfig;
   private Decoder decoder;
 
   @AfterMethod
@@ -45,62 +43,27 @@ public class NumTranslationOptionsTest {
     }
   }
 
-  @Test
-  public void givenInput_whenDecodingWithNumTranslationOptions3_thenScoreAndTranslationCorrect()
-      throws Exception {
-    // Given
-    List<String> inputStrings = loadStringsFromFile(
-        "src/test/resources/decoder/num_translation_options/input");
-
-    // When
-    configureDecoder("src/test/resources/decoder/num_translation_options/joshua.config", true);
-    List<String> decodedStrings = decodeList(inputStrings, decoder, joshuaConfig);
-
-    // Then
-    List<String> goldStrings = loadStringsFromFile(
-        "src/test/resources/decoder/num_translation_options/output.gold");
-    assertEquals(decodedStrings, goldStrings);
+  @DataProvider(name = "testFiles")
+  public Object[][] lmFiles() {
+    return new Object[][] {
+        { "NumTranslationOptionsTest.conf", "NumTranslationOptionsTest.in",
+            "NumTranslationOptionsTest.gold" },
+        { "NumTranslationOptionsNoDotChartTest.conf", "NumTranslationOptionsTest.in",
+            "NumTranslationOptionsNoDotChartTest.gold" },
+        { "NumTranslationOptionsPackedTest.conf", "NumTranslationOptionsTest.in",
+            "NumTranslationOptionsPackedTest.gold" } };
   }
 
-  @Test
-  public void givenInput_whenDecodingWithNumTranslationOptions3AndNoDotChart_thenScoreAndTranslationCorrect()
-      throws Exception {
-    // Given
-    List<String> inputStrings = loadStringsFromFile(
-        "src/test/resources/decoder/num_translation_options/input");
+  @Test(dataProvider = "testFiles")
+  public void givenInput_whenDecodingWithNumTranslationOptions_thenScoreAndTranslationCorrect(
+      String confFile, String inFile, String goldFile) throws Exception {
+    String inputPath = this.getClass().getResource(inFile).getFile();
+    String goldPath = this.getClass().getResource(goldFile).getFile();
+    Config config = parseResources(this.getClass(), confFile)
+        .withFallback(Decoder.getDefaultFlags());
+    KenLmTestUtil.Guard(() -> decoder = new Decoder(config));
 
-    // When
-    configureDecoder("src/test/resources/decoder/num_translation_options/joshua.config", false);
-    List<String> decodedStrings = decodeList(inputStrings, decoder, joshuaConfig);
-
-    // Then
-    List<String> goldStrings = loadStringsFromFile(
-        "src/test/resources/decoder/num_translation_options/output-no-dot-chart.gold");
-    assertEquals(decodedStrings, goldStrings);
+    decodeAndAssertDecodedOutputEqualsGold(inputPath, decoder, goldPath);
   }
 
-  @Test
-  public void givenInput_whenDecodingWithNumTranslationOptions3AndPacked_thenScoreAndTranslationCorrect()
-      throws Exception {
-    // Given
-    List<String> inputStrings = loadStringsFromFile(
-        "src/test/resources/decoder/num_translation_options/input");
-
-    // When
-    configureDecoder("src/test/resources/decoder/num_translation_options/joshua-packed.config",
-        true);
-    List<String> decodedStrings = decodeList(inputStrings, decoder, joshuaConfig);
-
-    // Then
-    List<String> goldStrings = loadStringsFromFile(
-        "src/test/resources/decoder/num_translation_options/output-packed.gold");
-    assertEquals(decodedStrings, goldStrings);
-  }
-
-  public void configureDecoder(String pathToConfig, boolean useDotChart) throws Exception {
-    joshuaConfig = new JoshuaConfiguration();
-    joshuaConfig.readConfigFile(pathToConfig);
-    joshuaConfig.use_dot_chart = useDotChart;
-    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig));
-  }
 }
