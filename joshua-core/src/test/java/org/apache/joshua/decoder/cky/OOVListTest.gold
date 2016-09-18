@@ -1,0 +1,3 @@
+Goats eat cheese ||| phrase_0=0.000000 lm_0=-16.587435 glue_0=-1.000000 WordPenalty=-2.171473 ||| -11.503
+i will go home ||| phrase_0=0.000000 lm_0=-12.155182 glue_0=-1.000000 WordPenalty=-2.605767 ||| -4.414
+goets_OOV eet_OOV cheez_OOV ||| phrase_0=0.000000 lm_0=-17.699974 glue_0=-1.000000 WordPenalty=-2.171473 OOVPenalty=-7.749294 ||| -20.629

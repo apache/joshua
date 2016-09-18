@@ -18,14 +18,16 @@
  */
 package org.apache.joshua.decoder.cky;
 
+import static com.typesafe.config.ConfigFactory.parseResources;
 import static org.apache.joshua.decoder.cky.TestUtil.translate;
 import static org.testng.Assert.assertEquals;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
+
+import com.typesafe.config.Config;
 
 public class SourceAnnotationsTest {
 
@@ -33,30 +35,26 @@ public class SourceAnnotationsTest {
   private static final String GOLD_WITHOUT_ANNOTATIONS = "my friends call me ||| pt_0=3.000000 lm_0=-11.973694 glue_0=-3.000000 WordPenalty=-2.605767 ||| -7.650";
   private static final String GOLD_WITH_ANNOTATIONS = "my friends call me ||| pt_0=3.000000 lm_0=-111.512733 glue_0=-3.000000 WordPenalty=-2.605767 ||| -107.189";
 
-  private static final String JOSHUA_CONFIG_PATH = "src/test/resources/decoder/source-annotations/joshua.config";
-
-  private JoshuaConfiguration joshuaConfig;
   private Decoder decoder;
 
   @Test
   public void givenInput_whenNotUsingSourceAnnotations_thenOutputCorrect() throws Exception {
-    setUp(false);
-    String output = translate(INPUT, decoder, joshuaConfig);
+    Config config = parseResources(this.getClass(), "SourceAnnotationsNotUsingTest.conf")
+        .withFallback(Decoder.getDefaultFlags());
+    KenLmTestUtil.Guard(() -> decoder = new Decoder(config));
+
+    String output = translate(INPUT, decoder);
     assertEquals(output.trim(), GOLD_WITHOUT_ANNOTATIONS);
   }
 
   @Test
   public void givenInput_whenUsingSourceAnnotations_thenOutputCorrect() throws Exception {
-    setUp(true);
-    String output = translate(INPUT, decoder, joshuaConfig);
-    assertEquals(output.trim(), GOLD_WITH_ANNOTATIONS);
-  }
+    Config config = parseResources(this.getClass(), "SourceAnnotationsUsingTest.conf")
+        .withFallback(Decoder.getDefaultFlags());
+    KenLmTestUtil.Guard(() -> decoder = new Decoder(config));
 
-  public void setUp(boolean sourceAnnotations) throws Exception {
-    joshuaConfig = new JoshuaConfiguration();
-    joshuaConfig.readConfigFile(JOSHUA_CONFIG_PATH);
-    joshuaConfig.source_annotations = sourceAnnotations;
-    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig));
+    String output = translate(INPUT, decoder);
+    assertEquals(output.trim(), GOLD_WITH_ANNOTATIONS);
   }
 
   @AfterMethod
