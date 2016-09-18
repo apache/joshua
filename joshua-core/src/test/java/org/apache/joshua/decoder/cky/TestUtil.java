@@ -14,6 +14,11 @@
  */
 package org.apache.joshua.decoder.cky;
 
+import static com.typesafe.config.ConfigFactory.parseResources;
+import static org.apache.joshua.decoder.cky.TestUtil.decodeList;
+import static org.apache.joshua.decoder.cky.TestUtil.loadStringsFromFile;
+import static org.testng.Assert.assertEquals;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -35,7 +40,7 @@ public class TestUtil {
   /**
    * Loads a text file and returns a list containing one string per line in the file.
    * 
-   * @param pathToFile
+   * @param pathToFile path to file on disc
    * @return
    * @throws IOException
    */
@@ -76,5 +81,14 @@ public class TestUtil {
   public static String translate(String input, Decoder decoder) {
     final Sentence sentence = new Sentence(input, 0, decoder.getFlags());
     return decoder.decode(sentence).toString();
+  }
+  
+  public static void decodeAndAssertDecodedOutputEqualsGold(String pathToInput, Decoder decoder, String pathToGold) throws IOException {
+	    List<String> inputStrings = loadStringsFromFile(pathToInput);
+
+	    List<String> decodedStrings = decodeList(inputStrings, decoder);
+
+	    List<String> goldStrings = loadStringsFromFile(pathToGold);
+	    assertEquals(decodedStrings, goldStrings);
   }
 }
