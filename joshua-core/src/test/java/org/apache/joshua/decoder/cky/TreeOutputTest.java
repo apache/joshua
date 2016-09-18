@@ -18,20 +18,17 @@
  */
 package org.apache.joshua.decoder.cky;
 
-import static org.apache.joshua.decoder.cky.TestUtil.decodeList;
-import static org.apache.joshua.decoder.cky.TestUtil.loadStringsFromFile;
-import static org.testng.Assert.assertEquals;
-
-import java.util.List;
+import static com.typesafe.config.ConfigFactory.parseResources;
+import static org.apache.joshua.decoder.cky.TestUtil.decodeAndAssertDecodedOutputEqualsGold;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
+import com.typesafe.config.Config;
+
 public class TreeOutputTest {
-  private JoshuaConfiguration joshuaConfig;
   private Decoder decoder;
 
   @AfterMethod
@@ -44,22 +41,13 @@ public class TreeOutputTest {
 
   @Test
   public void givenInput_whenDecodingWithTreeOutput_thenOutputCorrect() throws Exception {
-    // Given
-    List<String> inputStrings = loadStringsFromFile("src/test/resources/decoder/tree-output/input");
+    String inputPath = this.getClass().getResource("TreeOutputTest.in").getFile();
+    String goldPath = this.getClass().getResource("TreeOutputTest.gold").getFile();
+    Config config = parseResources(this.getClass(), "TreeOutputTest.conf")
+        .withFallback(Decoder.getDefaultFlags());
+    KenLmTestUtil.Guard(() -> decoder = new Decoder(config));
 
-    // When
-    configureDecoder("src/test/resources/decoder/tree-output/joshua.config");
-    List<String> decodedStrings = decodeList(inputStrings, decoder, joshuaConfig);
-
-    // Then
-    List<String> goldStrings = loadStringsFromFile(
-        "src/test/resources/decoder/tree-output/output.gold");
-    assertEquals(decodedStrings, goldStrings);
+    decodeAndAssertDecodedOutputEqualsGold(inputPath, decoder, goldPath);
   }
 
-  public void configureDecoder(String pathToConfig) throws Exception {
-    joshuaConfig = new JoshuaConfiguration();
-    joshuaConfig.readConfigFile(pathToConfig);
-    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig));
-  }
 }
