@@ -18,6 +18,7 @@
  */
 package org.apache.joshua.decoder.ff.lm;
 
+import static org.apache.joshua.util.Constants.LONG_SIZE_IN_BYTES;
 import static org.apache.joshua.util.FormatUtils.isNonterminal;
 
 import java.util.List;
@@ -42,6 +43,7 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * @author Juri Ganitkevitch juri@cs.jhu.edu
  */
 public class StateMinimizingLanguageModel extends LanguageModelFF {
+
 
   public StateMinimizingLanguageModel(FeatureVector weights, String[] args, JoshuaConfiguration config) {
     super(weights, args, config);
@@ -72,17 +74,19 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
    * efficiently than the default {@link LanguageModelFF} class.
    */
   @Override
-  public float estimateCost(Rule rule, Sentence sentence) {
+  public float estimateCost(Rule rule) {
 
     int[] ruleWords = getRuleIds(rule);
 
-    // map to ken lm ids
-    final long[] words = mapToKenLmIds(ruleWords, null, true);
-    
-    // Get the probability of applying the rule and the new state
-    float lmCost = weight * ((KenLM) languageModel).estimateRule(words);
-    float oovCost = oovWeight * ((withOovFeature) ? getOovs(ruleWords) : 0f);
-    return lmCost + oovCost;
+    try(KenLMPool poolWrapper = ((KenLM)languageModel).createLMPool();) {
+      // map to ken lm ids
+      writeKenLmIds(ruleWords, null, true, poolWrapper);
+
+      // Get the probability of applying the rule and the new state
+      float lmCost = weight * ((KenLM)languageModel).estimateRule(poolWrapper);
+      float oovCost = oovWeight * ((withOovFeature) ? getOovs(ruleWords) : 0f);
+      return lmCost + oovCost;
+    }
   }
 
   private UUID languageModelPoolId = UUID.randomUUID();
@@ -112,14 +116,16 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
       acc.add(oovDenseFeatureIndex, getOovs(ruleWords));
     }
 
-     // map to ken lm ids
-    final long[] words = mapToKenLmIds(ruleWords, tailNodes, false);
+    KenLMPool statePool = sentence.getStateManager().getStatePool(languageModelPoolId,
+            (KenLM)languageModel);
 
-    KenLMPool statePool = sentence.getStateManager().getStatePool(languageModelPoolId, (KenLM)
-            languageModel);
+     // map to ken lm ids and copy to kenlm direct buffer
+    writeKenLmIds(ruleWords, tailNodes, false, statePool);
+
+
 
     // Get the probability of applying the rule and the new state
-    final StateProbPair pair = ((KenLM) languageModel).probRule(words, statePool);
+    final StateProbPair pair = ((KenLM)languageModel).probRule(statePool);
 
     // Record the prob
     acc.add(denseFeatureIndex, pair.prob);
@@ -132,9 +138,12 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
    * Maps given array of word/class ids to KenLM ids. For estimating cost and computing,
    * state retrieval differs slightly.
    */
-  private long[] mapToKenLmIds(int[] ids, List<HGNode> tailNodes, boolean isOnlyEstimate) {
+  private void writeKenLmIds(int[] ids, List<HGNode> tailNodes, boolean isOnlyEstimate,
+                             KenLMPool poolWrapper) {
+
+    poolWrapper.getNgramBuffer().putLong(0, ids.length);
+
     // The IDs we will to KenLM
-    long[] kenIds = new long[ids.length];
     for (int x = 0; x < ids.length; x++) {
       int id = ids[x];
 
@@ -142,20 +151,19 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
 
         if (isOnlyEstimate) {
           // For the estimate, we can just mark negative values
-          kenIds[x] = -1;
+          poolWrapper.getNgramBuffer().putLong((x + 1) * LONG_SIZE_IN_BYTES, -1);
         } else {
           // Nonterminal: retrieve the KenLM long that records the state
           int index = -(id + 1);
           final KenLMState state = (KenLMState) tailNodes.get(index).getDPState(stateIndex);
-          kenIds[x] = -state.getState();
+          poolWrapper.getNgramBuffer().putLong((x + 1) * LONG_SIZE_IN_BYTES, -state.getState());
         }
 
       } else {
         // Terminal: just add it
-        kenIds[x] = id;
+        poolWrapper.getNgramBuffer().putLong((x + 1) * LONG_SIZE_IN_BYTES, id);
       }
     }
-    return kenIds;
   }
 
   /**

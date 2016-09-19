@@ -25,6 +25,9 @@ import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import sun.nio.ch.DirectBuffer;
+
+import java.nio.ByteBuffer;
 
 import static org.apache.joshua.corpus.Vocabulary.registerLanguageModel;
 import static org.apache.joshua.corpus.Vocabulary.unregisterLanguageModels;
@@ -91,22 +94,24 @@ public class KenLmTest {
     String sentence = "Wayne Gretzky";
     String[] words = sentence.split("\\s+");
     int[] ids = Vocabulary.addAll(sentence);
-    long[] longIds = new long[ids.length];
-
-    for (int i = 0; i < words.length; i++) {
-      longIds[i] = ids[i];
-    }
 
     // WHEN
     KenLM.StateProbPair result;
     try (KenLMPool poolPointer = kenLm.createLMPool()) {
-      result = kenLm.probRule(longIds, poolPointer);
+
+      ByteBuffer buffer = poolPointer.getNgramBuffer();
+      buffer.putLong(0, words.length);
+      for (int i = 0; i < words.length; i++) {
+        buffer.putLong(i+8, ids[i]);
+      }
+
+      result = kenLm.probRule(poolPointer);
     }
 
     // THEN
     assertThat(result, is(notNullValue()));
     assertThat(result.state.getState(), is(1L));
-    assertThat(result.prob, is(-3.7906885f));
+    assertThat(result.prob, is(-5.834103F));
   }
 
   @Test

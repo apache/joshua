@@ -191,7 +191,7 @@ public class TargetBigram extends StatefulFF {
    * TargetBigram features are only computed across hyperedges, so there is nothing to be done here.
    */
   @Override
-  public float estimateCost(Rule rule, Sentence sentence) {
+  public float estimateCost(Rule rule) {
     return 0.0f;
   }
 

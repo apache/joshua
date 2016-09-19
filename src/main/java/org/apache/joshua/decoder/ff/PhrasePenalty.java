@@ -78,7 +78,7 @@ public class PhrasePenalty extends StatelessFF {
    * 
    */
   @Override
-  public float estimateCost(Rule rule, Sentence sentence) {
+  public float estimateCost(Rule rule) {
     if (rule != null && rule != Hypothesis.BEGIN_RULE && rule != Hypothesis.END_RULE 
         && (rule.getOwner().equals(owner)))
       return weights.getDense(denseFeatureIndex) * value;
