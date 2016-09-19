@@ -1,5 +1,5 @@
 tm = moses -owner pt -maxspan 0 -path rules.1.gz -max-source-len 5
-feature-function = StateMinimizingLanguageModel -lm_order 5 -lm_file lm.1.gz
+feature-function = StateMinimizingLanguageModel -lm_order 5 -lm_file ../lm.1.gz
 
 search = stack
 
