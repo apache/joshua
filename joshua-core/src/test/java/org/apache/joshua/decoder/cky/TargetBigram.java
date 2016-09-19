@@ -18,13 +18,15 @@
  */
 package org.apache.joshua.decoder.cky;
 
+import static com.typesafe.config.ConfigFactory.parseString;
 import static org.apache.joshua.decoder.cky.TestUtil.translate;
 import static org.testng.Assert.assertEquals;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
+
+import com.typesafe.config.Config;
 
 public class TargetBigram {
 
@@ -34,36 +36,39 @@ public class TargetBigram {
   private static final String GOLD_THRESHOLD10 = "this is a test ||| tm_glue_0=4.000 TargetBigram_<s>_UNK=1.000 TargetBigram_UNK_</s>=1.000 TargetBigram_UNK_is=1.000 TargetBigram_a_UNK=1.000 TargetBigram_is_a=1.000 ||| 0.000";
 
   private static final String VOCAB_PATH = "src/test/resources/decoder/target-bigram/vocab";
+  private static final String CONF_TOPN2 = "output_format = %s ||| %f ||| %c \n feature_functions = [ { class = TargetBigram, vocab = "
+      + VOCAB_PATH + ", top-n = 2 } ]";
+  private static final String CONF_TOPN3_THRESHOLD20 = "output_format = %s ||| %f ||| %c \n feature_functions = [ { class = TargetBigram, vocab = "
+      + VOCAB_PATH + ", top-n = 3, threshold = 20 } ]";
+  private static final String CONF_THRESHOLD10 = "output_format = %s ||| %f ||| %c \n feature_functions = [ { class = TargetBigram, vocab = "
+      + VOCAB_PATH + ", threshold = 10 } ]";
 
-  private JoshuaConfiguration joshuaConfig;
   private Decoder decoder;
 
   @Test
-  public void givenInput_whenNotUsingSourceAnnotations_thenOutputCorrect() throws Exception {
-    setUp("TargetBigram -vocab " + VOCAB_PATH + " -top-n 2");
-    String output = translate(INPUT, decoder, joshuaConfig);
+  public void givenInput_whenDecodingWithTargetBigramAndTopN2_thenOutputCorrect() {
+    setUp(CONF_TOPN2);
+    String output = translate(INPUT, decoder);
     assertEquals(output.trim(), GOLD_TOPN2);
   }
 
   @Test
-  public void givenInput_whenUsingSourceAnnotations_thenOutputCorrect() throws Exception {
-    setUp("TargetBigram -vocab " + VOCAB_PATH + " -top-n 3 -threshold 20");
-    String output = translate(INPUT, decoder, joshuaConfig);
+  public void givenInput_whenDecodingWithTargetBigramAndTopN3Threshold20_thenOutputCorrect() {
+    setUp(CONF_TOPN3_THRESHOLD20);
+    String output = translate(INPUT, decoder);
     assertEquals(output.trim(), GOLD_TOPN3_THRESHOLD20);
   }
 
   @Test
-  public void givenInput_whenUsingSourceAnnotations_thenOutputCorrect2() throws Exception {
-    setUp("TargetBigram -vocab " + VOCAB_PATH + " -threshold 10");
-    String output = translate(INPUT, decoder, joshuaConfig);
+  public void givenInput_whenDecodingWithTargetBigramThreshold10_thenOutputCorrect2() {
+    setUp(CONF_THRESHOLD10);
+    String output = translate(INPUT, decoder);
     assertEquals(output.trim(), GOLD_THRESHOLD10);
   }
 
-  public void setUp(String featureFunction) throws Exception {
-    joshuaConfig = new JoshuaConfiguration();
-    joshuaConfig.features.add(featureFunction);
-    joshuaConfig.outputFormat = "%s ||| %f ||| %c";
-    decoder = new Decoder(joshuaConfig);
+  public void setUp(String configuration) {
+    Config config = parseString(configuration).withFallback(Decoder.getDefaultFlags());
+    decoder = new Decoder(config);
   }
 
   @AfterMethod
