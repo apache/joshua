@@ -31,9 +31,9 @@ import com.typesafe.config.Config;
 public class TargetBigram {
 
   private static final String INPUT = "this is a test";
-  private static final String GOLD_TOPN2 = "this is a test ||| tm_glue_0=4.000 TargetBigram_<s>_this=1.000 TargetBigram_UNK_</s>=1.000 TargetBigram_UNK_UNK=1.000 TargetBigram_is_UNK=1.000 TargetBigram_this_is=1.000 ||| 0.000";
-  private static final String GOLD_TOPN3_THRESHOLD20 = "this is a test ||| tm_glue_0=4.000 TargetBigram_<s>_UNK=1.000 TargetBigram_UNK_</s>=1.000 TargetBigram_UNK_UNK=1.000 TargetBigram_UNK_a=1.000 TargetBigram_a_UNK=1.000 ||| 0.000";
-  private static final String GOLD_THRESHOLD10 = "this is a test ||| tm_glue_0=4.000 TargetBigram_<s>_UNK=1.000 TargetBigram_UNK_</s>=1.000 TargetBigram_UNK_is=1.000 TargetBigram_a_UNK=1.000 TargetBigram_is_a=1.000 ||| 0.000";
+  private static final String GOLD_TOPN2 = "this is a test ||| glue_0=-4.000000 TargetBigram_this_is=1.000000 TargetBigram_is_UNK=1.000000 TargetBigram_UNK_UNK=1.000000 TargetBigram_UNK_</s>=1.000000 TargetBigram_<s>_this=1.000000 ||| 0.000";
+  private static final String GOLD_TOPN3_THRESHOLD20 = "this is a test ||| glue_0=-4.000000 TargetBigram_a_UNK=1.000000 TargetBigram_UNK_a=1.000000 TargetBigram_UNK_UNK=1.000000 TargetBigram_UNK_</s>=1.000000 TargetBigram_<s>_UNK=1.000000 ||| 0.000";
+  private static final String GOLD_THRESHOLD10 = "this is a test ||| glue_0=-4.000000 TargetBigram_is_a=1.000000 TargetBigram_a_UNK=1.000000 TargetBigram_UNK_is=1.000000 TargetBigram_UNK_</s>=1.000000 TargetBigram_<s>_UNK=1.000000 ||| 0.000";
 
   private static final String VOCAB_PATH = "src/test/resources/decoder/target-bigram/vocab";
   private static final String CONF_TOPN2 = "output_format = %s ||| %f ||| %c \n feature_functions = [ { class = TargetBigram, vocab = "
@@ -48,22 +48,22 @@ public class TargetBigram {
   @Test
   public void givenInput_whenDecodingWithTargetBigramAndTopN2_thenOutputCorrect() {
     setUp(CONF_TOPN2);
-    String output = translate(INPUT, decoder);
-    assertEquals(output.trim(), GOLD_TOPN2);
+    String output = translate(INPUT, decoder).trim();
+    assertEquals(output, GOLD_TOPN2);
   }
 
   @Test
   public void givenInput_whenDecodingWithTargetBigramAndTopN3Threshold20_thenOutputCorrect() {
     setUp(CONF_TOPN3_THRESHOLD20);
-    String output = translate(INPUT, decoder);
-    assertEquals(output.trim(), GOLD_TOPN3_THRESHOLD20);
+    String output = translate(INPUT, decoder).trim();
+    assertEquals(output, GOLD_TOPN3_THRESHOLD20);
   }
 
   @Test
   public void givenInput_whenDecodingWithTargetBigramThreshold10_thenOutputCorrect2() {
     setUp(CONF_THRESHOLD10);
-    String output = translate(INPUT, decoder);
-    assertEquals(output.trim(), GOLD_THRESHOLD10);
+    String output = translate(INPUT, decoder).trim();
+    assertEquals(output, GOLD_THRESHOLD10);
   }
 
   public void setUp(String configuration) {
