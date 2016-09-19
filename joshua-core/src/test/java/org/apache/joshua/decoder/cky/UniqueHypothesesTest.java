@@ -46,7 +46,7 @@ public class UniqueHypothesesTest {
   @Test
   public void givenInputSentence_whenDecodingWithUniqueHypotheses_thenAllHypothesesUnique()
       throws Exception {
-    Config config = parseResources(this.getClass(), "UniqueHypothesesTest.config")
+    Config config = parseResources(this.getClass(), "UniqueHypothesesTest.conf")
         .withFallback(Decoder.getDefaultFlags());
     KenLmTestUtil.Guard(() -> decoder = new Decoder(config));
 
