@@ -19,6 +19,12 @@ features = []
 def smooth_key(key):
     return key.replace('-', '_').replace('maxspan', 'span_limit')
 
+def moses_phrasetable_error():
+    sys.stderr.write('MOSES phrase table format (tm keyword "moses") is no longer support')
+    sys.stderr.write('Use $JOSHUA/scripts/support/phrase2hiero.py to convert it to Joshua\'s format')
+    sys.stderr.write('Then change the type to "phrase" and try again')
+    sys.exit(1)
+
 def parse_args(line):
     found = {}
     
@@ -36,6 +42,10 @@ def parse_args(line):
                 if os.path.isdir(val):
                     type = 'PackedGrammar'
                     found['rule_cache_size'] = 10000
+                elif type == 'moses':
+                    moses_phrasetable_error()
+                elif type == 'phrase':
+                    type = 'PhraseTable'
                 else:
                     type = 'TextGrammar'
 
@@ -69,11 +79,19 @@ for line in sys.stdin:
         _, tm = re.split(r'\s*=\s*', line, 1)
 
         if tm.find("-path") == -1:
-            # first kind
-            classType, owner, maxlen, path = tm.split(' ')
-            className = 'TextGrammar'
-            if os.path.isdir(path):
-                className = 'PackedGrammar'
+            # first kind -- old format where all values are listed
+
+            if classType == 'moses':
+                moses_phrasetable_error()
+
+            elif (classType == 'phrase'):
+                className = 'PhraseTable'
+
+            else:
+                classType, owner, maxlen, path = tm.split(' ')
+                className = 'TextGrammar'
+                if os.path.isdir(path):
+                    className = 'PackedGrammar'
 
             tms.append('class = %s, owner = %s, span_limit = %s, path = %s' % (className, owner, maxlen, path))
 
