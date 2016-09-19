@@ -39,7 +39,8 @@ public class OOVListTest {
     }
   }
 
-  @Test
+  // TODO(fhieber): Disabled this test as the oov_list functionality was removed in 7 with the new conf system.
+  @Test(enabled = false)
   public void givenInput_whenDecodingWithOOVList_thenScoreAndTranslationCorrect() throws Exception {
     String inputPath = this.getClass().getResource("OOVListTest.in").getFile();
     String goldPath = this.getClass().getResource("OOVListTest.gold").getFile();
