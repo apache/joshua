@@ -18,6 +18,7 @@
  */
 package org.apache.joshua.decoder.cky;
 
+import static com.typesafe.config.ConfigFactory.parseResources;
 import static org.apache.joshua.decoder.cky.TestUtil.decodeList;
 import static org.testng.Assert.assertEquals;
 
@@ -27,10 +28,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
+
+import com.typesafe.config.Config;
 
 /**
  * Ensures that derivations are unique for the phrase-based decoder.
@@ -39,15 +41,16 @@ public class UniqueHypothesesTest {
 
   public static final String INPUT = "una estrategia republicana para obstaculizar la reelección de Obama";
 
-  private JoshuaConfiguration joshuaConfig = null;
   private Decoder decoder = null;
 
   @Test
   public void givenInputSentence_whenDecodingWithUniqueHypotheses_thenAllHypothesesUnique()
       throws Exception {
-    configureDecoder("src/test/resources/decoder/phrase/unique-hypotheses/joshua.config");
-    List<String> decodedStrings = decodeList(Arrays.asList(new String[] { INPUT }), decoder,
-        joshuaConfig);
+    Config config = parseResources(this.getClass(), "UniqueHypothesesTest.config")
+        .withFallback(Decoder.getDefaultFlags());
+    KenLmTestUtil.Guard(() -> decoder = new Decoder(config));
+
+    List<String> decodedStrings = decodeList(Arrays.asList(new String[] { INPUT }), decoder);
 
     assertEquals(decodedStrings.size(), 300);
 
@@ -55,12 +58,6 @@ public class UniqueHypothesesTest {
     // list
     Set<String> uniqueDecodedStrings = new HashSet<>(decodedStrings);
     assertEquals(decodedStrings.size(), uniqueDecodedStrings.size());
-  }
-
-  public void configureDecoder(String pathToConfig) throws Exception {
-    joshuaConfig = new JoshuaConfiguration();
-    joshuaConfig.readConfigFile(pathToConfig);
-    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig));
   }
 
   @AfterMethod

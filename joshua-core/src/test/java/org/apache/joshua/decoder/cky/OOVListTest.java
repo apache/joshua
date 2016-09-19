@@ -18,20 +18,17 @@
  */
 package org.apache.joshua.decoder.cky;
 
-import static org.apache.joshua.decoder.cky.TestUtil.decodeList;
-import static org.apache.joshua.decoder.cky.TestUtil.loadStringsFromFile;
-import static org.testng.Assert.assertEquals;
-
-import java.util.List;
+import static com.typesafe.config.ConfigFactory.parseResources;
+import static org.apache.joshua.decoder.cky.TestUtil.decodeAndAssertDecodedOutputEqualsGold;
 
 import org.apache.joshua.decoder.Decoder;
-import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
+import com.typesafe.config.Config;
+
 public class OOVListTest {
-  private JoshuaConfiguration joshuaConfig;
   private Decoder decoder;
 
   @AfterMethod
@@ -44,23 +41,12 @@ public class OOVListTest {
 
   @Test
   public void givenInput_whenDecodingWithOOVList_thenScoreAndTranslationCorrect() throws Exception {
-    // Given
-    List<String> inputStrings = loadStringsFromFile(
-        "src/test/resources/decoder/oov-list/input.txt");
+    String inputPath = this.getClass().getResource("OOVListTest.in").getFile();
+    String goldPath = this.getClass().getResource("OOVListTest.gold").getFile();
+    Config config = parseResources(this.getClass(), "OOVListTest.conf")
+        .withFallback(Decoder.getDefaultFlags());
+    KenLmTestUtil.Guard(() -> decoder = new Decoder(config));
 
-    // When
-    configureDecoder("src/test/resources/decoder/oov-list/joshua.config");
-    List<String> decodedStrings = decodeList(inputStrings, decoder, joshuaConfig);
-
-    // Then
-    List<String> goldStrings = loadStringsFromFile(
-        "src/test/resources/decoder/oov-list/output.gold");
-    assertEquals(decodedStrings, goldStrings);
-  }
-
-  public void configureDecoder(String pathToConfig) throws Exception {
-    joshuaConfig = new JoshuaConfiguration();
-    joshuaConfig.readConfigFile(pathToConfig);
-    KenLmTestUtil.Guard(() -> decoder = new Decoder(joshuaConfig));
+    decodeAndAssertDecodedOutputEqualsGold(inputPath, decoder, goldPath);
   }
 }
