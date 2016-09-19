@@ -17,7 +17,7 @@ tms = []
 features = []
 
 def smooth_key(key):
-    return key.replace('-', '_').replace('maxspan', 'span_limit')
+    return key.replace('-', '_').replace('maxspan', 'span_limit').replace('search', 'search_algorithm')
 
 def moses_phrasetable_error():
     sys.stderr.write('MOSES phrase table format (tm keyword "moses") is no longer support')
