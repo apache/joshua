@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 
 import com.typesafe.config.Config;
 
-public class TargetBigram {
+public class TargetBigramTest {
 
   private static final String INPUT = "this is a test";
   private static final String GOLD_TOPN2 = "this is a test ||| glue_0=-4.000000 TargetBigram_this_is=1.000000 TargetBigram_is_UNK=1.000000 TargetBigram_UNK_UNK=1.000000 TargetBigram_UNK_</s>=1.000000 TargetBigram_<s>_this=1.000000 ||| 0.000";
