@@ -93,7 +93,7 @@ for line in sys.stdin:
 
         features.append('class = %s, lm_type = %s, lm_order = %s, lm_file = %s' % (className, lm_type, order, path))
 
-    elif line.startswith('feature-function'):
+    elif line.startswith('feature-function') or line.startswith('feature_function'):
         _, feature = re.split(r'\s*=\s*', line, 1)
 
         features.append(parse_args_to_string(feature))
