@@ -32,7 +32,6 @@ import java.util.List;
 
 import org.apache.joshua.decoder.ff.FeatureFunction;
 import org.apache.joshua.decoder.ff.FeatureVector;
-import org.apache.joshua.decoder.ff.lm.StateMinimizingLanguageModel;
 import org.apache.joshua.decoder.hypergraph.HyperGraph;
 import org.apache.joshua.decoder.hypergraph.KBestExtractor;
 import org.apache.joshua.decoder.io.DeNormalize;

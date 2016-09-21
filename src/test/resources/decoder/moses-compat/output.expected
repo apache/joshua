@@ -1,6 +1,2 @@
-help
-0 ||| help ||| tm_glue_0=1.000 ||| 0.000
-help
-
-# n-best stuff to follow:
-0 ||| help ||| tm-glue-0= 1.000 ||| 0.000
+0 ||| help ||| tm_glue_0=1.0 ||| 0.0
+0 ||| help ||| tm_glue_0=1.0 ||| 0.0
