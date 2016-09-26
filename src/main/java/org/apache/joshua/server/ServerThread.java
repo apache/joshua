@@ -110,7 +110,7 @@ public class ServerThread extends Thread implements HttpHandler {
   }
   
   public HashMap<String, String> queryToMap(String query) throws UnsupportedEncodingException {
-    HashMap<String, String> result = new HashMap<String, String>();
+    HashMap<String, String> result = new HashMap<>();
     for (String param : query.split("&")) {
         String pair[] = param.split("=");
         if (pair.length > 1) {
@@ -185,113 +185,125 @@ public class ServerThread extends Thread implements HttpHandler {
    * Processes metadata commands received in the HTTP request. Some commands result in sending data back.
    *
    * @param meta the metadata request
-   * @return result string (for some commands)
    */
   private void handleMetadata(String meta, JSONMessage message) {
     String[] tokens = meta.split("\\s+", 2);
     String type = tokens[0];
     String args = tokens.length > 1 ? tokens[1] : "";
-    
-    if (type.equals("get_weight")) {
+
+    switch (type) {
+    case "get_weight":
       String weight = tokens[1];
       LOG.info("WEIGHT: %s = %.3f", weight, Decoder.weights.getWeight(weight));
 
-    } else if (type.equals("set_weights")) {
+      break;
+    case "set_weights": {
       // Change a decoder weight
       String[] argTokens = args.split("\\s+");
       for (int i = 0; i < argTokens.length; i += 2) {
         String feature = argTokens[i];
-        String newValue = argTokens[i+1];
+        String newValue = argTokens[i + 1];
         float old_weight = Decoder.weights.getWeight(feature);
         Decoder.weights.set(feature, Float.parseFloat(newValue));
-        LOG.info("set_weights: {} {} -> {}", feature, old_weight, Decoder.weights.getWeight(feature));
+        LOG.info("set_weights: {} {} -> {}", feature, old_weight,
+            Decoder.weights.getWeight(feature));
       }
-      
+
       message.addMetaData("weights " + Decoder.weights.toString());
-      
-    } else if (type.equals("get_weights")) {
+
+      break;
+    }
+    case "get_weights":
       message.addMetaData("weights " + Decoder.weights.toString());
-      
-    } else if (type.equals("add_rule")) {
+
+      break;
+    case "add_rule": {
       String argTokens[] = args.split(" \\|\\|\\| ");
-  
+
       if (argTokens.length < 3) {
         LOG.error("* INVALID RULE '{}'", meta);
         return;
       }
-      
+
       String lhs = argTokens[0];
       String source = argTokens[1];
       String target = argTokens[2];
       String featureStr = "";
       String alignmentStr = "";
-      if (argTokens.length > 3) 
+      if (argTokens.length > 3)
         featureStr = argTokens[3];
       if (argTokens.length > 4)
         alignmentStr = " ||| " + argTokens[4];
-      
+
       /* Prepend source and target side nonterminals for phrase-based decoding. Probably better
        * handled in each grammar type's addRule() function.
        */
-      String ruleString = (joshuaConfiguration.search_algorithm.equals("stack"))
-          ? String.format("%s ||| [X,1] %s ||| [X,1] %s ||| -1 %s %s", lhs, source, target, featureStr, alignmentStr)
-          : String.format("%s ||| %s ||| %s ||| -1 %s %s", lhs, source, target, featureStr, alignmentStr);
-      
+      String ruleString = (joshuaConfiguration.search_algorithm.equals("stack")) ?
+          String
+              .format("%s ||| [X,1] %s ||| [X,1] %s ||| -1 %s %s", lhs, source, target, featureStr,
+                  alignmentStr) :
+          String.format("%s ||| %s ||| %s ||| -1 %s %s", lhs, source, target, featureStr,
+              alignmentStr);
+
       Rule rule = new HieroFormatReader().parseLine(ruleString);
       decoder.addCustomRule(rule);
-      
+
       LOG.info("Added custom rule {}", rule.toString());
-  
-    } else if (type.equals("list_rules")) {
-  
+
+      break;
+    }
+    case "list_rules":
+
       LOG.info("list_rules");
-      
+
       // Walk the the grammar trie
-      ArrayList<Trie> nodes = new ArrayList<Trie>();
+      ArrayList<Trie> nodes = new ArrayList<>();
       nodes.add(decoder.getCustomPhraseTable().getTrieRoot());
-  
+
       while (nodes.size() > 0) {
         Trie trie = nodes.remove(0);
-  
+
         if (trie == null)
           continue;
-  
+
         if (trie.hasRules()) {
-          for (Rule rule: trie.getRuleCollection().getRules()) {
+          for (Rule rule : trie.getRuleCollection().getRules()) {
             message.addRule(rule.toString());
             LOG.debug("Found rule: " + rule);
           }
         }
-  
+
         if (trie.getExtensions() != null)
           nodes.addAll(trie.getExtensions());
       }
-  
-    } else if (type.equals("remove_rule")) {
-      
+
+      break;
+    case "remove_rule": {
+
       Rule rule = new HieroFormatReader().parseLine(args);
-      
+
       LOG.info("remove_rule " + rule);
-  
+
       Trie trie = decoder.getCustomPhraseTable().getTrieRoot();
       int[] sourceTokens = rule.getFrench();
-      for (int i = 0; i < sourceTokens.length; i++) {
-        Trie nextTrie = trie.match(sourceTokens[i]);
+      for (int sourceToken : sourceTokens) {
+        Trie nextTrie = trie.match(sourceToken);
         if (nextTrie == null)
           return;
-        
+
         trie = nextTrie;
       }
 
       if (trie.hasRules()) {
-        for (Rule ruleCand: trie.getRuleCollection().getRules()) {
+        for (Rule ruleCand : trie.getRuleCollection().getRules()) {
           if (Arrays.equals(rule.getEnglish(), ruleCand.getEnglish())) {
             trie.getRuleCollection().getRules().remove(ruleCand);
             break;
           }
         }
-        return;
       }
+      break;
+    }
     }
   }
 }

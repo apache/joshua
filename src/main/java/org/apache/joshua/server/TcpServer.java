@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 public class TcpServer {
   private static final Logger LOG = LoggerFactory.getLogger(TcpServer.class);
   private final JoshuaConfiguration joshuaConfiguration;
-  private Decoder decoder;
-  private int port;
+  private final Decoder decoder;
+  private final int port;
 
   public TcpServer(Decoder decoder, int port,JoshuaConfiguration joshuaConfiguration) {
     this.joshuaConfiguration = joshuaConfiguration;
