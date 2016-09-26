@@ -42,13 +42,12 @@ public class Optimizer {
     feat_hash = _feat_hash; // feature hash table
     stats_hash = _stats_hash; // suff. stats hash table
     finalLambda = new double[initialLambda.length];
-    for (int i = 0; i < finalLambda.length; i++)
-      finalLambda[i] = initialLambda[i];
+	  System.arraycopy(initialLambda, 0, finalLambda, 0, finalLambda.length);
   }
 
   // run MIRA for one epoch
   public double[] runOptimizer() {
-    List<Integer> sents = new ArrayList<Integer>();
+    List<Integer> sents = new ArrayList<>();
     for (int i = 0; i < sentNum; ++i)
         sents.add(i);
     double[] avgLambda = new double[initialLambda.length]; // only needed if averaging is required
@@ -90,7 +89,7 @@ public class Optimizer {
 	  loss = 0;
 	  thisBatchSize = batchSize;
 	  ++numBatch;
-	  HashMap<Integer, Double> featDiff = new HashMap<Integer, Double>();
+	  HashMap<Integer, Double> featDiff = new HashMap<>();
 	  for(int b = 0; b < batchSize; ++b ) {
 	      //find out oracle and prediction
 	      s = sents.get(sentCount);
@@ -120,51 +119,48 @@ public class Optimizer {
 
 	      //accumulate difference feature vector
 	      if ( b == 0 ) {
-		  for (int i = 0; i < vecOraFeat.length; i++) {
-		      featInfo = vecOraFeat[i].split("=");
-		      diffFeatId = Integer.parseInt(featInfo[0]);
-		      featDiff.put(diffFeatId, Double.parseDouble(featInfo[1]));
-		  }
-		  for (int i = 0; i < vecPredFeat.length; i++) {
-		      featInfo = vecPredFeat[i].split("=");
-		      diffFeatId = Integer.parseInt(featInfo[0]);
-		      if (featDiff.containsKey(diffFeatId)) { //overlapping features
-			  diff = featDiff.get(diffFeatId)-Double.parseDouble(featInfo[1]);
-			  if ( Math.abs(diff) > 1e-20 )
-			      featDiff.put(diffFeatId, diff);
-			  else
-			      featDiff.remove(diffFeatId);
+		      for (String aVecOraFeat : vecOraFeat) {
+			      featInfo = aVecOraFeat.split("=");
+			      diffFeatId = Integer.parseInt(featInfo[0]);
+			      featDiff.put(diffFeatId, Double.parseDouble(featInfo[1]));
 		      }
-		      else //features only firing in the 2nd feature vector
-			  featDiff.put(diffFeatId, -1.0*Double.parseDouble(featInfo[1]));
-		  }
+		      for (String aVecPredFeat : vecPredFeat) {
+			      featInfo = aVecPredFeat.split("=");
+			      diffFeatId = Integer.parseInt(featInfo[0]);
+			      if (featDiff.containsKey(diffFeatId)) { //overlapping features
+				      diff = featDiff.get(diffFeatId) - Double.parseDouble(featInfo[1]);
+				      if (Math.abs(diff) > 1e-20)
+					      featDiff.put(diffFeatId, diff);
+				      else
+					      featDiff.remove(diffFeatId);
+			      } else //features only firing in the 2nd feature vector
+				      featDiff.put(diffFeatId, -1.0 * Double.parseDouble(featInfo[1]));
+		      }
 	      } else {
-		  for (int i = 0; i < vecOraFeat.length; i++) {
-		      featInfo = vecOraFeat[i].split("=");
-		      diffFeatId = Integer.parseInt(featInfo[0]);
-		      if (featDiff.containsKey(diffFeatId)) { //overlapping features
-			  diff = featDiff.get(diffFeatId)+Double.parseDouble(featInfo[1]);
-			  if ( Math.abs(diff) > 1e-20 )
-			      featDiff.put(diffFeatId, diff);
-			  else
-			      featDiff.remove(diffFeatId);
+		      for (String aVecOraFeat : vecOraFeat) {
+			      featInfo = aVecOraFeat.split("=");
+			      diffFeatId = Integer.parseInt(featInfo[0]);
+			      if (featDiff.containsKey(diffFeatId)) { //overlapping features
+				      diff = featDiff.get(diffFeatId) + Double.parseDouble(featInfo[1]);
+				      if (Math.abs(diff) > 1e-20)
+					      featDiff.put(diffFeatId, diff);
+				      else
+					      featDiff.remove(diffFeatId);
+			      } else //features only firing in the new oracle feature vector
+				      featDiff.put(diffFeatId, Double.parseDouble(featInfo[1]));
 		      }
-		      else //features only firing in the new oracle feature vector
-			  featDiff.put(diffFeatId, Double.parseDouble(featInfo[1]));
-		  }
-		  for (int i = 0; i < vecPredFeat.length; i++) {
-		      featInfo = vecPredFeat[i].split("=");
-		      diffFeatId = Integer.parseInt(featInfo[0]);
-		      if (featDiff.containsKey(diffFeatId)) { //overlapping features
-			  diff = featDiff.get(diffFeatId)-Double.parseDouble(featInfo[1]);
-			  if ( Math.abs(diff) > 1e-20 )
-			      featDiff.put(diffFeatId, diff);
-			  else
-			      featDiff.remove(diffFeatId);
+		      for (String aVecPredFeat : vecPredFeat) {
+			      featInfo = aVecPredFeat.split("=");
+			      diffFeatId = Integer.parseInt(featInfo[0]);
+			      if (featDiff.containsKey(diffFeatId)) { //overlapping features
+				      diff = featDiff.get(diffFeatId) - Double.parseDouble(featInfo[1]);
+				      if (Math.abs(diff) > 1e-20)
+					      featDiff.put(diffFeatId, diff);
+				      else
+					      featDiff.remove(diffFeatId);
+			      } else //features only firing in the new prediction feature vector
+				      featDiff.put(diffFeatId, -1.0 * Double.parseDouble(featInfo[1]));
 		      }
-		      else //features only firing in the new prediction feature vector
-			  featDiff.put(diffFeatId, -1.0*Double.parseDouble(featInfo[1]));
-		  }
 	      }
 	      if (!runPercep) { // otherwise eta=1.0
 		  // remember the model scores here are already scaled
@@ -183,10 +179,10 @@ public class Optimizer {
 	  if (!runPercep) { // otherwise eta=1.0
 	      featNorm = 0;
 	      Collection<Double> allDiff = featDiff.values();
-	      for (Iterator<Double> it = allDiff.iterator(); it.hasNext();) {
-		  diff = it.next();
-		  featNorm += diff * diff / ( thisBatchSize * thisBatchSize );
-	      }
+		  for (Double anAllDiff : allDiff) {
+			  diff = anAllDiff;
+			  featNorm += diff * diff / (thisBatchSize * thisBatchSize);
+		  }
 	  }
 	  if( loss <= 0 )
 	      eta = 0;
@@ -269,7 +265,7 @@ public class Optimizer {
     finalMetricScore = bestMetricScore;
 
     // non-optimizable weights should remain unchanged
-    ArrayList<Double> cpFixWt = new ArrayList<Double>();
+    ArrayList<Double> cpFixWt = new ArrayList<>();
     for (int i = 1; i < isOptimizable.length; ++i) {
 	if (!isOptimizable[i])
 	    cpFixWt.add(finalLambda[i]);
@@ -302,21 +298,22 @@ public class Optimizer {
 	  // find out the 1-best candidate for each sentence
 	  // this depends on the training mode
 	  maxModelScore = NegInf;
-	  for (Iterator<String> it = candSet.iterator(); it.hasNext();) {
-	      modelScore = 0.0;
-	      candStr = it.next().toString();
-	      feat_str = feat_hash[i].get(candStr).split("\\s+");
-	      String[] feat_info;
-	      for (int f = 0; f < feat_str.length; f++) {
-		  feat_info = feat_str[f].split("=");
-		  modelScore += Double.parseDouble(feat_info[1]) * finalLambda[Vocabulary.id(feat_info[0])];
+	      for (String aCandSet : candSet) {
+		      modelScore = 0.0;
+		      candStr = aCandSet;
+		      feat_str = feat_hash[i].get(candStr).split("\\s+");
+		      String[] feat_info;
+		      for (String aFeat_str : feat_str) {
+			      feat_info = aFeat_str.split("=");
+			      modelScore +=
+					      Double.parseDouble(feat_info[1]) * finalLambda[Vocabulary.id(feat_info[0])];
+		      }
+		      if (maxModelScore < modelScore) {
+			      maxModelScore = modelScore;
+			      tmpStatsVal = stats_hash[i].get(candStr).split("\\s+"); // save the
+			      // suff stats
+		      }
 	      }
-	      if (maxModelScore < modelScore) {
-		  maxModelScore = modelScore;
-		  tmpStatsVal = stats_hash[i].get(candStr).split("\\s+"); // save the
-		  // suff stats
-	      }
-	  }
 
 	  for (int j = 0; j < suffStatsCount; j++)
 	      corpusStatsVal[j] += Integer.parseInt(tmpStatsVal[j]); // accumulate
@@ -361,107 +358,107 @@ public class Optimizer {
 	      worstPredScore = PosInf;
       }
 
-      for (Iterator<String> it = candSet.iterator(); it.hasNext();) {
-	  cand = it.next().toString();
-	  candMetric = computeSentMetric(sentId, cand); // compute metric score
+	  for (String aCandSet : candSet) {
+		  cand = aCandSet;
+		  candMetric = computeSentMetric(sentId, cand); // compute metric score
 
-	  // start to compute model score
-	  candScore = 0;
-	  featStr = feat_hash[sentId].get(cand).split("\\s+");
-	  feats = "";
+		  // start to compute model score
+		  candScore = 0;
+		  featStr = feat_hash[sentId].get(cand).split("\\s+");
+		  feats = "";
 
-	  for (int i = 0; i < featStr.length; i++) {
-	      featInfo = featStr[i].split("=");
-	      actualFeatId = Vocabulary.id(featInfo[0]);
-	      candScore += Double.parseDouble(featInfo[1]) * lambda[actualFeatId];
-	      if ((actualFeatId < isOptimizable.length && isOptimizable[actualFeatId])
-		  || actualFeatId >= isOptimizable.length)
-		  feats += actualFeatId + "=" + Double.parseDouble(featInfo[1]) + " ";
+		  for (String aFeatStr : featStr) {
+			  featInfo = aFeatStr.split("=");
+			  actualFeatId = Vocabulary.id(featInfo[0]);
+			  candScore += Double.parseDouble(featInfo[1]) * lambda[actualFeatId];
+			  if ((actualFeatId < isOptimizable.length && isOptimizable[actualFeatId])
+					  || actualFeatId >= isOptimizable.length)
+				  feats += actualFeatId + "=" + Double.parseDouble(featInfo[1]) + " ";
+		  }
+
+		  candScore *= featScale; // scale the model score
+
+		  // is this cand oracle?
+		  if (oraSelectMode == 1) {// "hope", b=1, r=1
+			  if (evalMetric.getToBeMinimized()) {// if the smaller the metric score, the better
+				  if (bestOraScore <= (candScore - candMetric)) {
+					  bestOraScore = candScore - candMetric;
+					  oraMetric = candMetric;
+					  oraScore = candScore;
+					  oraFeat = feats;
+					  oraCand = cand;
+				  }
+			  } else {
+				  if (bestOraScore <= (candScore + candMetric)) {
+					  bestOraScore = candScore + candMetric;
+					  oraMetric = candMetric;
+					  oraScore = candScore;
+					  oraFeat = feats;
+					  oraCand = cand;
+				  }
+			  }
+		  } else {// best metric score(ex: max BLEU), b=1, r=0
+			  if (evalMetric.getToBeMinimized()) {// if the smaller the metric score, the better
+				  if (bestOraScore >= candMetric) {
+					  bestOraScore = candMetric;
+					  oraMetric = candMetric;
+					  oraScore = candScore;
+					  oraFeat = feats;
+					  oraCand = cand;
+				  }
+			  } else {
+				  if (bestOraScore <= candMetric) {
+					  bestOraScore = candMetric;
+					  oraMetric = candMetric;
+					  oraScore = candScore;
+					  oraFeat = feats;
+					  oraCand = cand;
+				  }
+			  }
+		  }
+
+		  // is this cand prediction?
+		  if (predSelectMode == 1) {// "fear"
+			  if (evalMetric.getToBeMinimized()) {// if the smaller the metric score, the better
+				  if (worstPredScore <= (candScore + candMetric)) {
+					  worstPredScore = candScore + candMetric;
+					  predMetric = candMetric;
+					  predScore = candScore;
+					  predFeat = feats;
+				  }
+			  } else {
+				  if (worstPredScore <= (candScore - candMetric)) {
+					  worstPredScore = candScore - candMetric;
+					  predMetric = candMetric;
+					  predScore = candScore;
+					  predFeat = feats;
+				  }
+			  }
+		  } else if (predSelectMode == 2) {// model prediction(max model score)
+			  if (worstPredScore <= candScore) {
+				  worstPredScore = candScore;
+				  predMetric = candMetric;
+				  predScore = candScore;
+				  predFeat = feats;
+			  }
+		  } else {// worst metric score(ex: min BLEU)
+			  if (evalMetric.getToBeMinimized()) {// if the smaller the metric score, the better
+				  if (worstPredScore <= candMetric) {
+					  worstPredScore = candMetric;
+					  predMetric = candMetric;
+					  predScore = candScore;
+					  predFeat = feats;
+				  }
+			  } else {
+				  if (worstPredScore >= candMetric) {
+					  worstPredScore = candMetric;
+					  predMetric = candMetric;
+					  predScore = candScore;
+					  predFeat = feats;
+				  }
+			  }
+		  }
 	  }
-
-	  candScore *= featScale; // scale the model score
-
-	  // is this cand oracle?
-	  if (oraSelectMode == 1) {// "hope", b=1, r=1
-	      if (evalMetric.getToBeMinimized()) {// if the smaller the metric score, the better
-		  if (bestOraScore <= (candScore - candMetric)) {
-		      bestOraScore = candScore - candMetric;
-		      oraMetric = candMetric;
-		      oraScore = candScore;
-		      oraFeat = feats;
-		      oraCand = cand;
-		  }
-	      } else {
-		  if (bestOraScore <= (candScore + candMetric)) {
-		      bestOraScore = candScore + candMetric;
-		      oraMetric = candMetric;
-		      oraScore = candScore;
-		      oraFeat = feats;
-		      oraCand = cand;
-		  }
-	      }
-	  } else {// best metric score(ex: max BLEU), b=1, r=0
-	      if (evalMetric.getToBeMinimized()) {// if the smaller the metric score, the better
-		  if (bestOraScore >= candMetric) {
-		      bestOraScore = candMetric;
-		      oraMetric = candMetric;
-		      oraScore = candScore;
-		      oraFeat = feats;
-		      oraCand = cand;
-		  }
-	      } else {
-		  if (bestOraScore <= candMetric) {
-		      bestOraScore = candMetric;
-		      oraMetric = candMetric;
-		      oraScore = candScore;
-		      oraFeat = feats;
-		      oraCand = cand;
-		  }
-	      }
-	  }
-
-	  // is this cand prediction?
-	  if (predSelectMode == 1) {// "fear"
-	      if (evalMetric.getToBeMinimized()) {// if the smaller the metric score, the better
-		  if (worstPredScore <= (candScore + candMetric)) {
-		      worstPredScore = candScore + candMetric;
-		      predMetric = candMetric;
-		      predScore = candScore;
-		      predFeat = feats;
-		  }
-	      } else {
-		  if (worstPredScore <= (candScore - candMetric)) {
-		      worstPredScore = candScore - candMetric;
-		      predMetric = candMetric;
-		      predScore = candScore;
-		      predFeat = feats;
-		  }
-	      }
-	  } else if (predSelectMode == 2) {// model prediction(max model score)
-	      if (worstPredScore <= candScore) {
-		  worstPredScore = candScore;
-		  predMetric = candMetric;
-		  predScore = candScore;
-		  predFeat = feats;
-	      }
-	  } else {// worst metric score(ex: min BLEU)
-	      if (evalMetric.getToBeMinimized()) {// if the smaller the metric score, the better
-		  if (worstPredScore <= candMetric) {
-		      worstPredScore = candMetric;
-		      predMetric = candMetric;
-		      predScore = candScore;
-		      predFeat = feats;
-		  }
-	      } else {
-		  if (worstPredScore >= candMetric) {
-		      worstPredScore = candMetric;
-		      predMetric = candMetric;
-		      predScore = candScore;
-		      predFeat = feats;
-		  }
-	      }
-	  }
-      }
 
       oraPredScore[0] = oraMetric;
       oraPredScore[1] = oraScore;
@@ -608,14 +605,14 @@ public class Optimizer {
       return finalMetricScore;
   }
 
-  private Vector<String> output;
+  private final Vector<String> output;
   private double[] initialLambda;
-  private double[] finalLambda;
+  private final double[] finalLambda;
   private double finalMetricScore;
-  private HashMap<String, String>[] feat_hash;
-  private HashMap<String, String>[] stats_hash;
-  private int paramDim;
-  private boolean[] isOptimizable;
+  private final HashMap<String, String>[] feat_hash;
+  private final HashMap<String, String>[] stats_hash;
+  private final int paramDim;
+  private final boolean[] isOptimizable;
   public static int sentNum;
   public static int miraIter; // MIRA internal iterations
   public static int oraSelectMode;
@@ -636,6 +633,6 @@ public class Optimizer {
   public static double[] normalizationOptions;
   public static double[][] bleuHistory;
 
-  private final static double NegInf = (-1.0 / 0.0);
-  private final static double PosInf = (+1.0 / 0.0);
+  private final static double NegInf = Double.NEGATIVE_INFINITY;
+  private final static double PosInf = Double.POSITIVE_INFINITY;
 }
