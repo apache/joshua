@@ -34,23 +34,23 @@ import org.apache.joshua.metrics.EvaluationMetric;
 
 public class IntermediateOptimizer implements Runnable {
   /* non-static data members */
-  private int j;
-  private Semaphore blocker;
-  private Vector<String> threadOutput;
+  private final int j;
+  private final Semaphore blocker;
+  private final Vector<String> threadOutput;
   private String strToPrint;
 
-  private double[] initialLambda;
-  private double[] finalLambda;
-  private int[][] best1Cand_suffStats;
-  private double[] finalScore;
-  private int[] candCount;
-  private double[][][] featVal_array;
-  private ConcurrentHashMap<Integer, int[]>[] suffStats_array;
+  private final double[] initialLambda;
+  private final double[] finalLambda;
+  private final int[][] best1Cand_suffStats;
+  private final double[] finalScore;
+  private final int[] candCount;
+  private final double[][][] featVal_array;
+  private final ConcurrentHashMap<Integer, int[]>[] suffStats_array;
 
   /* static data members */
   private final static DecimalFormat f4 = new DecimalFormat("###0.0000");
-  private final static double NegInf = (-1.0 / 0.0);
-  private final static double PosInf = (+1.0 / 0.0);
+  private final static double NegInf = Double.NEGATIVE_INFINITY;
+  private final static double PosInf = Double.POSITIVE_INFINITY;
 
   private static int numSentences;
   private static int numDocuments;
@@ -82,10 +82,7 @@ public class IntermediateOptimizer implements Runnable {
 
     docSubset_firstRank = in_docSubsetInfo[1];
     docSubset_lastRank = in_docSubsetInfo[2];
-    if (in_docSubsetInfo[3] != numDocuments)
-      optimizeSubset = true;
-    else
-      optimizeSubset = false;
+    optimizeSubset = in_docSubsetInfo[3] != numDocuments;
 
     numParams = in_numParams;
     normalizationOptions = in_normalizationOptions;
@@ -295,7 +292,7 @@ public class IntermediateOptimizer implements Runnable {
           // indicesOfInterest_all[i].add(currIndex); // old_k ***/
 
           if (!thresholdsAll.containsKey(nearestIntersectionPoint)) {
-            TreeMap<Integer, int[]> A = new TreeMap<Integer, int[]>();
+            TreeMap<Integer, int[]> A = new TreeMap<>();
             A.put(i, th_info);
             thresholdsAll.put(nearestIntersectionPoint, A);
           } else {
@@ -487,15 +484,12 @@ public class IntermediateOptimizer implements Runnable {
       nextLambdaVal = (ip_prev + ip_curr) / 2.0;
 
       TreeMap<Integer, int[]> th_info_M = thresholdsAll.get(ip_prev);
-      Iterator<Integer> It2 = (th_info_M.keySet()).iterator();
-      while (It2.hasNext()) {
-        int i = It2.next();
+      for (Integer i : (th_info_M.keySet())) {
         // i.e. the 1-best for the i'th sentence changes at this threshold value
         int docOf_i = docOfSentence[i];
 
         int[] th_info = th_info_M.get(i);
-        @SuppressWarnings("unused")
-        int old_k = th_info[0]; // should be equal to indexOfCurrBest[i]
+        @SuppressWarnings("unused") int old_k = th_info[0]; // should be equal to indexOfCurrBest[i]
         int new_k = th_info[1];
 
         for (int s = 0; s < suffStatsCount; ++s) {
@@ -504,7 +498,7 @@ public class IntermediateOptimizer implements Runnable {
 
         indexOfCurrBest[i] = new_k;
         suffStats[i] = suffStats_array[i].get(indexOfCurrBest[i]); // update the SS for the i'th
-                                                                   // sentence
+        // sentence
 
         for (int s = 0; s < suffStatsCount; ++s) {
           suffStats_doc[docOf_i][s] += suffStats[i][s]; // add stats for candidate new_k
@@ -573,11 +567,8 @@ public class IntermediateOptimizer implements Runnable {
         int numCandidates = candCount[i];
 
         int currCand = 0;
-        Iterator<Integer> It = indicesOfInterest[i].iterator();
 
-        while (It.hasNext()) {
-          int nextIndex = It.next();
-
+        for (Integer nextIndex : indicesOfInterest[i]) {
           // skip candidates until you get to the nextIndex'th candidate
           while (currCand < nextIndex) {
             inFile.readLine();
@@ -691,7 +682,7 @@ public class IntermediateOptimizer implements Runnable {
     TreeSet<Integer>[] temp_TSA = new TreeSet[numSentences];
     indicesOfInterest = temp_TSA;
     for (int i = 0; i < numSentences; ++i) {
-      indicesOfInterest[i] = new TreeSet<Integer>();
+      indicesOfInterest[i] = new TreeSet<>();
     }
     // }
 
@@ -786,10 +777,7 @@ public class IntermediateOptimizer implements Runnable {
     // printMemoryUsage();
     // println("",2);
 
-
-
-    double[] c_best_info = {c_best, bestLambdaVal, bestScore};
-    return c_best_info;
+    return new double[] {c_best, bestLambdaVal, bestScore};
 
   } // double[] bestParamToChange(int j, double[] currLambda)
 
@@ -857,7 +845,7 @@ public class IntermediateOptimizer implements Runnable {
     thresholdsAll[0] = null;
     for (int c = 1; c <= numParams; ++c) {
       if (isOptimizable[c]) {
-        thresholdsAll[c] = new TreeMap<Double, TreeMap<Integer, int[]>>();
+        thresholdsAll[c] = new TreeMap<>();
       } else {
         thresholdsAll[c] = null;
       }

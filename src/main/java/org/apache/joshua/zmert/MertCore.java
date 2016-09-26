@@ -35,6 +35,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,8 +74,8 @@ public class MertCore {
 
   private final static DecimalFormat f4 = new DecimalFormat("###0.0000");
 
-  private final static double NegInf = (-1.0 / 0.0);
-  private final static double PosInf = (+1.0 / 0.0);
+  private final static double NegInf = Double.NEGATIVE_INFINITY;
+  private final static double PosInf = Double.POSITIVE_INFINITY;
   private final static double epsilon = 1.0 / 1000000;
 
   private int verbosity; // anything of priority <= verbosity will be printed
@@ -501,7 +502,7 @@ public class MertCore {
     indicesOfInterest_all = temp_TSA;
 
     for (int i = 0; i < numSentences; ++i) {
-      indicesOfInterest_all[i] = new TreeSet<Integer>();
+      indicesOfInterest_all[i] = new TreeSet<>();
     }
 
 
@@ -714,7 +715,7 @@ public class MertCore {
         candCount[i] = 0;
         lastUsedIndex[i] = -1;
         // suffStats_array[i].clear();
-        suffStats_array[i] = new ConcurrentHashMap<Integer, int[]>();
+        suffStats_array[i] = new ConcurrentHashMap<>();
       }
 
       double[][] initialLambda = new double[1 + initsPerIt][1 + numParams];
@@ -859,7 +860,7 @@ public class MertCore {
         // (It's not actually a bug, but only because existingCandStats gets
         // cleared before moving to the next source sentence.)
         // FIX: should be made an array, indexed by i
-        HashMap<String, String> existingCandStats = new HashMap<String, String>();
+        HashMap<String, String> existingCandStats = new HashMap<>();
         // Stores precalculated sufficient statistics for candidates, in case
         // the same candidate is seen again. (SS stored as a String.)
         // Q: Why do we care? If we see the same candidate again, aren't we going
@@ -970,7 +971,7 @@ public class MertCore {
 
           String[] sentsCurrIt_currSrcSent = new String[sizeOfNBest + 1];
 
-          Vector<String> unknownCands_V = new Vector<String>();
+          Vector<String> unknownCands_V = new Vector<>();
           // which candidates (of the i'th source sentence) have not been seen before
           // this iteration?
 
@@ -1186,8 +1187,7 @@ public class MertCore {
                 }
                 if (score > best1Score[j][i]) {
                   best1Score[j][i] = score;
-                  for (int s = 0; s < suffStatsCount; ++s)
-                    best1Cand_suffStats[j][i][s] = stats[s];
+                  System.arraycopy(stats, 0, best1Cand_suffStats[j][i], 0, suffStatsCount);
                 }
               } // for (j)
 
@@ -1292,7 +1292,7 @@ public class MertCore {
       Vector<String>[] threadOutput = new Vector[initsPerIt + 1];
 
       for (int j = 1; j <= initsPerIt; ++j) {
-        threadOutput[j] = new Vector<String>();
+        threadOutput[j] = new Vector<>();
         pool.execute(new IntermediateOptimizer(j, blocker, threadOutput[j], initialLambda[j],
             finalLambda[j], best1Cand_suffStats[j], finalScore, candCount, featVal_array,
             suffStats_array));
@@ -1308,9 +1308,8 @@ public class MertCore {
 
       // extract output from threadOutput[]
       for (int j = 1; j <= initsPerIt; ++j) {
-        for (String str : threadOutput[j]) {
-          println(str); // no verbosity check needed; thread already checked
-        }
+        // no verbosity check needed; thread already checked
+        (threadOutput[j]).forEach(this::println);
       }
 
       int best_j = 1;
@@ -1450,7 +1449,7 @@ public class MertCore {
       println("Running external decoder...", 1);
 
       try {
-        ArrayList<String> cmd = new ArrayList<String>();
+        ArrayList<String> cmd = new ArrayList<>();
         cmd.add(decoderCommandFileName);
 
         if (passIterationToDecoder)
@@ -1517,7 +1516,7 @@ public class MertCore {
         if (line.equals("")) continue;
 
         // skip lines that aren't formatted correctly
-        if (line.indexOf("|||") == -1)
+        if (!line.contains("|||"))
           continue;
 
         /*
@@ -1645,13 +1644,16 @@ public class MertCore {
 
       // read isOptimizable
       dummy = inFile_init.next();
-      if (dummy.equals("Opt")) {
+      switch (dummy) {
+      case "Opt":
         isOptimizable[c] = true;
-      } else if (dummy.equals("Fix")) {
+        break;
+      case "Fix":
         isOptimizable[c] = false;
-      } else {
-        throw new RuntimeException("Unknown isOptimizable string " + dummy
-            + " (must be either Opt or Fix)");
+        break;
+      default:
+        throw new RuntimeException(
+            "Unknown isOptimizable string " + dummy + " (must be either Opt or Fix)");
       }
 
       if (!isOptimizable[c]) { // skip next four values
@@ -1662,21 +1664,27 @@ public class MertCore {
       } else {
         // set minThValue[c] and maxThValue[c] (range for thresholds to investigate)
         dummy = inFile_init.next();
-        if (dummy.equals("-Inf")) {
+        switch (dummy) {
+        case "-Inf":
           minThValue[c] = NegInf;
-        } else if (dummy.equals("+Inf")) {
+          break;
+        case "+Inf":
           throw new RuntimeException("minThValue[" + c + "] cannot be +Inf!");
-        } else {
+        default:
           minThValue[c] = Double.parseDouble(dummy);
+          break;
         }
 
         dummy = inFile_init.next();
-        if (dummy.equals("-Inf")) {
+        switch (dummy) {
+        case "-Inf":
           throw new RuntimeException("maxThValue[" + c + "] cannot be -Inf!");
-        } else if (dummy.equals("+Inf")) {
+        case "+Inf":
           maxThValue[c] = PosInf;
-        } else {
+          break;
+        default:
           maxThValue[c] = Double.parseDouble(dummy);
+          break;
         }
 
         // set minRandValue[c] and maxRandValue[c] (range for random values)
@@ -1760,16 +1768,18 @@ public class MertCore {
     dummy = (origLine.substring(origLine.indexOf("=") + 1)).trim();
     String[] dummyA = dummy.split("\\s+");
 
-    if (dummyA[0].equals("none")) {
+    switch (dummyA[0]) {
+    case "none":
       normalizationOptions[0] = 0;
-    } else if (dummyA[0].equals("absval")) {
+      break;
+    case "absval":
       normalizationOptions[0] = 1;
       normalizationOptions[1] = Double.parseDouble(dummyA[1]);
       String pName = dummyA[2];
       for (int i = 3; i < dummyA.length; ++i) { // in case parameter name has multiple words
         pName = pName + " " + dummyA[i];
       }
-      normalizationOptions[2] = c_fromParamName(pName);;
+      normalizationOptions[2] = c_fromParamName(pName);
 
       if (normalizationOptions[1] <= 0) {
         throw new RuntimeException("Value for the absval normalization method must be positive.");
@@ -1778,29 +1788,36 @@ public class MertCore {
         throw new RuntimeException("Unrecognized feature name " + normalizationOptions[2]
             + " for absval normalization method.");
       }
-    } else if (dummyA[0].equals("maxabsval")) {
+      break;
+    case "maxabsval":
       normalizationOptions[0] = 2;
       normalizationOptions[1] = Double.parseDouble(dummyA[1]);
       if (normalizationOptions[1] <= 0) {
-        throw new RuntimeException("Value for the maxabsval normalization method must be positive.");
+        throw new RuntimeException(
+            "Value for the maxabsval normalization method must be positive.");
       }
-    } else if (dummyA[0].equals("minabsval")) {
+      break;
+    case "minabsval":
       normalizationOptions[0] = 3;
       normalizationOptions[1] = Double.parseDouble(dummyA[1]);
       if (normalizationOptions[1] <= 0) {
-        throw new RuntimeException("Value for the minabsval normalization method must be positive.");
+        throw new RuntimeException(
+            "Value for the minabsval normalization method must be positive.");
       }
-    } else if (dummyA[0].equals("LNorm")) {
+      break;
+    case "LNorm":
       normalizationOptions[0] = 4;
       normalizationOptions[1] = Double.parseDouble(dummyA[1]);
       normalizationOptions[2] = Double.parseDouble(dummyA[2]);
       if (normalizationOptions[1] <= 0 || normalizationOptions[2] <= 0) {
-        throw new RuntimeException("Both values for the LNorm normalization method must be positive.");
+        throw new RuntimeException(
+            "Both values for the LNorm normalization method must be positive.");
       }
-    } else {
+      break;
+    default:
       throw new RuntimeException("Unrecognized normalization method " + dummyA[0] + "; "
           + "must be one of none, absval, maxabsval, and LNorm.");
-    } // if (dummyA[0])
+    }
 
     inFile_init.close();
   }
@@ -1863,7 +1880,7 @@ public class MertCore {
 
           boolean format3 = false;
 
-          HashSet<String> seenStrings = new HashSet<String>();
+          HashSet<String> seenStrings = new HashSet<>();
           BufferedReader inFile = new BufferedReader(new FileReader(docInfoFileName));
           for (int i = 0; i < numSentences; ++i) {
             // set format3 = true if a duplicate is found
@@ -1874,8 +1891,8 @@ public class MertCore {
 
           inFile.close();
 
-          HashSet<String> seenDocNames = new HashSet<String>();
-          HashMap<String, Integer> docOrder = new HashMap<String, Integer>();
+          HashSet<String> seenDocNames = new HashSet<>();
+          HashMap<String, Integer> docOrder = new HashMap<>();
           // maps a document name to the order (0-indexed) in which it was seen
 
           inFile = new BufferedReader(new FileReader(docInfoFileName));
@@ -2015,7 +2032,7 @@ public class MertCore {
   private String[] cfgFileToArgsArray(String fileName) {
     checkFile(fileName);
 
-    Vector<String> argsVector = new Vector<String>();
+    Vector<String> argsVector = new Vector<>();
 
     BufferedReader inFile = null;
     try {
@@ -2027,7 +2044,7 @@ public class MertCore {
 
         if (line != null && line.length() > 0 && line.charAt(0) != '#') {
 
-          if (line.indexOf("#") != -1) { // discard comment
+          if (line.contains("#")) { // discard comment
             line = line.substring(0, line.indexOf("#"));
           }
 
@@ -2044,9 +2061,7 @@ public class MertCore {
               && (paramA[0].equals("-m") || paramA[0].equals("-docSet") || paramA[0]
                   .equals("-damianos"))) {
             // -m (metricName), -docSet, and -damianos are allowed to have extra optinos
-            for (int opt = 0; opt < paramA.length; ++opt) {
-              argsVector.add(paramA[opt]);
-            }
+            Collections.addAll(argsVector, paramA);
           } else {
             println("Malformed line in config file:");
             println(origLine);
@@ -2134,30 +2149,39 @@ public class MertCore {
     while (i < args.length) {
       String option = args[i];
       // Relevant files
-      if (option.equals("-dir")) {
+      switch (option) {
+      case "-dir":
         dirPrefix = args[i + 1];
-      } else if (option.equals("-s")) {
+        break;
+      case "-s":
         sourceFileName = args[i + 1];
-      } else if (option.equals("-r")) {
+        break;
+      case "-r":
         refFileName = args[i + 1];
-      } else if (option.equals("-rps")) {
+        break;
+      case "-rps":
         refsPerSen = Integer.parseInt(args[i + 1]);
         if (refsPerSen < 1) {
           throw new RuntimeException("refsPerSen must be positive.");
         }
-      } else if (option.equals("-txtNrm")) {
+        break;
+      case "-txtNrm":
         textNormMethod = Integer.parseInt(args[i + 1]);
         if (textNormMethod < 0 || textNormMethod > 4) {
           throw new RuntimeException("textNormMethod should be between 0 and 4");
         }
-      } else if (option.equals("-p")) {
+        break;
+      case "-p":
         paramsFileName = args[i + 1];
-      } else if (option.equals("-docInfo")) {
+        break;
+      case "-docInfo":
         docInfoFileName = args[i + 1];
-      } else if (option.equals("-fin")) {
+        break;
+      case "-fin":
         finalLambdaFileName = args[i + 1];
         // MERT specs
-      } else if (option.equals("-m")) {
+        break;
+      case "-m":
         metricName = args[i + 1];
         metricName_display = metricName;
         if (EvaluationMetric.knownMetricName(metricName)) {
@@ -2170,7 +2194,8 @@ public class MertCore {
         } else {
           throw new RuntimeException("Unknown metric name " + metricName + ".");
         }
-      } else if (option.equals("-docSet")) {
+        break;
+      case "-docSet":
         String method = args[i + 1];
 
         if (method.equals("all")) {
@@ -2215,53 +2240,62 @@ public class MertCore {
         } else {
           throw new RuntimeException("Unknown docSet method " + method + ".");
         }
-      } else if (option.equals("-maxIt")) {
+        break;
+      case "-maxIt":
         maxMERTIterations = Integer.parseInt(args[i + 1]);
         if (maxMERTIterations < 1) {
           throw new RuntimeException("maxMERTIts must be positive.");
         }
-      } else if (option.equals("-minIt")) {
+        break;
+      case "-minIt":
         minMERTIterations = Integer.parseInt(args[i + 1]);
         if (minMERTIterations < 1) {
           throw new RuntimeException("minMERTIts must be positive.");
         }
-      } else if (option.equals("-prevIt")) {
+        break;
+      case "-prevIt":
         prevMERTIterations = Integer.parseInt(args[i + 1]);
         if (prevMERTIterations < 0) {
           throw new RuntimeException("prevMERTIts must be non-negative.");
         }
-      } else if (option.equals("-stopIt")) {
+        break;
+      case "-stopIt":
         stopMinIts = Integer.parseInt(args[i + 1]);
         if (stopMinIts < 1) {
           throw new RuntimeException("stopMinIts must be positive.");
         }
-      } else if (option.equals("-stopSig")) {
+        break;
+      case "-stopSig":
         stopSigValue = Double.parseDouble(args[i + 1]);
-      }
+        break;
       //
       // /* possibly other early stopping criteria here */
       //
-      else if (option.equals("-thrCnt")) {
+      case "-thrCnt":
         numOptThreads = Integer.parseInt(args[i + 1]);
         if (numOptThreads < 1) {
           throw new RuntimeException("threadCount must be positive.");
         }
-      } else if (option.equals("-save")) {
+        break;
+      case "-save":
         saveInterFiles = Integer.parseInt(args[i + 1]);
         if (saveInterFiles < 0 || saveInterFiles > 3) {
           throw new RuntimeException("save should be between 0 and 3");
         }
-      } else if (option.equals("-compress")) {
+        break;
+      case "-compress":
         compressFiles = Integer.parseInt(args[i + 1]);
         if (compressFiles < 0 || compressFiles > 1) {
           throw new RuntimeException("compressFiles should be either 0 or 1");
         }
-      } else if (option.equals("-ipi")) {
+        break;
+      case "-ipi":
         initsPerIt = Integer.parseInt(args[i + 1]);
         if (initsPerIt < 1) {
           throw new RuntimeException("initsPerIt must be positive.");
         }
-      } else if (option.equals("-opi")) {
+        break;
+      case "-opi":
         int opi = Integer.parseInt(args[i + 1]);
         if (opi == 1) {
           oneModificationPerIteration = true;
@@ -2270,7 +2304,8 @@ public class MertCore {
         } else {
           throw new RuntimeException("oncePerIt must be either 0 or 1.");
         }
-      } else if (option.equals("-rand")) {
+        break;
+      case "-rand":
         int rand = Integer.parseInt(args[i + 1]);
         if (rand == 1) {
           randInit = true;
@@ -2279,58 +2314,68 @@ public class MertCore {
         } else {
           throw new RuntimeException("randInit must be either 0 or 1.");
         }
-      } else if (option.equals("-seed")) {
+        break;
+      case "-seed":
         if (args[i + 1].equals("time")) {
           seed = System.currentTimeMillis();
         } else {
           seed = Long.parseLong(args[i + 1]);
         }
-      }
+        break;
       /*
        * else if (option.equals("-ud")) { useDisk = Integer.parseInt(args[i+1]); if (useDisk < 0 ||
        * useDisk > 2) { println("useDisk should be between 0 and 2"); System.exit(10); } }
        */
       // Decoder specs
-      else if (option.equals("-cmd")) {
+      case "-cmd":
         decoderCommandFileName = args[i + 1];
-      } else if (option.equals("-passIt")) {
+        break;
+      case "-passIt":
         int val = Integer.parseInt(args[i + 1]);
         if (val < 0 || val > 1) {
           throw new RuntimeException("passIterationToDecoder should be either 0 or 1");
         }
-        passIterationToDecoder = (val == 1) ? true : false;
-      } else if (option.equals("-decOut")) {
+        passIterationToDecoder = (val == 1);
+        break;
+      case "-decOut":
         decoderOutFileName = args[i + 1];
-      } else if (option.equals("-decExit")) {
+        break;
+      case "-decExit":
         validDecoderExitValue = Integer.parseInt(args[i + 1]);
-      } else if (option.equals("-dcfg")) {
+        break;
+      case "-dcfg":
         decoderConfigFileName = args[i + 1];
-      } else if (option.equals("-N")) {
+        break;
+      case "-N":
         sizeOfNBest = Integer.parseInt(args[i + 1]);
         if (sizeOfNBest < 1) {
           throw new RuntimeException("N must be positive.");
         }
-      }
+        break;
       // Output specs
-      else if (option.equals("-v")) {
+      case "-v":
         verbosity = Integer.parseInt(args[i + 1]);
         if (verbosity < 0 || verbosity > 4) {
           throw new RuntimeException("verbosity should be between 0 and 4");
         }
-      } else if (option.equals("-decV")) {
+        break;
+      case "-decV":
         decVerbosity = Integer.parseInt(args[i + 1]);
         if (decVerbosity < 0 || decVerbosity > 1) {
           throw new RuntimeException("decVerbosity should be either 0 or 1");
         }
-      } else if (option.equals("-fake")) {
+        break;
+      case "-fake":
         fakeFileNameTemplate = args[i + 1];
         int QM_i = fakeFileNameTemplate.indexOf("?");
         if (QM_i <= 0) {
-          throw new RuntimeException("fakeFileNameTemplate must contain '?' to indicate position of iteration number");
+          throw new RuntimeException(
+              "fakeFileNameTemplate must contain '?' to indicate position of iteration number");
         }
         fakeFileNamePrefix = fakeFileNameTemplate.substring(0, QM_i);
         fakeFileNameSuffix = fakeFileNameTemplate.substring(QM_i + 1);
-      } else if (option.equals("-damianos")) {
+        break;
+      case "-damianos":
         damianos_method = Integer.parseInt(args[i + 1]);
         if (damianos_method < 0 || damianos_method > 3) {
           throw new RuntimeException("damianos_method should be between 0 and 3");
@@ -2338,7 +2383,8 @@ public class MertCore {
         damianos_param = Double.parseDouble(args[i + 2]);
         damianos_mult = Double.parseDouble(args[i + 3]);
         i += 2;
-      } else {
+        break;
+      default:
         throw new RuntimeException("Unknown option " + option);
       }
 
@@ -2585,7 +2631,7 @@ public class MertCore {
     str = " " + str + " ";
     str = str.replaceAll("\\s+", " ");
 
-    TreeSet<Integer> splitIndices = new TreeSet<Integer>();
+    TreeSet<Integer> splitIndices = new TreeSet<>();
 
     for (int i = 0; i < str.length(); ++i) {
       char ch = str.charAt(i);
@@ -2636,7 +2682,7 @@ public class MertCore {
     // remove spaces around dashes
     if (normMethod == 2 || normMethod == 4) {
 
-      TreeSet<Integer> skipIndices = new TreeSet<Integer>();
+      TreeSet<Integer> skipIndices = new TreeSet<>();
       str = " " + str + " ";
 
       for (int i = 0; i < str.length(); ++i) {
@@ -2775,9 +2821,7 @@ public class MertCore {
         double[] temp = featVal_array[c][i];
         featVal_array[c][i] = new double[1 + maxIndex[i] + sizeOfNBest];
 
-        for (int k2 = 0; k2 <= maxIndex[i]; ++k2) {
-          featVal_array[c][i][k2] = temp[k2];
-        }
+        System.arraycopy(temp, 0, featVal_array[c][i], 0, maxIndex[i] + 1);
       }
       maxIndex[i] += sizeOfNBest;
       // cleanupMemorySilently(); // UNCOMMENT THIS if cleaning up memory
@@ -2891,9 +2935,7 @@ public class MertCore {
       earlyStop = (int) serA[2];
       FINAL_score = serA[3];
 
-      for (int c = 1; c <= DMC.numParams; ++c) {
-        DMC.lambda[c] = serA[3 + c];
-      }
+      System.arraycopy(serA, 4, DMC.lambda, 1, DMC.numParams);
 
       maxIndex = new int[DMC.numSentences];
       for (int i = 0; i < DMC.numSentences; ++i) {
@@ -2920,9 +2962,7 @@ public class MertCore {
       serA[1] = randsToSkip;
       serA[2] = earlyStop;
       serA[3] = FINAL_score;
-      for (int c = 1; c <= DMC.numParams; ++c) {
-        serA[3 + c] = DMC.lambda[c];
-      }
+      System.arraycopy(DMC.lambda, 1, serA, 4, DMC.numParams);
       for (int i = 0; i < DMC.numSentences; ++i) {
         serA[3 + DMC.numParams + 1 + i] = maxIndex[i];
       }
