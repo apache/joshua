@@ -46,7 +46,7 @@ public class NBestListUtility {
   }
 
   public static List<String> findAllMatches(String regularExpression, String contentsString) {
-    List<String> allMatches = new ArrayList<String>();
+    List<String> allMatches = new ArrayList<>();
     Matcher m = Pattern.compile(regularExpression).matcher(contentsString);
     while (m.find()) {
       allMatches.add(m.group());
@@ -62,7 +62,7 @@ public class NBestListUtility {
   }
 
   public static List<Double> getTotalWeightsFromNBestListString(String nBestListAsString) {
-    List<Double> result = new ArrayList<Double>();
+    List<Double> result = new ArrayList<>();
     String[] lines = nBestListAsString.split("\n");
     for (String line : lines) {
       result.add(getTotalWeightFromNBestLine(line));

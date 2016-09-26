@@ -69,7 +69,7 @@ public class Cache<K, V> extends LinkedHashMap<K, V> {
   // ===============================================================
 
   /** Maximum number of items that the cache can contain. */
-  int maxCapacity;
+  final int maxCapacity;
 
   // ===============================================================
   // Constructor(s)

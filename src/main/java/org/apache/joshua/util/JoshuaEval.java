@@ -230,9 +230,7 @@ public class JoshuaEval {
       for (int i = 0; i < numSentences; ++i) {
         print("Sentence #" + i + ": ");
         int[] stats = new int[suffStatsCount];
-        for (int s = 0; s < suffStatsCount; ++s) {
-          stats[s] = SS[i][s];
-        }
+        System.arraycopy(SS[i], 0, stats, 0, suffStatsCount);
         evalMetric.printDetailedScore_fromStats(stats, true);
         // already prints a \n
       }
@@ -282,31 +280,38 @@ public class JoshuaEval {
 
     while (argno < args.length) {
       String option = args[argno];
-      if (option.equals("-cand")) {
+      switch (option) {
+      case "-cand":
         candFileName = args[argno + 1];
-      } else if (option.equals("-format")) {
+        break;
+      case "-format":
         candFileFormat = args[argno + 1];
         if (!candFileFormat.equals("plain") && !candFileFormat.equals("nbest")) {
           throw new RuntimeException("candFileFormat must be either plain or nbest.");
         }
-      } else if (option.equals("-rank")) {
+        break;
+      case "-rank":
         candRank = Integer.parseInt(args[argno + 1]);
         if (refsPerSen < 1) {
           throw new RuntimeException("Argument for -rank must be positive.");
         }
-      } else if (option.equals("-ref")) {
+        break;
+      case "-ref":
         refFileName = args[argno + 1];
-      } else if (option.equals("-rps")) {
+        break;
+      case "-rps":
         refsPerSen = Integer.parseInt(args[argno + 1]);
         if (refsPerSen < 1) {
           throw new RuntimeException("refsPerSen must be positive.");
         }
-      } else if (option.equals("-txtNrm")) {
+        break;
+      case "-txtNrm":
         textNormMethod = Integer.parseInt(args[argno + 1]);
         if (textNormMethod < 0 || textNormMethod > 4) {
           throw new RuntimeException("textNormMethod should be between 0 and 4");
         }
-      } else if (option.equals("-m")) {
+        break;
+      case "-m":
         metricName = args[argno + 1];
         if (EvaluationMetric.knownMetricName(metricName)) {
           int optionCount = EvaluationMetric.metricOptionCount(metricName);
@@ -318,7 +323,8 @@ public class JoshuaEval {
         } else {
           throw new RuntimeException("Unknown metric name " + metricName + ".");
         }
-      } else if (option.equals("-evr")) {
+        break;
+      case "-evr":
         int evr = Integer.parseInt(args[argno + 1]);
         if (evr == 1) {
           evaluateRefs = true;
@@ -327,7 +333,8 @@ public class JoshuaEval {
         } else {
           throw new RuntimeException("evalRefs must be either 0 or 1.");
         }
-      } else if (option.equals("-v")) {
+        break;
+      case "-v":
         int v = Integer.parseInt(args[argno + 1]);
         if (v == 1) {
           verbose = true;
@@ -336,7 +343,8 @@ public class JoshuaEval {
         } else {
           throw new RuntimeException("verbose must be either 0 or 1.");
         }
-      } else {
+        break;
+      default:
         throw new RuntimeException("Unknown option " + option);
       }
 
@@ -444,7 +452,7 @@ public class JoshuaEval {
     str = " " + str + " ";
     str = str.replaceAll("\\s+", " ");
 
-    TreeSet<Integer> splitIndices = new TreeSet<Integer>();
+    TreeSet<Integer> splitIndices = new TreeSet<>();
 
     for (int i = 0; i < str.length(); ++i) {
       char ch = str.charAt(i);
@@ -495,7 +503,7 @@ public class JoshuaEval {
     // remove spaces around dashes
     if (normMethod == 2 || normMethod == 4) {
 
-      TreeSet<Integer> skipIndices = new TreeSet<Integer>();
+      TreeSet<Integer> skipIndices = new TreeSet<>();
       str = " " + str + " ";
 
       for (int i = 0; i < str.length(); ++i) {

@@ -27,6 +27,7 @@ import org.apache.joshua.corpus.Vocabulary;
  * Provides convenience functions for extracting all ngrams from a sentence, represented as an array
  * of words.
  */
+@SuppressWarnings("ALL")
 public class Ngram {
 
   public static void getNgrams(Map<String, Integer> tbl, int startOrder, int endOrder,
@@ -34,7 +35,7 @@ public class Ngram {
 
     for (int i = 0; i < wrds.length; i++)
       for (int j = startOrder - 1; j < endOrder && j + i < wrds.length; j++) {// ngram: [i,i+j]
-        StringBuffer ngram = new StringBuffer();
+        StringBuilder ngram = new StringBuilder();
         for (int k = i; k <= i + j; k++) {
           int t_wrd = wrds[k];
           ngram.append(Vocabulary.word(t_wrd));
@@ -58,7 +59,7 @@ public class Ngram {
 
     for (int i = 0; i < wrds.size(); i++)
       for (int j = startOrder - 1; j < endOrder && j + i < wrds.size(); j++) {// ngram: [i,i+j]
-        StringBuffer ngram = new StringBuffer();
+        StringBuilder ngram = new StringBuilder();
         for (int k = i; k <= i + j; k++) {
           int t_wrd = wrds.get(k);
           ngram.append(Vocabulary.word(t_wrd));
@@ -82,7 +83,7 @@ public class Ngram {
 
     for (int i = 0; i < wrds.length; i++)
       for (int j = startOrder - 1; j < endOrder && j + i < wrds.length; j++) {// ngram: [i,i+j]
-        StringBuffer ngram = new StringBuffer();
+        StringBuilder ngram = new StringBuilder();
         for (int k = i; k <= i + j; k++) {
           String t_wrd = wrds[k];
           ngram.append(t_wrd);

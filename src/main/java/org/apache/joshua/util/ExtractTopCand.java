@@ -76,10 +76,8 @@ public class ExtractTopCand {
     try {
       // TODO: see documentation for extractOneBest
       // regarding using an n-best SegmentFileParser.
-      IndexedReader<String> nbestReader =
-          new IndexedReader<String>("line", "-".equals(inFile)
-              ? new LineReader(System.in)
-              : new LineReader(inFile));
+      IndexedReader<String> nbestReader = new IndexedReader<>("line",
+          "-".equals(inFile) ? new LineReader(System.in) : new LineReader(inFile));
 
       /*
        * TODO: This duplicates FileUtility.getWriteFileStream but with the addition of defaulting to

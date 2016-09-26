@@ -48,11 +48,11 @@ public enum PrimitiveIntEncoder implements IntEncoder {
 
   INT("int", 4) {
     public final int read(ByteBuffer stream, int position) {
-      return (int) stream.getInt(position);
+      return stream.getInt(position);
     }
 
     public final void write(ByteBuffer stream, int value) {
-      stream.putInt((int) value);
+      stream.putInt(value);
     }
   },
 
@@ -69,7 +69,7 @@ public enum PrimitiveIntEncoder implements IntEncoder {
   private final String key;
   private final int size;
 
-  private PrimitiveIntEncoder(String k, int s) {
+  PrimitiveIntEncoder(String k, int s) {
     key = k;
     size = s;
   }
@@ -95,7 +95,7 @@ public enum PrimitiveIntEncoder implements IntEncoder {
   }
 
   @Override
-  public void readState(DataInputStream in) throws IOException {
+  public void readState(DataInputStream in) {
   }
 
   @Override

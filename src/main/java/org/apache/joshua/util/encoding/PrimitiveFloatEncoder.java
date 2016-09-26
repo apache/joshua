@@ -87,7 +87,7 @@ public enum PrimitiveFloatEncoder implements FloatEncoder {
   private final String key;
   private final int size;
 
-  private PrimitiveFloatEncoder(String k, int s) {
+  PrimitiveFloatEncoder(String k, int s) {
     key = k;
     size = s;
   }

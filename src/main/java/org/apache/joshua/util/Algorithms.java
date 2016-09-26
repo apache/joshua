@@ -29,7 +29,7 @@ public final class Algorithms {
    * @param source todo
    * @return the minimum edit distance.
    */
-  public static final int levenshtein(String[] candidate, String[] source) {
+  public static int levenshtein(String[] candidate, String[] source) {
     // First check to see whether either of the arrays
     // is empty, in which case the least cost is simply
     // the length of the other array (which would correspond
@@ -74,7 +74,7 @@ public final class Algorithms {
   /**
    * Returns the minimum of the three values.
    */
-  private static final int minimum(int a, int b, int c) {
+  private static int minimum(int a, int b, int c) {
     int minimum;
     minimum = a;
     if (b < minimum) minimum = b;

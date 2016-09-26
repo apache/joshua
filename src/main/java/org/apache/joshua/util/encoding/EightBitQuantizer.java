@@ -73,8 +73,8 @@ public class EightBitQuantizer implements FloatEncoder {
   public void writeState(DataOutputStream out) throws IOException {
     out.writeUTF(getKey());
     out.writeInt(buckets.length);
-    for (int i = 0; i < buckets.length; i++)
-      out.writeFloat(buckets[i]);
+    for (float bucket : buckets)
+      out.writeFloat(bucket);
   }
 
   @Override

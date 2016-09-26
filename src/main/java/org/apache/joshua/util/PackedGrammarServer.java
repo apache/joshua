@@ -35,7 +35,8 @@ public class PackedGrammarServer {
 
   private PackedGrammar grammar;
 
-  public PackedGrammarServer(String packed_directory,JoshuaConfiguration joshuaConfiguration) throws FileNotFoundException, IOException {
+  public PackedGrammarServer(String packed_directory,JoshuaConfiguration joshuaConfiguration) throws
+      IOException {
     grammar = new PackedGrammar(packed_directory, -1, "owner", "thrax", joshuaConfiguration);
   }
 
@@ -73,7 +74,7 @@ public class PackedGrammarServer {
   }
   
   
-  public static void main(String[] args) throws FileNotFoundException, IOException {
+  public static void main(String[] args) throws IOException {
     JoshuaConfiguration joshuaConfiguration = new JoshuaConfiguration();
     PackedGrammarServer pgs = new PackedGrammarServer(args[0], joshuaConfiguration);
     

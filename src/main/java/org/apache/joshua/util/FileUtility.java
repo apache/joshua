@@ -55,7 +55,7 @@ public class FileUtility {
    * @return the parent path
    */
   static public String dirname(String fileName) {
-    if (fileName.indexOf(File.separator) != -1)
+    if (fileName.contains(File.separator))
       return fileName.substring(0, fileName.lastIndexOf(File.separator));
 
     return ".";

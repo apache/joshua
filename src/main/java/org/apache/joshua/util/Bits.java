@@ -54,7 +54,7 @@ public class Bits {
    */
   public static short decodeHighBits(int i) {
 
-    long key = i & 0xFFFF0000l;
+    long key = i & 0xFFFF0000L;
 
     key >>= 16;
 
@@ -86,11 +86,11 @@ public class Bits {
   public static long encodeAsLong(int high, int low) {
 
     // Store the first int value in the highest 32 bits of the long
-    long key = high | 0x0000000000000000l;
+    long key = high | 0x0000000000000000L;
     key <<= 32;
 
     // Store the second int value in the lowest 32 bits of the long
-    long lowLong = low & 0x00000000FFFFFFFFl;;
+    long lowLong = low & 0x00000000FFFFFFFFL;
     key |= lowLong;
 
     return key;
@@ -105,7 +105,7 @@ public class Bits {
    */
   public static int decodeHighBits(long l) {
 
-    long key = l & 0xFFFFFFFF00000000l;
+    long key = l & 0xFFFFFFFF00000000L;
 
     key >>= 32;
 

@@ -27,11 +27,11 @@ import org.apache.joshua.util.io.LineReader;
 
 public class Analyzer {
 
-  private TreeMap<Float, Integer> histogram;
+  private final TreeMap<Float, Integer> histogram;
   private int total;
 
   public Analyzer() {
-    histogram = new TreeMap<Float, Integer>();
+    histogram = new TreeMap<>();
     initialize();
   }
 
@@ -108,8 +108,7 @@ public class Analyzer {
       buckets[index++] = sum / count;
 
     float[] shortened = new float[index];
-    for (int i = 0; i < shortened.length; ++i)
-      shortened[i] = buckets[i];
+    System.arraycopy(buckets, 0, shortened, 0, shortened.length);
     return shortened;
   }
 
@@ -188,13 +187,14 @@ public class Analyzer {
   public String toString(String label) {
     StringBuilder sb = new StringBuilder();
     for (float val : histogram.keySet())
-      sb.append(label + "\t" + String.format("%.5f", val) + "\t" + histogram.get(val) + "\n");
+      sb.append(label).append("\t").append(String.format("%.5f", val)).append("\t")
+          .append(histogram.get(val)).append("\n");
     return sb.toString();
   }
 
   public static void main(String[] args) throws IOException {
-    try (LineReader reader = new LineReader(args[0]);) {
-      ArrayList<Float> s = new ArrayList<Float>();
+    try (LineReader reader = new LineReader(args[0])) {
+      ArrayList<Float> s = new ArrayList<>();
 
       System.out.println("Initialized.");
       while (reader.hasNext())
@@ -206,13 +206,13 @@ public class Analyzer {
       Analyzer q = new Analyzer();
 
       q.initialize();
-      for (int i = 0; i < n; i++)
-        q.add(s.get(i));
+      for (Float value1 : s)
+        q.add(value1);
       EightBitQuantizer eb = new EightBitQuantizer(q.quantize(8));
       System.out.println("Quantizer learned.");
 
-      for (int i = 0; i < n; i++)
-        eb.write(b, s.get(i));
+      for (Float value : s)
+        eb.write(b, value);
       b.rewind();
       System.out.println("Quantization complete.");
 

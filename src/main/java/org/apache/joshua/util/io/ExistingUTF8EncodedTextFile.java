@@ -33,7 +33,7 @@ import java.util.stream.Stream;
  * {@link Path}, or {@link String} representing a Path, is not found.
  */
 public class ExistingUTF8EncodedTextFile {
-  private static final Predicate<String> emptyStringPredicate = s -> s.isEmpty();
+  private static final Predicate<String> emptyStringPredicate = String::isEmpty;
 
   private final Path p;
 
@@ -59,7 +59,7 @@ public class ExistingUTF8EncodedTextFile {
    * @throws IOException on inability to read file (maybe it's not a text file)
    */
   public int getNumberOfLines() throws IOException {
-    try(Stream<String> ls = Files.lines(this.p, StandardCharsets.UTF_8);) {
+    try(Stream<String> ls = Files.lines(this.p, StandardCharsets.UTF_8)) {
       return (int) ls.count();
     }
   }
@@ -69,7 +69,7 @@ public class ExistingUTF8EncodedTextFile {
    * @throws IOException on inability to read file (maybe it's not a text file)
    */
   public int getNumberOfNonEmptyLines() throws IOException {
-    try(Stream<String> ls = Files.lines(this.p, StandardCharsets.UTF_8);) {
+    try(Stream<String> ls = Files.lines(this.p, StandardCharsets.UTF_8)) {
       return (int) ls.filter(emptyStringPredicate.negate())
           .count();
     }

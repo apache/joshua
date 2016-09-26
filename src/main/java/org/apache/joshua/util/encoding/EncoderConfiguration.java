@@ -38,14 +38,14 @@ public class EncoderConfiguration {
   private FloatEncoder[] encoderById;
   private FloatEncoder[] encoders;
 
-  private Map<Integer, Integer> outerToInner;
+  private final Map<Integer, Integer> outerToInner;
   
   private boolean labeled;
   
   private int numDenseFeatures = 0;
   
   public EncoderConfiguration() {
-    this.outerToInner = new HashMap<Integer, Integer>();
+    this.outerToInner = new HashMap<>();
   }
 
   public int getNumDenseFeatures() {

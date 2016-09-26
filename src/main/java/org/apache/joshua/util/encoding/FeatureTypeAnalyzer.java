@@ -38,17 +38,17 @@ public class FeatureTypeAnalyzer {
 
   private static final Logger LOG = LoggerFactory.getLogger(FeatureTypeAnalyzer.class);
 
-  private ArrayList<FeatureType> types;
+  private final ArrayList<FeatureType> types;
 
-  private Map<Integer, Integer> featureToType;
+  private final Map<Integer, Integer> featureToType;
 
-  private Map<Integer, Integer> featureIdMap;
+  private final Map<Integer, Integer> featureIdMap;
 
   // Is the feature setup labeled.
   private boolean labeled;
 
   // Is the encoder configuration open for new features (that are not assumed boolean)?
-  private boolean open;
+  private final boolean open;
 
   public FeatureTypeAnalyzer() {
     this(false);
@@ -56,13 +56,13 @@ public class FeatureTypeAnalyzer {
 
   public FeatureTypeAnalyzer(boolean open) {
     this.open = open;
-    this.types = new ArrayList<FeatureType>();
-    this.featureToType = new HashMap<Integer, Integer>();
-    this.featureIdMap = new HashMap<Integer, Integer>();
+    this.types = new ArrayList<>();
+    this.featureToType = new HashMap<>();
+    this.featureIdMap = new HashMap<>();
   }
 
   public void readConfig(String config_filename) throws IOException {
-    try(LineReader reader = new LineReader(config_filename);) {
+    try(LineReader reader = new LineReader(config_filename)) {
       while (reader.hasNext()) {
         // Clean up line, chop comments off and skip if the result is empty.
         String line = reader.next().trim();
@@ -78,7 +78,7 @@ public class FeatureTypeAnalyzer {
             throw new RuntimeException("Incomplete encoder line in config.");
           }
           String encoder_key = fields[1];
-          List<Integer> feature_ids = new ArrayList<Integer>();
+          List<Integer> feature_ids = new ArrayList<>();
           for (int i = 2; i < fields.length; i++)
             feature_ids.add(Vocabulary.id(fields[i]));
           addFeatures(encoder_key, feature_ids);
@@ -121,9 +121,7 @@ public class FeatureTypeAnalyzer {
   // Inspects the collected histograms, inferring actual type of feature. Then replaces the
   // analyzer, if present, with the most compact applicable type.
   public void inferTypes(boolean labeled) {
-    for (FeatureType ft : types) {
-      ft.inferUncompressedType();
-    }
+    types.forEach(FeatureType::inferUncompressedType);
     if (LOG.isInfoEnabled()) {
       for (int id : featureToType.keySet()) {
         LOG.info("Type inferred: {} is {}", (labeled ? Vocabulary.word(id) : "Feature " + id),
@@ -168,8 +166,8 @@ public class FeatureTypeAnalyzer {
     getIdEncoder().writeState(out_stream);
     out_stream.writeBoolean(labeled);
     out_stream.writeInt(types.size());
-    for (int index = 0; index < types.size(); index++)
-      types.get(index).encoder.writeState(out_stream);
+    for (FeatureType type : types)
+      type.encoder.writeState(out_stream);
 
     out_stream.writeInt(featureToType.size());
     for (int feature_id : featureToType.keySet()) {
@@ -203,7 +201,7 @@ public class FeatureTypeAnalyzer {
   static class FeatureType {
     FloatEncoder encoder;
     Analyzer analyzer;
-    int bits;
+    final int bits;
 
     FeatureType() {
       encoder = null;

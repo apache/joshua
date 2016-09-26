@@ -25,15 +25,15 @@ import java.nio.ByteBuffer;
 
 public interface IntEncoder {
 
-  public int read(ByteBuffer stream, int position);
+  int read(ByteBuffer stream, int position);
 
-  public void write(ByteBuffer stream, int value);
+  void write(ByteBuffer stream, int value);
 
-  public String getKey();
+  String getKey();
 
-  public void writeState(DataOutputStream out) throws IOException;
+  void writeState(DataOutputStream out) throws IOException;
 
-  public void readState(DataInputStream in) throws IOException;
+  void readState(DataInputStream in);
 
-  public int size();
+  int size();
 }

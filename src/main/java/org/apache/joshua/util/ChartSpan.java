@@ -37,8 +37,8 @@ package org.apache.joshua.util;
  * @author Matt Post post@cs.jhu.edu
  */
 public class ChartSpan<Type> {
-  Object[] chart;
-  int max;
+  final Object[] chart;
+  final int max;
 
   public ChartSpan(int w, Type defaultValue) {
     //System.err.println(String.format("ChartSpan::ChartSpan(%d)", w));

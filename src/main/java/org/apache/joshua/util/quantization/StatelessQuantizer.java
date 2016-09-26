@@ -36,5 +36,5 @@ abstract class StatelessQuantizer implements Quantizer {
   }
 
   @Override
-  public void readState(DataInputStream in) throws IOException {}
+  public void readState(DataInputStream in) {}
 }

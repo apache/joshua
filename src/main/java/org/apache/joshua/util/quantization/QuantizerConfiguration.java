@@ -37,16 +37,16 @@ public class QuantizerConfiguration {
 
   private static final Quantizer DEFAULT;
 
-  private ArrayList<Quantizer> quantizers;
-  private Map<Integer, Integer> quantizerByFeatureId;
+  private final ArrayList<Quantizer> quantizers;
+  private final Map<Integer, Integer> quantizerByFeatureId;
 
   static {
     DEFAULT = new BooleanQuantizer();
   }
 
   public QuantizerConfiguration() {
-    quantizers = new ArrayList<Quantizer>();
-    quantizerByFeatureId = new HashMap<Integer, Integer>();
+    quantizers = new ArrayList<>();
+    quantizerByFeatureId = new HashMap<>();
   }
 
   public void add(String quantizer_key, List<Integer> feature_ids) {
@@ -58,8 +58,7 @@ public class QuantizerConfiguration {
   }
 
   public void initialize() {
-    for (Quantizer q : quantizers)
-      q.initialize();
+    quantizers.forEach(Quantizer::initialize);
   }
 
   public final Quantizer get(int feature_id) {
@@ -102,8 +101,8 @@ public class QuantizerConfiguration {
     DataOutputStream out_stream =
         new DataOutputStream(new BufferedOutputStream(new FileOutputStream(vocab_file)));
     out_stream.writeInt(quantizers.size());
-    for (int index = 0; index < quantizers.size(); index++)
-      quantizers.get(index).writeState(out_stream);
+    for (Quantizer quantizer : quantizers)
+      quantizer.writeState(out_stream);
     out_stream.writeInt(quantizerByFeatureId.size());
     for (int feature_id : quantizerByFeatureId.keySet()) {
       out_stream.writeUTF(Vocabulary.word(feature_id));

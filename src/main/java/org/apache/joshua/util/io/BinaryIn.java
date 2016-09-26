@@ -57,9 +57,7 @@ public class BinaryIn<E extends Externalizable> extends RandomAccessFile impleme
         obj = type.newInstance();
         obj.readExternal(this);
         return obj;
-      } catch (InstantiationException e) {
-        throw new RuntimeException(e);
-      } catch (IllegalAccessException e) {
+      } catch (InstantiationException | IllegalAccessException e) {
         throw new RuntimeException(e);
       }
     }

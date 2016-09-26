@@ -83,10 +83,6 @@ public class Counted<E> implements Comparable<Counted<E>> {
    *         order of the counts associated with each object
    */
   public static <E> Comparator<Counted<E>> getDescendingComparator() {
-    return new Comparator<Counted<E>>() {
-      public int compare(Counted<E> o1, Counted<E> o2) {
-        return (o2.count.compareTo(o1.count));
-      }
-    };
+    return (o1, o2) -> (o2.count.compareTo(o1.count));
   }
 }

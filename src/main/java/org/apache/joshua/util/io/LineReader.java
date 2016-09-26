@@ -298,7 +298,7 @@ public class LineReader implements Reader<String> {
       System.exit(1);
     }
 
-    try (LineReader in = new LineReader(args[0]);) {
+    try (LineReader in = new LineReader(args[0])) {
       for (String line : in) {
         System.out.println(line);
       }

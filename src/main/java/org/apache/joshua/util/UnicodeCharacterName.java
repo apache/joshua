@@ -29,7 +29,7 @@ public class UnicodeCharacterName {
 
     int expectedSize = 21927;
 
-    map = new HashMap<Character, String>(expectedSize);
+    map = new HashMap<>(expectedSize);
 
     basicLatin(map);
     latin1Supplement(map);
@@ -98,7 +98,7 @@ public class UnicodeCharacterName {
     hangulSyllables(map);
   }
 
-  public static final void basicLatin(Map<Character, String> map) {
+  public static void basicLatin(Map<Character, String> map) {
 
     // C0 Controls
     map.put('\u0000', "NULL");
@@ -246,7 +246,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void latin1Supplement(Map<Character, String> map) {
+  public static void latin1Supplement(Map<Character, String> map) {
 
     // C1 controls
     map.put('\u0080', "<control>");
@@ -392,7 +392,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void latinExtendedA(Map<Character, String> map) {
+  public static void latinExtendedA(Map<Character, String> map) {
 
     // European Latin
     map.put('\u0100', "LATIN CAPITAL LETTER A WITH MACRON");
@@ -530,7 +530,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void latinExtendedB(Map<Character, String> map) {
+  public static void latinExtendedB(Map<Character, String> map) {
 
     // Non-European and historic Latin
     map.put('\u0180', "LATIN SMALL LETTER B WITH STROKE");
@@ -764,7 +764,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void ipaExtensions(Map<Character, String> map) {
+  public static void ipaExtensions(Map<Character, String> map) {
 
     // IPA extensions
     map.put('\u0250', "LATIN SMALL LETTER TURNED A");
@@ -870,7 +870,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void spacingModifierLetters(Map<Character, String> map) {
+  public static void spacingModifierLetters(Map<Character, String> map) {
 
     // Latin superscript modifier letters
     map.put('\u02B0', "MODIFIER LETTER SMALL H");
@@ -972,7 +972,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void combiningDiacriticMarks(Map<Character, String> map) {
+  public static void combiningDiacriticMarks(Map<Character, String> map) {
 
     // Ordinary diacritics
     map.put('\u0300', "COMBINING GRAVE ACCENT");
@@ -1112,7 +1112,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void greekAndCoptic(Map<Character, String> map) {
+  public static void greekAndCoptic(Map<Character, String> map) {
 
     map.put('\u0370', "GREEK CAPITAL LETTER HETA");
     map.put('\u0371', "GREEK SMALL LETTER HETA");
@@ -1251,7 +1251,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void cyrillic(Map<Character, String> map) {
+  public static void cyrillic(Map<Character, String> map) {
 
     map.put('\u0400', "CYRILLIC CAPITAL LETTER IE WITH GRAVE");
     map.put('\u0401', "CYRILLIC CAPITAL LETTER IO");
@@ -1512,7 +1512,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void cyrillicSupplement(Map<Character, String> map) {
+  public static void cyrillicSupplement(Map<Character, String> map) {
 
     map.put('\u0500', "CYRILLIC CAPITAL LETTER KOMI DE");
     map.put('\u0501', "CYRILLIC SMALL LETTER KOMI DE");
@@ -1555,7 +1555,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void armenian(Map<Character, String> map) {
+  public static void armenian(Map<Character, String> map) {
 
     map.put('\u0531', "ARMENIAN CAPITAL LETTER AYB");
     map.put('\u0532', "ARMENIAN CAPITAL LETTER BEN");
@@ -1646,7 +1646,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void hebrew(Map<Character, String> map) {
+  public static void hebrew(Map<Character, String> map) {
 
     map.put('\u0591', "HEBREW ACCENT ETNAHTA");
     map.put('\u0592', "HEBREW ACCENT SEGOL");
@@ -1738,7 +1738,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void arabic(Map<Character, String> map) {
+  public static void arabic(Map<Character, String> map) {
 
     map.put('\u0600', "ARABIC NUMBER SIGN");
     map.put('\u0601', "ARABIC SIGN SANAH");
@@ -1993,7 +1993,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void syriac(Map<Character, String> map) {
+  public static void syriac(Map<Character, String> map) {
 
     map.put('\u0700', "SYRIAC END OF PARAGRAPH");
     map.put('\u0701', "SYRIAC SUPRALINEAR FULL STOP");
@@ -2075,7 +2075,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void arabicSupplement(Map<Character, String> map) {
+  public static void arabicSupplement(Map<Character, String> map) {
 
     map.put('\u0750', "ARABIC LETTER BEH WITH THREE DOTS HORIZONTALLY BELOW");
     map.put('\u0751', "ARABIC LETTER BEH WITH DOT BELOW AND THREE DOTS ABOVE");
@@ -2128,7 +2128,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void thaana(Map<Character, String> map) {
+  public static void thaana(Map<Character, String> map) {
 
     map.put('\u0780', "THAANA LETTER HAA");
     map.put('\u0781', "THAANA LETTER SHAVIYANI");
@@ -2183,7 +2183,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void nko(Map<Character, String> map) {
+  public static void nko(Map<Character, String> map) {
 
     map.put('\u07C0', "NKO DIGIT ZERO");
     map.put('\u07C1', "NKO DIGIT ONE");
@@ -2247,7 +2247,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void samaritan(Map<Character, String> map) {
+  public static void samaritan(Map<Character, String> map) {
 
     map.put('\u0800', "SAMARITAN LETTER ALAF");
     map.put('\u0801', "SAMARITAN LETTER BIT");
@@ -2313,7 +2313,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void devanagari(Map<Character, String> map) {
+  public static void devanagari(Map<Character, String> map) {
 
     map.put('\u0900', "DEVANAGARI SIGN INVERTED CANDRABINDU");
     map.put('\u0901', "DEVANAGARI SIGN CANDRABINDU");
@@ -2435,7 +2435,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void bengali(Map<Character, String> map) {
+  public static void bengali(Map<Character, String> map) {
 
     map.put('\u0981', "BENGALI SIGN CANDRABINDU");
     map.put('\u0982', "BENGALI SIGN ANUSVARA");
@@ -2534,7 +2534,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void gurmukhi(Map<Character, String> map) {
+  public static void gurmukhi(Map<Character, String> map) {
 
     map.put('\u0A01', "GURMUKHI SIGN ADAK BINDI");
     map.put('\u0A02', "GURMUKHI SIGN BINDI");
@@ -2620,7 +2620,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void gujarati(Map<Character, String> map) {
+  public static void gujarati(Map<Character, String> map) {
 
     map.put('\u0A81', "GUJARATI SIGN CANDRABINDU");
     map.put('\u0A82', "GUJARATI SIGN ANUSVARA");
@@ -2710,7 +2710,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void oriya(Map<Character, String> map) {
+  public static void oriya(Map<Character, String> map) {
 
     map.put('\u0B01', "ORIYA SIGN CANDRABINDU");
     map.put('\u0B02', "ORIYA SIGN ANUSVARA");
@@ -2801,7 +2801,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void tamil(Map<Character, String> map) {
+  public static void tamil(Map<Character, String> map) {
 
     map.put('\u0B82', "TAMIL SIGN ANUSVARA");
     map.put('\u0B83', "TAMIL SIGN VISARGA");
@@ -2880,7 +2880,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void telugu(Map<Character, String> map) {
+  public static void telugu(Map<Character, String> map) {
 
     map.put('\u0C01', "TELUGU SIGN CANDRABINDU");
     map.put('\u0C02', "TELUGU SIGN ANUSVARA");
@@ -2980,7 +2980,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void kannada(Map<Character, String> map) {
+  public static void kannada(Map<Character, String> map) {
 
     map.put('\u0C82', "KANNADA SIGN ANUSVARA");
     map.put('\u0C83', "KANNADA SIGN VISARGA");
@@ -3073,7 +3073,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void malayalam(Map<Character, String> map) {
+  public static void malayalam(Map<Character, String> map) {
 
     map.put('\u0D02', "MALAYALAM SIGN ANUSVARA");
     map.put('\u0D03', "MALAYALAM SIGN VISARGA");
@@ -3175,7 +3175,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void sinhala(Map<Character, String> map) {
+  public static void sinhala(Map<Character, String> map) {
 
     map.put('\u0D82', "SINHALA SIGN ANUSVARAYA");
     map.put('\u0D83', "SINHALA SIGN VISARGAYA");
@@ -3260,7 +3260,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void thai(Map<Character, String> map) {
+  public static void thai(Map<Character, String> map) {
 
     map.put('\u0E01', "THAI CHARACTER KO KAI");
     map.put('\u0E02', "THAI CHARACTER KHO KHAI");
@@ -3352,7 +3352,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void lao(Map<Character, String> map) {
+  public static void lao(Map<Character, String> map) {
 
     map.put('\u0E81', "LAO LETTER KO");
     map.put('\u0E82', "LAO LETTER KHO SUNG");
@@ -3422,7 +3422,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void tibetan(Map<Character, String> map) {
+  public static void tibetan(Map<Character, String> map) {
 
     map.put('\u0F00', "TIBETAN SYLLABLE OM");
     map.put('\u0F01', "TIBETAN MARK GTER YIG MGO TRUNCATED A");
@@ -3632,7 +3632,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void myanmar(Map<Character, String> map) {
+  public static void myanmar(Map<Character, String> map) {
 
     map.put('\u1000', "MYANMAR LETTER KA");
     map.put('\u1001', "MYANMAR LETTER KHA");
@@ -3797,7 +3797,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void georgian(Map<Character, String> map) {
+  public static void georgian(Map<Character, String> map) {
 
     map.put('\u10A0', "GEORGIAN CAPITAL LETTER AN");
     map.put('\u10A1', "GEORGIAN CAPITAL LETTER BAN");
@@ -3885,7 +3885,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void hangulJamo(Map<Character, String> map) {
+  public static void hangulJamo(Map<Character, String> map) {
 
     map.put('\u1100', "HANGUL CHOSEONG KIYEOK");
     map.put('\u1101', "HANGUL CHOSEONG SSANGKIYEOK");
@@ -4146,7 +4146,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void ethiopic(Map<Character, String> map) {
+  public static void ethiopic(Map<Character, String> map) {
 
     map.put('\u1200', "ETHIOPIC SYLLABLE HA");
     map.put('\u1201', "ETHIOPIC SYLLABLE HU");
@@ -4507,7 +4507,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void ethiopicSupplement(Map<Character, String> map) {
+  public static void ethiopicSupplement(Map<Character, String> map) {
 
     map.put('\u1380', "ETHIOPIC SYLLABLE SEBATBEIT MWA");
     map.put('\u1381', "ETHIOPIC SYLLABLE MWI");
@@ -4538,7 +4538,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void cherokee(Map<Character, String> map) {
+  public static void cherokee(Map<Character, String> map) {
 
     map.put('\u13A0', "CHEROKEE LETTER A");
     map.put('\u13A1', "CHEROKEE LETTER E");
@@ -4628,7 +4628,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void canadianAboriginalSyllabics(Map<Character, String> map) {
+  public static void canadianAboriginalSyllabics(Map<Character, String> map) {
 
     map.put('\u1400', "CANADIAN SYLLABICS HYPHEN");
     map.put('\u1401', "CANADIAN SYLLABICS E");
@@ -5273,7 +5273,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void ogham(Map<Character, String> map) {
+  public static void ogham(Map<Character, String> map) {
 
     map.put('\u1680', "OGHAM SPACE MARK");
     map.put('\u1681', "OGHAM LETTER BEITH");
@@ -5307,7 +5307,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void runic(Map<Character, String> map) {
+  public static void runic(Map<Character, String> map) {
 
     map.put('\u16A0', "RUNIC LETTER FEHU FEOH FE F");
     map.put('\u16A1', "RUNIC LETTER V");
@@ -5393,7 +5393,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void tagalog(Map<Character, String> map) {
+  public static void tagalog(Map<Character, String> map) {
 
     map.put('\u1700', "TAGALOG LETTER A");
     map.put('\u1701', "TAGALOG LETTER I");
@@ -5418,7 +5418,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void hanunoo(Map<Character, String> map) {
+  public static void hanunoo(Map<Character, String> map) {
 
     map.put('\u1720', "HANUNOO LETTER A");
     map.put('\u1721', "HANUNOO LETTER I");
@@ -5446,7 +5446,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void buhid(Map<Character, String> map) {
+  public static void buhid(Map<Character, String> map) {
 
     map.put('\u1740', "BUHID LETTER A");
     map.put('\u1741', "BUHID LETTER I");
@@ -5471,7 +5471,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void tagbanwa(Map<Character, String> map) {
+  public static void tagbanwa(Map<Character, String> map) {
 
     map.put('\u1760', "TAGBANWA LETTER A");
     map.put('\u1761', "TAGBANWA LETTER I");
@@ -5494,7 +5494,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void khmer(Map<Character, String> map) {
+  public static void khmer(Map<Character, String> map) {
 
     map.put('\u1780', "KHMER LETTER KA");
     map.put('\u1781', "KHMER LETTER KHA");
@@ -5613,7 +5613,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void mongolian(Map<Character, String> map) {
+  public static void mongolian(Map<Character, String> map) {
 
     map.put('\u1800', "MONGOLIAN BIRGA");
     map.put('\u1801', "MONGOLIAN ELLIPSIS");
@@ -5774,7 +5774,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void canadianSyllabics(Map<Character, String> map) {
+  public static void canadianSyllabics(Map<Character, String> map) {
 
     map.put('\u18B0', "CANADIAN SYLLABICS OY");
     map.put('\u18B1', "CANADIAN SYLLABICS AY");
@@ -5849,7 +5849,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void limbu(Map<Character, String> map) {
+  public static void limbu(Map<Character, String> map) {
 
     map.put('\u1900', "LIMBU VOWEL-CARRIER LETTER");
     map.put('\u1901', "LIMBU LETTER KA");
@@ -5920,7 +5920,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void taiLe(Map<Character, String> map) {
+  public static void taiLe(Map<Character, String> map) {
 
     map.put('\u1950', "TAI LE LETTER KA");
     map.put('\u1951', "TAI LE LETTER XA");
@@ -5960,7 +5960,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void newTaiLue(Map<Character, String> map) {
+  public static void newTaiLue(Map<Character, String> map) {
 
     map.put('\u1980', "NEW TAI LUE LETTER HIGH QA");
     map.put('\u1981', "NEW TAI LUE LETTER LOW QA");
@@ -6048,7 +6048,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void khmerSymbols(Map<Character, String> map) {
+  public static void khmerSymbols(Map<Character, String> map) {
 
     map.put('\u19E0', "KHMER SYMBOL PATHAMASAT");
     map.put('\u19E1', "KHMER SYMBOL MUOY KOET");
@@ -6085,7 +6085,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void buginese(Map<Character, String> map) {
+  public static void buginese(Map<Character, String> map) {
 
     map.put('\u1A00', "BUGINESE LETTER KA");
     map.put('\u1A01', "BUGINESE LETTER GA");
@@ -6247,7 +6247,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void balinese(Map<Character, String> map) {
+  public static void balinese(Map<Character, String> map) {
 
     map.put('\u1B00', "BALINESE SIGN ULU RICEM");
     map.put('\u1B01', "BALINESE SIGN ULU CANDRA");
@@ -6373,7 +6373,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void sudanese(Map<Character, String> map) {
+  public static void sudanese(Map<Character, String> map) {
 
     map.put('\u1B80', "SUNDANESE SIGN PANYECEK");
     map.put('\u1B81', "SUNDANESE SIGN PANGLAYAR");
@@ -6433,7 +6433,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void lepcha(Map<Character, String> map) {
+  public static void lepcha(Map<Character, String> map) {
 
     map.put('\u1C00', "LEPCHA LETTER KA");
     map.put('\u1C01', "LEPCHA LETTER KLA");
@@ -6512,7 +6512,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void olChiki(Map<Character, String> map) {
+  public static void olChiki(Map<Character, String> map) {
 
     map.put('\u1C50', "OL CHIKI DIGIT ZERO");
     map.put('\u1C51', "OL CHIKI DIGIT ONE");
@@ -6565,7 +6565,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void vedic(Map<Character, String> map) {
+  public static void vedic(Map<Character, String> map) {
 
     map.put('\u1CD0', "VEDIC TONE KARSHANA");
     map.put('\u1CD1', "VEDIC TONE SHARA");
@@ -6605,7 +6605,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void phoneticExtensions(Map<Character, String> map) {
+  public static void phoneticExtensions(Map<Character, String> map) {
 
     map.put('\u1D00', "LATIN LETTER SMALL CAPITAL A");
     map.put('\u1D01', "LATIN LETTER SMALL CAPITAL AE");
@@ -6738,7 +6738,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void phoneticExtensionsSupplement(Map<Character, String> map) {
+  public static void phoneticExtensionsSupplement(Map<Character, String> map) {
 
     map.put('\u1D80', "LATIN SMALL LETTER B WITH PALATAL HOOK");
     map.put('\u1D81', "LATIN SMALL LETTER D WITH PALATAL HOOK");
@@ -6807,7 +6807,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void combiningDiacriticalMarksSupplement(Map<Character, String> map) {
+  public static void combiningDiacriticalMarksSupplement(Map<Character, String> map) {
 
     map.put('\u1DC0', "COMBINING DOTTED GRAVE ACCENT");
     map.put('\u1DC1', "COMBINING DOTTED ACUTE ACCENT");
@@ -6854,7 +6854,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void latinExtendedAdditional(Map<Character, String> map) {
+  public static void latinExtendedAdditional(Map<Character, String> map) {
 
     map.put('\u1E00', "LATIN CAPITAL LETTER A WITH RING BELOW");
     map.put('\u1E01', "LATIN SMALL LETTER A WITH RING BELOW");
@@ -7115,7 +7115,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void greekExtended(Map<Character, String> map) {
+  public static void greekExtended(Map<Character, String> map) {
 
     map.put('\u1F00', "GREEK SMALL LETTER ALPHA WITH PSILI");
     map.put('\u1F01', "GREEK SMALL LETTER ALPHA WITH DASIA");
@@ -7353,7 +7353,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void generalPunctuation(Map<Character, String> map) {
+  public static void generalPunctuation(Map<Character, String> map) {
 
     map.put('\u2000', "EN QUAD");
     map.put('\u2001', "EM QUAD");
@@ -10958,7 +10958,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void cjkSymbolsAndPunctuation(Map<Character, String> map) {
+  public static void cjkSymbolsAndPunctuation(Map<Character, String> map) {
 
     map.put('\u3000', "IDEOGRAPHIC SPACE");
     map.put('\u3001', "IDEOGRAPHIC COMMA");
@@ -14560,7 +14560,7 @@ public class UnicodeCharacterName {
 
   }
 
-  public static final void hangulSyllables(Map<Character, String> map) {
+  public static void hangulSyllables(Map<Character, String> map) {
 
     map.put('\uD7B0', "HANGUL JUNGSEONG O-YEO");
     map.put('\uD7B1', "HANGUL JUNGSEONG O-O-I");

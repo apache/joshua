@@ -65,15 +65,15 @@ public class BinaryOut implements DataOutput, ObjectOutput, Flushable, Closeable
   private final utf8CharRange[] charSizeBuffer;
   private final boolean writeObjects;
 
-  public BinaryOut(File file) throws FileNotFoundException, IOException {
+  public BinaryOut(File file) throws IOException {
     this(new FileOutputStream(file), true);
   }
 
-  public BinaryOut(String filename) throws FileNotFoundException, IOException {
+  public BinaryOut(String filename) throws IOException {
     this(new File(filename));
   }
 
-  public BinaryOut(OutputStream out, boolean writeObjects) throws IOException {
+  public BinaryOut(OutputStream out, boolean writeObjects) {
     this.out = out;
     this.buffer = new byte[BUFFER_SIZE];
     this.charBuffer = new char[BUFFER_SIZE];
@@ -498,7 +498,7 @@ public class BinaryOut implements DataOutput, ObjectOutput, Flushable, Closeable
 
   }
 
-  private static enum utf8CharRange {
+  private enum utf8CharRange {
     ONE_BYTE, TWO_BYTES, THREE_BYTES
   }
 

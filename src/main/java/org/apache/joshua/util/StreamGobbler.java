@@ -27,8 +27,8 @@ import java.io.InputStreamReader;
  * Based on: http://www.javaworld.com/javaworld/jw-12-2000/jw-1229-traps.html?page=4
  */
 public class StreamGobbler extends Thread {
-  InputStream istream;
-  boolean verbose;
+  final InputStream istream;
+  final boolean verbose;
 
   public StreamGobbler(InputStream is, int p) {
     istream = is;

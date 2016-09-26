@@ -66,10 +66,10 @@ public class Counts<A, B> implements Iterable<Pair<A, B>> {
    */
   public Counts(float floorProbability) {
     this.floorProbability = floorProbability;
-    this.counts = new HashMap<A, Map<B, Integer>>();
-    this.bTotals = new HashMap<B, Integer>();
-    this.probabilities = new HashMap<A, Map<B, Float>>();
-    this.reverseProbabilities = new HashMap<B, Map<A, Float>>();
+    this.counts = new HashMap<>();
+    this.bTotals = new HashMap<>();
+    this.probabilities = new HashMap<>();
+    this.reverseProbabilities = new HashMap<>();
   }
 
 
@@ -86,7 +86,7 @@ public class Counts<A, B> implements Iterable<Pair<A, B>> {
       if (counts.containsKey(a)) {
         bMap = counts.get(a);
       } else {
-        bMap = new HashMap<B, Integer>();
+        bMap = new HashMap<>();
         counts.put(a, bMap);
       }
 
@@ -145,7 +145,7 @@ public class Counts<A, B> implements Iterable<Pair<A, B>> {
   /**
    * Gets the total number of times the specified element has been seen.
    * 
-   * @param b
+   * @param b the element to count
    * @return the total number of times the specified element has been seen
    */
   int getCount(B b) {
@@ -179,7 +179,7 @@ public class Counts<A, B> implements Iterable<Pair<A, B>> {
       if (probabilities.containsKey(a)) {
         bMap = probabilities.get(a);
       } else {
-        bMap = new HashMap<B, Float>();
+        bMap = new HashMap<>();
       }
 
 
@@ -223,7 +223,7 @@ public class Counts<A, B> implements Iterable<Pair<A, B>> {
         if (reverseProbabilities.containsKey(b)) {
           aMap = reverseProbabilities.get(b);
         } else {
-          aMap = new HashMap<A, Float>();
+          aMap = new HashMap<>();
         }
 
         if (aMap.containsKey(a)) {
@@ -293,7 +293,7 @@ public class Counts<A, B> implements Iterable<Pair<A, B>> {
           bIterator = entry.getValue().keySet().iterator();
         }
 
-        return new Pair<A, B>(entry.getKey(), bIterator.next());
+        return new Pair<>(entry.getKey(), bIterator.next());
       }
 
       public void remove() {
