@@ -67,7 +67,7 @@ public class Optimizer {
       // set classifier parameters
       myClassifier.setClassifierParam(classifierParam);
       //run classifier
-      finalLambda = myClassifier.runClassifier(allSamples, initialLambda, paramDim);
+      double[] finalLambda = myClassifier.runClassifier(allSamples, initialLambda, paramDim);
       normalizeLambda(finalLambda);
       //parameters that are not optimizable are assigned with initial values
       for ( int i = 1; i < isOptimizable.length; ++i ) {
@@ -121,17 +121,16 @@ public class Optimizer {
 
       // find out the 1-best candidate for each sentence
       maxModelScore = NegInf;
-      for (Iterator<String> it = candSet.iterator(); it.hasNext();) {
+      for (String aCandSet : candSet) {
         modelScore = 0.0;
-        candStr = it.next().toString();
+        candStr = aCandSet;
 
         feat_str = feat_hash[i].get(candStr).split("\\s+");
 
-	for (int f = 0; f < feat_str.length; f++) {
-            String[] feat_info = feat_str[f].split("[=]");
-            modelScore +=
-                Double.parseDouble(feat_info[1]) * finalLambda[Vocabulary.id(feat_info[0])];
-	}
+        for (String aFeat_str : feat_str) {
+          String[] feat_info = aFeat_str.split("[=]");
+          modelScore += Double.parseDouble(feat_info[1]) * finalLambda[Vocabulary.id(feat_info[0])];
+        }
 
         if (maxModelScore < modelScore) {
           maxModelScore = modelScore;
@@ -147,10 +146,10 @@ public class Optimizer {
   }
 
   public Vector<String> process_Params() {
-    Vector<String> allSamples = new Vector<String>(); // to save all sampled pairs
+    Vector<String> allSamples = new Vector<>(); // to save all sampled pairs
 
     // sampling
-    Vector<String> sampleVec = new Vector<String>(); // use String to make sparse representation
+    Vector<String> sampleVec = new Vector<>(); // use String to make sparse representation
                                                      // easy
     for (int i = 0; i < sentNum; i++) {
       sampleVec = Sampler(i);
@@ -162,18 +161,18 @@ public class Optimizer {
 
   private Vector<String> Sampler(int sentId) {
     int candCount = stats_hash[sentId].size();
-    Vector<String> sampleVec = new Vector<String>();
-    HashMap<String, Double> candScore = new HashMap<String, Double>(); // metric(e.g BLEU) score of
+    Vector<String> sampleVec = new Vector<>();
+    HashMap<String, Double> candScore = new HashMap<>(); // metric(e.g BLEU) score of
                                                                        // all candidates
 
     // extract all candidates to a string array to save time in computing BLEU score
     String[] cands = new String[candCount];
     Set<String> candSet = stats_hash[sentId].keySet();
-    HashMap<Integer, String> candMap = new HashMap<Integer, String>();
+    HashMap<Integer, String> candMap = new HashMap<>();
 
     int candId = 0;
-    for (Iterator<String> it = candSet.iterator(); it.hasNext();) {
-      cands[candId] = it.next().toString();
+    for (String aCandSet : candSet) {
+      cands[candId] = aCandSet;
       candMap.put(candId, cands[candId]); // map an integer to each candidate
       candId++;
     }
@@ -183,7 +182,7 @@ public class Optimizer {
     double scoreDiff;
     double probAccept;
     boolean accept;
-    HashMap<String, Double> acceptedPair = new HashMap<String, Double>();
+    HashMap<String, Double> acceptedPair = new HashMap<>();
 
     if (Tau < candCount * (candCount - 1)) // otherwise no need to sample
     {
@@ -204,7 +203,7 @@ public class Optimizer {
 //        System.err.println("Diff: " + scoreDiff + " = " + candScore.get(candMap.get(j1)) + " - " 
 //            + candScore.get(candMap.get(j2)));
 
-        accept = randgen.nextDouble() <= probAccept ? true : false;
+        accept = randgen.nextDouble() <= probAccept;
 
         if (accept) acceptedPair.put(j1 + " " + j2, scoreDiff);
       }
@@ -216,7 +215,7 @@ public class Optimizer {
             scoreDiff = Math.abs(candScore.get(candMap.get(i)) - candScore.get(candMap.get(j)));
             probAccept = Alpha(scoreDiff);
 
-            accept = randgen.nextDouble() <= probAccept ? true : false;
+            accept = randgen.nextDouble() <= probAccept;
 
             if (accept) acceptedPair.put(i + " " + j, scoreDiff);
           }
@@ -229,7 +228,7 @@ public class Optimizer {
 
     // sort sampled pairs according to "scoreDiff"
     ValueComparator comp = new ValueComparator(acceptedPair);
-    TreeMap<String, Double> acceptedPairSort = new TreeMap<String, Double>(comp);
+    TreeMap<String, Double> acceptedPairSort = new TreeMap<>(comp);
     acceptedPairSort.putAll(acceptedPair);
 
     int topCount = 0;
@@ -238,7 +237,7 @@ public class Optimizer {
     String[] feat_str_j1, feat_str_j2;
     String j1Cand, j2Cand;
     String featDiff, neg_featDiff;
-    HashSet<String> added = new HashSet<String>(); // to avoid symmetric duplicate
+    HashSet<String> added = new HashSet<>(); // to avoid symmetric duplicate
 
     for (String key : acceptedPairSort.keySet()) {
       if (topCount == Xi) break;
@@ -262,31 +261,29 @@ public class Optimizer {
         featDiff = "";
         neg_featDiff = "";
 
-        HashMap<Integer, String> feat_diff = new HashMap<Integer, String>();
+        HashMap<Integer, String> feat_diff = new HashMap<>();
         String[] feat_info;
 	int feat_id;
 
-        for (int i = 0; i < feat_str_j1.length; i++) {
-          feat_info = feat_str_j1[i].split("[=]");
-	  feat_id = Vocabulary.id(feat_info[0]);
-	  if ( (feat_id < isOptimizable.length &&
-		isOptimizable[feat_id]) || 
-	       feat_id >= isOptimizable.length )
-	      feat_diff.put( feat_id, feat_info[1] );
+        for (String aFeat_str_j1 : feat_str_j1) {
+          feat_info = aFeat_str_j1.split("[=]");
+          feat_id = Vocabulary.id(feat_info[0]);
+          if ((feat_id < isOptimizable.length && isOptimizable[feat_id])
+              || feat_id >= isOptimizable.length)
+            feat_diff.put(feat_id, feat_info[1]);
         }
-	for (int i = 0; i < feat_str_j2.length; i++) {
-            feat_info = feat_str_j2[i].split("[=]");
-	    feat_id = Vocabulary.id(feat_info[0]);
-	    if ( (feat_id < isOptimizable.length &&
-		  isOptimizable[feat_id]) || 
-		 feat_id >= isOptimizable.length ) {
-		if (feat_diff.containsKey(feat_id))
-		    feat_diff.put( feat_id,
-				   Double.toString(Double.parseDouble(feat_diff.get(feat_id))-Double.parseDouble(feat_info[1])) );
-		else //only fired in the cand 2
-		    feat_diff.put( feat_id, Double.toString(-1.0*Double.parseDouble(feat_info[1])));
-	    }
-	}
+        for (String aFeat_str_j2 : feat_str_j2) {
+          feat_info = aFeat_str_j2.split("[=]");
+          feat_id = Vocabulary.id(feat_info[0]);
+          if ((feat_id < isOptimizable.length && isOptimizable[feat_id])
+              || feat_id >= isOptimizable.length) {
+            if (feat_diff.containsKey(feat_id))
+              feat_diff.put(feat_id, Double.toString(
+                  Double.parseDouble(feat_diff.get(feat_id)) - Double.parseDouble(feat_info[1])));
+            else //only fired in the cand 2
+              feat_diff.put(feat_id, Double.toString(-1.0 * Double.parseDouble(feat_info[1])));
+          }
+        }
 
 	for (Integer id: feat_diff.keySet()) {
             featDiff += id + ":" + feat_diff.get(id) + " ";
@@ -325,22 +322,22 @@ public class Optimizer {
 
   // compute *sentence-level* metric score
   private HashMap<String, Double> compute_Score(int sentId, String[] cands) {
-    HashMap<String, Double> candScore = new HashMap<String, Double>();
+    HashMap<String, Double> candScore = new HashMap<>();
     String statString;
     String[] statVal_str;
     int[] statVal = new int[evalMetric.get_suffStatsCount()];
 
     // for all candidates
-    for (int i = 0; i < cands.length; i++) {
-      statString = stats_hash[sentId].get(cands[i]);
+    for (String cand : cands) {
+      statString = stats_hash[sentId].get(cand);
       statVal_str = statString.split("\\s+");
 
       for (int j = 0; j < evalMetric.get_suffStatsCount(); j++)
         statVal[j] = Integer.parseInt(statVal_str[j]);
 
-//      System.err.println("Score: " + evalMetric.score(statVal));
-      
-      candScore.put(cands[i], evalMetric.score(statVal));
+      //      System.err.println("Score: " + evalMetric.score(statVal));
+
+      candScore.put(cand, evalMetric.score(statVal));
     }
 
     return candScore;
@@ -412,31 +409,30 @@ public class Optimizer {
       return finalMetricScore;
   }
 
-  private EvaluationMetric evalMetric;
-  private Vector<String> output;
-  private boolean[] isOptimizable;
-  private double[] initialLambda;
-  private double[] finalLambda;
-  private double[] normalizationOptions;
+  private final EvaluationMetric evalMetric;
+  private final Vector<String> output;
+  private final boolean[] isOptimizable;
+  private final double[] initialLambda;
+  private final double[] normalizationOptions;
   private double finalMetricScore;
-  private HashMap<String, String>[] feat_hash;
-  private HashMap<String, String>[] stats_hash;
-  private Random randgen;
-  private int paramDim;
-  private int sentNum;
-  private int Tau; // size of sampled candidate set(say 5000)
-  private int Xi; // choose top Xi candidates from sampled set(say 50)
-  private double metricDiff; // metric difference threshold(to select the qualified candidates)
-  private String classifierAlg; // optimization algorithm
-  private String[] classifierParam;
+  private final HashMap<String, String>[] feat_hash;
+  private final HashMap<String, String>[] stats_hash;
+  private final Random randgen;
+  private final int paramDim;
+  private final int sentNum;
+  private final int Tau; // size of sampled candidate set(say 5000)
+  private final int Xi; // choose top Xi candidates from sampled set(say 50)
+  private final double metricDiff; // metric difference threshold(to select the qualified candidates)
+  private final String classifierAlg; // optimization algorithm
+  private final String[] classifierParam;
 
-  private final static double NegInf = (-1.0 / 0.0);
-  private final static double PosInf = (+1.0 / 0.0);
+  private final static double NegInf = Double.NEGATIVE_INFINITY;
+  private final static double PosInf = Double.POSITIVE_INFINITY;
 }
 
 
 class ValueComparator implements Comparator<Object> {
-  Map<String,Double> base;
+  final Map<String,Double> base;
 
   public ValueComparator(Map<String,Double> base) {
     this.base = base;
@@ -444,9 +440,9 @@ class ValueComparator implements Comparator<Object> {
 
   @Override
   public int compare(Object a, Object b) {
-    if ((Double) base.get(a) <= (Double) base.get(b))
+    if (base.get(a) <= base.get(b))
       return 1;
-    else if ((Double) base.get(a) == (Double) base.get(b))
+    else if (base.get(a) == base.get(b))
       return 0;
     else
       return -1;

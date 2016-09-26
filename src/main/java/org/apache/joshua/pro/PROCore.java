@@ -34,6 +34,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,12 +64,11 @@ public class PROCore {
   private static final Logger LOG = LoggerFactory.getLogger(PROCore.class);
 
   private final JoshuaConfiguration joshuaConfiguration;
-  private TreeSet<Integer>[] indicesOfInterest_all;
 
   private final static DecimalFormat f4 = new DecimalFormat("###0.0000");
 
-  private final static double NegInf = (-1.0 / 0.0);
-  private final static double PosInf = (+1.0 / 0.0);
+  private final static double NegInf = Double.NEGATIVE_INFINITY;
+  private final static double PosInf = Double.POSITIVE_INFINITY;
   private final static double epsilon = 1.0 / 1000000;
 
   private int verbosity; // anything of priority <= verbosity will be printed
@@ -84,7 +84,6 @@ public class PROCore {
   // number of documents in the dev set
   // this should be 1, unless doing doc-level optimization
 
-  private int[] docOfSentence;
   // docOfSentence[i] stores which document contains the i'th sentence.
   // docOfSentence is 0-indexed, as are the documents (i.e. first doc is indexed 0)
 
@@ -130,9 +129,9 @@ public class PROCore {
   /* *********************************************************** */
 
   // private double[] lambda;
-  private ArrayList<Double> lambda = new ArrayList<Double>();
+  private ArrayList<Double> lambda = new ArrayList<>();
   // the current weight vector. NOTE: indexing starts at 1.
-  private ArrayList<Double> bestLambda = new ArrayList<Double>();
+  private final ArrayList<Double> bestLambda = new ArrayList<>();
   // the best weight vector across all iterations
 
   private boolean[] isOptimizable;
@@ -154,7 +153,6 @@ public class PROCore {
   private Decoder myDecoder;
   // COMMENT OUT if decoder is not Joshua
 
-  private String decoderCommand;
   // the command that runs the decoder; read from decoderCommandFileName
 
   private int decVerbosity;
@@ -164,7 +162,6 @@ public class PROCore {
   private int validDecoderExitValue;
   // return value from running the decoder command that indicates success
 
-  private int numOptThreads;
   // number of threads to run things in parallel
 
   private int saveInterFiles;
@@ -237,9 +234,9 @@ public class PROCore {
                                       // when returnBest = true
   private boolean returnBest = false; // return the best weight during tuning
 
-  private String dirPrefix; // where are all these files located?
   private String paramsFileName, docInfoFileName, finalLambdaFileName;
-  private String sourceFileName, refFileName, decoderOutFileName;
+  private String refFileName;
+  private String decoderOutFileName;
   private String decoderConfigFileName, decoderCommandFileName;
   private String fakeFileNameTemplate, fakeFileNamePrefix, fakeFileNameSuffix;
 
@@ -253,21 +250,21 @@ public class PROCore {
     this.joshuaConfiguration = joshuaConfiguration;
   }
 
-  public PROCore(String[] args, JoshuaConfiguration joshuaConfiguration) throws FileNotFoundException, IOException {
+  public PROCore(String[] args, JoshuaConfiguration joshuaConfiguration) throws IOException {
     this.joshuaConfiguration = joshuaConfiguration;
     EvaluationMetric.set_knownMetrics();
     processArgsArray(args);
     initialize(0);
   }
 
-  public PROCore(String configFileName, JoshuaConfiguration joshuaConfiguration) throws FileNotFoundException, IOException {
+  public PROCore(String configFileName, JoshuaConfiguration joshuaConfiguration) throws IOException {
     this.joshuaConfiguration = joshuaConfiguration;
     EvaluationMetric.set_knownMetrics();
     processArgsArray(cfgFileToArgsArray(configFileName));
     initialize(0);
   }
 
-  private void initialize(int randsToSkip) throws FileNotFoundException, IOException {
+  private void initialize(int randsToSkip) throws IOException {
     println("NegInf: " + NegInf + ", PosInf: " + PosInf + ", epsilon: " + epsilon, 4);
 
     randGen = new Random(seed);
@@ -329,8 +326,8 @@ public class PROCore {
     // and one line for the normalization method
     // indexing starts at 1 in these arrays
     for (int p = 0; p <= numParams; ++p)
-      lambda.add(new Double(0));
-    bestLambda.add(new Double(0));
+      lambda.add(0d);
+    bestLambda.add(0d);
     // why only lambda is a list? because the size of lambda
     // may increase over time, but other arrays are specified in
     // the param config file, only used for initialization
@@ -348,6 +345,7 @@ public class PROCore {
 
     String[][] refSentences = new String[numSentences][refsPerSen];
 
+    String decoderCommand;
     try {
 
       // read in reference sentences
@@ -482,10 +480,10 @@ public class PROCore {
 
     @SuppressWarnings("unchecked")
     TreeSet<Integer>[] temp_TSA = new TreeSet[numSentences];
-    indicesOfInterest_all = temp_TSA;
+    TreeSet<Integer>[] indicesOfInterest_all = temp_TSA;
 
     for (int i = 0; i < numSentences; ++i) {
-      indicesOfInterest_all[i] = new TreeSet<Integer>();
+      indicesOfInterest_all[i] = new TreeSet<>();
     }
   } // void initialize(...)
 
@@ -510,9 +508,9 @@ public class PROCore {
     if (folder.exists()) {
       File[] listOfFiles = folder.listFiles();
 
-      for (int i = 0; i < listOfFiles.length; i++) {
-        if (listOfFiles[i].isFile()) {
-          files = listOfFiles[i].getName();
+      for (File listOfFile : listOfFiles) {
+        if (listOfFile.isFile()) {
+          files = listOfFile.getName();
           if (files.startsWith("PRO.temp")) {
             deleteFile(files);
           }
@@ -617,11 +615,11 @@ public class PROCore {
     // save feats and stats for all candidates(old & new)
     HashMap<String, String>[] feat_hash = new HashMap[numSentences];
     for (int i = 0; i < numSentences; i++)
-      feat_hash[i] = new HashMap<String, String>();
+      feat_hash[i] = new HashMap<>();
 
     HashMap<String, String>[] stats_hash = new HashMap[numSentences];
     for (int i = 0; i < numSentences; i++)
-      stats_hash[i] = new HashMap<String, String>();
+      stats_hash[i] = new HashMap<>();
 
     while (!done) { // NOTE: this "loop" will only be carried out once
       println("--- Starting PRO iteration #" + iteration + " @ " + (new Date()) + " ---", 1);
@@ -838,7 +836,7 @@ public class PROCore {
         // (It's not actually a bug, but only because existingCandStats gets
         // cleared before moving to the next source sentence.)
         // FIX: should be made an array, indexed by i
-        HashMap<String, String> existingCandStats = new HashMap<String, String>();
+        HashMap<String, String> existingCandStats = new HashMap<>();
         // VERY IMPORTANT:
         // A CANDIDATE X MAY APPEARED IN ITER 1, ITER 3
         // BUT IF THE USER SPECIFIED TO CONSIDER ITERATIONS FROM ONLY ITER 2, THEN
@@ -910,7 +908,7 @@ public class PROCore {
                     // need to identify newly fired feats here
                     if (featId > numParams) {
                       ++numParams;
-                      lambda.add(new Double(0));
+                      lambda.add(0d);
                     }
                   }
                 }
@@ -936,7 +934,7 @@ public class PROCore {
 
           String[] sentsCurrIt_currSrcSent = new String[sizeOfNBest + 1];
 
-          Vector<String> unknownCands_V = new Vector<String>();
+          Vector<String> unknownCands_V = new Vector<>();
           // which candidates (of the i'th source sentence) have not been seen before
           // this iteration?
 
@@ -1110,7 +1108,7 @@ public class PROCore {
                   // need to identify newly fired feats here
                   if (featId > numParams) {
                     ++numParams;
-                    lambda.add(new Double(0));
+                    lambda.add(0d);
                   }
                 }
               }
@@ -1223,7 +1221,7 @@ public class PROCore {
               lambda.set(p, bestLambda.get(p));
             // and set the rest of lambda to be 0
             for (int p = 0; p < lambda.size() - bestLambda.size(); ++p)
-              lambda.set(p + bestLambda.size(), new Double(0));
+              lambda.set(p + bestLambda.size(), 0d);
           }
 
           return null; // this means that the old values should be kept by the caller
@@ -1239,7 +1237,7 @@ public class PROCore {
        * System.exit(0);
        */
 
-      Vector<String> output = new Vector<String>();
+      Vector<String> output = new Vector<>();
 
       // note: initialLambda[] has length = numParamsOld
       // augmented with new feature weights, initial values are 0
@@ -1286,8 +1284,8 @@ public class PROCore {
 
       /************* end optimization **************/
 
-      for (int i = 0; i < output.size(); i++)
-        println(output.get(i));
+      for (String anOutput : output)
+        println(anOutput);
 
       // check if any parameter has been updated
       boolean anyParamChanged = false;
@@ -1366,7 +1364,7 @@ public class PROCore {
       // use the new wt vector to decode the next iteration
       // (interpolation with previous wt vector)
       for (int i = 1; i <= numParams; i++)
-        lambda.set(i, interCoef * finalLambda[i] + (1 - interCoef) * lambda.get(i).doubleValue());
+        lambda.set(i, interCoef * finalLambda[i] + (1 - interCoef) * lambda.get(i));
 
       println("Next iteration will decode with lambda: " + lambdaToString(lambda), 1);
       println("", 1);
@@ -1400,9 +1398,9 @@ public class PROCore {
 
     retStr += "(listing the first " + featToPrint + " lambdas)";
     for (int c = 1; c <= featToPrint - 1; ++c) {
-      retStr += "" + String.format("%.4f", lambdaA.get(c).doubleValue()) + ", ";
+      retStr += "" + String.format("%.4f", lambdaA.get(c)) + ", ";
     }
-    retStr += "" + String.format("%.4f", lambdaA.get(numParams).doubleValue()) + "}";
+    retStr += "" + String.format("%.4f", lambdaA.get(numParams)) + "}";
 
     return retStr;
   }
@@ -1435,7 +1433,7 @@ public class PROCore {
       println("Running external decoder...", 1);
 
       try {
-        ArrayList<String> cmd = new ArrayList<String>();
+        ArrayList<String> cmd = new ArrayList<>();
         cmd.add(decoderCommandFileName);
 
         if (passIterationToDecoder)
@@ -1584,7 +1582,7 @@ public class PROCore {
         if (c_match == -1) {
           outFile.println(line);
         } else {
-          if (Math.abs(params.get(c_match).doubleValue()) > 1e-20)
+          if (Math.abs(params.get(c_match)) > 1e-20)
             outFile.println(Vocabulary.word(c_match) + " " + params.get(c_match));
         }
 
@@ -1593,7 +1591,7 @@ public class PROCore {
 
       // now append weights of new features
       for (int c = origFeatNum + 1; c <= numParams; ++c) {
-        if (Math.abs(params.get(c).doubleValue()) > 1e-20)
+        if (Math.abs(params.get(c)) > 1e-20)
           outFile.println(Vocabulary.word(c) + " " + params.get(c));
       }
 
@@ -1624,16 +1622,20 @@ public class PROCore {
 
       // read default value
       lambda.set(c, inFile_init.nextDouble());
-      defaultLambda[c] = lambda.get(c).doubleValue();
+      defaultLambda[c] = lambda.get(c);
 
       // read isOptimizable
       dummy = inFile_init.next();
-      if (dummy.equals("Opt")) {
+      switch (dummy) {
+      case "Opt":
         isOptimizable[c] = true;
-      } else if (dummy.equals("Fix")) {
+        break;
+      case "Fix":
         isOptimizable[c] = false;
-      } else {
-        throw new RuntimeException("Unknown isOptimizable string " + dummy + " (must be either Opt or Fix)");
+        break;
+      default:
+        throw new RuntimeException(
+            "Unknown isOptimizable string " + dummy + " (must be either Opt or Fix)");
       }
 
       if (!isOptimizable[c]) { // skip next two values
@@ -1702,9 +1704,11 @@ public class PROCore {
     dummy = (origLine.substring(origLine.indexOf("=") + 1)).trim();
     String[] dummyA = dummy.split("\\s+");
 
-    if (dummyA[0].equals("none")) {
+    switch (dummyA[0]) {
+    case "none":
       normalizationOptions[0] = 0;
-    } else if (dummyA[0].equals("absval")) {
+      break;
+    case "absval":
       normalizationOptions[0] = 1;
       normalizationOptions[1] = Double.parseDouble(dummyA[1]);
       String pName = dummyA[2];
@@ -1720,36 +1724,43 @@ public class PROCore {
         throw new RuntimeException("Unrecognized feature name " + normalizationOptions[2]
             + " for absval normalization method.");
       }
-    } else if (dummyA[0].equals("maxabsval")) {
+      break;
+    case "maxabsval":
       normalizationOptions[0] = 2;
       normalizationOptions[1] = Double.parseDouble(dummyA[1]);
       if (normalizationOptions[1] <= 0) {
-        throw new RuntimeException("Value for the maxabsval normalization method must be positive.");
+        throw new RuntimeException(
+            "Value for the maxabsval normalization method must be positive.");
       }
-    } else if (dummyA[0].equals("minabsval")) {
+      break;
+    case "minabsval":
       normalizationOptions[0] = 3;
       normalizationOptions[1] = Double.parseDouble(dummyA[1]);
       if (normalizationOptions[1] <= 0) {
-        throw new RuntimeException("Value for the minabsval normalization method must be positive.");
+        throw new RuntimeException(
+            "Value for the minabsval normalization method must be positive.");
       }
-    } else if (dummyA[0].equals("LNorm")) {
+      break;
+    case "LNorm":
       normalizationOptions[0] = 4;
       normalizationOptions[1] = Double.parseDouble(dummyA[1]);
       normalizationOptions[2] = Double.parseDouble(dummyA[2]);
       if (normalizationOptions[1] <= 0 || normalizationOptions[2] <= 0) {
-        throw new RuntimeException("Both values for the LNorm normalization method must be positive.");
+        throw new RuntimeException(
+            "Both values for the LNorm normalization method must be positive.");
       }
-    } else {
+      break;
+    default:
       throw new RuntimeException("Unrecognized normalization method " + dummyA[0] + "; "
           + "must be one of none, absval, maxabsval, and LNorm.");
-    } // if (dummyA[0])
+    }
 
     inFile_init.close();
   } // processParamFile()
 
   private void processDocInfo() {
     // sets numDocuments and docOfSentence[]
-    docOfSentence = new int[numSentences];
+    int[] docOfSentence = new int[numSentences];
 
     if (docInfoFileName == null) {
       for (int i = 0; i < numSentences; ++i)
@@ -1806,7 +1817,7 @@ public class PROCore {
 
           boolean format3 = false;
 
-          HashSet<String> seenStrings = new HashSet<String>();
+          HashSet<String> seenStrings = new HashSet<>();
           BufferedReader inFile = new BufferedReader(new FileReader(docInfoFileName));
           for (int i = 0; i < numSentences; ++i) {
             // set format3 = true if a duplicate is found
@@ -1818,8 +1829,8 @@ public class PROCore {
 
           inFile.close();
 
-          HashSet<String> seenDocNames = new HashSet<String>();
-          HashMap<String, Integer> docOrder = new HashMap<String, Integer>();
+          HashSet<String> seenDocNames = new HashSet<>();
+          HashMap<String, Integer> docOrder = new HashMap<>();
           // maps a document name to the order (0-indexed) in which it was seen
 
           inFile = new BufferedReader(new FileReader(docInfoFileName));
@@ -1946,7 +1957,7 @@ public class PROCore {
       try {
         PrintWriter outFile_lambdas = new PrintWriter(finalLambdaFileName);
         for (int c = 1; c <= numParams; ++c) {
-          outFile_lambdas.println(Vocabulary.word(c) + " ||| " + lambda.get(c).doubleValue());
+          outFile_lambdas.println(Vocabulary.word(c) + " ||| " + lambda.get(c));
         }
         outFile_lambdas.close();
 
@@ -1960,9 +1971,9 @@ public class PROCore {
   private String[] cfgFileToArgsArray(String fileName) {
     checkFile(fileName);
 
-    Vector<String> argsVector = new Vector<String>();
+    Vector<String> argsVector = new Vector<>();
 
-    try (BufferedReader inFile = new BufferedReader(new FileReader(fileName));) {
+    try (BufferedReader inFile = new BufferedReader(new FileReader(fileName))) {
       String line, origLine;
       do {
         line = inFile.readLine();
@@ -1970,7 +1981,7 @@ public class PROCore {
 
         if (line != null && line.length() > 0 && line.charAt(0) != '#') {
 
-          if (line.indexOf("#") != -1) { // discard comment
+          if (line.contains("#")) { // discard comment
             line = line.substring(0, line.indexOf("#"));
           }
 
@@ -1993,7 +2004,7 @@ public class PROCore {
 
           // CMU MODIFICATION(FROM METEOR FOR ZMERT)
           // Parse args
-          ArrayList<String> argList = new ArrayList<String>();
+          ArrayList<String> argList = new ArrayList<>();
           StringBuilder arg = new StringBuilder();
           boolean quoted = false;
           for (int i = 0; i < line.length(); i++) {
@@ -2026,9 +2037,7 @@ public class PROCore {
             argsVector.add(paramA[1]);
           } else if (paramA.length > 2 && (paramA[0].equals("-m") || paramA[0].equals("-docSet"))) {
             // -m (metricName), -docSet are allowed to have extra optinos
-            for (int opt = 0; opt < paramA.length; ++opt) {
-              argsVector.add(paramA[opt]);
-            }
+            Collections.addAll(argsVector, paramA);
           } else {
             throw new RuntimeException("Malformed line in config file:" + origLine);
           }
@@ -2058,8 +2067,8 @@ public class PROCore {
   private void processArgsArray(String[] args, boolean firstTime) {
     /* set default values */
     // Relevant files
-    dirPrefix = null;
-    sourceFileName = null;
+    String dirPrefix = null;
+    String sourceFileName = null;
     refFileName = "reference.txt";
     refsPerSen = 1;
     textNormMethod = 1;
@@ -2082,7 +2091,7 @@ public class PROCore {
     //
     // /* possibly other early stopping criteria here */
     //
-    numOptThreads = 1;
+    int numOptThreads = 1;
     saveInterFiles = 3;
     compressFiles = 0;
     oneModificationPerIteration = false;
@@ -2108,30 +2117,39 @@ public class PROCore {
     while (i < args.length) {
       String option = args[i];
       // Relevant files
-      if (option.equals("-dir")) {
+      switch (option) {
+      case "-dir":
         dirPrefix = args[i + 1];
-      } else if (option.equals("-s")) {
+        break;
+      case "-s":
         sourceFileName = args[i + 1];
-      } else if (option.equals("-r")) {
+        break;
+      case "-r":
         refFileName = args[i + 1];
-      } else if (option.equals("-rps")) {
+        break;
+      case "-rps":
         refsPerSen = Integer.parseInt(args[i + 1]);
         if (refsPerSen < 1) {
           throw new RuntimeException("refsPerSen must be positive.");
         }
-      } else if (option.equals("-txtNrm")) {
+        break;
+      case "-txtNrm":
         textNormMethod = Integer.parseInt(args[i + 1]);
         if (textNormMethod < 0 || textNormMethod > 4) {
           throw new RuntimeException("textNormMethod should be between 0 and 4");
         }
-      } else if (option.equals("-p")) {
+        break;
+      case "-p":
         paramsFileName = args[i + 1];
-      } else if (option.equals("-docInfo")) {
+        break;
+      case "-docInfo":
         docInfoFileName = args[i + 1];
-      } else if (option.equals("-fin")) {
+        break;
+      case "-fin":
         finalLambdaFileName = args[i + 1];
         // MERT specs
-      } else if (option.equals("-m")) {
+        break;
+      case "-m":
         metricName = args[i + 1];
         metricName_display = metricName;
         if (EvaluationMetric.knownMetricName(metricName)) {
@@ -2144,7 +2162,8 @@ public class PROCore {
         } else {
           throw new RuntimeException("Unknown metric name " + metricName + ".");
         }
-      } else if (option.equals("-docSet")) {
+        break;
+      case "-docSet":
         String method = args[i + 1];
 
         if (method.equals("all")) {
@@ -2189,48 +2208,56 @@ public class PROCore {
         } else {
           throw new RuntimeException("Unknown docSet method " + method + ".");
         }
-      } else if (option.equals("-maxIt")) {
+        break;
+      case "-maxIt":
         maxMERTIterations = Integer.parseInt(args[i + 1]);
         if (maxMERTIterations < 1) {
           throw new RuntimeException("maxMERTIts must be positive.");
         }
-      } else if (option.equals("-minIt")) {
+        break;
+      case "-minIt":
         minMERTIterations = Integer.parseInt(args[i + 1]);
         if (minMERTIterations < 1) {
           throw new RuntimeException("minMERTIts must be positive.");
         }
-      } else if (option.equals("-prevIt")) {
+        break;
+      case "-prevIt":
         prevMERTIterations = Integer.parseInt(args[i + 1]);
         if (prevMERTIterations < 0) {
           throw new RuntimeException("prevMERTIts must be non-negative.");
         }
-      } else if (option.equals("-stopIt")) {
+        break;
+      case "-stopIt":
         stopMinIts = Integer.parseInt(args[i + 1]);
         if (stopMinIts < 1) {
           throw new RuntimeException("stopMinIts must be positive.");
         }
-      } else if (option.equals("-stopSig")) {
+        break;
+      case "-stopSig":
         stopSigValue = Double.parseDouble(args[i + 1]);
-      }
+        break;
       //
       // /* possibly other early stopping criteria here */
       //
-      else if (option.equals("-thrCnt")) {
+      case "-thrCnt":
         numOptThreads = Integer.parseInt(args[i + 1]);
         if (numOptThreads < 1) {
           throw new RuntimeException("threadCount must be positive.");
         }
-      } else if (option.equals("-save")) {
+        break;
+      case "-save":
         saveInterFiles = Integer.parseInt(args[i + 1]);
         if (saveInterFiles < 0 || saveInterFiles > 3) {
           throw new RuntimeException("save should be between 0 and 3");
         }
-      } else if (option.equals("-compress")) {
+        break;
+      case "-compress":
         compressFiles = Integer.parseInt(args[i + 1]);
         if (compressFiles < 0 || compressFiles > 1) {
           throw new RuntimeException("compressFiles should be either 0 or 1");
         }
-      } else if (option.equals("-opi")) {
+        break;
+      case "-opi":
         int opi = Integer.parseInt(args[i + 1]);
         if (opi == 1) {
           oneModificationPerIteration = true;
@@ -2239,7 +2266,8 @@ public class PROCore {
         } else {
           throw new RuntimeException("oncePerIt must be either 0 or 1.");
         }
-      } else if (option.equals("-rand")) {
+        break;
+      case "-rand":
         int rand = Integer.parseInt(args[i + 1]);
         if (rand == 1) {
           randInit = true;
@@ -2248,13 +2276,14 @@ public class PROCore {
         } else {
           throw new RuntimeException("randInit must be either 0 or 1.");
         }
-      } else if (option.equals("-seed")) {
+        break;
+      case "-seed":
         if (args[i + 1].equals("time")) {
           seed = System.currentTimeMillis();
         } else {
           seed = Long.parseLong(args[i + 1]);
         }
-      }
+        break;
       /*
        * else if (option.equals("-ud")) { useDisk = Integer.parseInt(args[i+1]); if (useDisk < 0 ||
        * useDisk > 2) { println("useDisk should be between 0 and 2"); System.exit(10); } }
@@ -2262,23 +2291,23 @@ public class PROCore {
 
       // for pro:
       // classification algorithm class path
-      else if (option.equals("-classifierClass")) {
+      case "-classifierClass":
         classifierAlg = args[i + 1];
-      }
+        break;
       // params for the specified classifier
-      else if (option.equals("-classifierParams")) {
+      case "-classifierParams":
         classifierParams = args[i + 1].split("\\s+");
-      }
+        break;
       // tau: num of randomly generated candidates
-      else if (option.equals("-Tau")) {
+      case "-Tau":
         Tau = Integer.parseInt(args[i + 1]);
-      }
+        break;
       // xi: top-xi candidates to be accepted
-      else if (option.equals("-Xi")) {
+      case "-Xi":
         Xi = Integer.parseInt(args[i + 1]);
-      }
+        break;
       // return the best weight during tuning or not
-      else if (option.equals("-returnBest")) {
+      case "-returnBest":
         int retBest = Integer.parseInt(args[i + 1]);
         if (retBest == 1)
           returnBest = true;
@@ -2287,57 +2316,66 @@ public class PROCore {
         else {
           throw new RuntimeException("-returnBest must be either 0 or 1.");
         }
-      }
+        break;
       // interpolation coefficient between current & previous weights
-      else if (option.equals("-interCoef")) {
+      case "-interCoef":
         interCoef = Double.parseDouble(args[i + 1]);
-      }
+        break;
       // metric(eg. bleu) diff threshold(to select sampled candidates)
-      else if (option.equals("-metricDiff")) {
+      case "-metricDiff":
         metricDiff = Double.parseDouble(args[i + 1]);
-      }
+        break;
 
       // Decoder specs
-      else if (option.equals("-cmd")) {
+      case "-cmd":
         decoderCommandFileName = args[i + 1];
-      } else if (option.equals("-passIt")) {
+        break;
+      case "-passIt":
         int val = Integer.parseInt(args[i + 1]);
         if (val < 0 || val > 1) {
           throw new RuntimeException("passIterationToDecoder should be either 0 or 1");
         }
-        passIterationToDecoder = (val == 1) ? true : false;
-      } else if (option.equals("-decOut")) {
+        passIterationToDecoder = (val == 1);
+        break;
+      case "-decOut":
         decoderOutFileName = args[i + 1];
-      } else if (option.equals("-decExit")) {
+        break;
+      case "-decExit":
         validDecoderExitValue = Integer.parseInt(args[i + 1]);
-      } else if (option.equals("-dcfg")) {
+        break;
+      case "-dcfg":
         decoderConfigFileName = args[i + 1];
-      } else if (option.equals("-N")) {
+        break;
+      case "-N":
         sizeOfNBest = Integer.parseInt(args[i + 1]);
         if (sizeOfNBest < 1) {
           throw new RuntimeException("N must be positive.");
         }
-      }
+        break;
       // Output specs
-      else if (option.equals("-v")) {
+      case "-v":
         verbosity = Integer.parseInt(args[i + 1]);
         if (verbosity < 0 || verbosity > 4) {
           throw new RuntimeException("verbosity should be between 0 and 4");
         }
-      } else if (option.equals("-decV")) {
+        break;
+      case "-decV":
         decVerbosity = Integer.parseInt(args[i + 1]);
         if (decVerbosity < 0 || decVerbosity > 1) {
           throw new RuntimeException("decVerbosity should be either 0 or 1");
         }
-      } else if (option.equals("-fake")) {
+        break;
+      case "-fake":
         fakeFileNameTemplate = args[i + 1];
         int QM_i = fakeFileNameTemplate.indexOf("?");
         if (QM_i <= 0) {
-          throw new RuntimeException("fakeFileNameTemplate must contain '?' to indicate position of iteration number");
+          throw new RuntimeException(
+              "fakeFileNameTemplate must contain '?' to indicate position of iteration number");
         }
         fakeFileNamePrefix = fakeFileNameTemplate.substring(0, QM_i);
         fakeFileNameSuffix = fakeFileNameTemplate.substring(QM_i + 1);
-      } else {
+        break;
+      default:
         throw new RuntimeException("Unknown option " + option);
       }
 
@@ -2615,7 +2653,7 @@ public class PROCore {
         outFileName = prefix + ".all";
       }
 
-      try (PrintWriter outFile = new PrintWriter(outFileName);) {
+      try (PrintWriter outFile = new PrintWriter(outFileName)) {
         BufferedReader[] inFile = new BufferedReader[numFiles];
 
         int nextIndex;
@@ -2693,7 +2731,7 @@ public class PROCore {
     str = " " + str + " ";
     str = str.replaceAll("\\s+", " ");
 
-    TreeSet<Integer> splitIndices = new TreeSet<Integer>();
+    TreeSet<Integer> splitIndices = new TreeSet<>();
 
     for (int i = 0; i < str.length(); ++i) {
       char ch = str.charAt(i);
@@ -2740,7 +2778,7 @@ public class PROCore {
     // remove spaces around dashes
     if (normMethod == 2 || normMethod == 4) {
 
-      TreeSet<Integer> skipIndices = new TreeSet<Integer>();
+      TreeSet<Integer> skipIndices = new TreeSet<>();
       str = " " + str + " ";
 
       for (int i = 0; i < str.length(); ++i) {
@@ -2811,7 +2849,7 @@ public class PROCore {
   }
 
   private ArrayList<Double> randomLambda() {
-    ArrayList<Double> retLambda = new ArrayList<Double>(1 + numParams);
+    ArrayList<Double> retLambda = new ArrayList<>(1 + numParams);
 
     for (int c = 1; c <= numParams; ++c) {
       if (isOptimizable[c]) {

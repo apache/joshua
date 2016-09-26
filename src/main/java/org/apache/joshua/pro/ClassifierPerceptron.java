@@ -54,8 +54,8 @@ public class ClassifierPerceptron implements ClassifierInterface {
       numError = 0;
       // numPosSamp = 0;
 
-      for (int s = 0; s < sampleSize; s++) {
-        featVal = samples.get(s).split("\\s+");
+      for (String sample : samples) {
+        featVal = sample.split("\\s+");
 
         // only consider positive samples
         // if( featVal[featDim].equals("1") )
