@@ -27,23 +27,23 @@ import edu.uci.ics.jung.algorithms.layout.TreeLayout;
 import edu.uci.ics.jung.graph.DelegateForest;
 
 public class DerivationTreeTransformer implements Transformer<Node, Point2D> {
-  private TreeLayout<Node, DerivationTreeEdge> treeLayout;
-  private DerivationTree graph;
-  private Node root;
-  private Node sourceRoot;
+  private final TreeLayout<Node, DerivationTreeEdge> treeLayout;
+  private final DerivationTree graph;
+  private final Node root;
+  private final Node sourceRoot;
 
-  private boolean isAnchored;
+  private final boolean isAnchored;
   private Point2D anchorPoint;
 
-  private double Y_DIST;
-  private double X_DIST;
+  private final double Y_DIST;
+  private final double X_DIST;
 
 
   public DerivationTreeTransformer(DerivationTree t, Dimension d, boolean isAnchored) {
     this.isAnchored = isAnchored;
     anchorPoint = new Point2D.Double(0, 0);
     graph = t;
-    DelegateForest<Node, DerivationTreeEdge> del = new DelegateForest<Node, DerivationTreeEdge>(t);
+    DelegateForest<Node, DerivationTreeEdge> del = new DelegateForest<>(t);
     del.setRoot(t.root);
     del.setRoot(t.sourceRoot);
     root = t.root;
@@ -55,7 +55,7 @@ public class DerivationTreeTransformer implements Transformer<Node, Point2D> {
     }
     X_DIST = d.getWidth() / leafCount;
 
-    treeLayout = new TreeLayout<Node, DerivationTreeEdge>(del, (int) Math.round(X_DIST));
+    treeLayout = new TreeLayout<>(del, (int) Math.round(X_DIST));
   }
 
   public Point2D transform(Node n) {
@@ -90,8 +90,7 @@ public class DerivationTreeTransformer implements Transformer<Node, Point2D> {
   public Dimension getSize() {
     int height = (int) Math.round(2 * Y_DIST * (1 + distanceToLeaf(root)));
     int width = (int) Math.round(2 * treeLayout.transform(root).getX());
-    Dimension ret = new Dimension(width, height);
-    return ret;
+    return new Dimension(width, height);
   }
 
   public Point2D getAnchorPosition(DerivationViewer.AnchorType type) {

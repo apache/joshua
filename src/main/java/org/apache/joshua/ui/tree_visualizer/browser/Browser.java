@@ -84,14 +84,13 @@ public class Browser {
     if (argv.length > 2) {
       translationPaths = Arrays.copyOfRange(argv, 2, argv.length);
     }
-    translations = new ArrayList<TranslationInfo>();
+    translations = new ArrayList<>();
     readSourcesFromPath(sourcePath);
     readReferencesFromPath(referencePath);
     for (String tp : translationPaths) {
       readTranslationsFromPath(tp);
     }
     initializeChooserFrame();
-    return;
   }
 
   private static void readSourcesFromPath(String path) throws IOException {
@@ -152,23 +151,18 @@ public class Browser {
 
     searchBox = new JTextField("search");
     searchBox.getDocument().addDocumentListener(new SearchListener());
-    searchBox.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        final int selectedIndex = oneBestList.getSelectedIndex();
-        Browser.search(selectedIndex < 0 ? 0 : selectedIndex + 1);
-      }
+    searchBox.addActionListener(e -> {
+      final int selectedIndex = oneBestList.getSelectedIndex();
+      Browser.search(selectedIndex < 0 ? 0 : selectedIndex + 1);
     });
     oneBestList = new JList(new DefaultListModel());
     oneBestList.setFixedCellWidth(200);
     oneBestList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     // oneBestList.setCellRenderer(new DerivationBrowserListCellRenderer());
 
-    oneBestList.addListSelectionListener(new ListSelectionListener() {
-      public void valueChanged(ListSelectionEvent e) {
-        for (DerivationTreeFrame frame : activeFrame) {
-          frame.drawGraph(translations.get(oneBestList.getSelectedIndex()));
-        }
-        return;
+    oneBestList.addListSelectionListener(e -> {
+      for (DerivationTreeFrame frame : activeFrame) {
+        frame.drawGraph(translations.get(oneBestList.getSelectedIndex()));
       }
     });
     chooserFrame.getContentPane().add(searchBox, BorderLayout.NORTH);
@@ -178,12 +172,11 @@ public class Browser {
     chooserFrame.setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
     chooserFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-    activeFrame = new ArrayList<DerivationTreeFrame>();
+    activeFrame = new ArrayList<>();
     int numNBestFiles = translations.get(0).translations().size();
     for (int i = 0; i < numNBestFiles; i++)
       activeFrame.add(new DerivationTreeFrame(i, oneBestList));
     chooserFrame.setVisible(true);
-    return;
   }
 
   /**
@@ -195,7 +188,6 @@ public class Browser {
     for (TranslationInfo ti : translations) {
       oneBestListModel.addElement(ti.reference());
     }
-    return;
   }
 
   private static void search(int fromIndex) {
@@ -203,7 +195,7 @@ public class Browser {
     DefaultListModel oneBestListModel = (DefaultListModel) oneBestList.getModel();
     for (int i = fromIndex; i < oneBestListModel.getSize(); i++) {
       String reference = (String) oneBestListModel.getElementAt(i);
-      if (reference.indexOf(query) != -1) {
+      if (reference.contains(query)) {
         // found the query
         oneBestList.setSelectedIndex(i);
         oneBestList.ensureIndexIsVisible(i);
@@ -224,7 +216,6 @@ public class Browser {
     public void removeUpdate(DocumentEvent e) {
       final String query = searchBox.getText();
       if (query.equals("")) {
-        return;
       } else {
         insertUpdate(e);
       }

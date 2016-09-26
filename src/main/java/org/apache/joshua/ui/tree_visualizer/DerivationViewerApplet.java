@@ -46,6 +46,5 @@ public class DerivationViewerApplet extends JApplet {
         getSize(),
         Color.red,
         DerivationViewer.AnchorType.ANCHOR_ROOT));
-    return;
   }
 }

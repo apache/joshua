@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.stream.Collectors;
 
 /**
  * A class to represent the target-side tree produced by decoding using Joshua
@@ -126,7 +127,7 @@ public class Tree {
   }
 
   private void initialize(String [] tokens) {
-    final Stack<Integer> stack = new Stack<Integer>();
+    final Stack<Integer> stack = new Stack<>();
     int nodeIndex = 0;
     for (String token : tokens) {
       final Matcher matcher = NONTERMINAL_PATTERN.matcher(token);
@@ -177,7 +178,7 @@ public class Tree {
   }
 
   private List<Integer> childIndices(int index) {
-    List<Integer> result = new ArrayList<Integer>();
+    List<Integer> result = new ArrayList<>();
     int remainingChildren = numChildren[index];
     int childIndex = index + 1;
     while (remainingChildren > 0) {
@@ -252,10 +253,7 @@ public class Tree {
     }
 
     public List<Node> children() {
-      List<Node> result = new ArrayList<Node>();
-      for (int j : childIndices(index)) {
-        result.add(new Node(j));
-      }
+      List<Node> result = childIndices(index).stream().map(Node::new).collect(Collectors.toList());
       return result;
     }
 

@@ -26,10 +26,10 @@ import org.apache.joshua.ui.tree_visualizer.tree.Tree;
 class TranslationInfo {
   private String sourceSentence;
   private String reference;
-  private ArrayList<Tree> translations;
+  private final ArrayList<Tree> translations;
 
   public TranslationInfo() {
-    translations = new ArrayList<Tree>();
+    translations = new ArrayList<>();
   }
 
   public String sourceSentence() {
@@ -38,7 +38,6 @@ class TranslationInfo {
 
   public void setSourceSentence(String src) {
     sourceSentence = src;
-    return;
   }
 
   public String reference() {
@@ -47,7 +46,6 @@ class TranslationInfo {
 
   public void setReference(String ref) {
     reference = ref;
-    return;
   }
 
   public List<Tree> translations() {

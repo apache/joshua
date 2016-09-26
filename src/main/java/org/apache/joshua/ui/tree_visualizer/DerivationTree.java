@@ -53,7 +53,7 @@ public class DerivationTree extends DirectedOrderedSparseMultigraph<Node, Deriva
     for (Tree.Node child : tn.children()) {
       Node childNode = new Node(child.label(), false);
       addVertex(childNode);
-      addEdge(new DerivationTreeEdge(false), new Pair<Node>(n, childNode), EdgeType.DIRECTED);
+      addEdge(new DerivationTreeEdge(false), new Pair<>(n, childNode), EdgeType.DIRECTED);
       addSubtreeRootedAt(childNode, child);
     }
   }
@@ -74,7 +74,7 @@ public class DerivationTree extends DirectedOrderedSparseMultigraph<Node, Deriva
         insertSourceLeaf(n, sourceWords, nextUncoveredIndex, sourceStartIndex);
       }
       Node childNode = new Node(child.label(), true);
-      addEdge(new DerivationTreeEdge(true), new Pair<Node>(n, childNode), EdgeType.DIRECTED);
+      addEdge(new DerivationTreeEdge(true), new Pair<>(n, childNode), EdgeType.DIRECTED);
       nextUncoveredIndex = sourceEndIndex;
       addSourceSubtreeRootedAt(childNode, child, sourceStartIndex, sourceEndIndex, sourceWords);
     }
@@ -90,7 +90,7 @@ public class DerivationTree extends DirectedOrderedSparseMultigraph<Node, Deriva
       label += " " + leafWords[i];
     }
     Node childNode = new Node(label, true);
-    addEdge(new DerivationTreeEdge(true), new Pair<Node>(n, childNode), EdgeType.DIRECTED);
+    addEdge(new DerivationTreeEdge(true), new Pair<>(n, childNode), EdgeType.DIRECTED);
   }
 
   public void setSubtreeHighlight(Node n, boolean b) {
@@ -98,6 +98,5 @@ public class DerivationTree extends DirectedOrderedSparseMultigraph<Node, Deriva
     for (Node s : getSuccessors(n)) {
       setSubtreeHighlight(s, b);
     }
-    return;
   }
 }

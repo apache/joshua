@@ -63,32 +63,32 @@ class DerivationTreeFrame extends JFrame {
   /**
    * A panel holding the extra information about the derivation.
    */
-  private JPanel informationPanel;
+  private final JPanel informationPanel;
 
   /**
    * A label holding the current source sentence.
    */
-  private JLabel sourceLabel;
+  private final JLabel sourceLabel;
 
   /**
    * A label holding the reference translation of the current source sentence.
    */
-  private JLabel referenceLabel;
+  private final JLabel referenceLabel;
 
   /**
    * A label holding the one-best translation of the current source sentence.
    */
-  private JLabel oneBestLabel;
+  private final JLabel oneBestLabel;
 
   /**
    * A panel that holds the buttons, as well as labels to show which derivation
    * is currently being displayed.
    */
-  private JPanel controlPanel;
+  private final JPanel controlPanel;
   /**
    * A panel used to display the derivation tree itself.
    */
-  private JPanel viewPanel;
+  private final JPanel viewPanel;
 
   /**
    * This component displays the derivation tree's JUNG graph.
@@ -107,9 +107,9 @@ class DerivationTreeFrame extends JFrame {
   /**
    * Color to use to render target-side trees.
    */
-  private Color targetColor;
+  private final Color targetColor;
 
-  private JList mainList;
+  private final JList mainList;
 
   /**
    * The default constructor.
@@ -166,7 +166,6 @@ class DerivationTreeFrame extends JFrame {
     controlPanel.add(previousSource, BorderLayout.WEST);
     controlPanel.add(nextSource, BorderLayout.EAST);
     controlPanel.add(informationButton, BorderLayout.CENTER);
-    return;
   }
 
   /**
@@ -177,36 +176,26 @@ class DerivationTreeFrame extends JFrame {
     previousSource = new JButton("<");
     informationButton = new JButton("More Information");
 
-    nextSource.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        int index = mainList.getSelectedIndex();
-        mainList.setSelectedIndex(index + 1);
-        return;
+    nextSource.addActionListener(e -> {
+      int index = mainList.getSelectedIndex();
+      mainList.setSelectedIndex(index + 1);
+    });
+    previousSource.addActionListener(e -> {
+      int index = mainList.getSelectedIndex();
+      if (index > 0) {
+        mainList.setSelectedIndex(index - 1);
       }
     });
-    previousSource.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        int index = mainList.getSelectedIndex();
-        if (index > 0) {
-          mainList.setSelectedIndex(index - 1);
-        }
-        return;
+    informationButton.addActionListener(e -> {
+      JButton source = (JButton) e.getSource();
+      if (informationPanel.isVisible()) {
+        source.setText("More Information");
+        informationPanel.setVisible(false);
+      } else {
+        source.setText("Less Information");
+        informationPanel.setVisible(true);
       }
     });
-    informationButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        JButton source = (JButton) e.getSource();
-        if (informationPanel.isVisible()) {
-          source.setText("More Information");
-          informationPanel.setVisible(false);
-        } else {
-          source.setText("Less Information");
-          informationPanel.setVisible(true);
-        }
-        return;
-      }
-    });
-    return;
   }
 
   /**
@@ -235,7 +224,6 @@ class DerivationTreeFrame extends JFrame {
     dv.revalidate();
     repaint();
     getContentPane().repaint();
-    return;
   }
 
   /**
@@ -248,6 +236,5 @@ class DerivationTreeFrame extends JFrame {
     setTitle(getTitle() + " (fixed)");
     nextSource.setEnabled(false);
     previousSource.setEnabled(false);
-    return;
   }
 }
