@@ -59,7 +59,7 @@ public class Node<Label> {
    */
   public Node(int id) {
     this.id = id;
-    this.outgoingArcs = new ArrayList<Arc<Label>>();
+    this.outgoingArcs = new ArrayList<>();
   }
 
 
@@ -108,22 +108,18 @@ public class Node<Label> {
   public Iterable<Node<Label>> reachableNodes() {
     final Iterator<Arc<Label>> arcIterator = outgoingArcs.iterator();
 
-    return new Iterable<Node<Label>>() {
-      public Iterator<Node<Label>> iterator() {
-        return new Iterator<Node<Label>>() {
+    return () -> new Iterator<Node<Label>>() {
 
-          public boolean hasNext() {
-            return arcIterator.hasNext();
-          }
+      public boolean hasNext() {
+        return arcIterator.hasNext();
+      }
 
-          public Node<Label> next() {
-            return arcIterator.next().getHead();
-          }
+      public Node<Label> next() {
+        return arcIterator.next().getHead();
+      }
 
-          public void remove() {
-            throw new UnsupportedOperationException();
-          }
-        };
+      public void remove() {
+        throw new UnsupportedOperationException();
       }
     };
   }
@@ -138,7 +134,7 @@ public class Node<Label> {
    * @param label Label of the new outgoing arc.
    */
   public void addArc(Node<Label> destination, float weight, Label label) {
-    outgoingArcs.add(new Arc<Label>(this, destination, weight, label));
+    outgoingArcs.add(new Arc<>(this, destination, weight, label));
   }
 
 

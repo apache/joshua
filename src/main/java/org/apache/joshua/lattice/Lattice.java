@@ -59,7 +59,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
   /**
    * List of all nodes in the lattice. Nodes are assumed to be in topological order.
    */
-  private List<Node<Value>> nodes;
+  private final List<Node<Value>> nodes;
 
 
   JoshuaConfiguration config = null;
@@ -95,16 +95,16 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    */
   public Lattice(Value[] linearChain, JoshuaConfiguration config) {
     this.latticeHasAmbiguity = false;
-    this.nodes = new ArrayList<Node<Value>>();
+    this.nodes = new ArrayList<>();
 
-    Node<Value> previous = new Node<Value>(0);
+    Node<Value> previous = new Node<>(0);
     nodes.add(previous);
 
     int i = 1;
 
     for (Value value : linearChain) {
 
-      Node<Value> current = new Node<Value>(i);
+      Node<Value> current = new Node<>(i);
       float cost = 0.0f;
       // if (i > 4) cost = (float)i/1.53432f;
       previous.addArc(current, cost, value);
@@ -151,11 +151,11 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
       integerSentence[i] = new Token(tokens[i], config);
     }
 
-    return new Lattice<Token>(integerSentence, config);
+    return new Lattice<>(integerSentence, config);
   }
 
   public static Lattice<Token> createTokenLatticeFromPLF(String data, JoshuaConfiguration config) {
-    ArrayList<Node<Token>> nodes = new ArrayList<Node<Token>>();
+    ArrayList<Node<Token>> nodes = new ArrayList<>();
 
     // This matches a sequence of tuples, which describe arcs leaving this node
     Pattern nodePattern = Pattern.compile("(.+?)\\(\\s*(\\(.+?\\),\\s*)\\s*\\)(.*)");
@@ -172,7 +172,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
     boolean latticeIsAmbiguous = false;
 
     int nodeID = 0;
-    Node<Token> startNode = new Node<Token>(nodeID);
+    Node<Token> startNode = new Node<>(nodeID);
     nodes.add(startNode);
 
     while (nodeMatcher.matches()) {
@@ -182,13 +182,13 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
 
       nodeID++;
 
-      Node<Token> currentNode = null;
+      Node<Token> currentNode;
       if (nodeID < nodes.size() && nodes.get(nodeID) != null) {
         currentNode = nodes.get(nodeID);
       } else {
-        currentNode = new Node<Token>(nodeID);
+        currentNode = new Node<>(nodeID);
         while (nodeID > nodes.size())
-          nodes.add(new Node<Token>(nodes.size()));
+          nodes.add(new Node<>(nodes.size()));
         nodes.add(currentNode);
       }
 
@@ -207,9 +207,9 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
         if (destinationNodeID < nodes.size() && nodes.get(destinationNodeID) != null) {
           destinationNode = nodes.get(destinationNodeID);
         } else {
-          destinationNode = new Node<Token>(destinationNodeID);
+          destinationNode = new Node<>(destinationNodeID);
           while (destinationNodeID > nodes.size())
-            nodes.add(new Node<Token>(nodes.size()));
+            nodes.add(new Node<>(nodes.size()));
           nodes.add(destinationNode);
         }
 
@@ -234,11 +234,11 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
 
     /* Add </s> as a final state, connect it to the previous end-state */
     nodeID = nodes.get(nodes.size()-1).getNumber() + 1;
-    Node<Token> endNode = new Node<Token>(nodeID);
+    Node<Token> endNode = new Node<>(nodeID);
     nodes.get(nodes.size()-1).addArc(endNode, 0.0f, new Token(Vocabulary.STOP_SYM, config));
     nodes.add(endNode);
 
-    return new Lattice<Token>(nodes, latticeIsAmbiguous, config);
+    return new Lattice<>(nodes, latticeIsAmbiguous, config);
   }
 
   /**
@@ -250,7 +250,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    */
   public static Lattice<String> createStringLatticeFromString(String data, JoshuaConfiguration config) {
 
-    Map<Integer, Node<String>> nodes = new HashMap<Integer, Node<String>>();
+    Map<Integer, Node<String>> nodes = new HashMap<>();
 
     Pattern nodePattern = Pattern.compile("(.+?)\\((\\(.+?\\),)\\)(.*)");
     Pattern arcPattern = Pattern.compile("\\('(.+?)',(\\d+.\\d+),(\\d+)\\),(.*)");
@@ -270,7 +270,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
       if (nodes.containsKey(nodeID)) {
         currentNode = nodes.get(nodeID);
       } else {
-        currentNode = new Node<String>(nodeID);
+        currentNode = new Node<>(nodeID);
         nodes.put(nodeID, currentNode);
       }
 
@@ -287,7 +287,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
         if (nodes.containsKey(destinationNodeID)) {
           destinationNode = nodes.get(destinationNodeID);
         } else {
-          destinationNode = new Node<String>(destinationNodeID);
+          destinationNode = new Node<>(destinationNodeID);
           nodes.put(destinationNodeID, destinationNode);
         }
 
@@ -303,12 +303,12 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
       nodeMatcher = nodePattern.matcher(remainingData);
     }
 
-    List<Node<String>> nodeList = new ArrayList<Node<String>>(nodes.values());
+    List<Node<String>> nodeList = new ArrayList<>(nodes.values());
     Collections.sort(nodeList, new NodeIdentifierComparator());
 
     LOG.debug("Nodelist={}", nodeList);
 
-    return new Lattice<String>(nodeList, config);
+    return new Lattice<>(nodeList, config);
   }
 
   /**
@@ -380,12 +380,11 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    * Note: This method assumes no backward arcs. If there are backward arcs, the returned shortest
    * path costs for that node may not be accurate.
    *
-   * @param nodes A list of nodes which must be in topological order.
    * @return The all-pairs shortest path for all pairs of nodes.
    */
   private ChartSpan<Integer> calculateAllPairsShortestPath() {
 
-    ChartSpan<Integer> distance = new ChartSpan<Integer>(nodes.size() - 1, Integer.MAX_VALUE);
+    ChartSpan<Integer> distance = new ChartSpan<>(nodes.size() - 1, Integer.MAX_VALUE);
     distance.setDiagonal(0);
 
     /* Mark reachability between immediate neighbors */
@@ -426,9 +425,9 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
 
   public static void main(String[] args) {
 
-    List<Node<String>> nodes = new ArrayList<Node<String>>();
+    List<Node<String>> nodes = new ArrayList<>();
     for (int i = 0; i < 4; i++) {
-      nodes.add(new Node<String>(i));
+      nodes.add(new Node<>(i));
     }
 
     nodes.get(0).addArc(nodes.get(1), 1.0f, "x");
@@ -437,7 +436,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
     nodes.get(2).addArc(nodes.get(3), 3.0f, "b");
     nodes.get(2).addArc(nodes.get(3), 5.0f, "c");
 
-    Lattice<String> graph = new Lattice<String>(nodes, null);
+    Lattice<String> graph = new Lattice<>(nodes, null);
 
     System.out.println("Shortest path from 0 to 3: " + graph.getShortestPath(0, 3));
   }
@@ -478,7 +477,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
    */
   public static Lattice<String> createFromString(String data) {
 
-    Map<Integer,Node<String>> nodes = new HashMap<Integer,Node<String>>();
+    Map<Integer,Node<String>> nodes = new HashMap<>();
 
     Pattern nodePattern = Pattern.compile("(.+?)\\((\\(.+?\\),)\\)(.*)");
     Pattern arcPattern = Pattern.compile("\\('(.+?)',(\\d+.\\d+),(\\d+)\\),(.*)");
@@ -498,7 +497,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
       if (nodes.containsKey(nodeID)) {
         currentNode = nodes.get(nodeID);
       } else {
-        currentNode = new Node<String>(nodeID);
+        currentNode = new Node<>(nodeID);
         nodes.put(nodeID, currentNode);
       }
 
@@ -515,7 +514,7 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
         if (nodes.containsKey(destinationNodeID)) {
           destinationNode = nodes.get(destinationNodeID);
         } else {
-          destinationNode = new Node<String>(destinationNodeID);
+          destinationNode = new Node<>(destinationNodeID);
           nodes.put(destinationNodeID, destinationNode);
         }
 
@@ -531,11 +530,11 @@ public class Lattice<Value> implements Iterable<Node<Value>> {
       nodeMatcher = nodePattern.matcher(remainingData);
     }
 
-    List<Node<String>> nodeList = new ArrayList<Node<String>>(nodes.values());
+    List<Node<String>> nodeList = new ArrayList<>(nodes.values());
     Collections.sort(nodeList, new NodeIdentifierComparator());
 
     LOG.debug("Nodelist={}", nodeList);
 
-    return new Lattice<String>(nodeList, new JoshuaConfiguration());
+    return new Lattice<>(nodeList, new JoshuaConfiguration());
   }
 }

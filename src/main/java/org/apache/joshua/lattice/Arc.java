@@ -31,22 +31,22 @@ public class Arc<Label> {
   /**
    * Weight of this arc.
    */
-  private float cost;
+  private final float cost;
 
   /**
    * Node where this arc ends. 
    */
-  private Node<Label> head;
+  private final Node<Label> head;
 
   /**
    * Node where this arc begins.
    */
-  private Node<Label> tail;
+  private final Node<Label> tail;
 
   /**
    * Label associated with this arc.
    */
-  private Label label;
+  private final Label label;
   
   /**
    * Creates an arc with the specified head, tail, cost, and label.
@@ -101,17 +101,13 @@ public class Arc<Label> {
 
   @Override
   public String toString() {
-    StringBuilder s = new StringBuilder();
-
-    s.append(label.toString());
-    s.append("  :  ");
-    s.append(tail.toString());
-    s.append(" ==> ");
-    s.append(head.toString());
-    s.append("  :  ");
-    s.append(cost);
-
-    return s.toString();
+    return label.toString() +
+        "  :  " +
+        tail.toString() +
+        " ==> " +
+        head.toString() +
+        "  :  " +
+        cost;
   }
 
 }
