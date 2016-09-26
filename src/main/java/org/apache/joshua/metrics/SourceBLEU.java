@@ -23,10 +23,10 @@ import java.util.HashMap;
 public class SourceBLEU extends BLEU {
   // We assume that the source for the paraphrasing run is
   // part of the set of references
-  private int sourceReferenceIndex;
+  private final int sourceReferenceIndex;
 
   private int[] sourceWordCount;
-  private boolean useBrevityPenalty;
+  private final boolean useBrevityPenalty;
 
   public SourceBLEU() {
     super();

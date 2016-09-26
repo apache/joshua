@@ -31,8 +31,8 @@ public class MinimumChangeBLEU extends BLEU {
 
   // we assume that the source for the paraphrasing run is
   // part of the set of references
-  private int sourceReferenceIndex;
-  private double thresholdWER;
+  private final int sourceReferenceIndex;
+  private final double thresholdWER;
 
 
   public MinimumChangeBLEU() {
@@ -67,8 +67,8 @@ public class MinimumChangeBLEU extends BLEU {
     HashMap<String, Integer>[] temp_HMA = new HashMap[numSentences];
     maxNgramCounts = temp_HMA;
 
-    String gram = "";
-    int oldCount = 0, nextCount = 0;
+    String gram;
+    int oldCount, nextCount;
 
     for (int i = 0; i < numSentences; ++i) {
       // update counts as necessary from the reference translations

@@ -27,12 +27,12 @@ import org.apache.joshua.util.StreamGobbler;
 
 public class TercomRunner implements Runnable {
   /* non-static data members */
-  private Semaphore blocker;
+  private final Semaphore blocker;
 
-  private String refFileName;
-  private String hypFileName;
-  private String outFileNamePrefix;
-  private int memSize;
+  private final String refFileName;
+  private final String hypFileName;
+  private final String outFileNamePrefix;
+  private final int memSize;
 
   /* static data members */
   private static boolean caseSensitive;

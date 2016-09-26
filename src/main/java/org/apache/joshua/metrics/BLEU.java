@@ -55,13 +55,16 @@ public class BLEU extends EvaluationMetric {
       throw new RuntimeException("Maximum gram length must be positive");
     }
 
-    if (methodStr.equals("closest")) {
+    switch (methodStr) {
+    case "closest":
       setEffLengthMethod(EffectiveLengthMethod.CLOSEST);
-    } else if (methodStr.equals("shortest")) {
+      break;
+    case "shortest":
       setEffLengthMethod(EffectiveLengthMethod.SHORTEST);
       // } else if (methodStr.equals("average")) {
       // effLengthMethod = EffectiveLengthMethod.AVERAGE;
-    } else {
+      break;
+    default:
       LOG.error("Unknown effective length method string {}", methodStr);
       // System.out.println("Should be one of closest, shortest, or average.");
       LOG.error("Should be one of closest or shortest.");
@@ -109,8 +112,8 @@ public class BLEU extends EvaluationMetric {
     HashMap<String, Integer>[] temp_HMA = new HashMap[numSentences];
     maxNgramCounts = temp_HMA;
 
-    String gram = "";
-    int oldCount = 0, nextCount = 0;
+    String gram;
+    int oldCount, nextCount;
 
     for (int i = 0; i < numSentences; ++i) {
       maxNgramCounts[i] = getNgramCountsAll(refSentences[i][0]);
@@ -188,14 +191,12 @@ public class BLEU extends EvaluationMetric {
     for (int n = 1; n <= getMaxGramLength(); ++n) {
 
       int correctGramCount = 0;
-      String gram = "";
-      int candGramCount = 0, maxRefGramCount = 0, clippedCount = 0;
+      String gram;
+      int candGramCount, maxRefGramCount, clippedCount;
 
-      Iterator<String> it = (candCountsArray[n].keySet()).iterator();
-
-      while (it.hasNext()) {
+      for (String s : (candCountsArray[n].keySet())) {
         // for each n-gram type in the candidate
-        gram = it.next();
+        gram = s;
         candGramCount = candCountsArray[n].get(gram);
         // if (maxNgramCounts[i][n].containsKey(gram)) {
         // maxRefGramCount = maxNgramCounts[i][n].get(gram);
@@ -411,7 +412,7 @@ public class BLEU extends EvaluationMetric {
     HashMap<String, Integer>[] ngramCountsArray = new HashMap[1 + getMaxGramLength()];
     ngramCountsArray[0] = null;
     for (int n = 1; n <= getMaxGramLength(); ++n) {
-      ngramCountsArray[n] = new HashMap<String, Integer>();
+      ngramCountsArray[n] = new HashMap<>();
     }
 
     int len = words.length;
@@ -481,7 +482,7 @@ public class BLEU extends EvaluationMetric {
   }
 
   public HashMap<String, Integer> getNgramCountsAll(String[] words) {
-    HashMap<String, Integer> ngramCountsAll = new HashMap<String, Integer>();
+    HashMap<String, Integer> ngramCountsAll = new HashMap<>();
 
     int len = words.length;
     String gram;

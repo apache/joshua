@@ -34,12 +34,12 @@ public class Precis extends BLEU {
 
   // We assume that the source for the paraphrasing run is
   // part of the set of references, this is its index.
-  private int sourceReferenceIndex;
+  private final int sourceReferenceIndex;
 
   // A global target compression rate to achieve
   // if negative, we default to locally aiming for the compression
   // rate given by the (closest) reference compression?
-  private double targetCompressionRate;
+  private final double targetCompressionRate;
 
   // Are we optimizing for character-based compression (as opposed
   // to token-based)?
@@ -112,8 +112,8 @@ public class Precis extends BLEU {
     HashMap<String, Integer>[] temp_HMA = new HashMap[numSentences];
     maxNgramCounts = temp_HMA;
 
-    String gram = "";
-    int oldCount = 0, nextCount = 0;
+    String gram;
+    int oldCount, nextCount;
 
     for (int i = 0; i < numSentences; ++i) {
       // update counts as necessary from the reference translations

@@ -52,21 +52,27 @@ public class TER extends EvaluationMetric {
 
     // for 0-3, default values in tercom-0.7.25 are: nocase, punc, 20, 50
 
-    if (Metric_options[0].equals("case")) {
+    switch (Metric_options[0]) {
+    case "case":
       caseSensitive = true;
-    } else if (Metric_options[0].equals("nocase")) {
+      break;
+    case "nocase":
       caseSensitive = false;
-    } else {
+      break;
+    default:
       String msg = "Unknown case sensitivity string " + Metric_options[0]
           + ". Should be one of case or nocase.";
       throw new RuntimeException(msg);
     }
 
-    if (Metric_options[1].equals("punc")) {
+    switch (Metric_options[1]) {
+    case "punc":
       withPunctuation = true;
-    } else if (Metric_options[1].equals("nopunc")) {
+      break;
+    case "nopunc":
       withPunctuation = false;
-    } else {
+      break;
+    default:
       String msg = "Unknown with-punctuation string " + Metric_options[1]
           + ". Should be one of punc or nopunc.";
       throw new RuntimeException(msg);
@@ -119,7 +125,7 @@ public class TER extends EvaluationMetric {
   }
 
   public double worstPossibleScore() {
-    return (+1.0 / 0.0);
+    return Double.POSITIVE_INFINITY;
   }
 
   public int[] suffStats(String cand_str, int i) {
@@ -176,7 +182,7 @@ public class TER extends EvaluationMetric {
       // 3) Read SS from output file produced by tercom.7.25.jar
 
       BufferedReader inFile = new BufferedReader(new FileReader("TER_out.ter"));
-      String line = "";
+      String line;
 
       line = inFile.readLine(); // skip hyp line
       line = inFile.readLine(); // skip ref line
@@ -283,7 +289,7 @@ public class TER extends EvaluationMetric {
       OutputStreamWriter outStreamWriter = new OutputStreamWriter(outStream, "utf8");
       BufferedWriter outFile = new BufferedWriter(outStreamWriter);
 
-      String line_cand = "";
+      String line_cand;
 
       if (numCands > 0) {
         for (int d = 0; d < numCands; ++d) {
@@ -326,7 +332,7 @@ public class TER extends EvaluationMetric {
       OutputStreamWriter outStreamWriter = new OutputStreamWriter(outStream, "utf8");
       BufferedWriter outFile = new BufferedWriter(outStreamWriter);
 
-      String line_index = "";
+      String line_index;
 
       if (numIndices > 0) {
         for (int d = 0; d < numIndices; ++d) {
@@ -366,7 +372,7 @@ public class TER extends EvaluationMetric {
   }
 
   public int runTercom(String refFileName, String hypFileName, String outFileNamePrefix, int memSize) {
-    int exitValue = -1;
+    int exitValue;
 
     try {
 
@@ -408,7 +414,7 @@ public class TER extends EvaluationMetric {
   public void copySS(String inputFileName, PrintWriter outFile) {
     try {
       BufferedReader inFile = new BufferedReader(new FileReader(inputFileName));
-      String line = "";
+      String line;
 
       line = inFile.readLine(); // skip hyp line
       line = inFile.readLine(); // skip ref line
@@ -434,7 +440,7 @@ public class TER extends EvaluationMetric {
           + " vs. " + suffStatsCount + ") in TER.score(int[])");
     }
 
-    double sc = 0.0;
+    double sc;
 
     sc = stats[0] / (double) stats[1];
 

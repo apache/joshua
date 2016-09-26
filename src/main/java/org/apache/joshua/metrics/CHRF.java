@@ -131,12 +131,12 @@ public class CHRF extends EvaluationMetric {
     HashMap<String, Integer>[] grams = new HashMap[1 + maxGramLength];
     grams[0] = null;
     for (int n = 1; n <= maxGramLength; ++n) {
-      grams[n] = new HashMap<String, Integer>();
+      grams[n] = new HashMap<>();
     }
 
 
     for (int n=1; n<=maxGramLength; n++){
-      String gram = "";
+      String gram;
       for (int i = 0; i < s.length() - n + 1; i++){
           gram = s.substring(i, i+n);
           if(grams[n].containsKey(gram)){
@@ -169,26 +169,23 @@ public class CHRF extends EvaluationMetric {
       int[] to_return = {0,0};
       String gram;
       int cand_grams = 0;
-      int candGramCount = 0, refGramCount = 0;
+      int candGramCount, refGramCount;
       int errors = 0;
 
-        Iterator<String> it = (cand.keySet()).iterator();
-
-        while (it.hasNext()) {
-            gram = it.next();
-            candGramCount = cand.get(gram);
-            cand_grams += candGramCount;
-            if (ref.containsKey(gram)) {
-                refGramCount = ref.get(gram);
-                if(candGramCount>refGramCount){
-                    int error_here = candGramCount - refGramCount;
-                    errors += error_here;
-                }
-            } else {
-                refGramCount = 0;
-                errors += candGramCount;
-            }
+    for (String s : (cand.keySet())) {
+      gram = s;
+      candGramCount = cand.get(gram);
+      cand_grams += candGramCount;
+      if (ref.containsKey(gram)) {
+        refGramCount = ref.get(gram);
+        if (candGramCount > refGramCount) {
+          int error_here = candGramCount - refGramCount;
+          errors += error_here;
         }
+      } else {
+        errors += candGramCount;
+      }
+    }
 
       //System.out.println("  Ngrams not found: " + not_found);
 
@@ -236,7 +233,7 @@ public class CHRF extends EvaluationMetric {
     double[] recalls = new double[maxGramLength+1];
     double[] fs = new double[maxGramLength+1];
     //double[] scs = new double[maxGramLength+1];
-    double totalF = 0, totalSC = 0;
+    double totalF = 0, totalSC;
     double lp = 1;
 
     if (stats.length != suffStatsCount) {

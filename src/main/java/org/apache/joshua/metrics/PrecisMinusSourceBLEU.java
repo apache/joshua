@@ -27,10 +27,10 @@ import java.io.PrintWriter;
 
 public class PrecisMinusSourceBLEU extends EvaluationMetric {
 
-  private Precis myPrecis;
-  private SourceBLEU mySourceBLEU;
+  private final Precis myPrecis;
+  private final SourceBLEU mySourceBLEU;
 
-  private double bleuWeight;
+  private final double bleuWeight;
 
   private int precisCount;
   private int sourceBleuCount;
@@ -142,16 +142,12 @@ public class PrecisMinusSourceBLEU extends EvaluationMetric {
           + " vs. " + suffStatsCount + ") in PrecisMinusSourceBLEU.score(int[])");
     }
 
-    double sc = 0.0;
+    double sc;
 
     int[] stats_Precis = new int[precisCount];
     int[] stats_SourceBLEU = new int[sourceBleuCount];
-    for (int s = 0; s < precisCount; ++s) {
-      stats_Precis[s] = stats[s];
-    }
-    for (int s = 0; s < sourceBleuCount; ++s) {
-      stats_SourceBLEU[s] = stats[s + precisCount];
-    }
+    System.arraycopy(stats, 0, stats_Precis, 0, precisCount);
+    System.arraycopy(stats, 0 + precisCount, stats_SourceBLEU, 0, sourceBleuCount);
 
     double sc_T = myPrecis.score(stats_Precis);
     double sc_B = mySourceBLEU.score(stats_SourceBLEU);
@@ -164,12 +160,8 @@ public class PrecisMinusSourceBLEU extends EvaluationMetric {
   public void printDetailedScore_fromStats(int[] stats, boolean oneLiner) {
     int[] stats_Precis = new int[precisCount];
     int[] stats_SourceBLEU = new int[sourceBleuCount];
-    for (int s = 0; s < precisCount; ++s) {
-      stats_Precis[s] = stats[s];
-    }
-    for (int s = 0; s < sourceBleuCount; ++s) {
-      stats_SourceBLEU[s] = stats[s + precisCount];
-    }
+    System.arraycopy(stats, 0, stats_Precis, 0, precisCount);
+    System.arraycopy(stats, 0 + precisCount, stats_SourceBLEU, 0, sourceBleuCount);
 
     System.out.println("---PRECIS---");
     myPrecis.printDetailedScore_fromStats(stats_Precis, oneLiner);

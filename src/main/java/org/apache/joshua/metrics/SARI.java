@@ -119,8 +119,8 @@ public class SARI extends EvaluationMetric {
     HashMap<String, Integer>[][] temp_HMA = new HashMap[numSentences][maxGramLength];
     refNgramCounts = temp_HMA;
 
-    String gram = "";
-    int oldCount = 0, nextCount = 0;
+    String gram;
+    int oldCount, nextCount;
 
     for (int i = 0; i < numSentences; ++i) {
       refNgramCounts[i] = getNgramCountsArray(refSentences[i][0]);
@@ -133,10 +133,8 @@ public class SARI extends EvaluationMetric {
 
         for (int n = 1; n <= maxGramLength; ++n) {
 
-          Iterator<String> it = (nextNgramCounts[n].keySet()).iterator();
-
-          while (it.hasNext()) {
-            gram = it.next();
+          for (String s : (nextNgramCounts[n].keySet())) {
+            gram = s;
             nextCount = nextNgramCounts[n].get(gram);
 
             if (refNgramCounts[i][n].containsKey(gram)) { // update if necessary
@@ -378,7 +376,7 @@ public class SARI extends EvaluationMetric {
 
   public HashMap<String, Integer> substractHashMap(HashMap<String, Integer> counter1,
       HashMap<String, Integer> counter2) {
-    HashMap<String, Integer> newcounter = new HashMap<String, Integer>();
+    HashMap<String, Integer> newcounter = new HashMap<>();
 
     for (Map.Entry<String, Integer> e : counter1.entrySet()) {
       String ngram = e.getKey();
@@ -394,7 +392,7 @@ public class SARI extends EvaluationMetric {
   // HashMap result = counter1*ratio1 - counter2*ratio2
   public HashMap<String, Integer> substractHashMap(HashMap<String, Integer> counter1,
       HashMap<String, Integer> counter2, int ratio1, int ratio2) {
-    HashMap<String, Integer> newcounter = new HashMap<String, Integer>();
+    HashMap<String, Integer> newcounter = new HashMap<>();
 
     for (Map.Entry<String, Integer> e : counter1.entrySet()) {
       String ngram = e.getKey();
@@ -411,7 +409,7 @@ public class SARI extends EvaluationMetric {
 
   public HashMap<String, Double> divideHashMap(HashMap<String, Integer> counter1,
       HashMap<String, Integer> counter2) {
-    HashMap<String, Double> newcounter = new HashMap<String, Double>();
+    HashMap<String, Double> newcounter = new HashMap<>();
 
     for (Map.Entry<String, Integer> e : counter1.entrySet()) {
       String ngram = e.getKey();
@@ -427,7 +425,7 @@ public class SARI extends EvaluationMetric {
 
   public HashMap<String, Integer> intersectHashMap(HashMap<String, Integer> counter1,
       HashMap<String, Integer> counter2) {
-    HashMap<String, Integer> newcounter = new HashMap<String, Integer>();
+    HashMap<String, Integer> newcounter = new HashMap<>();
 
     for (Map.Entry<String, Integer> e : counter1.entrySet()) {
       String ngram = e.getKey();
@@ -443,7 +441,7 @@ public class SARI extends EvaluationMetric {
   // HashMap result = (counter1*ratio1) & (counter2*ratio2)
   public HashMap<String, Integer> intersectHashMap(HashMap<String, Integer> counter1,
       HashMap<String, Integer> counter2, int ratio1, int ratio2) {
-    HashMap<String, Integer> newcounter = new HashMap<String, Integer>();
+    HashMap<String, Integer> newcounter = new HashMap<>();
 
     for (Map.Entry<String, Integer> e : counter1.entrySet()) {
       String ngram = e.getKey();
@@ -479,7 +477,7 @@ public class SARI extends EvaluationMetric {
     HashMap<String, Integer>[] ngramCountsArray = new HashMap[1 + maxGramLength];
     ngramCountsArray[0] = null;
     for (int n = 1; n <= maxGramLength; ++n) {
-      ngramCountsArray[n] = new HashMap<String, Integer>();
+      ngramCountsArray[n] = new HashMap<>();
     }
 
     int len = words.length;
@@ -549,7 +547,7 @@ public class SARI extends EvaluationMetric {
   }
 
   public HashMap<String, Integer> getNgramCountsAll(String[] words) {
-    HashMap<String, Integer> ngramCountsAll = new HashMap<String, Integer>();
+    HashMap<String, Integer> ngramCountsAll = new HashMap<>();
 
     int len = words.length;
     String gram;
@@ -625,6 +623,6 @@ public class SARI extends EvaluationMetric {
 
   private enum StatIndex {
     KEEPBOTH, KEEPCAND, KEEPREF, DELBOTH, DELCAND, DELREF, ADDBOTH, ADDCAND, ADDREF, KEEPBOTH2
-  };
+  }
 
 }

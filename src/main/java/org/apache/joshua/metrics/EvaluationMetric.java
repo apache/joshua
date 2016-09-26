@@ -53,7 +53,7 @@ public abstract class EvaluationMetric {
 
   /* static (=> also non-abstract) methods */
   public static void set_knownMetrics() {
-    metricOptionCount = new TreeMap<String, Integer>();
+    metricOptionCount = new TreeMap<>();
 
     metricOptionCount.put("BLEU", 2);
     // the "BLEU" metric expects an options array of length 2
@@ -83,44 +83,64 @@ public abstract class EvaluationMetric {
   public static EvaluationMetric getMetric(String metricName, String[] metricOptions) {
     EvaluationMetric retMetric = null;
 
-    if (metricName.equals("BLEU")) {
+    switch (metricName) {
+    case "BLEU":
       retMetric = new BLEU(metricOptions); // the "BLEU" metric corresponds to the BLEU class
-    } else if (metricName.equals("BLEU_SBP")) {
+
+      break;
+    case "BLEU_SBP":
       retMetric = new BLEU_SBP(metricOptions); // the "BLEU_SBP" metric corresponds to the BLEU_SBP
-                                               // class
-    } else if (metricName.equals("01LOSS")) {
+
+      // class
+      break;
+    case "01LOSS":
       retMetric = new ZeroOneLoss(metricOptions); // the "01LOSS" metric corresponds to the
-                                                  // ZeroOneLoss class
-    } else if (metricName.equals("TER")) {
+
+      // ZeroOneLoss class
+      break;
+    case "TER":
       retMetric = new TER(metricOptions); // the "TER" metric corresponds to the TER class
+
       // } else if (metricName.equals("METEOR")) {
       // retMetric = new METEOR(metricOptions); // the "METEOR" metric corresponds to the METEOR
       // class
       // } else if (metricName.equals("RYPT")) {
       // retMetric = new RYPT(metricOptions); // the "RYPT" metric corresponds to the RYPT class
-    } else if (metricName.equals("TER-BLEU")) {
+      break;
+    case "TER-BLEU":
       retMetric = new TERMinusBLEU(metricOptions); // the "TER-BLEU" metric corresponds to the
-                                                   // TERMinusBLEU class
+
+      // TERMinusBLEU class
       // } else if (metricName.equals("WER")) {
       // retMetric = new WordErrorRate(metricOptions); // the "WER" metric corresponds to the
       // WordErrorRate class
-    } else if (metricName.equals("MC_BLEU")) {
+      break;
+    case "MC_BLEU":
       retMetric = new MinimumChangeBLEU(metricOptions); // the "MC_BLEU" metric corresponds to the
-                                                        // ParaphraseBLEU class
-    } else if (metricName.equals("PRECIS")) {
+
+      // ParaphraseBLEU class
+      break;
+    case "PRECIS":
       retMetric = new Precis(metricOptions);
-    } else if (metricName.equals("SRC_BLEU")) {
+      break;
+    case "SRC_BLEU":
       retMetric = new SourceBLEU(metricOptions);
-    } else if (metricName.equals("PRECIS-SRC_BLEU")) {
+      break;
+    case "PRECIS-SRC_BLEU":
       retMetric = new PrecisMinusSourceBLEU(metricOptions);
-    } else if (metricName.equals("GL_BLEU")) {
+      break;
+    case "GL_BLEU":
       retMetric = new GradeLevelBLEU(metricOptions); // the "GL_BLEU" metric corresponds to the
-                                                     // GradeLevelBLEU class
-    } else if (metricName.equals("SARI")) { 
+
+      // GradeLevelBLEU class
+      break;
+    case "SARI":
       retMetric = new SARI(metricOptions);
-    
-    } else if (metricName.equals("CHRF")) {
-        retMetric = new CHRF(metricOptions);
+
+      break;
+    case "CHRF":
+      retMetric = new CHRF(metricOptions);
+      break;
     }
     
     return retMetric;
@@ -145,9 +165,7 @@ public abstract class EvaluationMetric {
   public static void set_refSentences(String[][] refs) {
     refSentences = new String[numSentences][refsPerSen];
     for (int i = 0; i < numSentences; ++i) {
-      for (int r = 0; r < refsPerSen; ++r) {
-        refSentences[i][r] = refs[i][r];
-      }
+      System.arraycopy(refs[i], 0, refSentences[i], 0, refsPerSen);
     }
   }
 
@@ -190,9 +208,7 @@ public abstract class EvaluationMetric {
     int[][] SS = suffStats(SA, IA);
 
     int[] stats = new int[suffStatsCount];
-    for (int s = 0; s < suffStatsCount; ++s) {
-      stats[s] = SS[0][s];
-    }
+    System.arraycopy(SS[0], 0, stats, 0, suffStatsCount);
 
     return score(stats);
   }
@@ -241,9 +257,7 @@ public abstract class EvaluationMetric {
     for (int d = 0; d < candCount; ++d) {
       int[] currStats = suffStats(cand_strings[d], cand_indices[d]);
 
-      for (int s = 0; s < suffStatsCount; ++s) {
-        stats[d][s] = currStats[s];
-      }
+      System.arraycopy(currStats, 0, stats[d], 0, suffStatsCount);
     } // for (d)
 
     return stats;

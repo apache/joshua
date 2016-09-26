@@ -31,7 +31,6 @@ public class METEOR extends EvaluationMetric {
   protected String targetLanguage;
   protected boolean normalize;
   protected boolean keepPunctuation;
-  private int maxComputations;
 
   public METEOR(String[] Metric_options) {
     // M_o[0]: -l language, one of {en,cz,fr,de,es}
@@ -41,27 +40,36 @@ public class METEOR extends EvaluationMetric {
 
     // default in meteor v0.8: en, norm_no, removePunc
 
-    if (Metric_options[0].equals("en")) {
+    switch (Metric_options[0]) {
+    case "en":
       targetLanguage = "en";
-    } else if (Metric_options[0].equals("cz")) {
+      break;
+    case "cz":
       targetLanguage = "cz";
-    } else if (Metric_options[0].equals("fr")) {
+      break;
+    case "fr":
       targetLanguage = "fr";
-    } else if (Metric_options[0].equals("de")) {
+      break;
+    case "de":
       targetLanguage = "de";
-    } else if (Metric_options[0].equals("es")) {
+      break;
+    case "es":
       targetLanguage = "es";
-    } else {
-      String msg = "Unknown language string " + Metric_options[0]
-          + ". Should be one of {en,cz,fr,de,es}.";
+      break;
+    default:
+      String msg =
+          "Unknown language string " + Metric_options[0] + ". Should be one of {en,cz,fr,de,es}.";
       throw new RuntimeException(msg);
     }
 
-    if (Metric_options[1].equals("norm_yes")) {
+    switch (Metric_options[1]) {
+    case "norm_yes":
       normalize = true;
-    } else if (Metric_options[1].equals("norm_no")) {
+      break;
+    case "norm_no":
       normalize = false;
-    } else {
+      break;
+    default:
       String msg = "Unknown normalize string " + Metric_options[1]
           + ". Should be one of norm_yes or norm_no.";
       throw new RuntimeException(msg);
@@ -77,7 +85,7 @@ public class METEOR extends EvaluationMetric {
       throw new RuntimeException(msg);
     }
 
-    maxComputations = Integer.parseInt(Metric_options[3]);
+    int maxComputations = Integer.parseInt(Metric_options[3]);
     if (maxComputations < 1) {
       throw new RuntimeException("Maximum computations must be positive");
     }
@@ -127,8 +135,8 @@ public class METEOR extends EvaluationMetric {
       OutputStreamWriter outStreamWriter = new OutputStreamWriter(outStream, "utf8");
       BufferedWriter outFile = new BufferedWriter(outStreamWriter);
 
-      for (int d = 0; d < candCount; ++d) {
-        writeLine(cand_strings[d], outFile);
+      for (String cand_string : cand_strings) {
+        writeLine(cand_string, outFile);
       }
 
       outFile.close();
@@ -175,7 +183,7 @@ public class METEOR extends EvaluationMetric {
       // 3) Read SS from output file produced by meteor
 
       BufferedReader inFile = new BufferedReader(new FileReader("TER_out.ter"));
-      String line = "";
+      String line;
 
       line = inFile.readLine(); // skip hyp line
       line = inFile.readLine(); // skip ref line

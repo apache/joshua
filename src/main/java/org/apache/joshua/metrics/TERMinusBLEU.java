@@ -27,8 +27,8 @@ import java.io.PrintWriter;
 
 public class TERMinusBLEU extends EvaluationMetric {
   // individual components
-  private TER myTER;
-  private BLEU myBLEU;
+  private final TER myTER;
+  private final BLEU myBLEU;
   private int suffStatsCount_TER;
   private int suffStatsCount_BLEU;
 
@@ -63,7 +63,7 @@ public class TERMinusBLEU extends EvaluationMetric {
   }
 
   public double worstPossibleScore() {
-    return (+1.0 / 0.0);
+    return Double.POSITIVE_INFINITY;
   }
 
   public int[] suffStats(String cand_str, int i) {
@@ -154,16 +154,12 @@ public class TERMinusBLEU extends EvaluationMetric {
           + " vs. " + suffStatsCount + ") in TERMinusBLEU.score(int[])");
     }
 
-    double sc = 0.0;
+    double sc;
 
     int[] stats_TER = new int[suffStatsCount_TER];
     int[] stats_BLEU = new int[suffStatsCount_BLEU];
-    for (int s = 0; s < suffStatsCount_TER; ++s) {
-      stats_TER[s] = stats[s];
-    }
-    for (int s = 0; s < suffStatsCount_BLEU; ++s) {
-      stats_BLEU[s] = stats[s + suffStatsCount_TER];
-    }
+    System.arraycopy(stats, 0, stats_TER, 0, suffStatsCount_TER);
+    System.arraycopy(stats, 0 + suffStatsCount_TER, stats_BLEU, 0, suffStatsCount_BLEU);
 
     double sc_T = myTER.score(stats_TER);
     double sc_B = myBLEU.score(stats_BLEU);
@@ -176,12 +172,8 @@ public class TERMinusBLEU extends EvaluationMetric {
   public void printDetailedScore_fromStats(int[] stats, boolean oneLiner) {
     int[] stats_TER = new int[suffStatsCount_TER];
     int[] stats_BLEU = new int[suffStatsCount_BLEU];
-    for (int s = 0; s < suffStatsCount_TER; ++s) {
-      stats_TER[s] = stats[s];
-    }
-    for (int s = 0; s < suffStatsCount_BLEU; ++s) {
-      stats_BLEU[s] = stats[s + suffStatsCount_TER];
-    }
+    System.arraycopy(stats, 0, stats_TER, 0, suffStatsCount_TER);
+    System.arraycopy(stats, 0 + suffStatsCount_TER, stats_BLEU, 0, suffStatsCount_BLEU);
 
     System.out.println("---TER---");
     myTER.printDetailedScore_fromStats(stats_TER, oneLiner);
