@@ -28,9 +28,9 @@ package org.apache.joshua.subsample;
  * @version $LastChangedDate$
  */
 public class Alignment {
-  private short eLength;
-  private short fLength;
-  private M2 aligned;
+  private final short eLength;
+  private final short fLength;
+  private final M2 aligned;
 
   public Alignment(short fLength, short eLength, String alignments) {
     this.eLength = eLength;
@@ -55,7 +55,7 @@ public class Alignment {
 
 
   public String toString() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     for (short i = 0; i < fLength; i++)
       for (short j = 0; j < eLength; j++)
         if (aligned.get(i, j)) sb.append(i).append('-').append(j).append(' ');
@@ -69,8 +69,8 @@ public class Alignment {
 
   /** A (short,short)->boolean map for storing alignments. */
   private final static class M2 {
-    private short width;
-    private boolean[] bits;
+    private final short width;
+    private final boolean[] bits;
 
     public M2(short f, short e) {
       width = f;

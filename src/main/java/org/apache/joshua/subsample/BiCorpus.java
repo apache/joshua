@@ -64,7 +64,7 @@ public class BiCorpus implements Iterable<PhrasePair> {
    * @throws IndexOutOfBoundsException todo
    */
   public BiCorpus(String foreignFileName, String nativeFileName, String alignmentFileName)
-      throws IOException, IllegalArgumentException, IndexOutOfBoundsException {
+      throws IllegalArgumentException, IndexOutOfBoundsException {
     this.foreignFileName = foreignFileName;
     this.nativeFileName = nativeFileName;
     this.alignmentFileName = alignmentFileName;
@@ -73,9 +73,7 @@ public class BiCorpus implements Iterable<PhrasePair> {
     // Of course, that will be checked for in each iteration
     //
     // We write it this way to avoid warnings from the foreach style loop
-    Iterator<PhrasePair> it = iterator();
-    while (it.hasNext()) {
-      it.next();
+    for (PhrasePair phrasePair : this) {
     }
   }
 
@@ -95,9 +93,9 @@ public class BiCorpus implements Iterable<PhrasePair> {
    */
   @SuppressWarnings("resource")
   public Iterator<PhrasePair> iterator() {
-    PhraseReader closureRF = null;
-    PhraseReader closureRE = null;
-    BufferedReader closureRA = null;
+    PhraseReader closureRF;
+    PhraseReader closureRE;
+    BufferedReader closureRA;
     try {
       closureRF = new PhraseReader(new FileReader(this.foreignFileName), (byte) 1);
       closureRE = new PhraseReader(new FileReader(this.nativeFileName), (byte) 0);
@@ -134,7 +132,7 @@ public class BiCorpus implements Iterable<PhrasePair> {
         if (this.hasNext()) {
           Phrase f = this.nextForeignPhrase;
 
-          Phrase e = null;
+          Phrase e;
           try {
             e = re.readPhrase();
           } catch (IOException ioe) {
@@ -146,7 +144,7 @@ public class BiCorpus implements Iterable<PhrasePair> {
           } else {
             if (e.size() != 0 && f.size() != 0) {
               if (null != ra) {
-                String line = null;
+                String line;
                 try {
                   line = ra.readLine();
                 } catch (IOException ioe) {

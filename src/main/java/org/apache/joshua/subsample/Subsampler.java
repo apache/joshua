@@ -48,9 +48,9 @@ public class Subsampler {
   private static final Logger LOG = LoggerFactory.getLogger(Subsampler.class);
 
   protected Map<Phrase, Integer> ngramCounts;
-  protected int maxN;
-  protected int targetCount;
-  protected int maxSubsample = 1500000;
+  protected final int maxN;
+  protected final int targetCount;
+  protected final int maxSubsample = 1500000;
 
   protected static final int MAX_SENTENCE_LENGTH = 100;
   protected static final int MIN_RATIO_LENGTH = 10;
@@ -63,22 +63,19 @@ public class Subsampler {
   }
 
   private HashMap<Phrase, Integer> loadNgrams(String[] files) throws IOException {
-    HashMap<Phrase, Integer> map = new HashMap<Phrase, Integer>();
+    HashMap<Phrase, Integer> map = new HashMap<>();
     for (String fn : files) {
       LOG.debug("Loading test set from {}", fn);
 
-      PhraseReader reader = new PhraseReader(new FileReader(fn), (byte) 1);
       Phrase phrase;
       int lineCount = 0;
-      try {
+      try (PhraseReader reader = new PhraseReader(new FileReader(fn), (byte) 1)) {
         while ((phrase = reader.readPhrase()) != null) {
           lineCount++;
           List<Phrase> ngrams = phrase.getSubPhrases(this.maxN);
           for (Phrase ngram : ngrams)
             map.put(ngram, 0);
         }
-      } finally {
-        reader.close();
       }
       LOG.debug("Processed {} lines in {}", lineCount, fn);
     }
@@ -121,7 +118,7 @@ public class Subsampler {
       BiCorpusFactory bcFactory) throws IOException {
     try {
       // Read filenames into a list
-      List<String> files = new ArrayList<String>();
+      List<String> files = new ArrayList<>();
       {
         FileReader fr = null;
         BufferedReader br = null;
@@ -148,7 +145,7 @@ public class Subsampler {
 
         BiCorpus bc = bcFactory.fromFiles(f);
 
-        HashMap<PhrasePair, PhrasePair> set = new HashMap<PhrasePair, PhrasePair>();
+        HashMap<PhrasePair, PhrasePair> set = new HashMap<>();
 
         int binsize = 10; // BUG: Magic-Number
         int max_k = MAX_SENTENCE_LENGTH / binsize;
@@ -181,8 +178,6 @@ public class Subsampler {
         // does profiling show it helps? We only
         // do it once per file, so it's not a
         // performance blackhole.
-        set = null;
-        bc = null;
         System.gc();
       }
     } finally {

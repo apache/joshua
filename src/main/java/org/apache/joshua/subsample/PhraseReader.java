@@ -32,7 +32,7 @@ import org.apache.joshua.corpus.BasicPhrase;
  * @version $LastChangedDate$
  */
 public class PhraseReader extends BufferedReader {
-  private byte language;
+  private final byte language;
 
   public PhraseReader(Reader r, byte language) {
     super(r);
