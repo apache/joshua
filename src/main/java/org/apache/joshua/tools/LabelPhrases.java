@@ -60,7 +60,7 @@ public class LabelPhrases {
       System.exit(-1);
     }
 
-    try (LineReader phrase_reader = new LineReader(phrase_file_name);) {
+    try (LineReader phrase_reader = new LineReader(phrase_file_name)) {
       while (phrase_reader.ready()) {
         String line = phrase_reader.readLine();
 

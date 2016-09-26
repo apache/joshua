@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -36,38 +37,34 @@ public class GrammarPackerCli {
   
   // Input grammars to be packed (with a joint vocabulary)
   @Option(name = "--grammars", aliases = {"-g", "-i"}, handler = StringArrayOptionHandler.class, required = true, usage = "list of grammars to pack (jointly, i.e. they share the same vocabulary)")
-  private List<String> grammars = new ArrayList<>();
+  private final List<String> grammars = new ArrayList<>();
   
   // Output grammars
   @Option(name = "--outputs", aliases = {"-p", "-o"}, handler = StringArrayOptionHandler.class, required = true, usage = "output directories of packed grammars.")
-  private List<String> outputs = new ArrayList<>();
+  private final List<String> outputs = new ArrayList<>();
   
   // Output grammars
   @Option(name = "--alignments", aliases = {"-a", "--fa"}, handler = StringArrayOptionHandler.class, required = false, usage = "alignment files")
-  private List<String> alignments_filenames = new ArrayList<>();
+  private final List<String> alignments_filenames = new ArrayList<>();
   
   // Config filename
   @Option(name = "--config_file", aliases = {"-c"}, required = false, usage = "(optional) packing configuration file")
   private String config_filename;
   
   @Option(name = "--dump_files", aliases = {"-d"}, handler = StringArrayOptionHandler.class, usage = "(optional) dump feature stats to file")
-  private List<String> featuredump_filenames = new ArrayList<>();
+  private final List<String> featuredump_filenames = new ArrayList<>();
   
   @Option(name = "--ga", usage = "whether alignments are present in the grammar")
-  private boolean grammar_alignments = false;
+  private final boolean grammar_alignments = false;
   
   @Option(name = "--slice_size", aliases = {"-s"}, required = false, usage = "approximate slice size in # of rules (default=1000000)")
-  private int slice_size = 1000000;
+  private final int slice_size = 1000000;
   
   
   private void run() throws IOException {
 
     final List<String> missingFilenames = new ArrayList<>(grammars.size());
-    for (final String g : grammars) {
-      if (!new File(g).exists()) {
-        missingFilenames.add(g);
-      }
-    }
+    missingFilenames.addAll(grammars.stream().filter(g -> !new File(g).exists()).collect(Collectors.toList()));
     if (!missingFilenames.isEmpty()) {
       throw new IOException("Input grammar files not found: " + missingFilenames.toString());
     }
@@ -81,28 +78,20 @@ public class GrammarPackerCli {
         throw new IOException("Must provide an output directory for each grammar");
       }
       final List<String> existingOutputs = new ArrayList<>(outputs.size());
-      for (final String o : outputs) {
-        if (new File(o).exists()) {
-          existingOutputs.add(o);
-        }
-      }
+      existingOutputs
+          .addAll(outputs.stream().filter(o -> new File(o).exists()).collect(Collectors.toList()));
       if (!existingOutputs.isEmpty()) {
         throw new IOException("These output directories already exist (will not overwrite): " + existingOutputs.toString());
       }
     }
     if (outputs.isEmpty()) {
-      for (final String g : grammars) {
-        outputs.add(g + ".packed");
-      }
+      outputs.addAll(grammars.stream().map(g -> g + ".packed").collect(Collectors.toList()));
     }
     
     if (!alignments_filenames.isEmpty()) {
       final List<String> missingAlignmentFiles = new ArrayList<>(alignments_filenames.size());
-      for (final String a : alignments_filenames) {
-        if (!new File(a).exists()) {
-          missingAlignmentFiles.add(a);
-        }
-      }
+      missingAlignmentFiles.addAll(alignments_filenames.stream().filter(a -> !new File(a).exists())
+          .collect(Collectors.toList()));
       if (!missingAlignmentFiles.isEmpty()) {
         throw new IOException("Alignment files not found: " + missingAlignmentFiles.toString());
       }

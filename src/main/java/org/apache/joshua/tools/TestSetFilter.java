@@ -78,14 +78,19 @@ public class TestSetFilter {
   }
 
   public void setFilter(String type) {
-    if (type.equals("fast"))
+    switch (type) {
+    case "fast":
       filter = new FastFilter();
-    else if (type.equals("exact"))
+      break;
+    case "exact":
       filter = new ExactFilter();
-    else if (type.equals("loose"))
+      break;
+    case "loose":
       filter = new LooseFilter();
-    else
+      break;
+    default:
       throw new RuntimeException(String.format("Invalid filter type '%s'", type));
+    }
   }
 
   public void setRuleLength(int value) {
@@ -143,17 +148,17 @@ public class TestSetFilter {
 
   private interface Filter {
     /* Tell the filter about a sentence in the test set being filtered to */
-    public void addSentence(String sentence);
+    void addSentence(String sentence);
 
     /* Returns true if the filter permits the specified source side */
-    public boolean permits(String sourceSide);
+    boolean permits(String sourceSide);
   }
 
   private class FastFilter implements Filter {
     private Set<String> ngrams = null;
 
     public FastFilter() {
-      ngrams = new HashSet<String>();
+      ngrams = new HashSet<>();
     }
 
     @Override
@@ -192,7 +197,7 @@ public class TestSetFilter {
     List<String> testSentences = null;
 
     public LooseFilter() {
-      testSentences = new ArrayList<String>();
+      testSentences = new ArrayList<>();
     }
 
     @Override
@@ -225,13 +230,13 @@ public class TestSetFilter {
    */
   private class ExactFilter implements Filter {
     private FastFilter fastFilter = null;
-    private Map<String, Set<Integer>> sentencesByWord;
+    private final Map<String, Set<Integer>> sentencesByWord;
     List<String> testSentences = null;
 
     public ExactFilter() {
       fastFilter = new FastFilter();
-      sentencesByWord = new HashMap<String, Set<Integer>>();
-      testSentences = new ArrayList<String>();
+      sentencesByWord = new HashMap<>();
+      testSentences = new ArrayList<>();
     }
 
     @Override
@@ -276,7 +281,7 @@ public class TestSetFilter {
       String[] tokens = sentence.split("\\s+");
       for (String t : tokens) {
         if (! sentencesByWord.containsKey(t))
-          sentencesByWord.put(t, new HashSet<Integer>());
+          sentencesByWord.put(t, new HashSet<>());
         sentencesByWord.get(t).add(index);
       }
     }
@@ -287,7 +292,7 @@ public class TestSetFilter {
         if (!token.matches(NT_REGEX)) {
           if (sentencesByWord.containsKey(token)) {
             if (sentences == null)
-              sentences = new HashSet<Integer>(sentencesByWord.get(token));
+              sentences = new HashSet<>(sentencesByWord.get(token));
             else
               sentences.retainAll(sentencesByWord.get(token));
           }
@@ -317,25 +322,26 @@ public class TestSetFilter {
     TestSetFilter filter = new TestSetFilter();
 
     for (int i = 0; i < argv.length; i++) {
-      if (argv[i].equals("-v")) {
+      switch (argv[i]) {
+      case "-v":
         filter.setVerbose(true);
         continue;
-      } else if (argv[i].equals("-p")) {
+      case "-p":
         filter.setParallel(true);
         continue;
-      } else if (argv[i].equals("-g")) {
+      case "-g":
         grammarFile = argv[++i];
         continue;
-      } else if (argv[i].equals("-f")) {
+      case "-f":
         filter.setFilter("fast");
         continue;
-      } else if (argv[i].equals("-e")) {
+      case "-e":
         filter.setFilter("exact");
         continue;
-      } else if (argv[i].equals("-l")) {
+      case "-l":
         filter.setFilter("loose");
         continue;
-      } else if (argv[i].equals("-n")) {
+      case "-n":
         filter.setRuleLength(Integer.parseInt(argv[i + 1]));
         i++;
         continue;
@@ -352,7 +358,7 @@ public class TestSetFilter {
     }
     try(LineReader reader = (grammarFile != null)
         ? new LineReader(grammarFile, filter.verbose)
-        : new LineReader(System.in);) {
+        : new LineReader(System.in)) {
       for (String rule: reader) {
         rulesIn++;
 
@@ -378,7 +384,6 @@ public class TestSetFilter {
         System.err.println("[INFO] cached queries: " + filter.cached);
       }
 
-      return;
     }
   }
 }

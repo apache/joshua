@@ -74,17 +74,17 @@ public class GrammarPacker {
   public static final int VERSION = 4;
 
   // Size limit for slice in bytes.
-  private static int DATA_SIZE_LIMIT = (int) (Integer.MAX_VALUE * 0.8);
+  private static final int DATA_SIZE_LIMIT = (int) (Integer.MAX_VALUE * 0.8);
   // Estimated average number of feature entries for one rule.
-  private static int DATA_SIZE_ESTIMATE = 20;
+  private static final int DATA_SIZE_ESTIMATE = 20;
 
   private static final String SOURCE_WORDS_SEPARATOR = " ||| ";
 
   // Output directory name.
-  private String output;
+  private final String output;
 
   // Input grammar to be packed.
-  private String grammar;
+  private final String grammar;
 
   public String getGrammar() {
     return grammar;
@@ -97,16 +97,16 @@ public class GrammarPacker {
   // Approximate maximum size of a slice in number of rules
   private int approximateMaximumSliceSize;
 
-  private boolean labeled;
+  private final boolean labeled;
 
-  private boolean packAlignments;
-  private boolean grammarAlignments;
-  private String alignments;
+  private final boolean packAlignments;
+  private final boolean grammarAlignments;
+  private final String alignments;
 
-  private FeatureTypeAnalyzer types;
+  private final FeatureTypeAnalyzer types;
   private EncoderConfiguration encoderConfig;
 
-  private String dump;
+  private final String dump;
 
   private int max_source_len;
 
@@ -149,7 +149,7 @@ public class GrammarPacker {
   }
 
   private void readConfig(String config_filename) throws IOException {
-    try(LineReader reader = new LineReader(config_filename);) {
+    try(LineReader reader = new LineReader(config_filename)) {
       while (reader.hasNext()) {
         // Clean up line, chop comments off and skip if the result is empty.
         String line = reader.next().trim();
@@ -231,12 +231,11 @@ public class GrammarPacker {
   /**
    * Returns a reader that turns whatever file format is found into Hiero grammar rules.
    *
-   * @param grammarFile
-   * @return
+   * @return a Hiero format reader
    * @throws IOException
    */
   private HieroFormatReader getGrammarReader() throws IOException {
-    try (LineReader reader = new LineReader(grammar);) {
+    try (LineReader reader = new LineReader(grammar)) {
       String line = reader.next();
       if (line.startsWith("[")) {
         return new HieroFormatReader(grammar);
@@ -248,7 +247,7 @@ public class GrammarPacker {
 
   /**
    * This first pass over the grammar
-   * @param reader
+   * @param reader the Hiero format reader
    */
   private void explore(HieroFormatReader reader) {
 
@@ -272,15 +271,15 @@ public class GrammarPacker {
       // appropriate encoder.
       int feature_counter = 0;
       String[] features = rule.getFeatureString().split("\\s+");
-      for (int f = 0; f < features.length; ++f) {
-        if (features[f].contains("=")) {
-          String[] fe = features[f].split("=");
+      for (String feature : features) {
+        if (feature.contains("=")) {
+          String[] fe = feature.split("=");
           if (fe[0].equals("Alignment"))
             continue;
           types.observe(Vocabulary.id(fe[0]), Float.parseFloat(fe[1]));
         } else {
-          types.observe(Vocabulary.id(String.valueOf(feature_counter++)),
-              Float.parseFloat(features[f]));
+          types
+              .observe(Vocabulary.id(String.valueOf(feature_counter++)), Float.parseFloat(feature));
         }
       }
     }
@@ -303,15 +302,15 @@ public class GrammarPacker {
     // to determine when flushing is possible
     String prev_first_two_source_words = null;
 
-    PackingTrie<SourceValue> source_trie = new PackingTrie<SourceValue>();
-    PackingTrie<TargetValue> target_trie = new PackingTrie<TargetValue>();
+    PackingTrie<SourceValue> source_trie = new PackingTrie<>();
+    PackingTrie<TargetValue> target_trie = new PackingTrie<>();
     FeatureBuffer feature_buffer = new FeatureBuffer();
 
     AlignmentBuffer alignment_buffer = null;
     if (packAlignments)
       alignment_buffer = new AlignmentBuffer();
 
-    TreeMap<Integer, Float> features = new TreeMap<Integer, Float>();
+    TreeMap<Integer, Float> features = new TreeMap<>();
     for (Rule rule: grammarReader) {
       counter++;
       slice_counter++;
@@ -383,8 +382,7 @@ public class GrammarPacker {
       // to pass on to the source trie node.
       features.clear();
       int feature_count = 0;
-      for (int f = 0; f < feature_entries.length; ++f) {
-        String feature_entry = feature_entries[f];
+      for (String feature_entry : feature_entries) {
         int feature_id;
         float feature_value;
         if (feature_entry.contains("=")) {
@@ -444,10 +442,10 @@ public class GrammarPacker {
    * stores the rule's lhs as well as links to the target and feature stream. The feature stream is
    * prompted to write out a block
    *
-   * @param source_trie
-   * @param target_trie
-   * @param feature_buffer
-   * @param id
+   * @param source_trie the source Trie
+   * @param target_trie the target Trie
+   * @param feature_buffer the feature buffer
+   * @param id the id of the piece of grammar to flush
    * @throws IOException
    */
   private void flush(PackingTrie<SourceValue> source_trie,
@@ -473,14 +471,14 @@ public class GrammarPacker {
 
     // Add trie root into queue, set target position to 0 and set cumulated
     // size to size of trie root.
-    target_queue = new LinkedList<PackingTrie<TargetValue>>();
+    target_queue = new LinkedList<>();
     target_queue.add(target_trie);
     target_position = 0;
 
     // Target lookup table for trie levels.
     int current_level_size = 1;
     int next_level_size = 0;
-    ArrayList<Integer> target_lookup = new ArrayList<Integer>();
+    ArrayList<Integer> target_lookup = new ArrayList<>();
 
     // Packing loop for upwards-pointing target trie.
     while (!target_queue.isEmpty()) {
@@ -518,7 +516,7 @@ public class GrammarPacker {
     target_lookup_stream.close();
 
     // Setting up for source and data writing.
-    source_queue = new LinkedList<PackingTrie<SourceValue>>();
+    source_queue = new LinkedList<>();
     source_queue.add(source_trie);
     source_position = source_trie.size(true, false);
     source_trie.address = target_position;
@@ -594,8 +592,8 @@ public class GrammarPacker {
     int symbol;
     PackingTrie<D> parent;
 
-    TreeMap<Integer, PackingTrie<D>> children;
-    List<D> values;
+    final TreeMap<Integer, PackingTrie<D>> children;
+    final List<D> values;
 
     int address;
 
@@ -605,8 +603,8 @@ public class GrammarPacker {
       symbol = 0;
       parent = null;
 
-      children = new TreeMap<Integer, PackingTrie<D>>();
-      values = new ArrayList<D>();
+      children = new TreeMap<>();
+      values = new ArrayList<>();
     }
 
     PackingTrie(PackingTrie<D> parent, int symbol) {
@@ -625,7 +623,7 @@ public class GrammarPacker {
       else {
         PackingTrie<D> child = children.get(path[index]);
         if (child == null) {
-          child = new PackingTrie<D>(this, path[index]);
+          child = new PackingTrie<>(this, path[index]);
           children.put(path[index], child);
         }
         child.add(path, index + 1, value);
@@ -696,7 +694,7 @@ public class GrammarPacker {
   }
 
   class TargetValue implements PackingTrieValue {
-    SourceValue parent;
+    final SourceValue parent;
 
     TargetValue(SourceValue parent) {
       this.parent = parent;
@@ -712,14 +710,14 @@ public class GrammarPacker {
     private byte[] backing;
     protected ByteBuffer buffer;
 
-    protected ArrayList<Integer> memoryLookup;
+    protected final ArrayList<Integer> memoryLookup;
     protected int totalSize;
-    protected ArrayList<Integer> onDiskOrder;
+    protected final ArrayList<Integer> onDiskOrder;
 
-    PackingBuffer() throws IOException {
+    PackingBuffer() {
       allocate();
-      memoryLookup = new ArrayList<Integer>();
-      onDiskOrder = new ArrayList<Integer>();
+      memoryLookup = new ArrayList<>();
+      onDiskOrder = new ArrayList<>();
       totalSize = 0;
     }
 
@@ -735,7 +733,7 @@ public class GrammarPacker {
     protected void reallocate() {
       if (backing.length == Integer.MAX_VALUE)
         return;
-      long attempted_length = backing.length * 2l;
+      long attempted_length = backing.length * 2L;
       int new_length;
       // Detect overflow.
       if (attempted_length >= Integer.MAX_VALUE)
@@ -904,11 +902,11 @@ public class GrammarPacker {
   }
 
   class PackingFileTuple implements Comparable<PackingFileTuple> {
-    private File sourceFile;
-    private File targetLookupFile;
-    private File targetFile;
+    private final File sourceFile;
+    private final File targetLookupFile;
+    private final File targetFile;
 
-    private File featureFile;
+    private final File featureFile;
     private File alignmentFile;
 
     PackingFileTuple(String prefix) {
