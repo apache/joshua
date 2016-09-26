@@ -59,7 +59,6 @@ public class BiCorpus implements Iterable<PhrasePair> {
    * @param foreignFileName todo
    * @param nativeFileName todo
    * @param alignmentFileName todo
-   * @throws IOException todo
    * @throws IllegalArgumentException todo
    * @throws IndexOutOfBoundsException todo
    */
