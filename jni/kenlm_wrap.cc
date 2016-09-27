@@ -76,11 +76,10 @@ class EqualIndex : public std::binary_function<StateIndex, StateIndex, bool> {
 typedef std::unordered_set<StateIndex, HashIndex, EqualIndex> Lookup;
 
 /**
- * A Chart bundles together a unordered_multimap that maps ChartState signatures to a single
- * object instantiated using a pool. This allows duplicate states to avoid allocating separate
- * state objects at multiple places throughout a sentence, and also allows state to be shared
- * across KenLMs for the same sentence.  Multimap is used to avoid hash collisions which can
- * return incorrect results, and cause out-of-bounds lookups when multiple KenLMs are in use.
+ * A Chart bundles together a vector holding CharStates and an unordered_set of StateIndexes
+ * which provides a mapping between StateIndexes and the positions of ChartStates in the vector.
+ * This allows for duplicate states to avoid allocating separate state objects at multiple places
+ * throughout a sentence.
  */
 class Chart {
   public:
@@ -148,7 +147,7 @@ public:
   virtual float ProbString(jint * const begin, jint * const end,
       jint start) const = 0;
 
-  virtual float EstimateRule(const Chart &chart) const = 0;
+  virtual float EstimateRule(jlong *begin, jlong *end) const = 0;
 
   virtual uint8_t Order() const = 0;
 
@@ -202,7 +201,7 @@ public:
 
   float ProbRule(lm::ngram::ChartState& state, const Chart &chart) const {
 
-    // By convention the first long in the ngramBuffer denots the size of the buffer
+    // By convention the first long in the ngramBuffer denotes the size of the buffer
     long* begin = chart.ngramBuffer_ + 1;
     long* end = begin + *chart.ngramBuffer_;
 
@@ -229,12 +228,7 @@ public:
     return ruleScore.Finish();
   }
 
-  float EstimateRule(const Chart &chart) const {
-
-    // By convention the first long in the ngramBuffer denotes the size of the buffer
-    long* begin = chart.ngramBuffer_ + 1;
-    long* end = begin + *chart.ngramBuffer_;
-
+  float EstimateRule(jlong * const begin, jlong * const end) const {
     if (begin == end) return 0.0;
     lm::ngram::ChartState nullState;
     lm::ngram::RuleScore<Model> ruleScore(m_, nullState);
@@ -477,11 +471,15 @@ JNIEXPORT jlong JNICALL Java_org_apache_joshua_decoder_ff_lm_KenLM_probRule(
 }
 
 JNIEXPORT jfloat JNICALL Java_org_apache_joshua_decoder_ff_lm_KenLM_estimateRule(
-  JNIEnv *env, jclass, jlong pointer, jlong chartPtr) {
+  JNIEnv *env, jclass, jlong pointer, jlongArray arr) {
+  jint length = env->GetArrayLength(arr);
+  // GCC only.
+  jlong values[length];
+  env->GetLongArrayRegion(arr, 0, length, values);
 
   // Compute the probability
-  Chart* chart = reinterpret_cast<Chart*>(chartPtr);
-  return reinterpret_cast<const VirtualBase*>(pointer)->EstimateRule(*chart);
+  return reinterpret_cast<const VirtualBase*>(pointer)->EstimateRule(values,
+      values + length);
 }
 
 } // extern

@@ -21,12 +21,14 @@ package org.apache.joshua.decoder.ff.lm;
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.KenLMPool;
 import org.apache.joshua.decoder.ff.state_maintenance.KenLMState;
-import org.apache.joshua.util.Constants;
 import org.apache.joshua.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
+import static org.apache.joshua.util.Constants.LONG_SIZE_IN_BYTES;
 
 /**
  * JNI wrapper for KenLM. This version of KenLM supports two use cases, implemented by the separate
@@ -88,7 +90,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
 
   private static native long probRule(long ptr, long pool);
 
-  private static native float estimateRule(long ptr, long poolWrapper);
+  private static native float estimateRule(long ptr, long words[]);
 
   private static native float probString(long ptr, int words[], int start);
 
@@ -107,9 +109,8 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
   }
 
   public KenLMPool createLMPool() {
-    ByteBuffer ngramBuffer = ByteBuffer.allocateDirect(MAX_TARGET_LENGTH *
-            Constants.LONG_SIZE_IN_BYTES);
-    ngramBuffer.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+    ByteBuffer ngramBuffer = ByteBuffer.allocateDirect(MAX_TARGET_LENGTH * LONG_SIZE_IN_BYTES);
+    ngramBuffer.order(LITTLE_ENDIAN);
     long pool = createPool(ngramBuffer);
     return new KenLMPool(pool, this, ngramBuffer);
   }
@@ -158,11 +159,18 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
    * needed so KenLM knows which memory pool to use. When finished, it returns the updated KenLM
    * state and the LM probability incurred along this rule.
    *
+   * @param words       array of words
    * @param poolWrapper an object that wraps a pool reference returned from KenLM createPool
    * @return the updated {@link org.apache.joshua.decoder.ff.lm.KenLM.StateProbPair} e.g.
    * KenLM state and the LM probability incurred along this rule
    */
-  public StateProbPair probRule(KenLMPool poolWrapper) {
+  public StateProbPair probRule(long[] words, KenLMPool poolWrapper) {
+
+    poolWrapper.setBufferLength(words.length);
+    for (int i = 0; i < words.length; i++) {
+      poolWrapper.writeIdToBuffer(i, words[i]);
+    }
+
     long packedResult = probRule(pointer, poolWrapper.getPool());
     int state = (int) (packedResult >> 32);
     float probVal = Float.intBitsToFloat((int) packedResult);
@@ -174,12 +182,13 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
    * Public facing function that estimates the cost of a rule, which value is used for sorting
    * rules during cube pruning.
    *
+   * @param words array of words
    * @return the estimated cost of the rule (the (partial) n-gram probabilities of all words in the rule)
    */
-  public float estimateRule(KenLMPool poolWrapper) {
+  public float estimateRule(long[] words) {
     float estimate = 0.0f;
     try {
-      estimate = estimateRule(pointer, poolWrapper.getPool());
+      estimate = estimateRule(pointer, words);
     } catch (NoSuchMethodError e) {
       throw new RuntimeException(e);
     }
@@ -249,11 +258,12 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
   }
 
   /**
-   * Inner class used to hold the results returned from KenLM with left-state minimization.
+   * Inner class used to hold the results returned from KenLM with left-state minimization. Note
+   * that inner classes have to be static to be accessible from the JNI!
    */
   public static class StateProbPair {
-    public KenLMState state = null;
-    public float prob = 0.0f;
+    public final KenLMState state;
+    public final float prob;
 
     public StateProbPair(long state, float prob) {
       this.state = new KenLMState(state);
