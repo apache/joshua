@@ -15,14 +15,14 @@ import static org.apache.joshua.util.Constants.LONG_SIZE_IN_BYTES;
  * @author Kellen Sunderland
  */
 
-public class KenLMPool implements AutoCloseable {
+public abstract class LmPool implements AutoCloseable {
 
   private final long pool;
   private final KenLM languageModel;
   private final ByteBuffer ngramBuffer;
   private boolean released = false;
 
-  public KenLMPool(long pool, KenLM languageModel, ByteBuffer ngramBuffer) {
+  public LmPool(long pool, KenLM languageModel, ByteBuffer ngramBuffer) {
     this.pool = pool;
     this.languageModel = languageModel;
     this.ngramBuffer = ngramBuffer;

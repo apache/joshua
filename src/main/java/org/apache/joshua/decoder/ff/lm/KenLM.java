@@ -18,8 +18,9 @@
  */
 package org.apache.joshua.decoder.ff.lm;
 
+import javafx.scene.Parent;
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.KenLMPool;
+import org.apache.joshua.decoder.LmPool;
 import org.apache.joshua.decoder.ff.state_maintenance.KenLMState;
 import org.apache.joshua.util.FormatUtils;
 import org.slf4j.Logger;
@@ -108,11 +109,11 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
     }
   }
 
-  public KenLMPool createLMPool() {
+  public LmPool createLMPool() {
     ByteBuffer ngramBuffer = ByteBuffer.allocateDirect(MAX_TARGET_LENGTH * LONG_SIZE_IN_BYTES);
     ngramBuffer.order(LITTLE_ENDIAN);
     long pool = createPool(ngramBuffer);
-    return new KenLMPool(pool, this, ngramBuffer);
+    return new KenLMPool(pool, ngramBuffer);
   }
 
   public void destroyLMPool(long pointer) {
@@ -164,7 +165,7 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
    * @return the updated {@link org.apache.joshua.decoder.ff.lm.KenLM.StateProbPair} e.g.
    * KenLM state and the LM probability incurred along this rule
    */
-  public StateProbPair probRule(long[] words, KenLMPool poolWrapper) {
+  public StateProbPair probRule(long[] words, LmPool poolWrapper) {
 
     poolWrapper.setBufferLength(words.length);
     for (int i = 0; i < words.length; i++) {
@@ -271,4 +272,9 @@ public class KenLM implements NGramLanguageModel, Comparable<KenLM> {
     }
   }
 
+  private class KenLMPool extends LmPool {
+    protected KenLMPool(long pool, ByteBuffer ngramBuffer) {
+      super(pool, KenLM.this, ngramBuffer);
+    }
+  }
 }
