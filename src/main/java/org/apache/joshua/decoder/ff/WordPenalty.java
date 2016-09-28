@@ -72,7 +72,7 @@ public final class WordPenalty extends StatelessFF {
   }
 
   @Override
-  public float estimateCost(Rule rule, Sentence sentence) {
+  public float estimateCost(Rule rule) {
     if (rule != null)
       return weights.getDense(denseFeatureIndex) * OMEGA * (rule.getEnglish().length - rule.getArity());
     return 0.0f;

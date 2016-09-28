@@ -19,7 +19,7 @@
 package org.apache.joshua.system;
 
 import org.apache.joshua.corpus.Vocabulary;
-import org.apache.joshua.decoder.KenLMPool;
+import org.apache.joshua.decoder.LmPool;
 import org.apache.joshua.decoder.ff.lm.KenLM;
 import org.apache.joshua.util.io.KenLmTestUtil;
 import org.testng.annotations.AfterMethod;
@@ -94,12 +94,12 @@ public class KenLmTest {
     long[] longIds = new long[ids.length];
 
     for (int i = 0; i < words.length; i++) {
-      longIds[i] = ids[i];
+      longIds[i] = Vocabulary.id(words[i]);
     }
 
     // WHEN
     KenLM.StateProbPair result;
-    try (KenLMPool poolPointer = kenLm.createLMPool()) {
+    try (LmPool poolPointer = kenLm.createLMPool()) {
       result = kenLm.probRule(longIds, poolPointer);
     }
 

@@ -21,20 +21,16 @@ package org.apache.joshua.decoder.segment_file;
 import static org.apache.joshua.util.FormatUtils.addSentenceMarkers;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
-import org.apache.joshua.decoder.KenLMPool;
 import org.apache.joshua.decoder.LanguageModelStateManager;
 import org.apache.joshua.decoder.ff.tm.Grammar;
 import org.apache.joshua.lattice.Arc;

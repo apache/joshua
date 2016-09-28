@@ -377,7 +377,7 @@ public class Rule implements Comparator<Rule>, Comparable<Rule> {
 
 //      LOG.debug("estimateCost({} ;; {})", getFrenchWords(), getEnglishWords());
       for (FeatureFunction ff : models) {
-        float val = ff.estimateCost(this, null);
+        float val = ff.estimateCost(this);
 //        LOG.debug("  FEATURE {} -> {}", ff.getName(), val);
         this.estimatedCost += val; 
       }

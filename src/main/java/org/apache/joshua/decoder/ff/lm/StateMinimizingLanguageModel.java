@@ -25,7 +25,7 @@ import java.util.UUID;
 
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.JoshuaConfiguration;
-import org.apache.joshua.decoder.KenLMPool;
+import org.apache.joshua.decoder.LmPool;
 import org.apache.joshua.decoder.chart_parser.SourcePath;
 import org.apache.joshua.decoder.ff.FeatureVector;
 import org.apache.joshua.decoder.ff.lm.KenLM.StateProbPair;
@@ -72,7 +72,7 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
    * efficiently than the default {@link LanguageModelFF} class.
    */
   @Override
-  public float estimateCost(Rule rule, Sentence sentence) {
+  public float estimateCost(Rule rule) {
 
     int[] ruleWords = getRuleIds(rule);
 
@@ -115,7 +115,7 @@ public class StateMinimizingLanguageModel extends LanguageModelFF {
      // map to ken lm ids
     final long[] words = mapToKenLmIds(ruleWords, tailNodes, false);
 
-    KenLMPool statePool = sentence.getStateManager().getStatePool(languageModelPoolId, (KenLM)
+    LmPool statePool = sentence.getStateManager().getStatePool(languageModelPoolId, (KenLM)
             languageModel);
 
     // Get the probability of applying the rule and the new state

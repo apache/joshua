@@ -205,7 +205,7 @@ public class EdgePhraseSimilarityFF extends StatefulFF implements SourceDependen
   }
 
   @Override
-  public float estimateCost(Rule rule, Sentence sentence) {
+  public float estimateCost(Rule rule) {
     return 0.0f;
   }
 

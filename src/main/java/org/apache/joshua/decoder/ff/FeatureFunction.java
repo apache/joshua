@@ -253,7 +253,7 @@ public abstract class FeatureFunction {
    * @param sentence {@link org.apache.joshua.lattice.Lattice} input
    * @return the *weighted* cost of applying the feature.
    */
-  public abstract float estimateCost(Rule rule, Sentence sentence);
+  public abstract float estimateCost(Rule rule);
 
   /**
    * This feature is called to produce a *weighted estimate* of the future cost

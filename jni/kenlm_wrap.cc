@@ -76,15 +76,16 @@ class EqualIndex : public std::binary_function<StateIndex, StateIndex, bool> {
 typedef std::unordered_set<StateIndex, HashIndex, EqualIndex> Lookup;
 
 /**
- * A Chart bundles together a unordered_multimap that maps ChartState signatures to a single
- * object instantiated using a pool. This allows duplicate states to avoid allocating separate
- * state objects at multiple places throughout a sentence, and also allows state to be shared
- * across KenLMs for the same sentence.  Multimap is used to avoid hash collisions which can
- * return incorrect results, and cause out-of-bounds lookups when multiple KenLMs are in use.
+ * A Chart bundles together a vector holding CharStates and an unordered_set of StateIndexes
+ * which provides a mapping between StateIndexes and the positions of ChartStates in the vector.
+ * This allows for duplicate states to avoid allocating separate state objects at multiple places
+ * throughout a sentence.
  */
 class Chart {
   public:
-    Chart() : lookup_(1000, HashIndex(vec_), EqualIndex(vec_)) {}
+    Chart(long* ngramBuffer) : 
+    ngramBuffer_(ngramBuffer),
+    lookup_(1000, HashIndex(vec_), EqualIndex(vec_)) {}
 
     StateIndex Intern(const lm::ngram::ChartState &state) {
       vec_.push_back(state);
@@ -99,6 +100,7 @@ class Chart {
     const lm::ngram::ChartState &InterpretState(StateIndex index) const {
       return vec_[index - 1];
     }
+    long* ngramBuffer_;
 
   private:
     StateVector vec_;
@@ -140,7 +142,7 @@ public:
 
   virtual bool IsKnownWordIndex(const lm::WordIndex& id) const = 0;
 
-  virtual float ProbRule(jlong *begin, jlong *end, lm::ngram::ChartState& state, const Chart &chart) const = 0;
+  virtual float ProbRule(lm::ngram::ChartState& state, const Chart &chart) const = 0;
 
   virtual float ProbString(jint * const begin, jint * const end,
       jint start) const = 0;
@@ -197,7 +199,12 @@ public:
       return id != m_.GetVocabulary().NotFound();
   }
 
-  float ProbRule(jlong * const begin, jlong * const end, lm::ngram::ChartState& state, const Chart &chart) const {
+  float ProbRule(lm::ngram::ChartState& state, const Chart &chart) const {
+
+    // By convention the first long in the ngramBuffer denotes the size of the buffer
+    long* begin = chart.ngramBuffer_ + 1;
+    long* end = begin + *chart.ngramBuffer_;
+
     if (begin == end) return 0.0;
     lm::ngram::RuleScore<Model> ruleScore(m_, state);
 
@@ -351,8 +358,10 @@ JNIEXPORT void JNICALL Java_org_apache_joshua_decoder_ff_lm_KenLM_destroy(
 }
 
 JNIEXPORT jlong JNICALL Java_org_apache_joshua_decoder_ff_lm_KenLM_createPool(
-    JNIEnv *env, jclass) {
-  return reinterpret_cast<long>(new Chart());
+    JNIEnv *env, jclass, jobject arr) {
+  jlong* ngramBuffer = (jlong*)env->GetDirectBufferAddress(arr);
+  Chart *newChart = new Chart(ngramBuffer);
+  return reinterpret_cast<long>(newChart);
 }
 
 JNIEXPORT void JNICALL Java_org_apache_joshua_decoder_ff_lm_KenLM_destroyPool(
@@ -449,20 +458,14 @@ union FloatConverter {
 };
 
 JNIEXPORT jlong JNICALL Java_org_apache_joshua_decoder_ff_lm_KenLM_probRule(
-  JNIEnv *env, jclass, jlong pointer, jlong chartPtr, jlongArray arr) {
-
-  jint length = env->GetArrayLength(arr);
-  // GCC only.
-  jlong values[length];
-  env->GetLongArrayRegion(arr, 0, length, values);
+  JNIEnv *env, jclass, jlong pointer, jlong chartPtr) {
 
   // Compute the probability
   lm::ngram::ChartState outState;
   const VirtualBase *base = reinterpret_cast<const VirtualBase*>(pointer);
   Chart* chart = reinterpret_cast<Chart*>(chartPtr);
   FloatConverter prob;
-  prob.f = base->ProbRule(values, values + length, outState, *chart);
-
+  prob.f = base->ProbRule(outState, *chart);
   StateIndex index = chart->Intern(outState);
   return static_cast<uint64_t>(index) << 32 | static_cast<uint64_t>(prob.i);
 }

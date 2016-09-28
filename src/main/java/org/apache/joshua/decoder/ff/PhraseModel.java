@@ -85,7 +85,7 @@ public class PhraseModel extends StatelessFF {
    * functions.
    */
   @Override
-  public float estimateCost(final Rule rule, Sentence sentence) {
+  public float estimateCost(final Rule rule) {
 
     if (rule != null && rule.getOwner().equals(ownerID)) {
       if (rule.getPrecomputableCost() <= Float.NEGATIVE_INFINITY)
