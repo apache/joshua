@@ -56,13 +56,14 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This code was originally written by Yuan Cao, who copied the MERT code to produce this file.
+ *
+ * For more information @see <a href="http://www.jmlr.org/papers/v12/duchi11a.html">AdaGrad</a>.
  */
-
 public class AdaGradCore {
 
   private static final Logger LOG = LoggerFactory.getLogger(AdaGradCore.class);
-  private final static double NegInf = (-1.0 / 0.0);
-  private final static double PosInf = (+1.0 / 0.0);
+  private final static double NegInf = Double.NEGATIVE_INFINITY;
+  private final static double PosInf = Double.POSITIVE_INFINITY;
   private final static double epsilon = 1.0 / 1000000;
   private final static DecimalFormat f4 = new DecimalFormat("###0.0000");
 
