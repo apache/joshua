@@ -25,7 +25,7 @@
   </parent>
   <groupId>org.apache.joshua</groupId>
   <artifactId>joshua</artifactId>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
   <version>6.1-SNAPSHOT</version>
   <name>Apache Joshua Machine Translation Toolkit</name>
   <description>Joshua is an open-source statistical machine
@@ -141,6 +141,21 @@
     </pluginManagement>
 
     <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Export-Package>org.apache.joshua.decoder</Export-Package>
+            <Import-Package>
+              com.google.common.*;version="[15,20)",
+              com.google.gson.*;version="[2.3.0,2.9.0)",
+            </Import-Package>
+            <Embed-Dependency>berkeleylm,args4j</Embed-Dependency>
+          </instructions>
+        </configuration>
+      </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
@@ -296,5 +311,12 @@
       <version>2.0.52-beta</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.annotation</artifactId>
+      <version>6.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
 </project>
