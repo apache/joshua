@@ -1,0 +1,84 @@
+Apache Joshua Language Pack
+===========================
+
+Thanks for downloading the Apache Joshua language pack for <SOURCE>--<TARGET>.
+
+Please see the "Quick Start" section below to learn how to run the
+language pack. Additional runtime options can be found in the "Runtime
+Options" section. For complete documentation, please visit the Joshua
+website, https://joshua.apache.org/
+
+For information on the data used to construct this language pack,
+please see the CREDITS file, and to see its performance on a range of
+different publicly available test sets, see BENCHMARKS.
+
+This language pack was released on <DATE>.
+
+Quick Start
+-----------
+To run the language pack, invoke the command
+
+    joshua [[JOSHUA] OPTIONS ... ]
+
+The Joshua decoder will start running, accepting input from STDIN and writing to
+STDOUT. Joshua expects its input in the form of a single sentence per line. Each
+sentence should first be piped through `prepare.sh`, which normalizes and
+tokenizes the input. 
+
+    cat sentences.txt | prepare.sh | joshua > output.txt
+
+Joshua can also be run in server mode, implementing either a direct TCP-IP
+interface, or implementing a Google-translate style RESTful API. To run Joshua as a TCP-IP server, add the option
+
+    joshua -server-port 5674
+
+You can then connect directly to the socket using nc or telnet:
+
+    cat sentences.txt | prepare.sh | nc localhost 5674 > output.txt
+
+You can set the RESTful interface by also passing '-server-type http':
+
+    joshua -server-port 5674 -server-type http
+
+The RESTful interface is used when running the browser demo (see web/index.html)
+or when using the Joshua Translation Engine.
+
+Runtime options
+---------------
+By default, the language pack runs with a single thread and with options set to
+balance speed and accuracy. These and many other runtime options can be changed
+with the following arguments and parameters to the Joshua invocation
+demonstrated above.
+
+-  `-threads N`
+
+   N is the number of simultaneous decoding threads to launch. If this option is
+   omitted from the command line and the configuration file, the default number of
+   threads, which is 1, will be used.
+
+   Decoded outputs are assembled in order and Joshua has to hold on to the
+   complete target hypergraph until it is ready to be processed for output, so too
+   many simultaneous threads could result in lots of memory usage if a long
+   sentence results in many sentences being queued up. We have run Joshua with as
+   many as 48 threads without any problems of this kind, but it’s useful to keep
+   in the back of your mind.
+
+-  `-pop-limit N`
+
+   This controls how many hypotheses Joshua explores. You can make Joshua faster
+   (but less accurate) by reducing N, and you can make it more accurate (but
+   slower) by increasing N. We suggest values of N as low as 5 and as high as
+   1000. The default is 100.
+
+-  `-output-format "formatting string"
+
+   Specify the output-format variable, which is interpolated for the following
+   variables:
+
+       %i : the 0-indexed input sentence number
+       %s : the best translation, lower-cased and tokenized
+       %c : the model cost
+       %f : the values of the features of the best translation
+       %S : the best translation, denormalized and re-cased
+
+   The default value is "%S".
