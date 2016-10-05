@@ -1,7 +1,11 @@
 Apache Joshua Language Pack
 ===========================
 
-Thanks for downloading the Apache Joshua language pack for <SOURCE>--<TARGET>.
+Thanks for downloading the Apache Joshua language pack for
+<SOURCE>--<TARGET>. This language pack provides a machine translation
+system for automatically translating sentences from <SOURCE> to
+sentences in <TARGET>. Joshua language packs have no external
+dependencies, and can be run straight from the provided JAR file.
 
 Please see the "Quick Start" section below to learn how to run the
 language pack. Additional runtime options can be found in the "Runtime
