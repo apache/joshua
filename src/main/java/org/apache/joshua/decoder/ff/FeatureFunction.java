@@ -249,7 +249,6 @@ public abstract class FeatureFunction {
    * compute();
    * 
    * @param rule the rule to compute an estimated cost on 
-   * @param sentence the current input sentence
    * @return the *weighted* cost of applying the feature.
    */
   public abstract float estimateCost(Rule rule);
