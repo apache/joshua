@@ -20,30 +20,31 @@ if [[ -z $4 ]]; then
     exit 1
 fi
 
-JOSHUA=$(dirname $0/../..)
+set -u
+set -e
+
+JOSHUA=$(dirname $0)/../..
 date=$(date +%Y-%m-%d)
-dest=$langpair/releases/apache-joshua-$langpair-$date
+dest=releases/apache-joshua-$langpair-$date
 source=$(echo $langpair | cut -d- -f1)
 target=$(echo $langpair | cut -d- -f2)
 
 # Create the jar file
-(cd $JOSHUA && mvn compile assembly:single)
+(cd $JOSHUA && mvn clean compile assembly:single)
 
 # Copy over critical infrastructure files
-[[ ! -d "$dest/target" ]] && mkdir "$dest/target"
-[[ ! -d "$dest/bin" ]] && mkdir "$dest/bin"
+[[ ! -d "$dest/target" ]] && mkdir -p "$dest/target"
+[[ ! -d "$dest/bin" ]] && mkdir -p "$dest/bin"
 cp $JOSHUA/target/joshua-*-jar-with-dependencies.jar $dest/target
-cp $JOSHUA/bin/joshua $dest/bin
 
 # Copy over the web demonstration
-cp -a $JOSHUA/demo web
+cp -a $JOSHUA/demo $dest/web
 
 # Create the bundle
 # ... --copy-config-options "-lower-case true -project-case true"
-$JOSHUA/scripts/support/run_bundler.py \
+$JOSHUA/scripts/language-pack/copy_model.py \
     --force \
     --verbose \
-    --root $langpair/$modelno \
     --copy-config-options \
       '-top-n 1 -output-format %S -mark-oovs false -lowercase true -projectcase true' \
     $config \
