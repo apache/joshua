@@ -45,8 +45,7 @@ import org.apache.joshua.decoder.segment_file.Sentence;
  * feature function is to compute the features that are fired in different
  * circumstances and then return the inner product of those features with the
  * weight vector. Feature functions can also produce estimates of their future
- * cost (via {@link org.apache.joshua.decoder.ff.FeatureFunction#estimateCost(Rule, Sentence)}); 
- * these values are not used in computing the
+ * cost (via estimateCost(Rule, Sentence)}); these values are not used in computing the
  * score, but are only used for sorting rules during cube pruning. The
  * individual features produced by each template should have globally unique
  * names; a good convention is to prefix each feature with the name of the
@@ -249,11 +248,11 @@ public abstract class FeatureFunction {
    * sorting. Later, the real cost of this feature function is called via
    * compute();
    * 
-   * @param rule {@link org.apache.joshua.decoder.ff.tm.Rule} to be utilized within computation
-   * @param sentence {@link org.apache.joshua.lattice.Lattice} input
+   * @param rule the rule to compute an estimated cost on 
+   * @param sentence the current input sentence
    * @return the *weighted* cost of applying the feature.
    */
-  public abstract float estimateCost(Rule rule);
+  public abstract float estimateCost(Rule rule, Sentence sentence);
 
   /**
    * This feature is called to produce a *weighted estimate* of the future cost
