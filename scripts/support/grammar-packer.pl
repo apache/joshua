@@ -30,8 +30,9 @@ my %opts = (
   m => '8g',      # amount of memory to give the packer
   T => '/tmp',    # location of temporary space
   v => 0,         # verbose
+  s => 0,         # grammars have already been UNIX sorted, skip sorting
 );
-getopts("am:T:vg:o:", \%opts) || die usage();
+getopts("am:T:vg:o:s", \%opts) || die usage();
 die usage() if (@ARGV);
 
 my $JOSHUA = $ENV{JOSHUA} or die "you must defined \$JOSHUA";
@@ -64,18 +65,25 @@ foreach my $grammar (@grammars) {
     exit 1;
   }
 
-  # Sort the grammar or phrase table
-  my $name = basename($grammar);
-  my (undef,$sorted_grammar) = tempfile("${name}XXXX", DIR => $opts{T}, UNLINK => 1);
-  print STDERR "Sorting grammar to $sorted_grammar...\n" if $opts{v};
+  if ($opts{s}) {
+    # The user *swears* the grammars are already sorted! Trust her.
+    print STDERR "You claim the grammars are already sorted. Okay, I'll believe you!\n";
+    push(@sorted_grammars, $grammar);
 
-  # regular grammar
-  if (system("$CAT $grammar | sed 's/ ||| /\t/g' | LC_ALL=C sort -t'\t' -k2,2 -k3,3 --buffer-size=$opts{m} -T $opts{T} | sed 's/\t/ ||| /g' | gzip -9n > $sorted_grammar")) {
-    print STDERR "* FATAL: Couldn't sort the grammar (not enough memory? short on tmp space?)\n";
-    exit 2;
+  } else {
+    # Sort the grammar or phrase table
+    my $name = basename($grammar);
+    my (undef,$sorted_grammar) = tempfile("${name}XXXX", DIR => $opts{T}, UNLINK => 1);
+    print STDERR "Sorting grammar to $sorted_grammar...\n" if $opts{v};
+
+    # regular grammar
+    if (system("$CAT $grammar | sed 's/ ||| /\t/g' | LC_ALL=C sort -t'\t' -k2,2 -k3,3 --buffer-size=$opts{m} -T $opts{T} | sed 's/\t/ ||| /g' | gzip -9n > $sorted_grammar")) {
+      print STDERR "* FATAL: Couldn't sort the grammar (not enough memory? short on tmp space?)\n";
+      exit 2;
+    }
+
+    push(@sorted_grammars, $sorted_grammar);
   }
-
-  push(@sorted_grammars, $sorted_grammar);
 }
 
 
@@ -92,5 +100,7 @@ if ($retval == 0) {
   map { unlink($_) } @sorted_grammars;
 } else {
   print STDERR "* FATAL: Couldn't pack the grammar.\n";
+  print STDERR "* Copying sorted grammars ($grammars) to current directory.\n";
+  system("cp $grammars .");
   exit 1;
 }
