@@ -116,7 +116,7 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
   protected GrammarReader<Rule> createReader(String format, String grammarFile) throws IOException {
 
     if (grammarFile != null) {
-      if ("hiero".equals(format) || "thrax".equals(format)) {
+      if ("hiero".equals(format) || "thrax".equals(format) || "phrase".equals(format)) {
         return new HieroFormatReader(grammarFile);
       } else if ("moses".equals(format)) {
         return new MosesFormatReader(grammarFile);
