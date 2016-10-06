@@ -145,7 +145,7 @@ my $HADOOP_MEM = "4g";
 my $PARSER_MEM = "2g";
 
 # memory available for building the language model
-my $BUILDLM_MEM = "2G";
+my $BUILDLM_MEM = "8G";
 
 # Memory available for packing the grammar.
 my $PACKER_MEM = "8g";
