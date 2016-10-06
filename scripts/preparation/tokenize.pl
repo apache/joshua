@@ -8,13 +8,23 @@ binmode(STDOUT, ":encoding(utf8)");
 
 use warnings;
 use strict;
-
-my $mydir = "$ENV{JOSHUA}/scripts/training/nonbreaking_prefixes";
+use File::Basename qw/dirname/;
 
 my %NONBREAKING_PREFIX = ();
 my $language = "en";
 my $QUIET = 1;
 my $HELP = 0;
+my $PREFIX_DIR = find_nonbreaking_prefixes();
+
+sub find_nonbreaking_prefixes {
+  # look in the following locations until you find one
+  my @prefixes = ( dirname($0), "$ENV{JOSHUA}/scripts/preparation" );
+  foreach my $prefix (@prefixes) {
+    my $path = "$prefix/nonbreaking_prefixes";
+    return $path if -e $path;
+  }
+  return "";
+}
 
 my $use_penn_treebank_tokenization = 1;
 
@@ -25,10 +35,11 @@ while (@ARGV) {
 	/^-l$/ && ($language = shift, next);
 	/^-v$/ && ($QUIET = 0, next);
 	/^-h$/ && ($HELP = 1, next);
+  /^-p$/ && ($PREFIX_DIR = shift, next);
 }
 
 if ($HELP) {
-	print "Usage ./tokenizer.perl (-l [en|de|...]) < textfile > tokenizedfile\n";
+	print "Usage ./tokenize.pl (-l [en|de|...]) < textfile > tokenizedfile\n";
 	exit;
 }
 if (!$QUIET) {
@@ -246,13 +257,13 @@ sub tokenize {
 sub load_prefixes {
 	my ($language, $PREFIX_REF) = @_;
 	
-	my $prefixfile = "$mydir/nonbreaking_prefix.$language";
+	my $prefixfile = "$PREFIX_DIR/nonbreaking_prefix.$language";
 	
 	#default back to English if we don't have a language-specific prefix file
 	if (!(-e $prefixfile)) {
-		$prefixfile = "$mydir/nonbreaking_prefix.en";
+		$prefixfile = "$PREFIX_DIR/nonbreaking_prefix.en";
 		print STDERR "WARNING: No known abbreviations for language '$language', attempting fall-back to English version...\n";
-		die ("ERROR: No abbreviations files found in $mydir\n") unless (-e $prefixfile);
+		die ("ERROR: No abbreviations files found in $PREFIX_DIR\n") unless (-e $prefixfile);
 	}
 	
 	if (-e "$prefixfile") {
