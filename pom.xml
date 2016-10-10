@@ -117,6 +117,7 @@
   <modules>
     <module>joshua-core</module>
     <module>joshua-web</module>
+    <module>joshua-osgi</module>
   </modules>
 
   <dependencyManagement>
