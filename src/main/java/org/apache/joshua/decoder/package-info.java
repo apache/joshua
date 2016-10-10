@@ -23,4 +23,7 @@
  * of any actual decoding algorithm. Rather, such code is in 
  * child packages of this package.
  */
+@Version("0.1.0")
 package org.apache.joshua.decoder;
+
+import org.osgi.annotation.versioning.Version;
