@@ -117,7 +117,7 @@ public class Translation {
           if (joshuaConfiguration.topN == 0) {
 
             /* construct Viterbi output */
-            final String best = getViterbiString(hypergraph);
+            final String best = removeSentenceMarkers(getViterbiString(hypergraph));
 
             LOG.info("Translation {}: {} {}", source.id(), hypergraph.goalNode.getScore(), best);
 
