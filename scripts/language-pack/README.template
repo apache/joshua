@@ -1,8 +1,8 @@
 Apache Joshua Language Pack
 ===========================
 
-Thanks for downloading the Apache Joshua language pack for
-<SOURCE>--<TARGET>. This language pack provides a machine translation
+Thanks for downloading the Apache Joshua <SOURCE>--<TARGET>
+language pack. This language pack provides a machine translation
 system for automatically translating sentences from <SOURCE> to
 sentences in <TARGET>. Joshua language packs have no external
 dependencies, and can be run straight from the provided JAR file.
@@ -22,17 +22,21 @@ Quick Start
 -----------
 To run the language pack, invoke the command
 
-    joshua [[JOSHUA] OPTIONS ... ]
+    joshua [OPTIONS ...]
 
 The Joshua decoder will start running, accepting input from STDIN and writing to
 STDOUT. Joshua expects its input in the form of a single sentence per line. Each
 sentence should first be piped through `prepare.sh`, which normalizes and
-tokenizes the input. 
+tokenizes the input for the language pack's source language.
 
     cat sentences.txt | prepare.sh | joshua > output.txt
 
-Joshua can also be run in server mode, implementing either a direct TCP-IP
-interface, or implementing a Google-translate style RESTful API. To run Joshua as a TCP-IP server, add the option
+It takes some time (sometimes as much as a minute) to load all of the models
+into memory, which means there is high latency from startup until the first
+translation. To reduce this time, Joshua can also be run in server mode,
+implementing either a direct TCP-IP interface, or implementing a
+Google-translate style RESTful API. To run Joshua as a TCP-IP server, add the
+option
 
     joshua -server-port 5674
 
@@ -53,6 +57,10 @@ By default, the language pack runs with a single thread and with options set to
 balance speed and accuracy. These and many other runtime options can be changed
 with the following arguments and parameters to the Joshua invocation
 demonstrated above.
+
+- `-v 1`
+
+   Be more verbose in output.
 
 -  `-threads N`
 

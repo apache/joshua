@@ -54,8 +54,9 @@ FILE_TYPE_TOKENS = ['lm', 'tm']
 FILE_TYPE_OPTIONS = ['-path', '-lm_file']
 
 OUTPUT_CONFIG_FILE_NAME = 'joshua.config'
-BUNDLE_RUNNER_FILE_NAME = 'joshua'
-BUNDLE_RUNNER_TEXT = """#!/bin/bash
+
+def bundle_runner_text(mem):
+    text = """#!/bin/bash
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -85,7 +86,7 @@ NUM_ARGS=0
 E_OPTERROR=1
 
 ## memory usage; default is 4 GB
-mem=4g
+mem=%s
 
 if [[ $1 == "-m" ]]; then
     mem=$2
@@ -102,8 +103,10 @@ exec java -mx${mem} \
     -Dfile.encoding=utf8 \
     -Djava.library.path=./lib \
     -cp ./target/joshua-*-jar-with-dependencies.jar \
-    org.apache.joshua.decoder.JoshuaDecoder -c joshua.config "$@"
-"""
+    org.apache.joshua.decoder.JoshuaDecoder -c joshua.config -v 0 "$@"
+""" % mem
+
+    return text
 
 
 LineParts = namedtuple('LineParts', ['config', 'comment'])
@@ -369,8 +372,8 @@ def handle_args(clargs):
              ' \'-top-n 0 -output-format %%S -mark-oovs false\''
     )
     parser.add_argument(
-        '--server-port', dest='server_port', type=int, default=5674,
-        help='specify the port to be used when running Joshua as a server'
+        '-m', '--mem', default='4g',
+        help='default amount of memory for Joshua. Defaults to 4g'
     )
     parser.add_argument(
         '-v', '--verbose', action='store_true',
@@ -489,7 +492,7 @@ def collect_operations(opts):
     # Write the scripts that run Joshua using the configuration and
     # resource in the bundle, and make their mode world-readable, and
     # world-executable.
-    for file_name, file_text in [[BUNDLE_RUNNER_FILE_NAME, BUNDLE_RUNNER_TEXT],]:
+    for file_name, file_text in [['joshua', bundle_runner_text(opts.mem)],]:
         path = os.path.join(opts.dest_dir, file_name)
         operations.append(
             (write_string_to_file, (path, file_text),
