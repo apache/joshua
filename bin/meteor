@@ -24,4 +24,9 @@ output=$1
 reference=$2
 lang=$3
 
+
+if [[ ! -e $reference ]]; then
+  reference=$reference.0
+fi
+
 java -Xmx2G -jar $METEOR/meteor-*.jar $output $reference -l $lang
