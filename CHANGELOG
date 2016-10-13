@@ -1,10 +1,23 @@
-6.1 (TBD)
+6.1 (October 14, 2016)
 =========
 
-- Phrase-based decoder has been rewritten to use glue rules, instead of adding a preterminal
-  to all phrase-based rules. This means that phrase-based grammars can be used directly out
-  of Thrax.
+Major changes
+- Large speedups (2--3x) over Joshua 6.0.5, through better grammar
+  packing and KenLM language model queries
+- Reorganized under the Apache name
+- Moved from ant+ivy build to Maven
+- New builtin HTTP server supporting a Google-style RESTful interface
+- Simplification of phrase-based decoder implementation (not backwards compatible)
+- Now provides a cleaner API
 
+Minor changes
+- Code reorganization and cleanup
+- Better runtime handling of exceptions (removal of many spontaneous exits)
+- Moved regression tests to proper unit tests
+- Simplified logging system
+- Many bug fixes and other improvements
+- Packing of multiple grammars
+	
 6.0.5 (October 23, 2015)
 ========================
 

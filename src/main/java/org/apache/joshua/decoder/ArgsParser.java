@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.apache.joshua.util.Constants;
 import org.apache.joshua.util.io.LineReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,13 +62,9 @@ public class ArgsParser {
         }
 
         if (args[i].equals("-version")) {
-          try (LineReader reader = new LineReader(String.format("%s/VERSION", System.getenv("JOSHUA")));) {
-            reader.readLine();
-            String version = reader.readLine().split("\\s+")[2];
-            System.out.println(String.format("The Apache Joshua machine translator, version %s", version));
-            System.out.println("joshua.incubator.apache.org");
-            System.exit(0);
-          }
+          System.out.println(String.format("The Apache Joshua Machine Translator, version %s", Constants.VERSION));
+          System.out.println("http://joshua.apache.org/");
+          System.exit(0);
         } else if (args[i].equals("-license")) {
           try {
             Files.readAllLines(Paths.get(String.format("%s/../LICENSE",
