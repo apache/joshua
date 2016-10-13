@@ -43,7 +43,7 @@ JOSHUA=$(dirname $0)/..
 RES_OVERRIDE_PATH=$JOSHUA/src/main/resources
 # Get the jar file (only the most recent, if there are many)
 JAR_PATH=$(ls -t $JOSHUA/target/joshua-*-jar-with-dependencies.jar | head -n1)
-exec java -Xmx${mem} \
+exec java -mx${mem} \
 	-Dfile.encoding=utf8 \
 	-Djava.library.path=$JOSHUA/lib \
 	-cp $JAR_PATH \
