@@ -1,5 +1,11 @@
 [![Build Status](https://travis-ci.org/apache/incubator-joshua.svg?branch=master)](https://travis-ci.org/apache/incubator-joshua)
 [![homebrew](https://img.shields.io/homebrew/v/joshua.svg?maxAge=2592000?style=plastic)](http://braumeister.org/formula/joshua)
+[![license](https://img.shields.io/github/license/apache/incubator-joshua.svg?maxAge=2592000?style=plastic)](http://www.apache.org/licenses/LICENSE-2.0)
+[![Jenkins](https://img.shields.io/jenkins/s/https/builds.apache.org/joshua_master.svg?maxAge=2592000?style=plastic)](https://builds.apache.org/job/joshua_master/)
+[![Jenkins tests](https://img.shields.io/jenkins/t/https/builds.apache.org/joshua_master.svg?maxAge=2592000?style=plastic)](https://builds.apache.org/job/joshua_master)
+[![Jenkins coverage](https://img.shields.io/jenkins/c/https/builds.apache.org/joshua_master.svg?maxAge=2592000?style=plastic)](https://builds.apache.org/job/joshua_master)
+[![Maven Central](https://img.shields.io/maven-central/v/org.apache.joshua/joshua.svg?maxAge=2592000?style=plastic)](http://search.maven.org/#search|ga|1|g%3A%22org.apache.joshua%22)
+[![Twitter Follow](https://img.shields.io/twitter/follow/ApacheJoshua.svg?style=social&label=Follow&maxAge=2592000?style=plastic)](https://twitter.com/ApacheJoshua)
 
 # Welcome to Apache Joshua (Incubating)
 <img src="https://s.apache.org/joshua_logo" align="right" width="300" />
