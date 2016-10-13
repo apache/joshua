@@ -1154,7 +1154,7 @@ if (! defined $GRAMMAR_FILE) {
     system("mv $thrax_file.tmp $thrax_file");
 
     $cachepipe->cmd("thrax-run",
-                    "hadoop jar $THRAX/bin/thrax.jar -D mapreduce.task.timeout=0 -D mapreduce.map.java.opts='-Xmx$HADOOP_MEM' -D mapreduce.reduce.java.opts='-Xmx$HADOOP_MEM' -D hadoop.tmp.dir=$TMPDIR $thrax_file $THRAXDIR > thrax.log 2>&1; rm -f grammar grammar.gz; hadoop fs -getmerge $THRAXDIR/final/ grammar.gz",
+                    "hadoop jar $THRAX/bin/thrax.jar -D mapreduce.task.timeout=0 -D mapreduce.map.java.opts='-Xmx$HADOOP_MEM' -D mapreduce.reduce.java.opts='-Xmx$HADOOP_MEM' -D hadoop.tmp.dir=$TMPDIR $thrax_file $THRAXDIR > thrax.log 2>&1; rm -f grammar grammar.gz; hadoop fs -cat $THRAXDIR/final/* | tee grammar-unfiltered.gz | gzip -cd | $JOSHUA/scripts/training/filter-rules.pl -t 100 -c 3 | gzip -9n > grammar.gz",
                     "$DATA_DIRS{train}/thrax-input-file",
                     $thrax_file,
                     "grammar.gz");

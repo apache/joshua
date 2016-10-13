@@ -1,14 +1,32 @@
 #!/usr/bin/env perl
 
 # Removes rules from phrase tables and grammars according to various criteria.
+#
+# October 2016. It turns out that Thrax keeps *all* rules it finds for each source
+# side. In big bitexts, this can mean that common words collect tens or even hundreds
+# of thousands of translation options, due to garbage collection (Moore, 2004), all of
+# which are then retained. These can be filtered out by this script, which will reduce
+# the grammar to contain only the top 100 translation options (by count) for each source
+# side. You just need to provide the field that contains the "Rarity Penalty" computed
+# by thrax. This is field 3 (0-indexed) by default. To filter in this way:
+#
+# gzip -cd grammar.gz | filter-rules.pl -t 100 -f 3 | gzip -9n > grammar-filtered.gz
+#
+# You can also filter by using the model weights, say after tuning:
+#
+# gzip -cd grammar.gz | filter-rules.pl -t 100 -c /path/to/joshua.config -o pt ...
+#
+# Really this should just be built into Thrax, which could use the rarity penalty there.
 
 use strict;
 use warnings;
 use List::Util qw/max sum/;
 use Getopt::Std;
 
-my %opts = ( t => 100 );
-my $ret = getopts("bps:uvc:t:o:", \%opts);
+my %opts = ( 
+  f => 3, # default field for rarity penalty is 3 (0-indexed)
+);
+my $ret = getopts("bps:uvc:t:o:f:", \%opts);
 
 if (!$ret) {
   print "Usage: filter-rules.pl [-u] [-s SCOPE] [-v]\n";
@@ -17,10 +35,10 @@ if (!$ret) {
   print "   -s SCOPE: remove rules with scope > SCOPE (Hopkins & Langmead, 2010)\n";
   print "   -u: remove abstract unary rules\n";
   print "   -v: be verbose\n";
+  print "   -t: only include top N candidates (requires either -f or (-c and -o)\n";
+  print "   -f: rarity penalty field to use when filtering (index or name) to -t without -c (default:3)\n";
   print "   -c: path to joshua config file\n";
   print "   -o: grammar owner (required for -t)\n";
-  print "   -t: only include top N candidates by weight (requires config file)\n";
-  print "   -f: score field to use when filtering (index or name) to -t without -c\n";
   exit;
 }
 
@@ -110,7 +128,7 @@ sub filter_and_print_rules {
   my @rules = @$rulelist;
 
   my @filtered_rules = ();
-  if ($opts{c}) {
+  if ($opts{t} and $opts{c}) {
     my %scores;
     foreach my $rule (@rules) {
       my @tokens = split(/ \|\|\| /, $rule);
@@ -130,6 +148,20 @@ sub filter_and_print_rules {
     }
 
     my @sorted_rules = sort {$scores{$b} <=> $scores{$a}} keys(%scores);
+    @filtered_rules = splice(@sorted_rules, 0, $opts{t});
+    $SKIPPED{redundant} += scalar(@sorted_rules) - scalar(@filtered_rules);
+
+  } elsif ($opts{t} and $opts{f}) {
+    # Filter using field f (0-indexed), which is assumed to be the rarity penalty field
+    my %rarities;
+    foreach my $rule (@rules) {
+      my @tokens = split(/ \|\|\| /, $rule);
+      my $features = $tokens[3];
+      my @features = split(" ", $features);
+      my $rarity = $features[$opts{f}] || 1.0;
+      $rarities{$rule} = 1-log($rarity); # Thrax sets rarity = exp(1-count(e,f)), sigh
+    }
+    my @sorted_rules = sort { $rarities{$b} <=> $rarities{$a} } keys(%rarities);
     @filtered_rules = splice(@sorted_rules, 0, $opts{t});
     $SKIPPED{redundant} += scalar(@sorted_rules) - scalar(@filtered_rules);
 
