@@ -7,25 +7,24 @@
 # of thousands of translation options, due to garbage collection (Moore, 2004), all of
 # which are then retained. These can be filtered out by this script, which will reduce
 # the grammar to contain only the top 100 translation options (by count) for each source
-# side. You just need to provide the field that contains the "Rarity Penalty" computed
-# by thrax. This is field 3 (0-indexed) by default. To filter in this way:
+# side. This only works for grammars that have a 6th |||-delimited field containing
+# rule counts:
 #
-# gzip -cd grammar.gz | filter-rules.pl -t 100 -f 3 | gzip -9n > grammar-filtered.gz
+#   gzip -cd grammar.gz | filter-rules.pl -t 100 | gzip -9n > grammar-filtered.gz
 #
-# You can also filter by using the model weights, say after tuning:
+# If you don't have that field, but do have a tuned model, you can also filter by using that,
+# say after tuning:
 #
-# gzip -cd grammar.gz | filter-rules.pl -t 100 -c /path/to/joshua.config -o pt ...
+#   gzip -cd grammar.gz | filter-rules.pl -t 100 -c /path/to/joshua.config -o pt ...
 #
-# Really this should just be built into Thrax, which could use the rarity penalty there.
+# Really this should all just be built into thrax.
 
 use strict;
 use warnings;
 use List::Util qw/max sum/;
 use Getopt::Std;
 
-my %opts = ( 
-  f => 3, # default field for rarity penalty is 3 (0-indexed)
-);
+my %opts = ();
 my $ret = getopts("bps:uvc:t:o:f:", \%opts);
 
 if (!$ret) {
@@ -35,8 +34,7 @@ if (!$ret) {
   print "   -s SCOPE: remove rules with scope > SCOPE (Hopkins & Langmead, 2010)\n";
   print "   -u: remove abstract unary rules\n";
   print "   -v: be verbose\n";
-  print "   -t: only include top N candidates (requires either -f or (-c and -o)\n";
-  print "   -f: rarity penalty field to use when filtering (index or name) to -t without -c (default:3)\n";
+  print "   -t: only include top N candidates\n";
   print "   -c: path to joshua config file\n";
   print "   -o: grammar owner (required for -t)\n";
   exit;
@@ -151,19 +149,29 @@ sub filter_and_print_rules {
     @filtered_rules = splice(@sorted_rules, 0, $opts{t});
     $SKIPPED{redundant} += scalar(@sorted_rules) - scalar(@filtered_rules);
 
-  } elsif ($opts{t} and $opts{f}) {
+  } elsif ($opts{t}) {
     # Filter using field f (0-indexed), which is assumed to be the rarity penalty field
-    my %rarities;
+    my %counts;
     foreach my $rule (@rules) {
       my @tokens = split(/ \|\|\| /, $rule);
-      my $features = $tokens[3];
-      my @features = split(" ", $features);
-      my $rarity = $features[$opts{f}] || 1.0;
-      $rarities{$rule} = 1-log($rarity); # Thrax sets rarity = exp(1-count(e,f)), sigh
+      if (@tokens < 6) {
+        print STDERR "* WARNING, no counts present in field, not filtering\n";
+        delete $opts{t};
+        last;
+      }
+      my $countstr = $tokens[5];
+      my @counts = split(" ", $countstr);
+      my $count = $counts[0];
+      $counts{$rule} = $count;
     }
-    my @sorted_rules = sort { $rarities{$b} <=> $rarities{$a} } keys(%rarities);
-    @filtered_rules = splice(@sorted_rules, 0, $opts{t});
-    $SKIPPED{redundant} += scalar(@sorted_rules) - scalar(@filtered_rules);
+
+    if (len(keys(%counts)) > 0) {
+      my @sorted_rules = sort { $counts{$b} <=> $counts{$a} } keys(%counts);
+      @filtered_rules = splice(@sorted_rules, 0, $opts{t});
+      $SKIPPED{redundant} += scalar(@sorted_rules) - scalar(@filtered_rules);
+    } else {
+      @filtered_rules = @rules;
+    }
 
   } else {
     @filtered_rules = @rules;
