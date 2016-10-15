@@ -106,6 +106,6 @@ run('%s/bin/hadoop fs -getmerge %s/final/ %s' % (HADOOP, THRAXDIR, args.output_f
 
 # Cleanup
 if not args.debug:
-    os.remove(conf_file)
+    os.remove(conf_file_name)
     os.remove(thrax_file)
     run('%s/bin/hadoop fs -rm -r %s' % (HADOOP, THRAXDIR))
