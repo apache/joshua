@@ -165,7 +165,7 @@ sub filter_and_print_rules {
       $counts{$rule} = $count;
     }
 
-    if (len(keys(%counts)) > 0) {
+    if (scalar(keys(%counts)) > 0) {
       my @sorted_rules = sort { $counts{$b} <=> $counts{$a} } keys(%counts);
       @filtered_rules = splice(@sorted_rules, 0, $opts{t});
       $SKIPPED{redundant} += scalar(@sorted_rules) - scalar(@filtered_rules);
