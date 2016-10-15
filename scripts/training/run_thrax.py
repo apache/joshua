@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 """
-Runs the Z-MERT and PRO tuners.
+Runs Thrax.
 """
 from __future__ import print_function
 from itertools import izip
@@ -91,7 +91,7 @@ paste(args.source_corpus, args.target_corpus, args.alignment_file, thrax_file)
 run('%s/bin/hadoop fs -put %s %s/input-file' % (HADOOP, thrax_file, THRAXDIR))
 
 # Copy the template
-conf_file = tempfile.NamedTemporaryFile(prefix='thrax.conf')
+conf_file = tempfile.NamedTemporaryFile(prefix='thrax.conf', delete=False)
 for line in open(args.thrax_config):
     if not line.startswith('input-file'):
         conf_file.write(line)
@@ -106,5 +106,6 @@ run('%s/bin/hadoop fs -getmerge %s/final/ %s' % (HADOOP, THRAXDIR, args.output_f
 
 # Cleanup
 if not args.debug:
+    os.remove(conf_file)
     os.remove(thrax_file)
     run('%s/bin/hadoop fs -rm -r %s' % (HADOOP, THRAXDIR))
