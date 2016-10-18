@@ -22,6 +22,9 @@ export CXXFLAGS+=" -O3 -fPIC -DHAVE_ZLIB"
 export LDFLAGS+=" -lz -lbz2 -llzma"
 export CXX=${CXX:-g++}
 
+export JOSHUA=$($JOSHUA/scripts/misc/canonical_path $(dirname $0)/..)
+echo "Using JOSHUA=$JOSHUA"
+
 cd $JOSHUA/ext/kenlm
 [[ ! -d build ]] && mkdir build
 cd build

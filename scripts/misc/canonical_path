@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+
+import os
+import argparse
+
+parser = argparse.ArgumentParser(description='Return canonical path')
+parser.add_argument('file', help='File or directory to absolutize')
+args = parser.parse_args()
+
+print os.path.realpath(args.file)
