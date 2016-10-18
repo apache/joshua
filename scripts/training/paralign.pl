@@ -80,8 +80,8 @@ sub run_berkeley_aligner {
   $cachepipe->cmd("berkeley-aligner-chunk-$chunkno",
                   "java -d64 -Xmx$args{aligner_mem} -jar $JOSHUA/ext/berkeleyaligner/distribution/berkeleyaligner.jar ++alignments/$chunkno/word-align.conf",
                   "alignments/$chunkno/word-align.conf",
-                  "$args{train_dir}/splits/corpus.$args{source}.$chunkno",
-                  "$args{train_dir}/splits/corpus.$args{target}.$chunkno",
+                  "$args{train_dir}/splits/$chunkno/corpus.$args{source}",
+                  "$args{train_dir}/splits/$chunkno/corpus.$args{target}",
                   "$chunkdir/training.align");
 }
 
