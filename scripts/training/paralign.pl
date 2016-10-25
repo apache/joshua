@@ -39,7 +39,7 @@ while (my $chunkno = <>) {
   system("mkdir","-p", $chunkdir);
 
   if ($args{aligner} eq "giza") {
-    run_giza($chunkdir, $chunkno, $args{num_threads} > 1);
+    run_giza($chunkdir, $chunkno, 0);
   } elsif ($args{aligner} eq "berkeley") {
     run_berkeley_aligner($chunkdir, $chunkno, $aligner_conf);
   } elsif ($args{aligner} eq "jacana") {
