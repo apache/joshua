@@ -18,7 +18,6 @@
  */
 package org.apache.joshua.decoder.ff.lm;
 
-import javafx.scene.Parent;
 import org.apache.joshua.corpus.Vocabulary;
 import org.apache.joshua.decoder.LmPool;
 import org.apache.joshua.decoder.ff.state_maintenance.KenLMState;
