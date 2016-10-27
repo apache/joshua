@@ -659,7 +659,7 @@ def collect_operations(opts):
                 message = (
                     # Prepend the line number to the error message
                     'ERROR: Configuration file "{0}" line {1}: {2}'
-                    .format(opts.config.name, line_num, e.message)
+                    .format(opts.config.name, line_num, str(e))
                 )
                 e.message = message
                 raise e
@@ -675,7 +675,7 @@ def collect_operations(opts):
                 # Prepend the line number to the error message
                 message = (
                     'ERROR: Configuration file "{0}" line {1}: {2}'
-                    .format(opts.config.name, line_num, e.message)
+                    .format(opts.config.name, line_num, str(e))
                 )
                 e.message = message
                 raise e
