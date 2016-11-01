@@ -8,17 +8,19 @@ config=$2
 mem=$3
 credits=$4
 benchmark=$5
+example=$6
 
 date=$(date +%Y-%m-%d)
 
-if [[ -z $5 ]]; then
-    echo "Usage: $0 langpair config mem credits-file benchmark-file"
+if [[ -z $6 ]]; then
+    echo "Usage: $0 langpair config mem credits-file benchmark-file example"
     echo "where"
     echo "  langpair is the language pair, (e.g., es-en)"
     echo "  config is the tuned Joshua config, (1/tune/joshua.config.final)"
     echo "  mem is the amount of memory the decoder needs"
     echo "  credits-file is a file describing how the model was built (1/CREDITS"
     echo "  benchmark-file is a file describing model performance on test sets (1/BENCHMARK)"
+    echo "  example is a path prefix to a pair of small (~10 lines) example files"
     exit 1
 fi
 
@@ -58,9 +60,18 @@ copy_template() {
     > $2
 }
 
-# Copy over critical infrastructure files
+# Create the target directory
 [[ ! -d "$dest/target" ]] && mkdir -p "$dest/target"
+
+# Copy over critical infrastructure files
 cp $JOSHUA/target/joshua-*-jar-with-dependencies.jar $dest/target
+
+# Copy over the example files
+for ext in $source_abbr $target_abbr; do
+    [[ ! -s $example.$ext ]] && echo "Can't find example file $example.$ext, quitting" && exit
+    cp $example.$ext $dest/example.$ext
+    chmod 444 $dest/example.$ext
+done
 
 # Copy over the web demonstration
 cp -a $JOSHUA/demo $dest/web
@@ -81,3 +92,4 @@ chmod 444 $dest/BENCHMARK
 # Create the README
 copy_template "$JOSHUA/scripts/language-pack/README.template" "$dest/README"
 chmod 444 $dest/README
+
