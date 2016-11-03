@@ -49,7 +49,7 @@ if (!$QUIET) {
 
 load_prefixes($language,\%NONBREAKING_PREFIX);
 
-if (scalar(%NONBREAKING_PREFIX) eq 0){
+if (scalar(%NONBREAKING_PREFIX) == 0 && ! $QUIET){
 	print STDERR "Warning: No known abbreviations for language '$language'\n";
 }
 
@@ -262,7 +262,7 @@ sub load_prefixes {
 	#default back to English if we don't have a language-specific prefix file
 	if (!(-e $prefixfile)) {
 		$prefixfile = "$PREFIX_DIR/nonbreaking_prefix.en";
-		print STDERR "WARNING: No known abbreviations for language '$language', attempting fall-back to English version...\n";
+		print STDERR "WARNING: No known abbreviations for language '$language', attempting fall-back to English version...\n" unless $QUIET;
 		die ("ERROR: No abbreviations files found in $PREFIX_DIR\n") unless (-e $prefixfile);
 	}
 	
