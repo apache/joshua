@@ -28,12 +28,13 @@ set -u
 set -e
 
 JOSHUA=$(dirname $0)/../..
+ISO=$JOSHUA/scripts/misc/iso639
 date=$(date +%Y-%m-%d)
 dest=releases/apache-joshua-$langpair-$date
 source_abbr=$(echo $langpair | cut -d- -f1)
 target_abbr=$(echo $langpair | cut -d- -f2)
-source=$(iso639 $source_abbr)
-target=$(iso639 $target_abbr)
+source=$($ISO $source_abbr)
+target=$($ISO $target_abbr)
 
 # Create the jar file
 (cd $JOSHUA && mvn clean compile assembly:single)

@@ -1,0 +1,45 @@
+#!/usr/bin/env python
+
+"""
+Converts among language names and abbreviations using Python's ISO-639 module.
+https://pypi.python.org/pypi/iso-639/0.4.3
+
+You need to install the iso-639 module:
+
+    pip install [--user] iso-639
+
+Here is some example usage of that module:
+
+    > from iso639 import languages as l
+    > greek = l.get(part1 = 'el')
+    > pprint(vars(greek))
+    {'inverted': 'Greek, Modern (1453-)',
+     'macro': '',
+     'name': 'Modern Greek (1453-)',
+     'names': [],
+     'part1': 'el',
+     'part2b': 'gre',
+     'part2t': 'ell',
+     'part3': 'ell',
+     'part5': ''}
+"""
+
+import sys
+import iso639
+
+if len(sys.argv) != 2:
+   print "Usage: iso639 LANG"
+   print "where LANG is a language name or abbreviation."
+   sys.exit(1)
+
+input = sys.argv[1]
+
+if len(input) == 2:
+   lang = iso639.languages.get(part1 = input)
+   print lang.name
+elif len(input) == 3:
+   lang = iso639.languages.get(part3 = input)
+   print lang.name
+else:
+   lang = iso639.languages.get(name = input)
+   print lang.part1
