@@ -32,6 +32,7 @@ fi
 numrefs=$(ls $refs* | wc -l)
 verbose=0
 
+JOSHUA=$(dirname $0)/..
 java -cp $JOSHUA/target/joshua-*-jar-with-dependencies.jar \
     -Dfile.encoding=utf8 -Djava.library.path=$JOSHUA/lib \
     -Xmx256m -Xms256m \
