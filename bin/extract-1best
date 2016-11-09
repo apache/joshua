@@ -26,8 +26,7 @@ fi
 
 set -u
 
-#JOSHUA=$(dirname $0)/..
-JOSHUA=/usr/local/Cellar/joshua/HEAD-2f3e752/libexec
+JOSHUA=$(dirname $0)/..
 RES_OVERRIDE_PATH=$JOSHUA/src/main/resources
 # Get the jar file (only the most recent, if there are many)
 JAR_PATH=$(ls -t $JOSHUA/target/joshua-*-jar-with-dependencies.jar | head -n1)
