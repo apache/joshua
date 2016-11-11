@@ -385,6 +385,7 @@
                 <exclude>distribution/joshua-runtime/icon.svg</exclude>
                 <exclude>distribution/joshua-runtime/README.md</exclude>
                 <exclude>examples/**</exclude>
+                <exclude>scripts/preparation/nonbreaking_prefixes/**</exclude>
               </excludes>
             </configuration>
           </plugin>
