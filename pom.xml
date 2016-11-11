@@ -378,6 +378,13 @@
                 <exclude>KEYS</exclude>
                 <exclude>doap_joshua.rdf</exclude>
                 <exclude>src/test/**</exclude>
+                <exclude>demo/bootstrap/**</exclude>
+                <exclude>demo/README.md</exclude>
+                <exclude>distribution/joshua-full/icon.svg</exclude>
+                <exclude>distribution/joshua-full/README.md</exclude>
+                <exclude>distribution/joshua-runtime/icon.svg</exclude>
+                <exclude>distribution/joshua-runtime/README.md</exclude>
+                <exclude>examples/**</exclude>
               </excludes>
             </configuration>
           </plugin>
