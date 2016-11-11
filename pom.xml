@@ -386,6 +386,17 @@
                 <exclude>distribution/joshua-runtime/README.md</exclude>
                 <exclude>examples/**</exclude>
                 <exclude>scripts/preparation/nonbreaking_prefixes/**</exclude>
+                <exclude>scripts/distributedLM/global_symol_list</exclude>
+                <exclude>scripts/distributedLM/lm.list.withweights</exclude>
+                <exclude>scripts/language-pack/README.template</exclude>
+                <exclude>scripts/training/templates/alignment/jacana/resources/model/tagdict</exclude>
+                <exclude>scripts/training/templates/glue-grammar</exclude>
+                <exclude>scripts/training/templates/glue-grammar.itg</exclude>
+                <exclude>scripts/training/templates/hadoop/masters</exclude>
+                <exclude>scripts/training/templates/hadoop/slaves</exclude>
+                <exclude>scripts/training/templates/tune/decoder_command</exclude>
+                <exclude>scripts/training/templates/tune/decoder_command.qsub</exclude>
+                <exclude>scripts/training/TODO</exclude>
               </excludes>
             </configuration>
           </plugin>
