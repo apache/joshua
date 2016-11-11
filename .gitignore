@@ -61,3 +61,4 @@ ext/
 thrax/
 test-output
 joshua-core/test-output
+.pydevproject

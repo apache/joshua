@@ -363,13 +363,21 @@
               </licenses>
               <excludeSubProjects>false</excludeSubProjects>
               <excludes>
+                <exclude>.classpath</exclude>
+                <exclude>.gitignore/**/**</exclude>
+                <exclude>.git/**/**</exclude>
+                <exclude>.gitmodules/**/**</exclude>
+                <exclude>.project</exclude>
+                <exclude>.pydevproject</exclude>
+                <exclude>.settings</exclude>
+                <exclude>.travis.yml</exclude>
                 <exclude>CHANGES.md</exclude>
                 <exclude>README.md</exclude>
                 <exclude>NOTICE.txt</exclude>
                 <exclude>LICENSE</exclude>
                 <exclude>KEYS</exclude>
                 <exclude>doap_joshua.rdf</exclude>
-                <exclude>.gitignore/**/**</exclude>
+                <exclude>src/test/**</exclude>
               </excludes>
             </configuration>
           </plugin>
