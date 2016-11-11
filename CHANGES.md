@@ -1,22 +1,71 @@
-6.1 (October 14, 2016)
-=========
+Apache Joshua 6.1 (Nov 10th, 2016)
+==================================
+Release Report - https://s.apache.org/joshua6.1
 
-Major changes
-- Large speedups (2--3x) over Joshua 6.0.5, through better grammar
-  packing and KenLM language model queries
-- Reorganized under the Apache name
-- Moved from ant+ivy build to Maven
-- New builtin HTTP server supporting a Google-style RESTful interface
-- Simplification of phrase-based decoder implementation (not backwards compatible)
-- Now provides a cleaner API
+Sub-task
 
-Minor changes
-- Code reorganization and cleanup
-- Better runtime handling of exceptions (removal of many spontaneous exits)
-- Moved regression tests to proper unit tests
-- Simplified logging system
-- Many bug fixes and other improvements
-- Packing of multiple grammars
+    [JOSHUA-301] - Add findbugs plugin to maven build
+
+Bug
+
+    [JOSHUA-22] - Parallelize MBR computation
+    [JOSHUA-71] - OS X installation depends on coreutils to run thrax test
+    [JOSHUA-95] - Vocabulary locking
+    [JOSHUA-107] - Verbosity levels
+    [JOSHUA-172] - Speed up grammar file reading with memory-mapped files
+    [JOSHUA-239] - Dependency addition to Joshua-Decoder/Joshua/pom.xml
+    [JOSHUA-259] - Integration tests are failing
+    [JOSHUA-268] - Phrase-based model error (NullPointerException)
+    [JOSHUA-271] - Thrax invocation should not reply upon $HADOOP being set
+    [JOSHUA-276] - Trivial fixes to 1.8 Javadoc
+    [JOSHUA-278] - Alignments printed incorrectly for phrase-based decoder
+    [JOSHUA-279] - Cannot build Joshua master branch
+    [JOSHUA-280] - Existing Language packs not compatible with Joshua master
+    [JOSHUA-281] - split2files.pl support script no longer exists hence pipeline fails
+    [JOSHUA-282] - %S output format doesn't remove <s>
+    [JOSHUA-284] - Phrase-based decoding changes
+    [JOSHUA-285] - Not all RuntimeExceptions are caught
+    [JOSHUA-287] - KenLM.java catches UnsatisfiedLinkError when attempting to load libken.so (libken.dylib on OSX)
+    [JOSHUA-299] - Move regression tests to proper unit tests
+    [JOSHUA-304] - word-align.conf alignment template file not compatible with berkeley aligner
+    [JOSHUA-305] - joshua-6.1-SNAPSHOT-source-release.zip takes ages to build
+    [JOSHUA-319] - test-decode decoder_command results in java.lang.NumberFormatException: For input string: "MAXSPAN"
+    [JOSHUA-321] - Add JOSHUA env to ./bin/bleu and ./bin/extract-1best bash scripts
+    [JOSHUA-322] - extract-1best script references non-existent execution paths
+
+Improvement
+
+    [JOSHUA-252] - Make it possible to use Maven to build Joshua
+    [JOSHUA-256] - Note that Joshua builds and runs with >= Java 1.8
+    [JOSHUA-262] - Implement all logging as Slf4j over Log4j
+    [JOSHUA-269] - Fix Javadoc in JOSHUA-252 branch to comply with JDK1.8 Spec
+    [JOSHUA-272] - Simplify the packing and usage of phrase-based grammars
+    [JOSHUA-286] - Remove presence of all joshua-decoder.org links in codebase
+    [JOSHUA-291] - Improve code quality via static analysis
+    [JOSHUA-296] - Refactor threading code
+    [JOSHUA-309] - Update CHANGELOG
+    [JOSHUA-312] - Even though alignment is cached, it is always re-done in pipeline re-execution
+
+New Feature
+
+    [JOSHUA-100] - Add Shen et al. (2008) dependency LM
+
+Task
+
+    [JOSHUA-248] - Add Apache License headers to Joshua code
+    [JOSHUA-249] - Joshua Logo
+    [JOSHUA-251] - Address Website Branding Issues
+    [JOSHUA-254] - Update README with correct branding
+    [JOSHUA-255] - License headers for all bash scripts
+    [JOSHUA-257] - Add license headers to all Python scripts
+    [JOSHUA-258] - Add back penn-treebank-(de)tokenizer perl scripts
+    [JOSHUA-261] - Remove ext directory from source tree
+    [JOSHUA-297] - List supported versions of Hadoop
+    [JOSHUA-323] - Joshua 6.1 Release Management
+
+Test
+
+    [JOSHUA-253] - Enable execution of Unit tests
 	
 6.0.5 (October 23, 2015)
 ========================
