@@ -24,6 +24,11 @@ use warnings;
 use strict;
 use File::Basename qw/dirname/;
 
+my $JOSHUA;
+BEGIN { 
+  $JOSHUA = $ENV{JOSHUA} || ".";
+}
+
 my %NONBREAKING_PREFIX = ();
 my $language = "en";
 my $QUIET = 1;
@@ -32,7 +37,7 @@ my $PREFIX_DIR = find_nonbreaking_prefixes();
 
 sub find_nonbreaking_prefixes {
   # look in the following locations until you find one
-  my @prefixes = ( dirname($0), "$ENV{JOSHUA}/scripts/preparation" );
+  my @prefixes = ( dirname($0), "$JOSHUA/scripts/preparation" );
   foreach my $prefix (@prefixes) {
     my $path = "$prefix/nonbreaking_prefixes";
     return $path if -e $path;
@@ -63,7 +68,7 @@ if (!$QUIET) {
 
 load_prefixes($language,\%NONBREAKING_PREFIX);
 
-if (scalar(%NONBREAKING_PREFIX) == 0 && ! $QUIET){
+if (scalar(keys(%NONBREAKING_PREFIX)) == 0 && ! $QUIET){
 	print STDERR "Warning: No known abbreviations for language '$language'\n";
 }
 
