@@ -46,7 +46,7 @@ You might also find it helpful to set these:
 Then, compile Joshua by typing:
 
     cd $JOSHUA
-    mvn clean compile assembly:single
+    mvn clean package
 
 You also need to download and compile [KenLM](http://kheafield.com/code/kenlm/) and [Thrax](https://github.com/joshua-decoder/thrax):
 
