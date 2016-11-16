@@ -109,8 +109,9 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
       LOG.info("Couldn't create a GrammarReader for file {} with format {}",
           grammarFile, formatKeyword);
     }
-
-    this.printGrammar();
+    
+    LOG.info("MemoryBasedBatchGrammar: Read {} rules with {} distinct source sides from '{}'",
+        this.qtyRulesRead, this.qtyRuleBins, grammarFile);
   }
 
   protected GrammarReader<Rule> createReader(String format, String grammarFile) throws IOException {
@@ -197,11 +198,6 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
       this.qtyRuleBins++;
     }
     pos.ruleBin.addRule(rule);
-  }
-
-  protected void printGrammar() {
-    LOG.info("MemoryBasedBatchGrammar: Read {} rules with {} distinct source sides from '{}'",
-        this.qtyRulesRead, this.qtyRuleBins, grammarFile);
   }
 
   /***

@@ -113,7 +113,7 @@ public class Token {
       else
         annotations.put("lettercase",  "lower");
       
-      LOG.info("TOKEN: {} -> {} ({})", token, token.toLowerCase(), annotations.get("lettercase"));
+      LOG.debug("TOKEN: {} -> {} ({})", token, token.toLowerCase(), annotations.get("lettercase"));
       token = token.toLowerCase(); 
     }
     
