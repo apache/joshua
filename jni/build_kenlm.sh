@@ -17,10 +17,12 @@
 #
 set -u
 
-export KENLM_MAX_ORDER=10
-export CXXFLAGS+=" -O3 -fPIC -DHAVE_ZLIB"
-export LDFLAGS+=" -lz -lbz2 -llzma"
+KENLM_MAX_ORDER=10
+
 export CXX=${CXX:-g++}
+export LDFLAGS+=" -lz -lbz2 -llzma"
+#CXXFLAGS+=" -O3 -fPIC -DHAVE_ZLIB"
+export CXXFLAGS+=" -I. -O3 -fPIC -DNDEBUG"
 
 export JOSHUA=$($JOSHUA/scripts/misc/canonical_path $(dirname $0)/..)
 echo "Using JOSHUA=$JOSHUA"
@@ -28,17 +30,26 @@ echo "Using JOSHUA=$JOSHUA"
 cd $JOSHUA/ext/kenlm
 [[ ! -d build ]] && mkdir build
 cd build
-cmake .. -DKENLM_MAX_ORDER=$KENLM_MAX_ORDER -DCMAKE_BUILD_TYPE=Release
-make -j2
+cmake .. -DKENLM_MAX_ORDER=$KENLM_MAX_ORDER
+#Use this if cmake fails with boost errors
+#cmake .. -DBoost_NO_BOOST_CMAKE=TRUE -DBOOST_ROOT=/opt/boost
+make -j
 cp bin/{query,lmplz,build_binary} $JOSHUA/bin
 
 if [ "$(uname)" == Darwin ]; then
   SUFFIX=dylib
-  RT=""
 else
-  RT=-lrt
   SUFFIX=so
+  CXXFLAGS+=" -lrt"
 fi
 
+#objects=""
+#for i in util/double-conversion/*.cc util/*.cc lm/*.cc $ADDED_PATHS; do
+#  if [ "${i%test.cc}" == "$i" ] && [ "${i%main.cc}" == "$i" ]; then
+#    $CXX $CXXFLAGS -c $i -o ${i%.cc}.o
+#    objects="$objects ${i%.cc}.o"
+#  fi
+#done
+
 [[ ! -d "$JOSHUA/lib" ]] && mkdir "$JOSHUA/lib"
-$CXX -std=gnu++11 -I. -DKENLM_MAX_ORDER=$KENLM_MAX_ORDER -I$JAVA_HOME/include -I$JOSHUA/ext/kenlm -I$JAVA_HOME/include/linux -I$JAVA_HOME/include/darwin $JOSHUA/jni/kenlm_wrap.cc lm/CMakeFiles/kenlm.dir/*.o util/CMakeFiles/kenlm_util.dir/*.o util/CMakeFiles/kenlm_util.dir/double-conversion/*.o -shared -o $JOSHUA/lib/libken.$SUFFIX $CXXFLAGS $LDFLAGS $RT
+$CXX -std=gnu++11 -I. -DKENLM_MAX_ORDER=$KENLM_MAX_ORDER -I$JAVA_HOME/include -I$JOSHUA/ext/kenlm -I$JAVA_HOME/include/linux -I$JAVA_HOME/include/darwin $JOSHUA/jni/kenlm_wrap.cc lm/CMakeFiles/kenlm.dir/*.o util/CMakeFiles/kenlm_util.dir/*.o util/CMakeFiles/kenlm_util.dir/double-conversion/*.o -shared -o $JOSHUA/lib/libken.$SUFFIX $CXXFLAGS $LDFLAGS
