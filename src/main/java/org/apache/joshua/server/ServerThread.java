@@ -190,6 +190,8 @@ public class ServerThread extends Thread implements HttpHandler {
     String[] tokens = meta.split("\\s+", 2);
     String type = tokens[0];
     String args = tokens.length > 1 ? tokens[1] : "";
+    
+    LOG.info("META: {}", type);
 
     switch (type) {
     case "get_weight":
@@ -213,18 +215,21 @@ public class ServerThread extends Thread implements HttpHandler {
 
       break;
     }
-    case "get_weights":
+    case "get_weights": {
       message.addMetaData("weights " + Decoder.weights.toString());
 
       break;
+    }
     case "add_rule": {
+      
+      try {
       String argTokens[] = args.split(" \\|\\|\\| ");
 
       if (argTokens.length < 3) {
-        LOG.error("* INVALID RULE '{}'", meta);
+        LOG.warn("* INVALID RULE '{}'", meta);
         return;
       }
-
+      
       String lhs = argTokens[0];
       String source = argTokens[1];
       String target = argTokens[2];
@@ -238,23 +243,20 @@ public class ServerThread extends Thread implements HttpHandler {
       /* Prepend source and target side nonterminals for phrase-based decoding. Probably better
        * handled in each grammar type's addRule() function.
        */
-      String ruleString = (joshuaConfiguration.search_algorithm.equals("stack")) ?
-          String
-              .format("%s ||| [X,1] %s ||| [X,1] %s ||| -1 %s %s", lhs, source, target, featureStr,
-                  alignmentStr) :
-          String.format("%s ||| %s ||| %s ||| -1 %s %s", lhs, source, target, featureStr,
-              alignmentStr);
-
+      String ruleString = String.format("%s ||| %s ||| %s ||| -1 %s %s", 
+          lhs, source, target, featureStr, alignmentStr);
       Rule rule = new HieroFormatReader().parseLine(ruleString);
       decoder.addCustomRule(rule);
 
       LOG.info("Added custom rule {}", rule.toString());
 
       break;
+      
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
-    case "list_rules":
-
-      LOG.info("list_rules");
+    case "list_rules": {
 
       // Walk the the grammar trie
       ArrayList<Trie> nodes = new ArrayList<>();
@@ -278,6 +280,7 @@ public class ServerThread extends Thread implements HttpHandler {
       }
 
       break;
+    }
     case "remove_rule": {
 
       Rule rule = new HieroFormatReader().parseLine(args);
@@ -302,6 +305,10 @@ public class ServerThread extends Thread implements HttpHandler {
           }
         }
       }
+      break;
+    }
+    default: {
+      LOG.warn("INVALID metadata command '{}'", type);
       break;
     }
     }
