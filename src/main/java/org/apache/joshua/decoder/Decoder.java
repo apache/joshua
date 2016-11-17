@@ -435,64 +435,72 @@ public class Decoder {
    */
   private void initializeTranslationGrammars() throws IOException {
 
-    if (joshuaConfiguration.tms.size() > 0) {
+    // collect packedGrammars to check if they use a shared vocabulary
+    final List<PackedGrammar> packed_grammars = new ArrayList<>();
+    
+    // record the glue grammar so we can make sure there is one
+    Grammar glueGrammar = null;
 
-      // collect packedGrammars to check if they use a shared vocabulary
-      final List<PackedGrammar> packed_grammars = new ArrayList<>();
+    // tm = {thrax/hiero,packed,samt,moses} OWNER LIMIT FILE
+    for (String tmLine : joshuaConfiguration.tms) {
 
-      // tm = {thrax/hiero,packed,samt,moses} OWNER LIMIT FILE
-      for (String tmLine : joshuaConfiguration.tms) {
+      String type = tmLine.substring(0,  tmLine.indexOf(' '));
+      String[] args = tmLine.substring(tmLine.indexOf(' ')).trim().split("\\s+");
+      HashMap<String, String> parsedArgs = FeatureFunction.parseArgs(args);
 
-        String type = tmLine.substring(0,  tmLine.indexOf(' '));
-        String[] args = tmLine.substring(tmLine.indexOf(' ')).trim().split("\\s+");
-        HashMap<String, String> parsedArgs = FeatureFunction.parseArgs(args);
+      String owner = parsedArgs.get("owner");
+      int span_limit = Integer.parseInt(parsedArgs.get("maxspan"));
+      String path = parsedArgs.get("path");
+      
+      Grammar grammar;
+      if (type.equals("moses") && ! type.equals("phrase")) {
+        joshuaConfiguration.search_algorithm = "stack";
+        grammar = new PhraseTable(path, owner, type, joshuaConfiguration);
 
-        String owner = parsedArgs.get("owner");
-        int span_limit = Integer.parseInt(parsedArgs.get("maxspan"));
-        String path = parsedArgs.get("path");
-
-        Grammar grammar;
-        if (! type.equals("moses") && ! type.equals("phrase")) {
-          if (new File(path).isDirectory()) {
-            try {
-              PackedGrammar packed_grammar = new PackedGrammar(path, span_limit, owner, type, joshuaConfiguration);
-              packed_grammars.add(packed_grammar);
-              grammar = packed_grammar;
-            } catch (FileNotFoundException e) {
-              String msg = String.format("Couldn't load packed grammar from '%s'", path)
-                  + "Perhaps it doesn't exist, or it may be an old packed file format.";
-              throw new RuntimeException(msg);
-            }
-          } else {
-            // thrax, hiero, samt
-            grammar = new MemoryBasedBatchGrammar(type, path, owner,
-                joshuaConfiguration.default_non_terminal, span_limit, joshuaConfiguration);
+      } else {
+        if (new File(path).isDirectory()) {
+          try {
+            PackedGrammar packed_grammar = new PackedGrammar(path, span_limit, owner, type, joshuaConfiguration);
+            packed_grammars.add(packed_grammar);
+            grammar = packed_grammar;
+          } catch (FileNotFoundException e) {
+            String msg = String.format("Couldn't load packed grammar from '%s'", path)
+                + "Perhaps it doesn't exist, or it may be an old packed file format.";
+            throw new RuntimeException(msg);
           }
-
         } else {
-
-          joshuaConfiguration.search_algorithm = "stack";
-          grammar = new PhraseTable(path, owner, type, joshuaConfiguration);
+          // thrax, hiero, samt
+          grammar = new MemoryBasedBatchGrammar(type, path, owner,
+              joshuaConfiguration.default_non_terminal, span_limit, joshuaConfiguration);
         }
-
-        this.grammars.add(grammar);
       }
 
-      checkSharedVocabularyChecksumsForPackedGrammars(packed_grammars);
+      this.grammars.add(grammar);
 
-    } else {
-      LOG.warn("no grammars supplied!  Supplying dummy glue grammar.");
-      MemoryBasedBatchGrammar glueGrammar = new MemoryBasedBatchGrammar("glue", joshuaConfiguration, -1);
-      glueGrammar.addGlueRules(featureFunctions);
-      this.grammars.add(glueGrammar);
+      /* Record whether we saw a custom grammar for adding phrase entries */
+      if (getOwner(grammar.getOwner()).equals("custom")) {
+        this.customPhraseTable = grammar;
+      } else if (getOwner(grammar.getOwner()).equals("glue")) {
+        glueGrammar = grammar;
+      }
     }
 
-    /* Add the grammar for custom entries */
-    if (joshuaConfiguration.search_algorithm.equals("stack"))
-      this.customPhraseTable = new PhraseTable(null, "custom", "phrase", joshuaConfiguration);
-    else
-      this.customPhraseTable = new MemoryBasedBatchGrammar("custom", joshuaConfiguration, 20);
-    this.grammars.add(this.customPhraseTable);
+    checkSharedVocabularyChecksumsForPackedGrammars(packed_grammars);
+
+    /* Create a glue grammar if none was provided */
+    if (joshuaConfiguration.search_algorithm.equals("cky") && glueGrammar == null) {
+      LOG.warn("No glue grammar found! Creating dummy glue grammar.");
+      glueGrammar = new MemoryBasedBatchGrammar("glue", joshuaConfiguration, -1);
+      ((MemoryBasedBatchGrammar)glueGrammar).addGlueRules(featureFunctions);
+      this.grammars.add(glueGrammar);
+    }
+    
+    /* Create a custom phrase table if none was found in the config file */
+    if (customPhraseTable == null) {
+      this.customPhraseTable = new PhraseTable("custom.grammar", "custom", "phrase", joshuaConfiguration);
+      this.grammars.add(this.customPhraseTable);
+    }
+
 
     /* Create an epsilon-deleting grammar */
     if (joshuaConfiguration.lattice_decoding) {
