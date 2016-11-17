@@ -674,20 +674,26 @@ public class Decoder {
    * @param rule the rule to add
    */
   public void addCustomRule(Rule rule) {
+    if (getCustomPhraseTable() != null) {
+      getCustomPhraseTable().addRule(rule);
+      rule.estimateRuleCost(featureFunctions);
+      getCustomPhraseTable().save();
+    }
+  }
+
+  public Grammar getCustomPhraseTable() {
     if (customPhraseTable == null) {
-      LOG.warn("No custom grammar was found in the config file; can't add rule");
+      LOG.warn("No custom grammar was found in the config file, so none was instantiated");
       LOG.warn("Add the following line to your config and restart Joshua to enable it:");
       LOG.warn("  tm = phrase -owner custom -maxspan 20 -path /path/to/custom.grammar");
       LOG.warn("The owner must be 'custom'");
     }
-      
-    customPhraseTable.addRule(rule);
-    rule.estimateRuleCost(featureFunctions);
-    
-    customPhraseTable.save();
-  }
 
-  public Grammar getCustomPhraseTable() {
     return customPhraseTable;
+  }
+  
+  public void saveCustomPhraseTable() {
+    if (getCustomPhraseTable() != null)
+      getCustomPhraseTable().save();
   }
 }

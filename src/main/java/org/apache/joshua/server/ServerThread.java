@@ -305,6 +305,9 @@ public class ServerThread extends Thread implements HttpHandler {
           }
         }
       }
+      
+      decoder.saveCustomPhraseTable();
+      
       break;
     }
     default: {
