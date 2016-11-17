@@ -424,7 +424,7 @@ public class Chart {
     if (null == this.cells.get(0, sourceLength)
         || !this.goalBin.transitToGoal(this.cells.get(0, sourceLength), this.featureFunctions,
             this.sourceLength)) {
-      LOG.warn("Input {}: Parse failure (either no derivations exist or pruning is too aggressive",
+      LOG.warn("Input {}: Parse failure (either no derivations exist, or pruning is too aggressive)",
           sentence.id());
       return null;
     }
@@ -621,7 +621,7 @@ public class Chart {
     if (null == this.cells.get(0, sourceLength)
         || !this.goalBin.transitToGoal(this.cells.get(0, sourceLength), this.featureFunctions,
             this.sourceLength)) {
-      LOG.warn("Input {}: Parse failure (either no derivations exist or pruning is too aggressive",
+      LOG.warn("Input {}: Parse failure (either no derivations exist, or pruning is too aggressive)",
           sentence.id());
       return null;
     }

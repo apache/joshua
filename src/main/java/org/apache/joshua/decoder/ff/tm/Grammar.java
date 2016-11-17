@@ -117,4 +117,9 @@ public interface Grammar {
    * @param rule the {@link org.apache.joshua.decoder.ff.tm.Rule}
    */
   void addRule(Rule rule);
+  
+  /**
+   * Write the grammar out to some permanent location (disk, database, etc).
+   */
+  void save();
 }

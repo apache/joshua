@@ -19,7 +19,9 @@
 package org.apache.joshua.decoder.phrase;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import org.apache.joshua.corpus.Vocabulary;
@@ -115,6 +117,14 @@ public class PhraseTable implements Grammar {
    */
   public void addRule(Rule rule) {
     backend.addRule(rule);
+  }
+  
+  /**
+   * Saves the grammar to disk. Only supported when the backend is a MemoryBasedBatchGrammar.
+   */
+  @Override
+  public void save() {
+    backend.save();
   }
   
   @Override

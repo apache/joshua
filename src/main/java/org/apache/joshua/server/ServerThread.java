@@ -168,7 +168,8 @@ public class ServerThread extends Thread implements HttpHandler {
       handleMetadata(meta, message);
 
     for (Translation translation: translationResponseStream) {
-      LOG.info("TRANSLATION: '{}' with {} k-best items", translation, translation.getStructuredTranslations().size());
+      LOG.info("TRANSLATION: '{}' with {} k-best items, score {}", 
+          translation, translation.getStructuredTranslations().size());
       message.addTranslation(translation);
     }
 
@@ -190,6 +191,8 @@ public class ServerThread extends Thread implements HttpHandler {
     String[] tokens = meta.split("\\s+", 2);
     String type = tokens[0];
     String args = tokens.length > 1 ? tokens[1] : "";
+    
+    LOG.info("META: {}", type);
 
     switch (type) {
     case "get_weight":
@@ -213,37 +216,38 @@ public class ServerThread extends Thread implements HttpHandler {
 
       break;
     }
-    case "get_weights":
+    case "get_weights": {
       message.addMetaData("weights " + Decoder.weights.toString());
 
       break;
+    }
     case "add_rule": {
+    
       String argTokens[] = args.split(" \\|\\|\\| ");
 
       if (argTokens.length < 3) {
-        LOG.error("* INVALID RULE '{}'", meta);
+        LOG.warn("* INVALID RULE '{}'", meta);
         return;
       }
-
+      
       String lhs = argTokens[0];
       String source = argTokens[1];
       String target = argTokens[2];
       String featureStr = "";
       String alignmentStr = "";
       if (argTokens.length > 3)
-        featureStr = argTokens[3];
+        featureStr = argTokens[3].trim();
       if (argTokens.length > 4)
-        alignmentStr = " ||| " + argTokens[4];
+        alignmentStr = argTokens[4].trim();
 
       /* Prepend source and target side nonterminals for phrase-based decoding. Probably better
        * handled in each grammar type's addRule() function.
        */
-      String ruleString = (joshuaConfiguration.search_algorithm.equals("stack")) ?
-          String
-              .format("%s ||| [X,1] %s ||| [X,1] %s ||| -1 %s %s", lhs, source, target, featureStr,
-                  alignmentStr) :
-          String.format("%s ||| %s ||| %s ||| -1 %s %s", lhs, source, target, featureStr,
-              alignmentStr);
+      String ruleString = String.format("%s ||| %s ||| %s ||| -1", lhs, source, target);
+      if (! featureStr.equals(""))
+        ruleString += featureStr;
+      if (! alignmentStr.equals(""))
+        ruleString += " ||| " + alignmentStr;
 
       Rule rule = new HieroFormatReader().parseLine(ruleString);
       decoder.addCustomRule(rule);
@@ -252,9 +256,7 @@ public class ServerThread extends Thread implements HttpHandler {
 
       break;
     }
-    case "list_rules":
-
-      LOG.info("list_rules");
+    case "list_rules": {
 
       // Walk the the grammar trie
       ArrayList<Trie> nodes = new ArrayList<>();
@@ -278,11 +280,10 @@ public class ServerThread extends Thread implements HttpHandler {
       }
 
       break;
+    }
     case "remove_rule": {
 
       Rule rule = new HieroFormatReader().parseLine(args);
-
-      LOG.info("remove_rule " + rule);
 
       Trie trie = decoder.getCustomPhraseTable().getTrieRoot();
       int[] sourceTokens = rule.getFrench();
@@ -302,6 +303,13 @@ public class ServerThread extends Thread implements HttpHandler {
           }
         }
       }
+      
+      decoder.saveCustomPhraseTable();
+      
+      break;
+    }
+    default: {
+      LOG.warn("INVALID metadata command '{}'", type);
       break;
     }
     }
