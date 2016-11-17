@@ -1021,6 +1021,11 @@ public class PackedGrammar extends AbstractGrammar {
   public void addRule(Rule rule) {
     throw new RuntimeException("PackedGrammar.addRule(): I can't add rules");
   }
+  
+  @Override
+  public void save() {
+    throw new RuntimeException("PackedGrammar.save(): I can't be saved");
+  }
 
   /**
    * Read the config file

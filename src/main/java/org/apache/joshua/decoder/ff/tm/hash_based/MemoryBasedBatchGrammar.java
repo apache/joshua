@@ -18,7 +18,16 @@
  */
 package org.apache.joshua.decoder.ff.tm.hash_based;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,15 +78,27 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
   private GrammarReader<Rule> modelReader;
 
   /**
-   * Constructor used by Decoder mostly. Default spanLimit of 20
+   * Constructor used by Decoder mostly.
    * @param owner the associated decoder-wide {@link org.apache.joshua.decoder.ff.tm.OwnerMap}
    * @param config a {@link org.apache.joshua.decoder.JoshuaConfiguration} object
    * @param spanLimit the maximum span of the input grammar rule(s) can be applied to.
    */
   public MemoryBasedBatchGrammar(String owner, JoshuaConfiguration config, int spanLimit) {
+    this(null, owner, config, spanLimit);
+  }
+  
+  /**
+   * Constructor used by Decoder for creating custom grammars.
+   * 
+   * @param file the file to load the grammar from
+   * @param owner the associated decoder-wide {@link org.apache.joshua.decoder.ff.tm.OwnerMap}
+   * @param config a {@link org.apache.joshua.decoder.JoshuaConfiguration} object
+   * @param spanLimit the maximum span of the input grammar rule(s) can be applied to.
+   */
+  public MemoryBasedBatchGrammar(String file, String owner, JoshuaConfiguration config, int spanLimit) {
     super(owner, config, spanLimit);
   }
-
+  
   /**
    * Constructor to initialize a GrammarReader (unowned)
    * @param reader the GrammarReader used for storing ASCII line-based grammars on disk.
@@ -99,7 +120,11 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
     this.grammarFile = grammarFile;
 
     // ==== loading grammar
-    this.modelReader = createReader(formatKeyword, grammarFile);
+    try {
+      this.modelReader = createReader(formatKeyword, grammarFile);
+    } catch (IOException e) {
+      LOG.warn("Couldn't load a '{}' type grammar from file '{}'", formatKeyword, grammarFile);
+    }
     if (modelReader != null) {
       for (Rule rule : modelReader)
         if (rule != null) {
@@ -231,6 +256,48 @@ public class MemoryBasedBatchGrammar extends AbstractGrammar {
       Rule oovRule = new Rule(nt_i, sourceWords, targetWords, "", 0, oovAlignment);
       addRule(oovRule);
       oovRule.estimateRuleCost(featureFunctions);
+    }
+  }
+
+  /**
+   * Saves the grammar to the specified location.
+   */
+  @Override
+  public void save() {
+    
+    LOG.info("Saving custom grammar to file '{}'", grammarFile);
+    
+    try {
+      BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+          new FileOutputStream(grammarFile), "UTF-8"));
+
+      ArrayList<Trie> nodes = new ArrayList<Trie>();
+      nodes.add(root);
+      while (nodes.size() > 0) {
+        Trie trie = nodes.remove(0);
+        // find all rules at the current node, print them
+        if (trie.hasRules()) {
+          for (Rule rule: trie.getRuleCollection().getRules()) {
+            try {
+              LOG.info("  rule: {}", rule.textFormat());
+              out.write(rule.textFormat() + "\n");
+            } catch (IOException e) {
+              e.printStackTrace();
+              return;
+            }
+          }
+        }
+
+        // graph is acyclical so we shouldn't have to check for having visited
+        if (trie.hasExtensions())
+          nodes.addAll(trie.getExtensions());
+      }
+      
+      out.close();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return;
     }
   }
 
