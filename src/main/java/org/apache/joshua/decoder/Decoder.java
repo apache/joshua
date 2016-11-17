@@ -453,7 +453,7 @@ public class Decoder {
       String path = parsedArgs.get("path");
       
       Grammar grammar;
-      if (type.equals("moses") && ! type.equals("phrase")) {
+      if (type.equals("moses") || type.equals("phrase")) {
         joshuaConfiguration.search_algorithm = "stack";
         grammar = new PhraseTable(path, owner, type, joshuaConfiguration);
 
