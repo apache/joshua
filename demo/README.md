@@ -3,16 +3,7 @@ feed it sentences, add custom rules, and view the translations.
 
 There are two steps:
 
-1. Start Joshua in server mode
-
-       $JOSHUA/bin/joshua -server-type http -server-port 5674 \
-         -feature-function OOVPenalty \
-         -feature-function "PhrasePenalty -owner custom" \
-         -weight-overwrite "OOVPenalty 1 PhrasePenalty -1" \
-         -mark-oovs -lowercase -projectcase -output-format %S
-
-   Alternately, you can use the config file in this directory, which
-   contains all the above parameteres, and simply run it like this:
+1. Start Joshua in server mode, using the config file provided in this directory:
 
        $JOSHUA/bin/joshua -config demo.config
 

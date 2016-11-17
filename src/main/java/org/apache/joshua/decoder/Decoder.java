@@ -495,13 +495,6 @@ public class Decoder {
       this.grammars.add(glueGrammar);
     }
     
-    /* Create a custom phrase table if none was found in the config file */
-    if (customPhraseTable == null) {
-      this.customPhraseTable = new PhraseTable("custom.grammar", "custom", "phrase", joshuaConfiguration);
-      this.grammars.add(this.customPhraseTable);
-    }
-
-
     /* Create an epsilon-deleting grammar */
     if (joshuaConfiguration.lattice_decoding) {
       LOG.info("Creating an epsilon-deleting grammar");
