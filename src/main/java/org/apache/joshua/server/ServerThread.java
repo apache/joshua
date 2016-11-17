@@ -168,7 +168,8 @@ public class ServerThread extends Thread implements HttpHandler {
       handleMetadata(meta, message);
 
     for (Translation translation: translationResponseStream) {
-      LOG.info("TRANSLATION: '{}' with {} k-best items", translation, translation.getStructuredTranslations().size());
+      LOG.info("TRANSLATION: '{}' with {} k-best items, score {}", 
+          translation, translation.getStructuredTranslations().size());
       message.addTranslation(translation);
     }
 
@@ -221,8 +222,7 @@ public class ServerThread extends Thread implements HttpHandler {
       break;
     }
     case "add_rule": {
-      
-      try {
+    
       String argTokens[] = args.split(" \\|\\|\\| ");
 
       if (argTokens.length < 3) {
@@ -236,25 +236,25 @@ public class ServerThread extends Thread implements HttpHandler {
       String featureStr = "";
       String alignmentStr = "";
       if (argTokens.length > 3)
-        featureStr = argTokens[3];
+        featureStr = argTokens[3].trim();
       if (argTokens.length > 4)
-        alignmentStr = " ||| " + argTokens[4];
+        alignmentStr = argTokens[4].trim();
 
       /* Prepend source and target side nonterminals for phrase-based decoding. Probably better
        * handled in each grammar type's addRule() function.
        */
-      String ruleString = String.format("%s ||| %s ||| %s ||| -1 %s %s", 
-          lhs, source, target, featureStr, alignmentStr);
+      String ruleString = String.format("%s ||| %s ||| %s ||| -1", lhs, source, target);
+      if (! featureStr.equals(""))
+        ruleString += featureStr;
+      if (! alignmentStr.equals(""))
+        ruleString += " ||| " + alignmentStr;
+
       Rule rule = new HieroFormatReader().parseLine(ruleString);
       decoder.addCustomRule(rule);
 
       LOG.info("Added custom rule {}", rule.toString());
 
       break;
-      
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
     }
     case "list_rules": {
 
@@ -284,8 +284,6 @@ public class ServerThread extends Thread implements HttpHandler {
     case "remove_rule": {
 
       Rule rule = new HieroFormatReader().parseLine(args);
-
-      LOG.info("remove_rule " + rule);
 
       Trie trie = decoder.getCustomPhraseTable().getTrieRoot();
       int[] sourceTokens = rule.getFrench();
