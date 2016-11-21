@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM java:latest
+FROM maven:latest
 
 LABEL Description="This image is used to provide a Joshua Decoder environment" Vendor="Apache Software Foundation"
 
@@ -28,7 +28,7 @@ RUN apt-get update && \
             liblzma-dev \            
             libz-dev \
             make \
-            maven
+            ant
 
 
 RUN mkdir /opt/joshua
@@ -44,4 +44,4 @@ COPY . $JOSHUA
 
 RUN sh download-deps.sh
 
-RUN mvn clean compile assembly:single
+RUN mvn package
