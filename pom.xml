@@ -63,6 +63,51 @@
 
   <developers>
     <developer>
+      <id>magicaltrout</id>
+      <name>Tom Barber</name>
+      <email>tom [at] analytical-labs [dot] com</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>thammegowda</id>
+      <name>Thamme Gowda</name>
+      <email>tgowdan [at] gmail [dot] com</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>johnhew</id>
+      <name>John Hewitt</name>
+      <email>johnhew [at] seas [dot] upenn [dot] edu</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>fhieber</id>
+      <name>Felix Hieber</name>
+      <email>felix [dot] hieber [at] gmail [dot] com</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>mattmann</id>
+      <name>Chris Mattman</name>
+      <email>chris [dot] a [dot] mattmann [at] jpl [dot] nasa [dot] gov</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>lewismc</id>
       <name>Lewis John McGibbney</name>
       <email>lewismc [at] apache [dot] org</email>
@@ -75,6 +120,42 @@
       <id>mjpost</id>
       <name>Matt Post</name>
       <email>post [at] cs [dot] jhu [dot] edu</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>hsaputra</id>
+      <name>Henry Saputra</name>
+      <email>henry [dot] saputra [at] gmail [dot] com</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>kellen</id>
+      <name>Kellen Sunderland</name>
+      <email>kellen [dot] sunderland [at] gmail [dot] com</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>tommaso</id>
+      <name>Tommaso Teofili</name>
+      <email>tommaso [dot] teofili [at] gmail [dot] com</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>mthomas</id>
+      <name>Max Thomas</name>
+      <email>max [at] maxthomas [dot] io</email>
       <roles>
         <role>Committer</role>
         <role>PMC Member</role>
