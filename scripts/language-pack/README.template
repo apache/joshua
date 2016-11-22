@@ -57,6 +57,28 @@ You can set the RESTful interface by also passing '-server-type http':
 The RESTful interface is used when running the browser demo (see web/index.html)
 or when using the Joshua Translation Engine.
 
+Web demo
+--------
+See the web/ directory for a web-based AJAX interface to Java. One feature of this
+approach is that it permits you to add custom words and phrases to Joshua, which then
+become translation options for the decoder. To start the web demo,
+
+1. Start Joshua in HTTP server mode, as described above
+
+       ./joshua -server-port 5674 -server-type http
+
+   This starts Joshua running on port 5674.
+
+2. Load the web interface, passing it to server and port you are using
+
+       firefox "web/index.html?server=localhost&port=5674"
+
+   Any browser will do.
+
+You can then translate text, entering one sentence per line, in the main box. You can
+also experiment with adding words and phrases. These are then saved to a custom grammar.
+These rules can be managed on the "Rules" tab.
+
 Runtime options
 ---------------
 By default, the language pack runs with a single thread and with options set to
