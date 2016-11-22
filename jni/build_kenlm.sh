@@ -17,8 +17,7 @@
 #
 set -u
 
-KENLM_MAX_ORDER=10
-
+export KENLM_MAX_ORDER=10
 export CXX=${CXX:-g++}
 export LDFLAGS+=" -lz -lbz2 -llzma"
 #CXXFLAGS+=" -O3 -fPIC -DHAVE_ZLIB"
@@ -32,7 +31,7 @@ cd $JOSHUA/ext/kenlm
 cd build
 cmake .. -DKENLM_MAX_ORDER=$KENLM_MAX_ORDER
 #Use this if cmake fails with boost errors
-#cmake .. -DBoost_NO_BOOST_CMAKE=TRUE -DBOOST_ROOT=/opt/boost
+#cmake .. -DBoost_NO_BOOST_CMAKE=TRUE -DBOOST_ROOT=/opt/boost -DKENLM_MAX_ORDER=$KENLM_MAX_ORDER
 make -j
 cp bin/{query,lmplz,build_binary} $JOSHUA/bin
 
