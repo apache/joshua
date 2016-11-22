@@ -81,6 +81,14 @@
       </roles>
     </developer>
     <developer>
+      <id>mhedderich</id>
+      <name>Michael Hedderich</name>
+      <email>mhedderich [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+      </roles>
+    </developer>
+    <developer>
       <id>johnhew</id>
       <name>John Hewitt</name>
       <email>johnhew [at] seas [dot] upenn [dot] edu</email>
