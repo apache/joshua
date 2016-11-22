@@ -50,7 +50,7 @@ You can then connect directly to the socket using nc or telnet:
 
     cat example.<SRC> | prepare.sh | nc localhost 5674 > output.<TRG>
 
-You can set the RESTful interface by also passing '-server-type http':
+You can set the RESTful interface by also passing `-server-type http`:
 
     joshua -server-port 5674 -server-type http
 
