@@ -50,8 +50,11 @@ target_abbr=$(echo $langpair | cut -d- -f2)
 source=$($ISO $source_abbr)
 target=$($ISO $target_abbr)
 
-# Create the jar file
-(cd $JOSHUA && mvn clean compile assembly:single)
+# Create the jar file if it's not there
+JARFILE=$(ls -tr $JOSHUA/target/joshua-*-jar-with-dependencies.jar | tail -n1)
+if [[ ! -e "$JARFILE" ]]; then
+    (cd $JOSHUA && mvn clean install)
+fi
 
 # Create the bundle
 # ... --copy-config-options "-lower-case true -project-case true"
@@ -60,7 +63,7 @@ $JOSHUA/scripts/language-pack/copy_model.py \
     --verbose \
     --mem $mem \
     --copy-config-options \
-      '-top-n 1 -output-format %S -mark-oovs false -lower-case -project-case' \
+      '-top-n 1 -output-format %S -mark-oovs false -lower-case true -project-case true' \
     $config \
     $dest
 
@@ -79,7 +82,7 @@ copy_template() {
 [[ ! -d "$dest/target" ]] && mkdir -p "$dest/target"
 
 # Copy over critical infrastructure files
-cp $JOSHUA/target/joshua-*-jar-with-dependencies.jar $dest/target
+cp $JARFILE $dest/target
 
 # Copy over the example files
 for ext in $source_abbr $target_abbr; do
