@@ -94,7 +94,7 @@ options that may be useful during decoding include:
    complete target hypergraph until it is ready to be processed for output, so
    too many simultaneous threads could result in lots of memory usage if a long
    sentence results in many sentences being queued up. We have run Joshua with
-   as many as 48 threads without any problems of this kind, but it’s useful to
+   as many as 48 threads without any problems of this kind, but it's useful to
    keep in the back of your mind.
 
 -  `-pop-limit N`
@@ -199,7 +199,7 @@ def filter_through_copy_config_script(config_text, copy_configs):
         'Running the copy-config.pl script with the command: ' + cmd
     )
     p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE)
-    result, err = p.communicate(config_text)
+    result, err = p.communicate(config_text.encode('utf8'))
     if p.returncode != 0:
         raise CalledProcessError(
             'Encountered an error running the copy-config.pl script.\n'
@@ -207,7 +207,7 @@ def filter_through_copy_config_script(config_text, copy_configs):
             '  error: %s'
             % (cmd, err or '')
         )
-    return result
+    return result.decode('utf8')
 
 
 def line_specifies_grammar(line):
@@ -659,7 +659,7 @@ def collect_operations(opts):
                 message = (
                     # Prepend the line number to the error message
                     'ERROR: Configuration file "{0}" line {1}: {2}'
-                    .format(opts.config.name, line_num, e.message)
+                    .format(opts.config.name, line_num, str(e))
                 )
                 e.message = message
                 raise e
@@ -675,7 +675,7 @@ def collect_operations(opts):
                 # Prepend the line number to the error message
                 message = (
                     'ERROR: Configuration file "{0}" line {1}: {2}'
-                    .format(opts.config.name, line_num, e.message)
+                    .format(opts.config.name, line_num, str(e))
                 )
                 e.message = message
                 raise e
@@ -748,7 +748,7 @@ def main(argv):
         operations = collect_operations(opts)
         execute_operations(operations)
     except Exception as e:
-        error_quit(e.message)
+        error_quit(str(e))
 
 
 if __name__ == "__main__":

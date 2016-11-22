@@ -350,7 +350,8 @@ def get_features(config_file):
 
     output = check_output("%s/bin/joshua-decoder -c %s -show-weights -v 0" % (JOSHUA, config_file), shell=True)
     features = []
-    for index, item in enumerate(output.split('\n')):
+    for index, item in enumerate(output.split('\n'.encode(encoding='utf_8', errors='strict'))):
+        item = item.decode()
         if item != "":
             features.append(tuple(item.split()))
     return features
@@ -388,7 +389,7 @@ def setup_configs(template, template_dest, target, num_refs, tunedir, command, c
                      'NUMREFS': num_refs,
                      'TUNEDIR': tunedir,
                      'METRIC': metric,
-                     'ITERATIONS': `iterations`,
+                     'ITERATIONS': iterations,
                      'DECODER_COMMAND': command,
                      'DECODER_CONFIG': config,
                      'DECODER_OUTPUT': output })
@@ -416,7 +417,7 @@ def run_zmert(tunedir, source, target, command, config, output, opts):
                   target, get_num_refs(target), tunedir, command, config, output,
                   opts.metric, opts.iterations or 10)
 
-    tuner_mem = '4g'
+    tuner_mem = '10g'
     call("java -d64 -Xmx%s -cp %s/target/joshua-*-jar-with-dependencies.jar org.apache.joshua.zmert.ZMERT -maxMem 4000 %s/mert.config > %s/mert.log 2>&1" % (tuner_mem, JOSHUA, tunedir, tunedir), shell=True)
 
     safe_symlink(os.path.join(os.path.dirname(config),'joshua.config.ZMERT.final'),
@@ -430,7 +431,7 @@ def run_pro(tunedir, source, target, command, config, output, opts):
                   target, get_num_refs(target), tunedir, command, config, output,
                   opts.metric, opts.iterations or 30)
 
-    tuner_mem = '4g'
+    tuner_mem = '10g'
     call("java -d64 -Xmx%s -cp %s/target/joshua-*-jar-with-dependencies.jar org.apache.joshua.pro.PRO %s/pro.config > %s/pro.log 2>&1" % (tuner_mem, JOSHUA, tunedir, tunedir), shell=True)
 
     safe_symlink(os.path.join(os.path.dirname(config),'joshua.config.PRO.final'),
@@ -444,7 +445,7 @@ def run_mira(tunedir, source, target, command, config, output, opts):
                   target, get_num_refs(target), tunedir, command, config, output,
                   opts.metric, opts.iterations or 5)
 
-    tuner_mem = '4g'
+    tuner_mem = '10g'
     call("java -d64 -Xmx%s -cp %s/target/joshua-*-jar-with-dependencies.jar org.apache.joshua.mira.MIRA %s/mira.config > %s/mira.log 2>&1" % (tuner_mem, JOSHUA, tunedir, tunedir), shell=True)
 
     safe_symlink(os.path.join(os.path.dirname(config),'joshua.config.MIRA.final'),
@@ -457,7 +458,7 @@ def run_adagrad(tunedir, source, target, command, config, output, opts):
                   target, get_num_refs(target), tunedir, command, config, output,
                   opts.metric, opts.iterations or 10)
 
-    tuner_mem = '4g'
+    tuner_mem = '10g'
     call("java -d64 -Xmx%s -cp %s/target/joshua-*-jar-with-dependencies.jar org.apache.joshua.adagrad.AdaGrad %s/adagrad.config > %s/adagrad.log 2>&1" % (tuner_mem, JOSHUA, tunedir, tunedir), shell=True)
 
     safe_symlink(os.path.join(os.path.dirname(config),'joshua.config.ADAGRAD.final'),
