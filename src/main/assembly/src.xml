@@ -54,6 +54,8 @@
         <exclude>**/ext/**</exclude>
         <!-- exclude thrax directories -->
         <exclude>**/thrax/</exclude>
+        <!-- exclude pom.xml.releaseBackup -->
+        <exclude>pom.xml.releaseBackup</exclude>
       </excludes>
     </fileSet>
   </fileSets>
