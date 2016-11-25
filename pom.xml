@@ -72,6 +72,15 @@
       </roles>
     </developer>
     <developer>
+      <id>tdomhan</id>
+      <name>Tobias Domhan</name>
+      <email>tdomhan [at] gmail [dot] com</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>thammegowda</id>
       <name>Thamme Gowda</name>
       <email>tgowdan [at] gmail [dot] com</email>
