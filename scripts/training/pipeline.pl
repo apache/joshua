@@ -766,7 +766,13 @@ if ($FIRST_STEP eq "ALIGN") {
   # --no-tokenization flag
 }
 
-# skip this step if an alignment was provided
+# Use an existing alignment file if it's present, short-circuits
+# rebuilding the alignments...
+if (-s "alignments/training.align") {
+  $ALIGNMENT = "alignments/training.align";
+}
+
+# skip this step if an alignment was provided or it already exists
 if (! defined $ALIGNMENT) {
 
   # We process the data in chunks which by default are 1,000,000 sentence pairs.  So first split up
