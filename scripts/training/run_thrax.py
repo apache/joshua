@@ -40,7 +40,9 @@ $JOSHUA/scripts/support/run_thrax.py \
   /path/to/corpus.TARGET \
   /path/to/alignment \
   /path/to/thrax.config \
-  -o grammar.gz
+  [-o grammar.gz] \
+  [-T /tmp] \
+  [-v]
 """
 parser = argparse.ArgumentParser(description='Run thrax')
 parser.add_argument('-o', dest='output_file', default='grammar.gz', help='Location of output grammar')
@@ -48,19 +50,14 @@ parser.add_argument('-f', dest='force', default=False, action='store_true', help
 parser.add_argument('-T', dest='tmp_dir', default='/tmp', help='Temporary directory')
 parser.add_argument('-v', dest='verbose', default=False, action='store_true', help='Be verbose')
 parser.add_argument('-d', '--debug', dest='debug', default=False, action='store_true', help='Don\'t cleanup')
-parser.add_argument('thrax_config', help='Location of Thrax template to use')
-parser.add_argument('source_corpus', help='The source corpus')
-parser.add_argument('target_corpus', help='The target corpus (parsed if building SAMT)')
+parser.add_argument('corpora', nargs='+', help='Either (a) the Thrax input file or (b) the source, target, and aligned corpus files')
 parser.add_argument('alignment_file', help='The alignment between them')
 args = parser.parse_args()
-
-source = args.source_corpus.split('.')[-1]
-target = args.target_corpus.split('.')[-1]
 
 HADOOP   = os.environ['HADOOP']
 THRAX_JAR = os.path.join(os.environ['JOSHUA'], 'thrax', 'bin', 'thrax.jar')
 
-THRAXDIR = 'pipeline-%s-%s-%s' % ( source, target, os.getcwd().replace('/','_') )
+THRAXDIR = 'pipeline-%s' % ( os.getcwd().replace('/','_') )
 
 def run(cmd):
     if args.verbose:
@@ -81,13 +78,25 @@ if os.path.exists(args.output_file) and not args.force:
     sys.stderr.write('  (use -f to force overwrite)\n')
     sys.exit(1)
 
+if len(args.corpora) not in [1,3]:
+    sys.stderr.write('Fatal: corpora argument must be either')
+    sys.stderr.write('  (a) a single consolidated Thrax input file, or')
+    sys.stderr.write('  (b) three parallel files: source, target, and alignments')
+    sys.exit(2)
+
 # Cleanup 
 run('%s/bin/hadoop fs -rm -r %s' % (HADOOP, THRAXDIR))
 run('%s/bin/hadoop fs -mkdir %s' % (HADOOP, THRAXDIR))
 
 # Create thrax input file
-thrax_file = 'thrax.input-file'
-paste(args.source_corpus, args.target_corpus, args.alignment_file, thrax_file)
+if len(args.corpora) == 3:
+    # Paste together the source, target, and alignment files
+    thrax_file = 'thrax.input_file'
+    paste(args.corpora[0], args.corpora[1], args.corpora[2], thrax_file)
+else:    
+    # Assume the thrax input file is already created
+    thrax_file = args.corpora[0]
+
 run('%s/bin/hadoop fs -put %s %s/input-file' % (HADOOP, thrax_file, THRAXDIR))
 
 # Copy the template
