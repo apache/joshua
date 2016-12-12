@@ -14,6 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+echo "Warning: this script downloads many tools used in building and running Joshua."
+echo "Not all of them are Apache Licensed. If you wish to continue, type 'y' and hit Enter".
+echo -n "Continue? (y to continue) "
+read j
+if [[ $j != 'y' ]]; then
+    echo "Quitting."
+fi
+
 git clone https://github.com/kpu/kenlm.git ext/kenlm
 (cd ext/kenlm; git checkout e6a600c8ac4062a9e6644f91232d3ba09469c4f4)
 ./jni/build_kenlm.sh
