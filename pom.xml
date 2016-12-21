@@ -23,7 +23,7 @@
     <version>18</version>
   </parent>
   <groupId>org.apache.joshua</groupId>
-  <artifactId>joshua</artifactId>
+  <artifactId>joshua-incubating</artifactId>
   <packaging>jar</packaging>
   <version>6.2-SNAPSHOT</version>
   <name>Apache Joshua Machine Translation Toolkit</name>
