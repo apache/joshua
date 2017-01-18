@@ -287,6 +287,15 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
           <descriptors>
             <descriptor>${basedir}/src/main/assembly/src.xml</descriptor>
