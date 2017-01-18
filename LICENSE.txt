@@ -225,3 +225,11 @@ Copyright (c) 2011-2015 Twitter, Inc.
 
 jquery 2.2.0, a javascript library.
 Copyright 2014 jQuery Foundation and other contributors, https://jquery.org/
+
+normalize.css A collection of HTML element and attribute style-normalizations 
+http://necolas.github.io/normalize.css/
+Copyright (c) Nicolas Gallagher and Jonathan Neal
+
+GLYPHICONS a library of precisely prepared monochromatic icons and symbols, 
+created with an emphasis to simplicity and easy orientation.
+http://glyphicons.com

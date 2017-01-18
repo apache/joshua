@@ -1,4 +1,4 @@
-Apache Joshua 6.1 (Nov 10th, 2016)
+Apache Joshua 6.1 (Jan 17th, 2017)
 ==================================
 Release Report - https://s.apache.org/joshua6.1
 

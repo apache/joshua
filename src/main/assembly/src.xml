@@ -26,7 +26,7 @@
     <format>zip</format>
   </formats>
   <includeBaseDirectory>true</includeBaseDirectory>
-  <baseDirectory>apache-joshua-${project.version}</baseDirectory>
+  <baseDirectory>apache-joshua-${project.version}-incubating</baseDirectory>
   <fileSets>
   <!-- include all modules -->
     <fileSet>
@@ -56,6 +56,14 @@
         <exclude>**/thrax/</exclude>
         <!-- exclude pom.xml.releaseBackup -->
         <exclude>pom.xml.releaseBackup</exclude>
+        <!-- Compiled binary GIZA++ -->
+        <exclude>**/bin/GIZA++</exclude>
+        <!-- Compiled binary mkcls -->
+        <exclude>**/bin/mkcls</exclude>
+        <!-- Compiled binary snt2cooc.out -->
+        <exclude>**/bin/snt2cooc.out</exclude>
+        <!-- Compiled binary lm.berkeleylm.gz -->
+        <exclude>**/src/test/resources/berkeley_lm/lm.berkeleylm.gz</exclude>
       </excludes>
     </fileSet>
   </fileSets>
