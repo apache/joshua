@@ -301,7 +301,7 @@
             <descriptor>${basedir}/src/main/assembly/src.xml</descriptor>
           </descriptors>
           <attach>true</attach>
-          <skipAssembly>${assembly.skip}</skipAssembly>
+          <skipAssembly>false</skipAssembly>
           <tarLongFileMode>posix</tarLongFileMode>
         </configuration>
       </plugin>
