@@ -16,7 +16,7 @@ matrix:
       - sudo apt-get -y update
       - sudo apt-get -y install build-essential libboost-all-dev zlib1g-dev libbz2-dev liblzma-dev cmake cmake-data
       - export JOSHUA=`pwd`
-      - ./download-deps.sh
+      - ./download-deps.sh yes-i-want-non-apache-licensed-software
     - os: osx
       osx_image: xcode8
       before_install:
