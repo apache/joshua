@@ -468,6 +468,15 @@ public class Decoder {
                 + "Perhaps it doesn't exist, or it may be an old packed file format.";
             throw new RuntimeException(msg);
           }
+
+          /* Bug check. It is a problem if you load the glue grammar before a packed grammar, due to vocabulary
+           * issues. That should be fixed one day, but in the meantime, it is important to tell people about it.
+           */
+          if (glueGrammar != null) {
+            LOG.error("FATAL: the glue grammar must be listed AFTER any packed grammar.");
+            LOG.error("  Change the order in the config file so that your packed grammar is loaded first.");
+            throw new RuntimeException("Glue grammar loaded before a packed grammar.");
+          }
         } else {
           // thrax, hiero, samt
           grammar = new MemoryBasedBatchGrammar(type, path, owner,
