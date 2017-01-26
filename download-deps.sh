@@ -14,12 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-echo "Warning: this script downloads many tools used in building and running Joshua."
-echo "Not all of them are Apache Licensed. If you wish to continue, type 'y' and hit Enter".
-echo -n "Continue? (y to continue) "
-read j
-if [[ $j != 'y' ]]; then
-    echo "Quitting."
+if [[ $1 = "yes-i-want-non-apache-licensed-software" ]]; then
+  echo "Warning: this script downloads many tools used in building and running Joshua."
+  echo "Not all of them are Apache Licensed. The argument passed to this script has"
+  echo "been interpreted as preemptive acknowledgment of this fact."
+  sleep 5
+else
+  echo "Warning: this script downloads many tools used in building and running Joshua."
+  echo "Not all of them are Apache Licensed. If you wish to continue, type 'y' and hit Enter".
+  echo -n "Continue? (y to continue) "
+  read j
+  if [[ $j != 'y' ]]; then
+      echo "Quitting."
+  fi
 fi
 
 git clone https://github.com/kpu/kenlm.git ext/kenlm
