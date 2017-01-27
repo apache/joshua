@@ -380,6 +380,9 @@
           <descriptors>
             <descriptor>${basedir}/src/main/assembly/src.xml</descriptor>
           </descriptors>
+          <attach>true</attach>
+          <skipAssembly>false</skipAssembly>
+          <tarLongFileMode>posix</tarLongFileMode>
         </configuration>
       </plugin>
     </plugins>
