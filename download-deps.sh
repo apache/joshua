@@ -14,37 +14,50 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if [[ $1 = "yes-i-want-non-apache-licensed-software" ]]; then
-  echo "Warning: this script downloads many tools used in building and running Joshua."
-  echo "Not all of them are Apache Licensed. The argument passed to this script has"
-  echo "been interpreted as preemptive acknowledgment of this fact."
-  sleep 5
-else
-  echo "Warning: this script downloads many tools used in building and running Joshua."
-  echo "Not all of them are Apache Licensed. If you wish to continue, type 'y' and hit Enter".
-  echo -n "Continue? (y to continue) "
-  read j
-  if [[ $j != 'y' ]]; then
-      echo "Quitting."
-  fi
+# The tools to install. This is overridden if there is a command-line argument.
+tools="kenlm berkeleylm thrax giza berkeleyaligner"
+[[ ! -z $1 ]] && tools=$1
+
+echo "Warning: this script downloads many tools used in building and running Joshua."
+echo "Not all of them are Apache Licensed. If you wish to continue, type 'y' and hit Enter".
+echo -n "Continue? (y to continue) "
+read j
+if [[ $j != 'y' ]]; then
+    echo "Quitting."
 fi
 
-git clone https://github.com/kpu/kenlm.git ext/kenlm
-(cd ext/kenlm; git checkout e6a600c8ac4062a9e6644f91232d3ba09469c4f4)
-./jni/build_kenlm.sh
+echo "Installing $tools..."
 
-git clone https://github.com/joshua-decoder/berkeleylm.git ext/berkeleylm
-(cd ext/berkeleylm; ant)
-
-git clone https://github.com/joshua-decoder/thrax.git
-(cd thrax; ant)
-
-git clone https://github.com/joshua-decoder/giza-pp.git ext/giza-pp
-(make -j4 -C ext/giza-pp all install)
-
-git clone https://github.com/joshua-decoder/symal.git ext/symal
-(make -C ext/symal all)
-
-git clone https://github.com/joshua-decoder/berkeleyaligner ext/berkeleyaligner
-(cd ext/berkeleyaligner; ant)
+for tool in $tools; do
+    echo "Trying to install tool '$tool'..."
+    case $tool in 
+	      kenlm)
+            git clone https://github.com/kpu/kenlm.git ext/kenlm
+            (cd ext/kenlm; git checkout e6a600c8ac4062a9e6644f91232d3ba09469c4f4)
+            ./jni/build_kenlm.sh
+            ;;
+        berkeleylm)
+            git clone https://github.com/joshua-decoder/berkeleylm.git ext/berkeleylm
+            (cd ext/berkeleylm; ant)
+            ;;
+        thrax)
+            git clone https://github.com/joshua-decoder/thrax.git
+            (cd thrax; ant)
+            ;;
+        giza)
+            git clone https://github.com/joshua-decoder/giza-pp.git ext/giza-pp
+            (make -j4 -C ext/giza-pp all install)
+        
+            git clone https://github.com/joshua-decoder/symal.git ext/symal
+            (make -C ext/symal all)
+            ;;
+        berkeleyaligner)
+            git clone https://github.com/joshua-decoder/berkeleyaligner ext/berkeleyaligner
+            (cd ext/berkeleyaligner; ant)
+            ;;
+        *)
+            echo "No such tool '$tool'"
+            ;;
+    esac
+done
 
