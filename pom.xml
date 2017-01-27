@@ -211,7 +211,7 @@
     <connection>scm:git:http://git-wip-us.apache.org/repos/asf/incubator-joshua.git</connection>
     <developerConnection>scm:git:http://git-wip-us.apache.org/repos/asf/incubator-joshua.git</developerConnection>
     <url>https://git-wip-us.apache.org/repos/asf/incubator-joshua.git</url>
-    <tag>HEAD</tag>
+    <tag>apache-joshua-6.1</tag>
   </scm>
   <issueManagement>
     <system>JIRA</system>
