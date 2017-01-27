@@ -273,6 +273,25 @@
             <updateReleaseInfo>true</updateReleaseInfo>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${maven-assembly-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>assembly</id>
+              <phase>package</phase>
+              <goals>
+                <goal>single</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <attach>true</attach>
+            <skipAssembly>false</skipAssembly>
+            <tarLongFileMode>posix</tarLongFileMode>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -282,29 +301,6 @@
         <configuration>
           <source>${javac.src.version}</source>
           <target>${javac.target.version}</target>
-        </configuration>
-      </plugin>
-      <!-- Generates the distribution package -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>${maven-assembly-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>assembly</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <descriptors>
-            <descriptor>${basedir}/src/main/assembly/src.xml</descriptor>
-          </descriptors>
-          <attach>true</attach>
-          <skipAssembly>false</skipAssembly>
-          <tarLongFileMode>posix</tarLongFileMode>
         </configuration>
       </plugin>
       <plugin>
@@ -374,6 +370,17 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <!-- Generates the distribution package -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <inherited>false</inherited>
+        <configuration>
+          <descriptors>
+            <descriptor>${basedir}/src/main/assembly/src.xml</descriptor>
+          </descriptors>
+        </configuration>
       </plugin>
     </plugins>
   </build>
