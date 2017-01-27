@@ -63,7 +63,7 @@
         <!-- Compiled binary snt2cooc.out -->
         <exclude>**/bin/snt2cooc.out</exclude>
         <!-- Compiled binary lm.berkeleylm.gz -->
-        <exclude>**/src/test/resources/berkeley_lm/lm.berkeleylm.gz</exclude>
+        <exclude>**/src/test/resources/berkeley_lm/**.gz</exclude>
       </excludes>
     </fileSet>
   </fileSets>
