@@ -254,7 +254,7 @@
             <mavenExecutorId>forked-path</mavenExecutorId>
             <useReleaseProfile>false</useReleaseProfile>
             <tagNameFormat>apache-joshua-@{project.version}</tagNameFormat>
-            <arguments>-Papache-release,release</arguments>
+            <arguments>-Prelease</arguments>
             <autoVersionSubmodules>true</autoVersionSubmodules>
           </configuration>
           <dependencies>
