@@ -51,7 +51,6 @@ parser.add_argument('-T', dest='tmp_dir', default='/tmp', help='Temporary direct
 parser.add_argument('-v', dest='verbose', default=False, action='store_true', help='Be verbose')
 parser.add_argument('-d', '--debug', dest='debug', default=False, action='store_true', help='Don\'t cleanup')
 parser.add_argument('corpora', nargs='+', help='Either (a) the Thrax input file or (b) the source, target, and aligned corpus files')
-parser.add_argument('alignment_file', help='The alignment between them')
 args = parser.parse_args()
 
 HADOOP   = os.environ['HADOOP']
