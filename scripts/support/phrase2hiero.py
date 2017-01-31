@@ -41,19 +41,16 @@ def maybelog(value):
     except ValueError:
         return value
 
-for line in sys.stdin:
-    moses = False
+for lineno,line in enumerate(sys.stdin):
 
     # Moses phrase tables do not have a left-hand side symbol, add that
-    if not line.startswith('['):
-        line = '[X] ||| ' + line
-        moses = True
+    line = '[X] ||| ' + line
 
     # Get all the fields
     tokens = line.split(r' ||| ')
 
     # take the -log() of each input token
-    if moses and len(tokens) >= 4:
+    if len(tokens) >= 4:
         tokens[3] = ' '.join(map(maybelog, tokens[3].split(' ')))
 
     print ' ||| '.join(tokens),
