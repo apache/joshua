@@ -1,0 +1,122 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+"""
+Runs Thrax.
+"""
+from __future__ import print_function
+from itertools import izip
+
+import codecs
+import argparse
+import tempfile
+import subprocess
+import sys
+import os
+
+JOSHUA = os.environ.get('JOSHUA')
+
+EXAMPLE = r"""
+Example invocation:
+
+$JOSHUA/scripts/support/run_thrax.py \
+  /path/to/thrax.config \
+  /path/to/corpus.SOURCE \
+  /path/to/corpus.TARGET \
+  /path/to/alignment \
+  [-o grammar.gz] \
+  [-T /tmp] \
+  [-v]
+"""
+parser = argparse.ArgumentParser(description='Run thrax')
+parser.add_argument('-o', dest='output_file', default='grammar.gz', help='Location of output grammar')
+parser.add_argument('-f', dest='force', default=False, action='store_true', help='Force overwrite')
+parser.add_argument('-T', dest='tmp_dir', default='/tmp', help='Temporary directory')
+parser.add_argument('-v', dest='verbose', default=False, action='store_true', help='Be verbose')
+parser.add_argument('-d', '--debug', dest='debug', default=False, action='store_true', help='Don\'t cleanup')
+parser.add_argument('thrax_config', help='Path to thrax config file')
+parser.add_argument('corpora', nargs='+', help='Either (a) the Thrax input file or (b) the source, target, and aligned corpus files')
+args = parser.parse_args()
+
+HADOOP   = os.environ['HADOOP']
+THRAX_JAR = os.path.join(os.environ['JOSHUA'], 'thrax', 'bin', 'thrax.jar')
+
+THRAXDIR = 'pipeline-%s' % ( os.getcwd().replace('/','_') )
+
+def run(cmd):
+    if args.verbose:
+        print(cmd)
+    subprocess.call(cmd, shell=True)
+
+def utf8open(file, flags='r'):
+    return codecs.open(file, flags, 'utf-8')
+
+def paste(source, target, align, out_file): 
+    out = utf8open(out_file, 'w')
+    for s, t, a in izip(utf8open(source), utf8open(target), utf8open(align)):
+        out.write(' ||| '.join([s.strip(), t.strip(), a.strip()]) + '\n')
+    out.close()
+
+if os.path.exists(args.output_file) and not args.force:
+    sys.stderr.write('Fatal: output path "%s" already exists\n' % (args.output_file))
+    sys.stderr.write('  (use -f to force overwrite)\n')
+    sys.exit(1)
+
+if len(args.corpora) not in [1,3]:
+    sys.stderr.write('Fatal: corpora argument must be either')
+    sys.stderr.write('  (a) a single consolidated Thrax input file, or')
+    sys.stderr.write('  (b) three parallel files: source, target, and alignments')
+    sys.exit(2)
+
+# Cleanup 
+run('%s/bin/hadoop fs -rm -r %s' % (HADOOP, THRAXDIR))
+run('%s/bin/hadoop fs -mkdir %s' % (HADOOP, THRAXDIR))
+
+# Create thrax input file
+if len(args.corpora) == 3:
+    # Paste together the source, target, and alignment files
+    thrax_file = 'thrax.input_file'
+    paste(args.corpora[0], args.corpora[1], args.corpora[2], thrax_file)
+    rm_thrax_file = True
+else:    
+    # Assume the thrax input file is already created
+    thrax_file = args.corpora[0]
+    rm_thrax_file = False
+
+run('%s/bin/hadoop fs -put %s %s/input-file' % (HADOOP, thrax_file, THRAXDIR))
+
+# Copy the template
+conf_file = tempfile.NamedTemporaryFile(prefix='/tmp/thrax.conf', delete=False)
+for line in open(args.thrax_config):
+    if not line.startswith('input-file'):
+        conf_file.write(line)
+conf_file.write('input-file %s/input-file\n' % (THRAXDIR))
+conf_file.close()
+conf_file_name = conf_file.name
+
+# Run Hadoop
+run('%s/bin/hadoop jar %s -D mapred.child.java.opts="-Xmx%s" -D hadoop.tmp.dir=%s %s %s' % (HADOOP, THRAX_JAR, '4g', args.tmp_dir, conf_file_name, THRAXDIR))
+run('rm -f %s' % (args.output_file))
+run('%s/bin/hadoop fs -getmerge %s/final/ %s' % (HADOOP, THRAXDIR, args.output_file))
+
+# Cleanup
+if not args.debug:
+    os.remove(conf_file_name)
+    if rm_thrax_file:
+      os.remove(thrax_file)
+    run('%s/bin/hadoop fs -rm -r %s' % (HADOOP, THRAXDIR))
