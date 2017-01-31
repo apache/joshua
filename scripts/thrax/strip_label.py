@@ -24,6 +24,6 @@ sys.stdout.encoding = 'utf-8'
 
 for line in sys.stdin:
     tokens = line.split(' ||| ')
-    tokens[3] = re.sub(r' \S*=', ' ', tokens[3])
+    tokens[3] = re.sub(r'\S*=', '', tokens[3])
 
     print ' ||| '.join(tokens),
