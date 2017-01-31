@@ -115,6 +115,6 @@ if ($retval == 0) {
 } else {
   print STDERR "* FATAL: Couldn't pack the grammar.\n";
   print STDERR "* Copying sorted grammars ($grammars) to current directory.\n";
-  system("cp $grammars .");
+  system("cp $grammars .") unless $opts{s};
   exit 1;
 }
