@@ -78,11 +78,15 @@ copy_template() {
     > $2
 }
 
-# Create the target directory
+# Create the target directory and copy over the jarfile
 [[ ! -d "$dest/target" ]] && mkdir -p "$dest/target"
-
-# Copy over critical infrastructure files
 cp $JARFILE $dest/target
+
+# Copy over KenLM if found
+if [[ -e "$JOSHUA/lib/libken.so" ]]; then
+    [[ ! -d "$dest/lib" ]] && mkdir -p "$dest/lib"
+    cp $JOSHUA/lib/libken.so "$dest/lib"
+fi
 
 # Copy over the web demonstration
 cp -a $JOSHUA/demo $dest/web
