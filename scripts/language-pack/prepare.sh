@@ -19,7 +19,8 @@
 
 set -u
 
-lang=<SRC>
+# Set default language. Override with "lang=XX prepare.sh"
+: ${lang=<SRC>}
 
 cd $(dirname $0) # relative paths now safe
 ./scripts/normalize.pl $lang | ./scripts/tokenize.pl -l $lang
