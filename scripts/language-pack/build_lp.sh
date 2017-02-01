@@ -26,15 +26,15 @@ example=$6
 
 date=$(date +%Y-%m-%d)
 
-if [[ -z $6 ]]; then
+if [[ -z $3 ]]; then
     echo "Usage: $0 langpair config mem credits-file benchmark-file example"
     echo "where"
     echo "  langpair is the language pair, (e.g., es-en)"
     echo "  config is the tuned Joshua config, (1/tune/joshua.config.final)"
     echo "  mem is the amount of memory the decoder needs"
-    echo "  credits-file is a file describing how the model was built (1/CREDITS"
-    echo "  benchmark-file is a file describing model performance on test sets (1/BENCHMARK)"
-    echo "  example is a path prefix to a pair of small (~10 lines) example files"
+    echo "  [optional] credits-file is a file describing how the model was built (1/CREDITS"
+    echo "  [optional] benchmark-file is a file describing model performance on test sets (1/BENCHMARK)"
+    echo "  [optional] example is a path prefix to a pair of small (~10 lines) example files"
     exit 1
 fi
 
@@ -84,13 +84,6 @@ copy_template() {
 # Copy over critical infrastructure files
 cp $JARFILE $dest/target
 
-# Copy over the example files
-for ext in $source_abbr $target_abbr; do
-    [[ ! -s $example.$ext ]] && echo "Can't find example file $example.$ext, quitting" && exit
-    cp $example.$ext $dest/example.$ext
-    chmod 444 $dest/example.$ext
-done
-
 # Copy over the web demonstration
 cp -a $JOSHUA/demo $dest/web
 
@@ -99,15 +92,27 @@ cp -a $JOSHUA/scripts/preparation $dest/scripts
 copy_template "$JOSHUA/scripts/language-pack/prepare.sh" "$dest/prepare.sh"
 chmod 555 $dest/prepare.sh
 
-# Copy the credits file
-cat $credits > $dest/CREDITS
-chmod 444 $dest/CREDITS
-
-# Summarize test set performance for the README
-cat $benchmark > $dest/BENCHMARK
-chmod 444 $dest/BENCHMARK
-
 # Create the README
 copy_template "$JOSHUA/scripts/language-pack/README.template" "$dest/README"
 chmod 444 $dest/README
 
+# Copy the credits file
+if [[ ! -z $credits ]]; then
+    cat $credits > $dest/CREDITS
+    chmod 444 $dest/CREDITS
+fi
+
+# Summarize test set performance for the README
+if [[ ! -z $benchmark ]]; then
+    cat $benchmark > $dest/BENCHMARK
+    chmod 444 $dest/BENCHMARK
+fi
+
+# Copy over the example files
+if [[ ! -z $example ]]; then
+    for ext in $source_abbr $target_abbr; do
+        [[ ! -s $example.$ext ]] && echo "Can't find example file $example.$ext, quitting" && exit
+        cp $example.$ext $dest/example.$ext
+        chmod 444 $dest/example.$ext
+    done
+fi
