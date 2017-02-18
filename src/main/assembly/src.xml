@@ -66,6 +66,9 @@
         <exclude>**/src/test/resources/berkeley_lm/**.gz</exclude>
         <!-- exclude IDEA files -->
         <exclude>**/*.iml</exclude>
+        <!-- exclude release files -->
+        <exclude>**/pom.xml.tag</exclude>
+        <exclude>**/release.properties</exclude>
       </excludes>
     </fileSet>
   </fileSets>
