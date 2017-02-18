@@ -64,6 +64,8 @@
         <exclude>**/bin/snt2cooc.out</exclude>
         <!-- Compiled binary lm.berkeleylm.gz -->
         <exclude>**/src/test/resources/berkeley_lm/**.gz</exclude>
+        <!-- exclude IDEA files -->
+        <exclude>**/*.iml</exclude>
       </excludes>
     </fileSet>
   </fileSets>
