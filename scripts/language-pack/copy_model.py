@@ -97,13 +97,12 @@ fi
 set -u
 
 bundledir=$(dirname $0)
-cd $bundledir   # relative paths are now safe....
 
-exec java -mx${mem} \
-    -Dfile.encoding=utf8 \
-    -Djava.library.path=./lib \
-    -cp ./target/joshua-*-jar-with-dependencies.jar \
-    org.apache.joshua.decoder.JoshuaDecoder -c joshua.config -v 0 "$@"
+exec java -mx${mem} \\
+    -Dfile.encoding=utf8 \\
+    -Djava.library.path=$bundledir/lib \\
+    -cp $bundledir/target/joshua-*-jar-with-dependencies.jar \\
+    org.apache.joshua.decoder.JoshuaDecoder -c $bundledir/joshua.config -v 0 "$@"
 """ % mem
 
     return text

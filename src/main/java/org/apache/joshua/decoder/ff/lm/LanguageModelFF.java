@@ -114,7 +114,7 @@ public class LanguageModelFF extends StatefulFF {
 
     this.type = parsedArgs.get("lm_type");
     this.ngramOrder = Integer.parseInt(parsedArgs.get("lm_order"));
-    this.path = parsedArgs.get("lm_file");
+    this.path = config.getFilePath(parsedArgs.get("lm_file"));
 
     if (parsedArgs.containsKey("class_map")) {
       this.isClassLM = true;

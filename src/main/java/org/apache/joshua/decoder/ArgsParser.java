@@ -18,6 +18,7 @@
  */
 package org.apache.joshua.decoder;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -85,6 +86,9 @@ public class ArgsParser {
           try {
             LOG.info("Parameters read from configuration file: {}", getConfigFile());
             config.readConfigFile(getConfigFile());
+
+            // Now set the parent directory
+            config.setConfigFilePath(new File(getConfigFile()).getCanonicalFile().getParent());
           } catch (IOException e) {
             throw new RuntimeException(e);
           }

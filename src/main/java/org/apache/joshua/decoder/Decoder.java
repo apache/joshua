@@ -450,7 +450,7 @@ public class Decoder {
 
       String owner = parsedArgs.get("owner");
       int span_limit = Integer.parseInt(parsedArgs.get("maxspan"));
-      String path = parsedArgs.get("path");
+      String path = joshuaConfiguration.getFilePath(parsedArgs.get("path"));
       
       Grammar grammar;
       if (type.equals("moses") || type.equals("phrase")) {

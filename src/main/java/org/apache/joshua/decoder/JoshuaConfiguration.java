@@ -22,6 +22,7 @@ import static org.apache.joshua.util.FormatUtils.cleanNonTerminal;
 import static org.apache.joshua.util.FormatUtils.ensureNonTerminalBrackets;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -52,6 +53,10 @@ import org.slf4j.LoggerFactory;
 public class JoshuaConfiguration {
 
   private static final Logger LOG = LoggerFactory.getLogger(JoshuaConfiguration.class);
+
+  // This records the directory from which relative file references are normalized.
+  // If a config file is loaded, that will override the current directory.
+  public String modelRootPath = Paths.get(".").toAbsolutePath().normalize().toString();
 
   // whether to construct a StructuredTranslation object for each request instead of
   // printing to stdout. Used when the Decoder is used from Java directly.
@@ -362,6 +367,31 @@ public class JoshuaConfiguration {
 
     } catch (IOException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * This records the path of the config file passed as a command-line argument
+   * (-c or -config). It is used to produce absolute path names when relative ones are found
+   * in the config file.
+   */
+  public void setConfigFilePath(String path) {
+    this.modelRootPath = path;
+  }
+
+  /**
+   * Returns the absolute file path of the argument. Files that are already absolute path names
+   * are returned unmodified, but relative file names have the `modelRootPath` prepended (if
+   * it was set).
+   */
+  public String getFilePath(String filename) {
+    if (filename.startsWith("/"))
+      return filename;
+    else if (this.modelRootPath != null)
+      return this.modelRootPath + "/" + filename;
+    else {
+      LOG.warn("File '{}' is a relative path but no config file path was set", filename);
+      return filename;
     }
   }
 
