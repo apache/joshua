@@ -113,9 +113,9 @@ public class ServerThread extends Thread implements HttpHandler {
    * Transforms an HTTP query string into a dictionary of lists of values. The lists are necessary 
    * because the RESTful spec permits multiple keys of the same name.
    * 
-   * @param query
-   * @return
-   * @throws UnsupportedEncodingException
+   * @param query the query string
+   * @return a map of lists of values found for each key in the query string
+   * @throws UnsupportedEncodingException if there is a bad encoding
    */
   public HashMap<String, ArrayList<String>> queryToMap(String query) throws UnsupportedEncodingException {
     HashMap<String, ArrayList<String>> result = new HashMap<>();
@@ -162,7 +162,7 @@ public class ServerThread extends Thread implements HttpHandler {
    * but only multiple "q=" keys are permitted. If multiple keys of other names are found, only the 
    * last one is used. So for the query string:
    * 
-   * ?q=a&q=b&meta=c&meta=d
+   * ?q=a&amp;q=b&amp;meta=c&amp;meta=d
    * 
    * handle() will use q = {a, b} and meta = {d}
    * 
@@ -204,6 +204,7 @@ public class ServerThread extends Thread implements HttpHandler {
    * Processes metadata commands received in the HTTP request. Some commands result in sending data back.
    *
    * @param meta the metadata request
+   * @param message the JSON message template that will be filled out.
    */
   private void handleMetadata(String meta, JSONMessage message) {
     String[] tokens = meta.split("\\s+", 2);

@@ -374,6 +374,8 @@ public class JoshuaConfiguration {
    * This records the path of the config file passed as a command-line argument
    * (-c or -config). It is used to produce absolute path names when relative ones are found
    * in the config file.
+   * 
+   * @param path the root path for the joshua models
    */
   public void setConfigFilePath(String path) {
     this.modelRootPath = path;
@@ -383,6 +385,9 @@ public class JoshuaConfiguration {
    * Returns the absolute file path of the argument. Files that are already absolute path names
    * are returned unmodified, but relative file names have the `modelRootPath` prepended (if
    * it was set).
+   * 
+   * @param filename the path of the file, absolute or relative
+   * @return the absolute file path of a file
    */
   public String getFilePath(String filename) {
     if (filename.startsWith("/"))
