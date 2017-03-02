@@ -109,15 +109,23 @@ public class ServerThread extends Thread implements HttpHandler {
     }
   }
   
-  public HashMap<String, String> queryToMap(String query) throws UnsupportedEncodingException {
-    HashMap<String, String> result = new HashMap<>();
+  /**
+   * Transforms an HTTP query string into a dictionary of lists of values. The lists are necessary 
+   * because the RESTful spec permits multiple keys of the same name.
+   * 
+   * @param query
+   * @return
+   * @throws UnsupportedEncodingException
+   */
+  public HashMap<String, ArrayList<String>> queryToMap(String query) throws UnsupportedEncodingException {
+    HashMap<String, ArrayList<String>> result = new HashMap<>();
     for (String param : query.split("&")) {
-        String pair[] = param.split("=");
-        if (pair.length > 1) {
-          result.put(pair[0], URLDecoder.decode(pair[1], "UTF-8"));
-        } else {
-            result.put(pair[0], "");
-        }
+        int pos = param.indexOf('=');
+        String key = URLDecoder.decode((pos != -1) ? param.substring(0,  pos) : param, "UTF-8");
+        String val = URLDecoder.decode((pos != -1) ? param.substring(pos+1) : "", "UTF-8");
+        if (! result.containsKey(key))
+          result.put(key, new ArrayList<String>());
+        result.get(key).add(URLDecoder.decode(val, "UTF-8"));
     }
     return result;
   } 
@@ -150,16 +158,26 @@ public class ServerThread extends Thread implements HttpHandler {
    * Called to handle an HTTP connection. This looks for metadata in the URL string, which is processed
    * if present. It also then handles returning a JSON-formatted object to the caller. 
    * 
+   * URL query strings can have multiple keys of the same name. These are accumulated into arrays,
+   * but only multiple "q=" keys are permitted. If multiple keys of other names are found, only the 
+   * last one is used. So for the query string:
+   * 
+   * ?q=a&q=b&meta=c&meta=d
+   * 
+   * handle() will use q = {a, b} and meta = {d}
+   * 
    * @param client the client connection
    */
   @Override
   public synchronized void handle(HttpExchange client) throws IOException {
 
-    HashMap<String, String> params = queryToMap(client.getRequestURI().getQuery());
-    String query = params.get("q");
-    String meta = params.get("meta");
+    HashMap<String, ArrayList<String>> params = queryToMap(client.getRequestURI().getQuery());
+    ArrayList<String> queryList = params.get("q");
+    ArrayList<String> metaList = params.get("meta");
+    String meta = (metaList != null && ! metaList.isEmpty()) ? metaList.get(metaList.size() - 1) : null;
     
-    BufferedReader reader = new BufferedReader(new StringReader(query));
+    /* Join together multiple sentence queries as distinct sentences. */
+    BufferedReader reader = new BufferedReader(new StringReader(String.join("\n", queryList)));
     TranslationRequestStream request = new TranslationRequestStream(reader, joshuaConfiguration);
     
     TranslationResponseStream translationResponseStream = decoder.decodeAll(request);
