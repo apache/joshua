@@ -32,10 +32,18 @@ RUN apt-get update && \
 
 # set environment variables
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
-ENV JOSHUA=/opt/joshua
+ENV JOSHUA=/code
+ENV PORT=5674
+ENV JOSHUA_ARGS=""
+ENV LD_LIBRARY_PATH=$JOSHUA/lib
 
-# download Joshua source 
-RUN mkdir /opt/joshua
-WORKDIR /opt/joshua
+# download Joshua source and compile KenLM
+RUN mkdir -p /code
+WORKDIR /code
 RUN curl -L https://api.github.com/repos/apache/incubator-joshua/tarball | tar --strip-components=1 -xzvf -
 RUN echo y | bash download-deps.sh kenlm
+
+# TODO: check that the LP version is correct
+
+# start Joshua
+ENTRYPOINT /model/joshua -config joshua.config.kenlm -server-type http -server-port $PORT -v 1 $JOSHUA_ARGS
