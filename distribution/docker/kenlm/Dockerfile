@@ -46,4 +46,4 @@ RUN echo y | bash download-deps.sh kenlm
 # TODO: check that the LP version is correct
 
 # start Joshua
-ENTRYPOINT /model/joshua -config joshua.config.kenlm -server-type http -server-port $PORT -v 1 $JOSHUA_ARGS
+ENTRYPOINT /model/joshua -config /model/joshua.config.kenlm -server-type http -server-port $PORT -v 1 $JOSHUA_ARGS
