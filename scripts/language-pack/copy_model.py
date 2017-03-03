@@ -82,10 +82,7 @@ def bundle_runner_text(mem):
 #
 # The default amount of memory is 4gb.
 
-NUM_ARGS=0
-E_OPTERROR=1
-
-## memory usage; default is 4 GB
+## Java heap space. Increase this if you get errors.
 mem=%s
 
 if [[ $1 == "-m" ]]; then
@@ -98,11 +95,7 @@ set -u
 
 bundledir=$(dirname $0)
 
-exec java -mx${mem} \\
-    -Dfile.encoding=utf8 \\
-    -Djava.library.path=$bundledir/lib \\
-    -cp $bundledir/target/joshua-*-jar-with-dependencies.jar \\
-    org.apache.joshua.decoder.JoshuaDecoder -c $bundledir/joshua.config -v 0 "$@"
+exec java -mx${mem} -Dfile.encoding=utf8 -cp $bundledir/target/joshua-*-jar-with-dependencies.jar org.apache.joshua.decoder.JoshuaDecoder -c $bundledir/joshua.config -v 0 "$@"
 """ % mem
 
     return text

@@ -53,7 +53,7 @@ target=$($ISO $target_abbr)
 # Create the jar file if it's not there
 JARFILE=$(ls -tr $JOSHUA/target/joshua-*-jar-with-dependencies.jar | tail -n1)
 if [[ ! -e "$JARFILE" ]]; then
-    (cd $JOSHUA && mvn clean install)
+    (cd $JOSHUA && mvn clean package)
 fi
 
 # Create the bundle
@@ -82,11 +82,11 @@ copy_template() {
 [[ ! -d "$dest/target" ]] && mkdir -p "$dest/target"
 cp $JARFILE $dest/target
 
-# Copy over KenLM if found
-if [[ -e "$JOSHUA/lib/libken.so" ]]; then
-    [[ ! -d "$dest/lib" ]] && mkdir -p "$dest/lib"
-    cp $JOSHUA/lib/libken.so "$dest/lib"
-fi
+# create the LP config file
+version=3
+git=$(cd $JOSHUA; git describe --long --dirty)
+echo "version = $version" > $dest/lp.conf
+echo "commit = $git" >> $dest/lp.conf
 
 # Copy over the web demonstration
 cp -a $JOSHUA/demo $dest/web
