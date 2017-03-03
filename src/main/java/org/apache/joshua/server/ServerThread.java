@@ -119,13 +119,17 @@ public class ServerThread extends Thread implements HttpHandler {
    */
   public HashMap<String, ArrayList<String>> queryToMap(String query) throws UnsupportedEncodingException {
     HashMap<String, ArrayList<String>> result = new HashMap<>();
+    if (LOG.isDebugEnabled())
+      LOG.debug("Got RESTful query: " + query);
     for (String param : query.split("&")) {
-        int pos = param.indexOf('=');
-        String key = URLDecoder.decode((pos != -1) ? param.substring(0,  pos) : param, "UTF-8");
-        String val = URLDecoder.decode((pos != -1) ? param.substring(pos+1) : "", "UTF-8");
-        if (! result.containsKey(key))
-          result.put(key, new ArrayList<String>());
-        result.get(key).add(URLDecoder.decode(val, "UTF-8"));
+      int pos = param.indexOf('=');
+      String key = URLDecoder.decode((pos != -1) ? param.substring(0,  pos) : param, "UTF-8");
+      String val = URLDecoder.decode((pos != -1) ? param.substring(pos+1) : "", "UTF-8");
+      if (LOG.isDebugEnabled())
+        LOG.debug("  -> Got {} = {}", key, val);
+      if (! result.containsKey(key))
+        result.put(key, new ArrayList<String>());
+      result.get(key).add(val);
     }
     return result;
   } 
@@ -171,7 +175,7 @@ public class ServerThread extends Thread implements HttpHandler {
   @Override
   public synchronized void handle(HttpExchange client) throws IOException {
 
-    HashMap<String, ArrayList<String>> params = queryToMap(client.getRequestURI().getQuery());
+    HashMap<String, ArrayList<String>> params = queryToMap(client.getRequestURI().getRawQuery());
     ArrayList<String> queryList = params.get("q");
     ArrayList<String> metaList = params.get("meta");
     String meta = (metaList != null && ! metaList.isEmpty()) ? metaList.get(metaList.size() - 1) : null;
