@@ -1,0 +1,18 @@
+# Version 3 (March 2017)
+
+This was the first version actually versioned. It was built to work with docker building
+a KenLM language model. 
+
+Includes KenLM language model files (recommended) in addition to BerkeleyLM. 
+The latter is the default, with the former recommended and facilitated with a Docker 
+container. Google API now multithreaded. Contained the new files:
+
+- joshua.config.kenlm (same config file but with KenLM instead of BerkeleyLM)
+- lp.conf (identifying the LP version and the git commit of the code)
+
+# Version 1-2 (prior to March 2017)
+
+These versions were not explicitly identified. They contained a "joshua" top-level script 
+and "prepare.sh" for preparing data. Operates in server mode or from the command line. 
+Entirely BerkeleyLM-based. Includes a Joshua 6.1 release candidate jar file.	
+
