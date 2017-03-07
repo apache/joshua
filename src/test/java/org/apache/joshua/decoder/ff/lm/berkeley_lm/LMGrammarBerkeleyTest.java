@@ -18,11 +18,23 @@
  */
 package org.apache.joshua.decoder.ff.lm.berkeley_lm;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.zip.GZIPOutputStream;
+
+import edu.berkeley.nlp.lm.io.MakeLmBinaryFromArpa;
+import org.apache.commons.io.IOUtils;
 import org.apache.joshua.decoder.Decoder;
 import org.apache.joshua.decoder.JoshuaConfiguration;
 import org.apache.joshua.decoder.Translation;
 import org.apache.joshua.decoder.segment_file.Sentence;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -39,15 +51,43 @@ public class LMGrammarBerkeleyTest {
   private static final String EXPECTED_OUTPUT_WITH_OOV = "tm_glue_0=2.000 lm_0=-7.153 lm_0_oov=0.000\n";
   private static final String[] OPTIONS = "-v 0 -output-format %f".split(" ");
 
+  private static final String lmFile = "src/test/resources/berkeley_lm/lm";
+  private static final String compressedLmFile = "target/lm.gz";
+  private static final String lmFileBin = "target/lm.berkeleylm";
+  private static final String compressedLmFileBin = "target/lm.berkeleylm.gz";
+
   private JoshuaConfiguration joshuaConfig;
   private Decoder decoder;
 
+  @BeforeClass
+  public static void before() throws Exception {
+    // generate lm.gz
+    FileInputStream lmFileStream = new FileInputStream(new File(lmFile));
+    compress(lmFileStream, compressedLmFile);
+
+    // generate lm.berkeleylm
+    MakeLmBinaryFromArpa.main(new String[] { lmFile, lmFileBin });
+
+    // generate lm.berkeleylm.gz
+    FileInputStream lmFileBinStream = new FileInputStream(new File(lmFileBin));
+    compress(lmFileBinStream, compressedLmFileBin);
+  }
+
+  private static void compress(FileInputStream lmFileStream, String target) throws IOException {
+    try {
+      Files.createFile(Paths.get(target));
+      GZIPOutputStream gzipOutputStream = new GZIPOutputStream(new FileOutputStream(target));
+      IOUtils.copy(lmFileStream, gzipOutputStream);
+      gzipOutputStream.finish();
+    } catch (FileAlreadyExistsException fae) {
+      // the file already exists, no need to recreate it
+    }
+  }
+
   @DataProvider(name = "languageModelFiles")
   public Object[][] lmFiles() {
-    return new Object[][]{{"src/test/resources/berkeley_lm/lm"},
-            {"src/test/resources/berkeley_lm/lm.gz"},
-            {"src/test/resources/berkeley_lm/lm.berkeleylm"},
-            {"src/test/resources/berkeley_lm/lm.berkeleylm.gz"}};
+    return new Object[][] { { lmFile }, { compressedLmFile }, { lmFileBin },
+        { compressedLmFileBin } };
   }
 
   @AfterMethod
@@ -74,12 +114,12 @@ public class LMGrammarBerkeleyTest {
   public void givenLmWithOovFeature_whenDecoder_thenCorrectFeaturesReturned() {
     joshuaConfig = new JoshuaConfiguration();
     joshuaConfig.processCommandLineOptions(OPTIONS);
-    joshuaConfig.features.add("LanguageModel -lm_type berkeleylm -oov_feature -lm_order 2 -lm_file src/test/resources/berkeley_lm/lm");
+    joshuaConfig.features.add(
+        "LanguageModel -lm_type berkeleylm -oov_feature -lm_order 2 -lm_file src/test/resources/berkeley_lm/lm");
     decoder = new Decoder(joshuaConfig, null);
     final String translation = decode(INPUT).toString();
     assertEquals(Decoder.weights.getDenseFeatures().size(), 3);
     assertEquals(translation, EXPECTED_OUTPUT_WITH_OOV);
   }
-
 
 }
