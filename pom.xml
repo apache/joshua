@@ -544,6 +544,8 @@
                 <exclude>scripts/training/templates/tune/decoder_command.qsub</exclude>
                 <exclude>scripts/training/TODO</exclude>
                 <exclude>scripts/thrax/strip_label.py</exclude>
+                <exclude>scripts/language-pack/VERSIONS</exclude>
+                <exclude>**/README.md</exclude>
               </excludes>
             </configuration>
           </plugin>
