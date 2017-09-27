@@ -64,3 +64,4 @@ joshua-core/test-output
 .pydevproject
 
 *.iml
+/.idea/
