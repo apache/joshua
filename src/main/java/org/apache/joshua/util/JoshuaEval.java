@@ -80,6 +80,12 @@ public class JoshuaEval {
     private static void evaluateCandsPlain(String inFileName) {
         String[] topCandidates = getTopCandidates(inFileName, "plain", 1, 1);
         evaluate(topCandidates, evalMetric);
+        String[] refs = new String[refSentences.length];
+        for (int i = 0; i < refSentences.length; i++) {
+            refs[i] = refSentences[i][0];
+        }
+        double lengthRatio = lengthRatio(topCandidates, refs);
+        System.out.printf("\nCandidate/Reference Length Ratio = %.4f\n", lengthRatio);
     }
 
 
@@ -553,7 +559,6 @@ public class JoshuaEval {
 
         try {
             BufferedReader inFile = new BufferedReader(new FileReader(fileName));
-
             String line;
             do {
                 line = inFile.readLine();
@@ -568,6 +573,25 @@ public class JoshuaEval {
         return count;
     }
 
+
+    /**
+     * Computes length ratios between two string arrays.
+     * @param arr1
+     * @param arr2
+     * @return ratio of lengths
+     */
+    private static double lengthRatio(String[] arr1, String[] arr2){
+
+        assert arr1.length == arr2.length;
+        int count1 = 0;
+        int count2 = 0;
+        for (int i = 0; i < arr1.length; i++){
+            count1 += arr1[i] == null ? 0 : arr1[i].split(" ").length;
+            count2 += arr2[i] == null ? 0 : arr2[i].split(" ").length;
+        }
+        return 1.0 * count1 / count2;
+
+    }
 
     private static void println(Object obj) {
         System.out.println(obj);
