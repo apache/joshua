@@ -173,6 +173,7 @@ my $NUM_JOBS = 1;
 # The number of threads to use at different pieces in the pipeline
 # (giza, decoding)
 my $NUM_THREADS = 1;
+$ENV{'NUM_THREADS'} = $NUM_THREADS;
 
 # which LM to use (kenlm or berkeleylm)
 my $LM_TYPE = "kenlm";

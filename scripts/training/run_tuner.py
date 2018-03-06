@@ -347,10 +347,11 @@ def parse_tm_line(line):
 def get_features(config_file):
     """Queries the decoder for all dense features that will be fired by the feature
     functions activated in the config file"""
-
-    mem_size = os.environ.get('JOSHUA_MEM', None)
-    mem_arg = '-m %s' % mem_size if mem_size else ''
+    
+    mem_arg = '-m %s' % os.environ['JOSHUA_MEM'] if 'JOSHUA_MEM' in os.environ else ''
     decode_cmd = "%s/bin/joshua-decoder %s -c %s -show-weights -v 0" % (JOSHUA, mem_arg, config_file)
+    if 'NUM_THREADS' in os.environ:
+        decode_cmd += ' -threads %s' % os.environ['NUM_THREADS']
     output = check_output(decode_cmd, shell=True)
     features = []
     for index, item in enumerate(output.split('\n'.encode(encoding='utf_8', errors='strict'))):
