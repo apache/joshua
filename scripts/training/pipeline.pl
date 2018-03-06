@@ -135,6 +135,8 @@ my $FILTERING = "fast";
 # a lot more than this for SAMT decoding (though really it depends
 # mostly on your grammar size)
 my $JOSHUA_MEM = "4g";
+# export the environment var
+$ENV{'JOSHUA_MEM'} = $JOSHUA_MEM;
 
 # the amount of memory available for hadoop processes (passed to
 # Hadoop via -Dmapred.child.java.opts

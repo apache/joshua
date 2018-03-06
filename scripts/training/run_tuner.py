@@ -348,7 +348,10 @@ def get_features(config_file):
     """Queries the decoder for all dense features that will be fired by the feature
     functions activated in the config file"""
 
-    output = check_output("%s/bin/joshua-decoder -c %s -show-weights -v 0" % (JOSHUA, config_file), shell=True)
+    mem_size = os.environ.get('JOSHUA_MEM', None)
+    mem_arg = '-m %s' % mem_size if mem_size else ''
+    decode_cmd = "%s/bin/joshua-decoder %s -c %s -show-weights -v 0" % (JOSHUA, mem_arg, config_file)
+    output = check_output(decode_cmd, shell=True)
     features = []
     for index, item in enumerate(output.split('\n'.encode(encoding='utf_8', errors='strict'))):
         item = item.decode()
