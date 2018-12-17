@@ -270,7 +270,8 @@ public class LanguageModelFF extends StatefulFF {
         if (tokens[i] > 0) { // skip nonterminals
           for (int j = 0; j < alignments.length; j += 2) {
             if (alignments[j] == i) {
-              String annotation = sentence.getAnnotation((int)alignments[i] + begin, "class");
+              int index = tokens.length == alignments.length ? i : j;
+              String annotation = sentence.getAnnotation((int) alignments[index] + begin, "class");
               if (annotation != null) {
                 //                System.err.println(String.format("  word %d source %d abs %d annotation %d/%s",
                 //                    i, alignments[i], alignments[i] + begin, annotation, Vocabulary.word(annotation)));
