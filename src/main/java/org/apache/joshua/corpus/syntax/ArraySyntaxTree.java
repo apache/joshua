@@ -368,7 +368,7 @@ public class ArraySyntaxTree implements SyntaxTree, Externalizable {
 
   // TODO: could make this way more efficient
   private void appendFromPennFormat(String line) {
-    String[] tokens = line.replaceAll("\\(", " ( ").replaceAll("\\)", " ) ").trim().split("\\s+");
+    String[] tokens = line.replace("\\(", " ( ").replace("\\)", " ) ").trim().split("\\s+");
 
     boolean next_nt = false;
     int current_id = 0;
