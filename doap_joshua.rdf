@@ -43,14 +43,14 @@
     </release>
     <repository>
       <SVNRepository>
-        <location rdf:resource="https://git-wip-us.apache.org/repos/asf/incubator-joshua.git"/>
-        <browse rdf:resource="https://github.com/apache/incubator-joshua"/>
+        <location rdf:resource="https://git-wip-us.apache.org/repos/asf/joshua.git"/>
+        <browse rdf:resource="https://github.com/apache/joshua"/>
       </SVNRepository>
     </repository>
     <maintainer>
       <foaf:Person>
         <foaf:name>Joshua Development Team</foaf:name>
-          <foaf:mbox rdf:resource="mailto:dev@joshua.incubator.apache.org"/>
+          <foaf:mbox rdf:resource="mailto:dev@joshua.apache.org"/>
       </foaf:Person>
     </maintainer>
   </Project>

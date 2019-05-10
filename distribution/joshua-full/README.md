@@ -32,11 +32,11 @@ Memory: amount of RAM the server should consume.
 # Contact Information
 
 To contact the authors swing by the dev mailing list:
-dev@joshua.incubator.apache.org
+dev@joshua.apache.org
 
 ## Apache Joshua
 
-  - http://joshua.incubator.apache.org
+  - http://joshua.apache.org
   - https://issues.apache.org/jira/browse/joshua
-  - dev@joshua.incubator.apache.org
+  - dev@joshua.apache.org
 

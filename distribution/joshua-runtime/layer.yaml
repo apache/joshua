@@ -16,4 +16,4 @@
 #
 
 includes: ['layer:basic', 'interface:java']
-repo: https://github.com/buggtb/incubator-joshua.git
+repo: https://github.com/buggtb/joshua.git

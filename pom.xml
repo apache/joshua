@@ -23,7 +23,7 @@
     <version>18</version>
   </parent>
   <groupId>org.apache.joshua</groupId>
-  <artifactId>joshua-incubating</artifactId>
+  <artifactId>joshua</artifactId>
   <packaging>jar</packaging>
   <version>6.2-SNAPSHOT</version>
   <name>Apache Joshua Machine Translation Toolkit</name>
@@ -31,7 +31,7 @@
   translation decoder for phrase-based, hierarchical,
   and syntax-based machine translation, written in Java.
   </description>
-  <url>http://joshua.incubator.apache.org</url>
+  <url>http://joshua.apache.org</url>
   <inceptionYear>2016</inceptionYear>
 
   <properties>
@@ -184,33 +184,33 @@
   <mailingLists>
     <mailingList>
       <name>Dev Mailing List</name>
-      <post>dev[at]joshua[dot]incubator[dot]apache[dot]org</post>
-      <subscribe>dev-subscribe[at]joshua[dot]incubator[dot]apache[dot]org</subscribe>
-      <unsubscribe>dev-unsubscribe[at]joshua[dot]incubator[dot]apache[dot]org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/incubator-joshua-dev/</archive>
+      <post>dev[at]joshua[dot]apache[dot]org</post>
+      <subscribe>dev-subscribe[at]joshua[dot]apache[dot]org</subscribe>
+      <unsubscribe>dev-unsubscribe[at]joshua[dot]apache[dot]org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/joshua-dev/</archive>
     </mailingList>
 
     <mailingList>
       <name>User Mailing List</name>
-      <post>user[at]joshua[dot]incubator[dot]apache[dot]org</post>
-      <subscribe>user-subscribe[at]joshua[dot]incubator[dot]apache[dot]org</subscribe>
-      <unsubscribe>user-unsubscribe[at]joshua[dot]incubator[dot]apache[dot]org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/incubator-joshua-user/</archive>
+      <post>user[at]joshua[dot]apache[dot]org</post>
+      <subscribe>user-subscribe[at]joshua[dot]apache[dot]org</subscribe>
+      <unsubscribe>user-unsubscribe[at]joshua[dot]apache[dot]org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/joshua-user/</archive>
     </mailingList>
 
     <mailingList>
       <name>Commits Mailing List</name>
-      <post>commits[at]joshua[dot]incubator[dot]apache[dot]org</post>
-      <subscribe>commits-subscribe[at]joshua[dot]incubator[dot]apache[dot]org</subscribe>
-      <unsubscribe>commits-unsubscribe[at]joshua[dot]incubator[dot]apache[dot]org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/incubator-joshua-commits/</archive>
+      <post>commits[at]joshua[dot]apache[dot]org</post>
+      <subscribe>commits-subscribe[at]joshua[dot]apache[dot]org</subscribe>
+      <unsubscribe>commits-unsubscribe[at]joshua[dot]apache[dot]org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/joshua-commits/</archive>
     </mailingList>
   </mailingLists>
 
   <scm>
-    <connection>scm:git:http://git-wip-us.apache.org/repos/asf/incubator-joshua.git</connection>
-    <developerConnection>scm:git:http://git-wip-us.apache.org/repos/asf/incubator-joshua.git</developerConnection>
-    <url>https://git-wip-us.apache.org/repos/asf/incubator-joshua.git</url>
+    <connection>scm:git:http://github.com/apache/joshua.git</connection>
+    <developerConnection>scm:git:http://github.com/apache/joshua.git</developerConnection>
+    <url>https://github.com/apache/joshua.git</url>
     <tag>HEAD</tag>
   </scm>
   <issueManagement>

@@ -1,11 +1,11 @@
-[![Build Status](https://travis-ci.org/apache/incubator-joshua.svg?branch=master)](https://travis-ci.org/apache/incubator-joshua)
+[![Build Status](https://travis-ci.org/apache/joshua.svg?branch=master)](https://travis-ci.org/apache/joshua)
 [![homebrew](https://img.shields.io/homebrew/v/joshua.svg?maxAge=2592000?style=plastic)](http://braumeister.org/formula/joshua)
-[![license](https://img.shields.io/github/license/apache/incubator-joshua.svg?maxAge=2592000?style=plastic)](http://www.apache.org/licenses/LICENSE-2.0)
+[![license](https://img.shields.io/github/license/apache/joshua.svg?maxAge=2592000?style=plastic)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Jenkins](https://img.shields.io/jenkins/s/https/builds.apache.org/joshua_master.svg?maxAge=2592000?style=plastic)](https://builds.apache.org/job/joshua_master/)
 [![Maven Central](https://img.shields.io/maven-central/v/org.apache.joshua/joshua-incubating.svg)](http://search.maven.org/#search|ga|1|a%3A%22joshua-incubating%22)
 [![Twitter Follow](https://img.shields.io/twitter/follow/ApacheJoshua.svg?style=social&label=Follow&maxAge=2592000?style=plastic)](https://twitter.com/ApacheJoshua)
 
-# Welcome to Apache Joshua (Incubating)
+# Welcome to Apache Joshua
 <img src="https://s.apache.org/joshua_logo" align="right" width="300" />
 
 Joshua is a statistical machine translation toolkit for both phrase-based (new in version 6.0) and syntax-based decoding. It can be run with pre-built language packs available for download, and can also be used to build models for new language pairs. Among the many features of
@@ -16,7 +16,7 @@ Joshua are:
  * [Thrax](https://github.com/joshua-decoder/thrax): a Hadoop-based, scalable grammar extractor
  * A [sparse feature architecture](http://cs.jhu.edu/~post/joshua-docs/md_sparse_features.html) supporting an arbitrary number of features
 
-The latest release of Joshua is always linked to directly from the [Home Page](http://joshua.incubator.apache.org)
+The latest release of Joshua is always linked to directly from the [Home Page](http://joshua.apache.org)
 
 ## New in 6.X
 
@@ -54,7 +54,7 @@ The basic method for invoking the decoder looks like this:
 
     cat SOURCE | $JOSHUA/bin/joshua-decoder -m MEM -c CONFIG OPTIONS > OUTPUT
 
-Some example usage scenarios and scripts can be found in the [examples/](https://github.com/apache/incubator-joshua/tree/master/examples) directory.
+Some example usage scenarios and scripts can be found in the [examples/](https://github.com/apache/joshua/tree/master/examples) directory.
 
 ## Development With Eclipse
 
@@ -65,7 +65,7 @@ with this by typing
 
 ## Working with "language packs"
 
-Joshua includes a number of "language packs", which are pre-built models that allow you to use the translation system as a black box, without worrying too much about how machine translation works. You can browse the models available for download on the [Joshua website](http://joshua.incubator.apache.org/language-packs/).
+Joshua includes a number of "language packs", which are pre-built models that allow you to use the translation system as a black box, without worrying too much about how machine translation works. You can browse the models available for download on the [Joshua website](http://joshua.apache.org/language-packs/).
 
 ## Building new models
 

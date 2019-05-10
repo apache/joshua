@@ -10,7 +10,7 @@ Bugs or source code issues should be logged in our
 The decoding examples and model training examples in the subdirectories of this
 directory assume you have downloaded the Fisher Spanish--English dataset, which
 contains speech-recognizer output paired with English translations. This data
-can be downloaded by running the [download.sh](https://github.com/apache/incubator-joshua/blob/master/examples/download.sh) script.
+can be downloaded by running the [download.sh](https://github.com/apache/joshua/blob/master/examples/download.sh) script.
 
 # Building a Spanish --> English Translation Model using the Fisher Spanish CALLHOME corpus
 
@@ -26,7 +26,7 @@ $ export SPANISH=$HOME/git/fisher-callhome-corpus
 $ mv joshua-decoder-*/ fisher-callhome-corpus
 ```
 
-B) Download and install Joshua as per the [Quickstart](https://github.com/apache/incubator-joshua#quick-start).
+B) Download and install Joshua as per the [Quickstart](https://github.com/apache/joshua#quick-start).
 
 C) Train the model:
 ```
