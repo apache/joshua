@@ -122,9 +122,9 @@ public class FormatUtils {
   }
   
   public static String escapeSpecialSymbols(String s) {
-    return s.replace("\\[",  "-lsb-")
-            .replace("\\]",  "-rsb-")
-            .replace("\\|",  "-pipe-");
+    return s.replaceAll("\\[",  "-lsb-")
+            .replaceAll("\\]",  "-rsb-")
+            .replaceAll("\\|",  "-pipe-");
   }
   
   public static String unescapeSpecialSymbols(String s) {
