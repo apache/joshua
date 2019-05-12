@@ -2597,11 +2597,11 @@ public class MertCore {
     if (normMethod == 0) return str;
 
     // replace HTML/SGML
-    str = str.replaceAll("&quot;", "\"");
-    str = str.replaceAll("&amp;", "&");
-    str = str.replaceAll("&lt;", "<");
-    str = str.replaceAll("&gt;", ">");
-    str = str.replaceAll("&apos;", "'");
+    str = str.replace("&quot;", "\"");
+    str = str.replace("&amp;", "&");
+    str = str.replace("&lt;", "<");
+    str = str.replace("&gt;", ">");
+    str = str.replace("&apos;", "'");
 
 
 

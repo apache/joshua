@@ -338,7 +338,7 @@ public class FeatureVector {
 
     // First print all the dense feature names in order
     for (int i = 0; i < DENSE_FEATURE_NAMES.size(); i++) {
-      outputString.append(String.format("%s=%.3f ", DENSE_FEATURE_NAMES.get(i).replaceAll("_", "-"), getDense(i)));
+      outputString.append(String.format("%s=%.3f ", DENSE_FEATURE_NAMES.get(i).replace("_", "-"), getDense(i)));
       printed_keys.add(DENSE_FEATURE_NAMES.get(i));
     }
 

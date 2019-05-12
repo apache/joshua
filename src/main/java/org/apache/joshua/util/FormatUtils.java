@@ -128,9 +128,9 @@ public class FormatUtils {
   }
   
   public static String unescapeSpecialSymbols(String s) {
-    return s.replaceAll("-lsb-", "[")
-            .replaceAll("-rsb-", "]")
-            .replaceAll("-pipe-", "|");
+    return s.replace("-lsb-", "[")
+            .replace("-rsb-", "]")
+            .replace("-pipe-", "|");
   }
   
   /**
