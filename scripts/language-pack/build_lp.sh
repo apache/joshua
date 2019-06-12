@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -84,9 +84,7 @@ cp $JARFILE $dest/target
 
 # create the LP config file
 version=3
-git=$(cd $JOSHUA; git describe --long --dirty)
 echo "version = $version" > $dest/lp.conf
-echo "commit = $git" >> $dest/lp.conf
 
 # Copy over the web demonstration
 cp -a $JOSHUA/demo $dest/web
