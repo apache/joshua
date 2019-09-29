@@ -28,7 +28,8 @@ RUN apt-get update && \
             liblzma-dev \            
             libz-dev \
             make \
-            curl
+            curl \
+            openjdk-8-jdk
 
 # set environment variables
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
