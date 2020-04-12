@@ -24,7 +24,7 @@ my @dirs = sort { $a <=> $b } grep /^\d[\d\.]*$/, readdir DIR;
 closedir DIR;
 
 foreach my $dir (@dirs) {
-  chomp(my $readme = `[[ -e "$basedir/$dir/README" ]] && cat $basedir/$dir/README`);
+  chomp(my $readme = `[ -e "$basedir/$dir/README" ] && cat $basedir/$dir/README`);
   my $bleu = get_scores("$basedir/$dir/test/final-bleu", 100.0);
   my $meteor = get_scores("$basedir/$dir/test/final-meteor", 100.0);
   my $time = get_time("$basedir/$dir/test/final-times");
