@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM maven:latest
+FROM maven:3.6-openjdk-11
 
 LABEL Description="Builds the KenLM library for use with language packs" Vendor="Apache Software Foundation"
 
@@ -28,11 +28,9 @@ RUN apt-get update && \
             liblzma-dev \            
             libz-dev \
             make \
-            curl \
-            openjdk-8-jdk
+            curl 
 
 # set environment variables
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
 ENV JOSHUA=/code
 ENV PORT=5674
 ENV JOSHUA_ARGS=""
@@ -43,7 +41,7 @@ RUN mkdir -p /code
 WORKDIR /code
 RUN curl -L https://api.github.com/repos/apache/joshua/tarball | tar --strip-components=1 -xzvf -
 RUN echo y | bash download-deps.sh kenlm
-
+RUN mvn clean package -DskipTests
 # TODO: check that the LP version is correct
 
 # start Joshua
