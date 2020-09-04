@@ -46,6 +46,10 @@ Then, compile Joshua by typing:
     cd $JOSHUA
     mvn clean package
 
+Install required (Ubuntu) packages:
+
+    sudo apt-get install cmake libbz2-dev liblzma-dev libboost-all-dev ant gcc g++
+
 You also need to download and compile [KenLM](http://kheafield.com/code/kenlm/) and [Thrax](https://github.com/joshua-decoder/thrax):
 
     bash ./download-deps.sh
